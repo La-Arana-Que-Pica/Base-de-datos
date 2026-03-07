@@ -1,0 +1,11 @@
+ID;Name;Nationality;Position;Overall;AttackingProwess;BallControl;Dribbling;LowPass;LoftedPass;Finishing;SetPieceTaking;Curve;Speed;PhysicalContact;DefensiveAwareness
+1;Marcus Rashford;14;CF;82;85;82;83;76;72;83;70;74;90;75;52
+2;Bruno Fernandes;25;AMF;87;80;88;85;89;86;80;85;84;72;70;68
+3;Casemiro;19;DMF;83;65;80;72;80;75;60;72;68;72;86;88
+4;Harry Maguire;14;CB;79;55;76;62;75;72;55;68;60;68;82;82
+5;David de Gea;8;GK;85;50;72;60;72;75;50;65;62;65;80;78
+6;Jadon Sancho;14;RWF;82;80;85;88;78;74;79;72;78;88;68;55
+7;Raphael Varane;9;CB;86;58;80;74;78;76;55;70;65;75;84;87
+8;Luke Shaw;14;LB;82;65;78;75;80;76;62;72;70;80;75;78
+9;Aaron Wan-Bissaka;14;RB;79;62;76;72;76;72;60;68;65;85;78;80
+10;Fred;19;CMF;78;68;79;74;78;74;65;72;68;82;78;76
