@@ -67,12 +67,22 @@ function tokenizeSearchText(input) {
   return normalized.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 }
 
+// PES numeric position index → abbreviated name
+// Order matches the GK;CB;LB;RB;DMF;CMF;LMF;RMF;AMF;LWF;RWF;SS;CF column sequence
+const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
+
 function normalizePlayerRow(row) {
+  const rawPos = pickValue(row, ['Position', 'POS', 'Pos']);
+  const posIdx = parseInt(rawPos, 10);
+  const position = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
+    ? PES_POSITIONS[posIdx]
+    : rawPos;
+
   return {
     ...row,
     ID: pickValue(row, ['ID', 'Id', 'id']),
     Name: pickValue(row, ['Name', 'PlayerName', 'Player']),
-    Position: pickValue(row, ['Position', 'POS', 'Pos']),
+    Position: position,
     Nationality: pickValue(row, ['Nationality', 'Country', 'country_id']),
     Overall: pickValue(row, ['Overall', 'OverallStats']),
     AttackingProwess: pickValue(row, ['AttackingProwess', 'Attacking Prowess']),
