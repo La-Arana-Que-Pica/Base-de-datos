@@ -155,23 +155,33 @@ async function boot() {
     const { folder, displayName, filePrefix } = teamMeta;
     const base = `database/teams/${folder}`;
 
-    // Note: the filename uses "appearence" (not "appearance") intentionally,
-    // as that is the spelling used by the CSV extractor tool.
-    const [teamText, playersText, appearenceText] = await Promise.all([
-      fetchText(`${base}/${filePrefix}_team.csv`),
-      fetchText(`${base}/${filePrefix}_players.csv`),
-      fetchText(`${base}/${filePrefix}_appearence.csv`),
-    ]);
+    // Determine which CSV types to load.
+    // If the manifest specifies a list, use it; otherwise fall back to the
+    // standard 5-file convention expected from the extractor tool.
+    // Note: "appearence" (without the extra 'a') is the intentional spelling
+    // used by the CSV extractor.
+    const csvTypes = Array.isArray(teamMeta.csvFiles) && teamMeta.csvFiles.length
+      ? teamMeta.csvFiles
+      : ['team', 'players', 'appearence', 'goalkeeper', 'playerinfo'];
 
-    const teamRows = teamText ? parseCSV(teamText) : [];
-    const playerRows = playersText ? parseCSV(playersText) : [];
-    const appearanceRows = appearenceText ? parseCSV(appearenceText) : [];
+    // Fetch all declared CSV files in parallel
+    const fetchMap = {};
+    await Promise.all(csvTypes.map(async type => {
+      const text = await fetchText(`${base}/${filePrefix}_${type}.csv`);
+      fetchMap[type] = text ? parseCSV(text) : [];
+    }));
 
-    // Map appearances by PlayerID for quick lookup
+    const teamRows   = fetchMap.team     || [];
+    const playerRows = fetchMap.players  || [];
+
+    // Build lookup maps keyed by PlayerID for all per-player CSV types
     const appearanceMap = {};
-    appearanceRows.forEach(a => {
-      appearanceMap[a.PlayerID] = a;
-    });
+    const goalkeeperMap = {};
+    const playerinfoMap = {};
+
+    (fetchMap.appearence  || []).forEach(r => { appearanceMap[r.PlayerID] = r; });
+    (fetchMap.goalkeeper  || []).forEach(r => { goalkeeperMap[r.PlayerID] = r; });
+    (fetchMap.playerinfo  || []).forEach(r => { playerinfoMap[r.PlayerID] = r; });
 
     // Determine league from Country field in team CSV
     const leagueId = teamRows.length > 0 ? teamRows[0].Country : null;
@@ -181,9 +191,12 @@ async function boot() {
       folder,
       displayName,
       filePrefix,
+      csvTypes,
       teamData: teamRows[0] || {},
       players: playerRows,
       appearanceMap,
+      goalkeeperMap,
+      playerinfoMap,
       leagueId,
       league,
     };
@@ -459,15 +472,31 @@ function computeRadarAttributes(player) {
   };
 }
 
+/**
+ * The GK-specific stats shown when a player's position is GK.
+ */
+const GK_STATS = [
+  { key: 'GKDiving',      label: 'Diving' },
+  { key: 'GKReflexes',    label: 'Reflexes' },
+  { key: 'GKHandling',    label: 'Handling' },
+  { key: 'GKKicking',     label: 'Kicking' },
+  { key: 'GKSpeed',       label: 'GK Speed' },
+  { key: 'GKPositioning', label: 'Positioning' },
+];
+
 function renderPlayerProfile(player, team) {
   hideAllViews();
   const view = document.getElementById('player-view');
   view.classList.add('active');
 
-  const appearance = team.appearanceMap[player.ID] || {};
-  const radarAttrs = computeRadarAttributes(player);
-  const leagueName = team.league ? team.league.league_name : 'Unknown League';
+  const appearance  = team.appearanceMap[player.ID]  || {};
+  const gkData      = team.goalkeeperMap[player.ID]  || {};
+  const playerInfo  = team.playerinfoMap[player.ID]  || {};
+  const radarAttrs  = computeRadarAttributes(player);
+  const leagueName  = team.league ? team.league.league_name : 'Unknown League';
+  const isGK        = (player.Position || '').toUpperCase() === 'GK';
 
+  // Ability stats rows
   const statsHtml = ABILITY_STATS.map(stat => {
     const val = player[stat.key] || '0';
     const colorClass = statColorClass(val);
@@ -481,6 +510,36 @@ function renderPlayerProfile(player, team) {
       </div>
     </div>`;
   }).join('');
+
+  // GK stats rows (only for GK position)
+  const gkHtml = isGK ? `
+    <div class="ability-title gk-title">Goalkeeper Stats</div>
+    <div class="stats-list">
+      ${GK_STATS.map(stat => {
+        const val = gkData[stat.key] || '0';
+        const colorClass = statColorClass(val);
+        const barColor = statColor(val);
+        const pct = Math.min(100, parseInt(val, 10) || 0);
+        return `<div class="stat-row">
+          <span class="stat-name">${stat.label}</span>
+          <span class="stat-value ${colorClass}">${val}</span>
+          <div class="stat-bar-container">
+            <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : '';
+
+  // Physical info rows (from playerinfo CSV)
+  const physicalHtml = (playerInfo.Height || playerInfo.Age || playerInfo.KitNumber) ? `
+    <div class="player-physical-card">
+      ${playerInfo.KitNumber ? `<div class="physical-row"><span class="info-label">Kit #</span><span>${playerInfo.KitNumber}</span></div>` : ''}
+      ${playerInfo.Age       ? `<div class="physical-row"><span class="info-label">Age</span><span>${playerInfo.Age}</span></div>` : ''}
+      ${playerInfo.Height    ? `<div class="physical-row"><span class="info-label">Height</span><span>${playerInfo.Height} cm</span></div>` : ''}
+      ${playerInfo.Weight    ? `<div class="physical-row"><span class="info-label">Weight</span><span>${playerInfo.Weight} kg</span></div>` : ''}
+      ${playerInfo.DominantFoot ? `<div class="physical-row"><span class="info-label">Foot</span><span>${playerInfo.DominantFoot}</span></div>` : ''}
+      ${playerInfo.WeakFoot  ? `<div class="physical-row"><span class="info-label">Weak Foot</span><span>${'★'.repeat(parseInt(playerInfo.WeakFoot, 10) || 0)}</span></div>` : ''}
+    </div>` : '';
 
   view.innerHTML = `
     <button class="back-btn" onclick="goBackToTeam()">◀ Back to ${team.displayName}</button>
@@ -520,6 +579,7 @@ function renderPlayerProfile(player, team) {
             <span>${leagueName}</span>
           </div>
         </div>
+        ${physicalHtml}
       </div>
 
       <!-- CENTER: ability settings -->
@@ -533,6 +593,7 @@ function renderPlayerProfile(player, team) {
         <div class="stats-list">
           ${statsHtml}
         </div>
+        ${gkHtml}
       </div>
 
       <!-- RIGHT: radar + appearances -->
@@ -560,6 +621,14 @@ function renderPlayerProfile(player, team) {
             <div class="appearance-item">
               <div class="value">${appearance.YellowCards || 0}</div>
               <div class="label">Yellow Cards</div>
+            </div>
+            <div class="appearance-item">
+              <div class="value">${appearance.RedCards || 0}</div>
+              <div class="label">Red Cards</div>
+            </div>
+            <div class="appearance-item">
+              <div class="value">${appearance.MinutesPlayed || 0}</div>
+              <div class="label">Minutes</div>
             </div>
           </div>
         </div>

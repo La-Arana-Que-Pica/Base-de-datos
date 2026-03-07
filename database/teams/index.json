@@ -3,7 +3,14 @@
     {
       "folder": "manchester-united",
       "displayName": "Manchester United",
-      "filePrefix": "MANCHESTER UNITED"
+      "filePrefix": "MANCHESTER UNITED",
+      "csvFiles": [
+        "team",
+        "players",
+        "appearence",
+        "goalkeeper",
+        "playerinfo"
+      ]
     }
   ]
 }
