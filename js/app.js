@@ -535,11 +535,7 @@ function renderPlayerRow(player, team) {
 // ─── Player profile ───────────────────────────────────────────────────────────
 
 function selectPlayer(playerId, teamFolder) {
-  const team = DB.teams.find(t => t.folder === teamFolder);
-  if (!team) return;
-  const player = team.players.find(p => p.ID === playerId);
-  if (!player) return;
-  renderPlayerProfile(player, team);
+  window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamFolder)}`;
 }
 
 /**
