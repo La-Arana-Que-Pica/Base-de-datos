@@ -282,6 +282,15 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* ── Infinite scroll sentinel ── */
+.infinite-scroll-sentinel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 0;
+  min-height: 72px;
+}
+
 /* ── Home view ── */
 #home-view {
   display: none;
