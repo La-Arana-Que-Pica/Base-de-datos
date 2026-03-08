@@ -619,13 +619,8 @@ function _appendNextBatch() {
     return;
   }
 
-  const fragment = document.createDocumentFragment();
-  batch.forEach(p => {
-    const row = document.createElement('tbody');
-    row.innerHTML = renderPlayerRow(p, p._team);
-    fragment.appendChild(row.firstElementChild);
-  });
-  tbody.appendChild(fragment);
+  const rowsHtml = batch.map(p => renderPlayerRow(p, p._team)).join('');
+  tbody.insertAdjacentHTML('beforeend', rowsHtml);
   _allPlayersOffset += batch.length;
 
   // If all players have now been rendered, clean up
