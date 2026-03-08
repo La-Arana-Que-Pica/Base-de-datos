@@ -3,12 +3,12 @@
  * Player Profile Page Script
  *
  * Loads a single player's full data from URL params:
- *   player.html?id=PLAYERID&team=TEAMFOLDER
+ *   player.html?id=PLAYERID&team=TEAMID
  */
 
 'use strict';
 
-// ─── Utilities (shared logic from app.js) ─────────────────────────────────────
+// ─── Utilities ────────────────────────────────────────────────────────────────
 
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
@@ -47,16 +47,6 @@ async function fetchText(url) {
   }
 }
 
-async function fetchJSON(url) {
-  try {
-    const resp = await fetch(url);
-    if (!resp.ok) return null;
-    return await resp.json();
-  } catch {
-    return null;
-  }
-}
-
 function flagSrc(countryId) {
   if (!countryId) return 'img/flags/default.png';
   return `img/flags/${countryId}.png`;
@@ -86,17 +76,82 @@ function overallColor(value) {
   return 'stat-red';
 }
 
+// ─── Translations (UI display only) ──────────────────────────────────────────
+
+// Stats: CSV column name → Spanish display label
+const STAT_LABELS = {
+  'Attacking Prowess': 'Ataque',
+  'Ball Control':      'Control de balón',
+  'Dribbling':         'Drible',
+  'Low Pass':          'Pase al ras',
+  'Lofted Pass':       'Pase bombeado',
+  'Finishing':         'Finalización',
+  'Place Kicking':     'Balón parado',
+  'Controlled Spin':   'Efecto',
+  'Header':            'Cabeza',
+  'Defensive Prowess': 'Defensa',
+  'Ball Winning':      'Recup. de balón',
+  'Kicking Power':     'Potencia de tiro',
+  'Speed':             'Velocidad',
+  'Explosive Power':   'Fuerza explosiva',
+  'Body Control':      'Control corporal',
+  'Physical Contact':  'Contacto físico',
+  'Jump':              'Salto',
+  'Goalkeeping':       'Capac. de portero',
+  'Catching':          'Atajar',
+  'Clearing':          'Despejar',
+  'Reflexes':          'Reflejos',
+  'Coverage':          'Alcance',
+  'Stamina':           'Resistencia',
+  'Weak Foot Usage':   'Uso de pie malo',
+  'Weak Foot Acc.':    'Precisión de pie malo',
+  'Form':              'Estabilidad',
+  'Injury Resistance': 'Resist. a lesiones',
+};
+
+// Positions: PES abbreviation → Spanish UI label
+const POSITION_LABELS = {
+  'GK':  'PT',
+  'CB':  'DEC',
+  'LB':  'LI',
+  'RB':  'LD',
+  'DMF': 'MCD',
+  'CMF': 'MC',
+  'LMF': 'MDI',
+  'RMF': 'MDD',
+  'AMF': 'MO',
+  'LWF': 'EXI',
+  'RWF': 'EXD',
+  'SS':  'SD',
+  'CF':  'CD',
+};
+
+// Team type → Spanish label
+const TYPE_LABELS = {
+  '0': 'Clubes',
+  '1': 'Equipos especiales',
+  '2': 'Selecciones',
+};
+
+function translateStat(csvCol) {
+  return STAT_LABELS[csvCol] || csvCol;
+}
+
+function translatePosition(pesPos) {
+  return POSITION_LABELS[pesPos] || pesPos;
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
 
-// Position rating columns (from the positional ability columns in the CSV)
+// Position rating columns (same order as PES_POSITIONS)
 const POSITION_RATING_COLS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
 
-// All ability stat columns grouped by category (all numeric 0–99 stats)
+// Ability stat columns grouped by category (raw CSV column names)
 const ABILITY_GROUPS = [
   {
-    title: 'Attack',
+    title: 'Ataque',
     cols: [
       'Attacking Prowess', 'Ball Control', 'Dribbling',
       'Low Pass', 'Lofted Pass', 'Finishing',
@@ -104,40 +159,30 @@ const ABILITY_GROUPS = [
     ],
   },
   {
-    title: 'Physical',
+    title: 'Físico',
     cols: [
       'Kicking Power', 'Speed', 'Explosive Power',
       'Body Control', 'Physical Contact', 'Jump', 'Stamina',
     ],
   },
   {
-    title: 'Defence',
+    title: 'Defensa',
     cols: ['Defensive Prowess', 'Ball Winning'],
   },
   {
-    title: 'Goalkeeping',
+    title: 'Portero',
     cols: ['Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'],
   },
   {
-    title: 'Form & Fitness',
+    title: 'Forma y condición',
     cols: ['Weak Foot Usage', 'Weak Foot Acc.', 'Form', 'Injury Resistance'],
   },
 ];
 
-// Skill columns (P01–P07 = position presets, S01–S28 = special skills)
-const SKILL_COLS = [
-  'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07',
-  'S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08',
-  'S09', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16',
-  'S17', 'S18', 'S19', 'S20', 'S21', 'S22', 'S23', 'S24',
-  'S25', 'S26', 'S27', 'S28',
-];
-
-// Face / physique appearance columns (unique to the appearence CSV)
-// These follow after the duplicate 'Id' column in the appearence CSV.
+// Face / physique appearance columns
 const FACE_GROUPS = [
   {
-    title: 'Physique',
+    title: 'Físico',
     cols: [
       'Neck Length', 'Neck Size', 'Shoulder Height', 'Shoulder Width',
       'Chest Measurement', 'Waist Size', 'Arm Size', 'Thigh Size',
@@ -145,14 +190,14 @@ const FACE_GROUPS = [
     ],
   },
   {
-    title: 'Head',
+    title: 'Cabeza',
     cols: [
       'Head Length', 'Head Width', 'Head Depth',
       'Face Height', 'Face Size', 'Forehead',
     ],
   },
   {
-    title: 'Eyes',
+    title: 'Ojos',
     cols: [
       'Upper Eyelid Type', 'Bottom Eyelid Type', 'Eye Height',
       'Horizontal Eye Position', 'Iris Colour', 'Pupil Size',
@@ -163,7 +208,7 @@ const FACE_GROUPS = [
     ],
   },
   {
-    title: 'Eyebrows',
+    title: 'Cejas',
     cols: [
       'Eyebrow Type', 'Eyebrow Thickness', 'Eyebrow Style', 'Eyebrow Density',
       'Eyebrow Colour R', 'Eyebrow Colour G', 'Eyebrow Colour B',
@@ -172,21 +217,21 @@ const FACE_GROUPS = [
     ],
   },
   {
-    title: 'Nose',
+    title: 'Nariz',
     cols: [
       'Nose Type', 'Laughter Lines', 'Nose Height', 'Nostril Width',
       'Nose Width', 'Nose Tip Depth', 'Nose Depth',
     ],
   },
   {
-    title: 'Mouth',
+    title: 'Boca',
     cols: [
       'Upper Lip Type', 'Lower Lip Type', 'Mouth Position',
       'Lip Size', 'Lip Width', 'Mouth Corner Height', 'Mouth Depth',
     ],
   },
   {
-    title: 'Face Features',
+    title: 'Rasgos faciales',
     cols: [
       'Facial Hair Type', 'Facial Hair Colour R', 'Facial Hair Colour G', 'Facial Hair Colour B',
       'Thickness', 'Cheek Type', 'Neck Line Type', 'Cheekbones',
@@ -195,7 +240,7 @@ const FACE_GROUPS = [
     ],
   },
   {
-    title: 'Hair',
+    title: 'Cabello',
     cols: [
       'Overall - Style', 'Overall - Length', 'Overall - Wave Level', 'Overall - Hair Variation',
       'Font - Style', 'Font - Parted', 'Font - Hairline', 'Font - Forehead Width',
@@ -204,7 +249,7 @@ const FACE_GROUPS = [
     ],
   },
   {
-    title: 'Kit & Accessories',
+    title: 'Equipación y accesorios',
     cols: [
       'Accessories', 'Wrist taping', 'Wrist Tape Colou', 'Ankle Taping',
       'Player Gloves', 'Colour', 'Undershorts', 'Sleeves',
@@ -224,10 +269,10 @@ function computeRadarAttributes(player) {
   };
   return {
     PAS: avg('Low Pass', 'Lofted Pass', 'Controlled Spin', 'Place Kicking'),
-    SHT: avg('Finishing', 'Attacking Prowess'),
-    PHY: avg('Physical Contact'),
+    TIR: avg('Finishing', 'Attacking Prowess'),
+    FIS: avg('Physical Contact'),
     DEF: avg('Defensive Prowess'),
-    SPD: avg('Speed'),
+    VEL: avg('Speed'),
     DRI: avg('Dribbling', 'Ball Control'),
   };
 }
@@ -337,7 +382,7 @@ function renderPositionGrid(player) {
     const val = parseInt(player[pos], 10);
     const colorClass = isNaN(val) ? '' : statColorClass(val);
     return `<div class="pos-rating-cell">
-      <div class="pos-rating-label">${pos}</div>
+      <div class="pos-rating-label">${translatePosition(pos)}</div>
       <div class="pos-rating-value ${colorClass}">${isNaN(val) ? '–' : val}</div>
     </div>`;
   }).join('');
@@ -346,10 +391,9 @@ function renderPositionGrid(player) {
 
 function renderAbilityGroups(player) {
   return ABILITY_GROUPS.map(group => {
-    // Only render groups that have at least one non-empty column
     const rows = group.cols
       .filter(col => player[col] !== undefined && player[col] !== '')
-      .map(col => renderStatRow(col, player[col]))
+      .map(col => renderStatRow(translateStat(col), player[col]))
       .join('');
     if (!rows) return '';
     return `<div class="stats-group">
@@ -361,7 +405,7 @@ function renderAbilityGroups(player) {
 
 function renderFaceData(appearance) {
   if (!appearance) {
-    return `<div class="appearance-empty">No appearance data available for this player.</div>`;
+    return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
   return FACE_GROUPS.map(group => {
     const rows = group.cols
@@ -392,25 +436,32 @@ function switchTab(tabId) {
 
 // ─── Main render ─────────────────────────────────────────────────────────────
 
-function renderPlayerPage(player, team, appearance, leagueName) {
-  const ovrClass = overallColor(player['OverallStats'] || player.OverallStats || '');
+function renderPlayerPage(player, team, appearance, typeLabel) {
+  const ovrClass = overallColor(player['OverallStats'] || '');
   const ovr = player['OverallStats'] || '–';
 
   const rawPos = player['POS'] || '';
   const posIdx = parseInt(rawPos, 10);
-  const position = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
+  const pesPosition = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
     ? PES_POSITIONS[posIdx]
     : rawPos;
+  const posDisplay = translatePosition(pesPosition);
 
   const radarAttrs = computeRadarAttributes(player);
+
+  const footVal = player['Foot'];
+  let footDisplay;
+  if (footVal === 'True') footDisplay = 'Izquierdo';
+  else if (footVal === 'False') footDisplay = 'Derecho';
+  else footDisplay = footVal || '–';
 
   const statsHtml = `
     <div class="profile-stats-layout">
       <div class="profile-stats-left">
-        <div class="stats-section-title">Position Ratings</div>
+        <div class="stats-section-title">Valoraciones por posición</div>
         ${renderPositionGrid(player)}
         <div class="radar-card" style="margin-top:20px">
-          <h3>Attribute Radar</h3>
+          <h3>Radar de atributos</h3>
           <canvas id="radar-canvas" width="240" height="240"></canvas>
         </div>
       </div>
@@ -423,7 +474,7 @@ function renderPlayerPage(player, team, appearance, leagueName) {
 
   const content = document.getElementById('player-content');
   content.innerHTML = `
-    <button class="back-btn" onclick="goBack()">◀ Back</button>
+    <button class="back-btn" onclick="goBack()">◀ Volver</button>
 
     <div class="player-profile-page">
 
@@ -434,9 +485,9 @@ function renderPlayerPage(player, team, appearance, leagueName) {
           onerror="this.onerror=null;this.src='img/players/default.png'"
           alt="${player['Name']}">
         <div class="profile-header-info">
-          <div class="profile-name">${player['Name'] || 'Unknown Player'}</div>
+          <div class="profile-name">${player['Name'] || 'Jugador desconocido'}</div>
           <div class="profile-badges">
-            <span class="position-badge">${position || '–'}</span>
+            <span class="position-badge">${posDisplay || '–'}</span>
             <span class="overall-badge ${ovrClass}">${ovr}</span>
           </div>
           <div class="profile-meta-row">
@@ -447,23 +498,19 @@ function renderPlayerPage(player, team, appearance, leagueName) {
           </div>
           <div class="profile-meta-row">
             <img class="team-crest-sm"
-              src="img/teams/${team.folder}.png"
+              src="img/teams/${team.id}.png"
               onerror="this.onerror=null;this.src='img/teams/default.png'"
               alt="${team.displayName}">
             <span>${team.displayName}</span>
           </div>
           <div class="profile-meta-row">
-            <img class="sidebar-league-logo"
-              src="img/leagues/${team.leagueId || 'default'}.png"
-              onerror="this.onerror=null;this.src='img/leagues/default.png'"
-              alt="${leagueName}">
-            <span>${leagueName}</span>
+            <span>${typeLabel}</span>
           </div>
           <div class="profile-quick-stats">
-            <div class="quick-stat"><span class="qs-label">Height</span><span class="qs-val">${player['Height'] || '–'} cm</span></div>
-            <div class="quick-stat"><span class="qs-label">Weight</span><span class="qs-val">${player['Weight'] || '–'} kg</span></div>
-            <div class="quick-stat"><span class="qs-label">Age</span><span class="qs-val">${player['Age'] || '–'}</span></div>
-            <div class="quick-stat"><span class="qs-label">Foot</span><span class="qs-val">${player['Foot'] === 'True' ? 'Left' : player['Foot'] === 'False' ? 'Right' : (player['Foot'] || '–')}</span></div>
+            <div class="quick-stat"><span class="qs-label">Altura</span><span class="qs-val">${player['Height'] || '–'} cm</span></div>
+            <div class="quick-stat"><span class="qs-label">Peso</span><span class="qs-val">${player['Weight'] || '–'} kg</span></div>
+            <div class="quick-stat"><span class="qs-label">Edad</span><span class="qs-val">${player['Age'] || '–'}</span></div>
+            <div class="quick-stat"><span class="qs-label">Pie</span><span class="qs-val">${footDisplay}</span></div>
           </div>
         </div>
       </div>
@@ -471,8 +518,8 @@ function renderPlayerPage(player, team, appearance, leagueName) {
       <!-- Tabs -->
       <div class="profile-tabs">
         <div class="profile-tab-bar">
-          <button class="profile-tab-btn active" data-tab="tab-stats" onclick="switchTab('tab-stats')">Stats</button>
-          <button class="profile-tab-btn" data-tab="tab-appearance" onclick="switchTab('tab-appearance')">Appearance</button>
+          <button class="profile-tab-btn active" data-tab="tab-stats" onclick="switchTab('tab-stats')">Estadísticas</button>
+          <button class="profile-tab-btn" data-tab="tab-appearance" onclick="switchTab('tab-appearance')">Apariencia</button>
         </div>
 
         <div id="tab-stats" class="profile-tab-panel active">
@@ -481,7 +528,7 @@ function renderPlayerPage(player, team, appearance, leagueName) {
 
         <div id="tab-appearance" class="profile-tab-panel">
           <div class="appearance-info">
-            These values define the player's face and body in the game editor.
+            Estos valores definen el aspecto del jugador en el editor del juego.
           </div>
           ${appearanceHtml}
         </div>
@@ -493,7 +540,7 @@ function renderPlayerPage(player, team, appearance, leagueName) {
   document.getElementById('loading-overlay').style.display = 'none';
 
   // Update page title
-  document.title = `${player['Name'] || 'Player'} – PES Database`;
+  document.title = `${player['Name'] || 'Jugador'} – Base de datos PES`;
 
   requestAnimationFrame(() => drawRadar('radar-canvas', radarAttrs));
 }
@@ -513,78 +560,61 @@ function goBack() {
 async function boot() {
   const params = new URLSearchParams(window.location.search);
   const playerId = params.get('id');
-  const teamFolder = params.get('team');
+  const teamId = params.get('team');
 
-  if (!playerId || !teamFolder) {
-    showError('Missing player ID or team in URL. Use player.html?id=ID&team=FOLDER');
+  if (!playerId || !teamId) {
+    showError('Faltan el ID del jugador o del equipo en la URL.');
     return;
   }
 
-  // Load leagues
-  const leaguesMap = {};
-  const leagueText = await fetchText('database/leagues/leagues.csv');
-  if (leagueText) {
-    const { rows } = parseCSV(leagueText);
-    rows.forEach(row => {
-      leaguesMap[row.league_id] = row;
-    });
-  }
-
-  // Load teams manifest
-  const manifest = await fetchJSON('database/teams/index.json');
-  if (!manifest || !Array.isArray(manifest.teams)) {
-    showError('Failed to load teams manifest.');
-    return;
-  }
-
-  const teamMeta = manifest.teams.find(t => t.folder === teamFolder);
-  if (!teamMeta) {
-    showError(`Team "${teamFolder}" not found in manifest.`);
-    return;
-  }
-
-  const { folder, files } = teamMeta;
-  const displayName = teamMeta.displayName || folder;
-  const base = `database/teams/${folder}`;
-
-  const [playersText, appearenceText, teamText] = await Promise.all([
-    files.players ? fetchText(`${base}/${files.players}`) : null,
-    files.appearence ? fetchText(`${base}/${files.appearence}`) : null,
-    files.team ? fetchText(`${base}/${files.team}`) : null,
+  // Load all global CSV files in parallel
+  const [playersText, teamsText, squadsText, appearancesText] = await Promise.all([
+    fetchText('database/All players exported.csv'),
+    fetchText('database/All teams exported.csv'),
+    fetchText('database/All squads exported.csv'),
+    fetchText('database/All appeaarances exported.csv'),
   ]);
 
-  if (!playersText) {
-    showError(`Could not load player data for team "${displayName}".`);
+  if (!playersText || !teamsText) {
+    showError('Error al cargar los archivos de la base de datos.');
     return;
   }
 
   const { rows: playerRows } = parseCSV(playersText);
-  const { rows: appearenceRows } = appearenceText ? parseCSV(appearenceText) : { rows: [] };
-  const { rows: teamRows } = teamText ? parseCSV(teamText) : { rows: [] };
+  const { rows: teamRows } = parseCSV(teamsText);
+  const { rows: appearanceRows } = appearancesText ? parseCSV(appearancesText) : { rows: [] };
+  const { rows: squadRows } = squadsText ? parseCSV(squadsText) : { rows: [] };
 
-  // Find the player (Id column, BOM stripped by trim() in parseCSV)
+  // Find the player
   const player = playerRows.find(p => p['Id'] === playerId);
   if (!player) {
-    showError(`Player with ID "${playerId}" not found in team "${displayName}".`);
+    showError(`Jugador con ID "${playerId}" no encontrado en la base de datos.`);
     return;
   }
 
+  // Find the team
+  const teamRow = teamRows.find(t => t['Id'] === teamId);
+  if (!teamRow) {
+    showError(`Equipo con ID "${teamId}" no encontrado en la base de datos.`);
+    return;
+  }
+
+  const team = {
+    id: teamId,
+    displayName: teamRow['Name'] || teamId,
+    type: teamRow['Type'] || '0',
+  };
+  const typeLabel = TYPE_LABELS[team.type] || '';
+
   // Build appearance map and find this player's appearance data
   const appearanceMap = {};
-  appearenceRows.forEach(a => {
-    const pid = pickValue(a, ['Id', 'PlayerID', 'PlayerId', 'ID', 'id']);
+  appearanceRows.forEach(a => {
+    const pid = a['Id'];
     if (pid) appearanceMap[pid] = a;
   });
   const appearance = appearanceMap[playerId] || null;
 
-  // Determine league
-  const leagueId = teamRows.length > 0 ? teamRows[0].Country : null;
-  const league = leagueId ? leaguesMap[leagueId] : null;
-  const leagueName = league ? league.league_name : 'Unknown League';
-
-  const team = { folder, displayName, leagueId, league };
-
-  renderPlayerPage(player, team, appearance, leagueName);
+  renderPlayerPage(player, team, appearance, typeLabel);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
@@ -592,9 +622,22 @@ async function boot() {
 function showError(message) {
   document.getElementById('loading-overlay').style.display = 'none';
   const content = document.getElementById('player-content');
-  content.innerHTML = `
-    <div class="error-message">${message}</div>
-    <p style="margin-top:16px"><a href="index.html" style="color:var(--color-highlight)">← Back to database</a></p>`;
+  content.textContent = '';
+
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'error-message';
+  errorDiv.textContent = message;
+
+  const backLink = document.createElement('p');
+  backLink.style.marginTop = '16px';
+  const anchor = document.createElement('a');
+  anchor.href = 'index.html';
+  anchor.style.color = 'var(--color-highlight)';
+  anchor.textContent = '← Volver a la base de datos';
+  backLink.appendChild(anchor);
+
+  content.appendChild(errorDiv);
+  content.appendChild(backLink);
   content.style.display = 'block';
 }
 
@@ -602,7 +645,7 @@ function showError(message) {
 
 document.addEventListener('DOMContentLoaded', () => {
   boot().catch(err => {
-    showError(`Unexpected error: ${err.message}`);
+    showError(`Error inesperado: ${err.message}`);
     console.error(err);
   });
 });
