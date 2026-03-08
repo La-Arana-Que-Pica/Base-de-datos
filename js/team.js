@@ -137,6 +137,119 @@ function computeRadarAttributes(player) {
   };
 }
 
+// ─── Sort / Filter state ──────────────────────────────────────────────────────
+
+let _sortCol = 'OVR';
+let _sortDir = 'desc';
+let _players = [];
+let _teamId = null;
+let _filterPos = '';
+let _filterMinOvr = '';
+let _filterMaxOvr = '';
+
+const SORT_COLS = {
+  'OVR':  p => parseInt(p.Overall, 10) || 0,
+  'NAME': p => (p.Name || '').toLowerCase(),
+  'POS':  p => (p.Position || ''),
+  'VEL':  p => computeRadarAttributes(p).VEL,
+  'DRI':  p => computeRadarAttributes(p).DRI,
+  'TIR':  p => computeRadarAttributes(p).TIR,
+  'PAS':  p => computeRadarAttributes(p).PAS,
+  'FIS':  p => computeRadarAttributes(p).FIS,
+  'DEF':  p => computeRadarAttributes(p).DEF,
+};
+
+function getSortedFilteredPlayers() {
+  let list = _players.slice();
+
+  // Filter by position
+  if (_filterPos) {
+    list = list.filter(p => (p.Position || '') === _filterPos);
+  }
+
+  // Filter by OVR range
+  if (_filterMinOvr !== '') {
+    const min = parseInt(_filterMinOvr, 10);
+    if (!isNaN(min)) list = list.filter(p => (parseInt(p.Overall, 10) || 0) >= min);
+  }
+  if (_filterMaxOvr !== '') {
+    const max = parseInt(_filterMaxOvr, 10);
+    if (!isNaN(max)) list = list.filter(p => (parseInt(p.Overall, 10) || 0) <= max);
+  }
+
+  // Sort
+  const getter = SORT_COLS[_sortCol] || SORT_COLS['OVR'];
+  list.sort((a, b) => {
+    const va = getter(a);
+    const vb = getter(b);
+    if (va < vb) return _sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return _sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  return list;
+}
+
+function setSort(col) {
+  if (_sortCol === col) {
+    _sortDir = _sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    _sortCol = col;
+    _sortDir = col === 'NAME' || col === 'POS' ? 'asc' : 'desc';
+  }
+  refreshTableBody();
+  updateSortHeaders();
+}
+
+function updateSortHeaders() {
+  document.querySelectorAll('#players-table th.sortable').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    const col = th.dataset.sortCol;
+    if (col === _sortCol) {
+      th.classList.add(_sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.textContent = _sortDir === 'asc' ? '▲' : '▼';
+    } else {
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.textContent = '⇅';
+    }
+  });
+}
+
+function refreshTableBody() {
+  const tbody = document.querySelector('#players-table tbody');
+  if (!tbody || !_teamId) return;
+  const list = getSortedFilteredPlayers();
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--color-text-muted)">Sin resultados para los filtros seleccionados.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(p => renderPlayerRow(p, _teamId)).join('');
+}
+
+function applyFilters() {
+  const posEl = document.getElementById('filter-position');
+  const minEl = document.getElementById('filter-min-ovr');
+  const maxEl = document.getElementById('filter-max-ovr');
+  _filterPos = posEl ? posEl.value : '';
+  _filterMinOvr = minEl ? minEl.value.trim() : '';
+  _filterMaxOvr = maxEl ? maxEl.value.trim() : '';
+  refreshTableBody();
+}
+
+function resetFilters() {
+  _filterPos = '';
+  _filterMinOvr = '';
+  _filterMaxOvr = '';
+  const posEl = document.getElementById('filter-position');
+  const minEl = document.getElementById('filter-min-ovr');
+  const maxEl = document.getElementById('filter-max-ovr');
+  if (posEl) posEl.value = '';
+  if (minEl) minEl.value = '';
+  if (maxEl) maxEl.value = '';
+  refreshTableBody();
+}
+
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
 function renderPlayerRow(player, teamId) {
@@ -177,11 +290,26 @@ function selectPlayer(playerId, teamId) {
 }
 
 function renderTeamPage(team, players) {
+  _players = players;
+  _teamId = team.id;
+  _sortCol = 'OVR';
+  _sortDir = 'desc';
+  _filterPos = '';
+  _filterMinOvr = '';
+  _filterMaxOvr = '';
+
   const typeLabel = TYPE_LABELS[team.type] || '';
   const safeTeamName = escapeHtml(team.displayName);
 
-  const rowsHtml = players.length
-    ? players.map(p => renderPlayerRow(p, team.id)).join('')
+  // Build unique positions for filter dropdown
+  const positions = [...new Set(players.map(p => p.Position).filter(Boolean))].sort();
+  const posOptions = positions.map(pos =>
+    `<option value="${escapeHtml(pos)}">${escapeHtml(translatePosition(pos))}</option>`
+  ).join('');
+
+  const sortedPlayers = getSortedFilteredPlayers();
+  const rowsHtml = sortedPlayers.length
+    ? sortedPlayers.map(p => renderPlayerRow(p, team.id)).join('')
     : `<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--color-text-muted)">No hay jugadores en este equipo.</td></tr>`;
 
   const content = document.getElementById('team-content');
@@ -197,21 +325,43 @@ function renderTeamPage(team, players) {
         <div class="view-subtitle">${escapeHtml(typeLabel)}</div>
       </div>
     </div>
+
+    <div class="filters-toolbar">
+      <div class="filter-group">
+        <span class="filter-label">Posición:</span>
+        <select id="filter-position" class="filter-select" onchange="applyFilters()">
+          <option value="">Todas</option>
+          ${posOptions}
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">OVR mín:</span>
+        <input id="filter-min-ovr" type="number" min="40" max="99" class="filter-input"
+          placeholder="40" oninput="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">OVR máx:</span>
+        <input id="filter-max-ovr" type="number" min="40" max="99" class="filter-input"
+          placeholder="99" oninput="applyFilters()">
+      </div>
+      <button class="filter-reset-btn" onclick="resetFilters()">Restablecer</button>
+    </div>
+
     <table class="players-table" id="players-table">
       <thead>
         <tr>
           <th></th>
           <th>#</th>
-          <th>Nombre</th>
+          <th class="sortable" data-sort-col="NAME">Nombre <span class="sort-icon">⇅</span></th>
           <th>Nac</th>
-          <th>Pos</th>
-          <th>OVR</th>
-          <th>VEL</th>
-          <th>DRI</th>
-          <th>TIR</th>
-          <th>PAS</th>
-          <th>FIS</th>
-          <th>DEF</th>
+          <th class="sortable" data-sort-col="POS">Pos <span class="sort-icon">⇅</span></th>
+          <th class="sortable sort-desc" data-sort-col="OVR">OVR <span class="sort-icon">▼</span></th>
+          <th class="sortable" data-sort-col="VEL">VEL <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-sort-col="DRI">DRI <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-sort-col="TIR">TIR <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-sort-col="PAS">PAS <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-sort-col="FIS">FIS <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-sort-col="DEF">DEF <span class="sort-icon">⇅</span></th>
         </tr>
       </thead>
       <tbody>
@@ -225,8 +375,14 @@ function renderTeamPage(team, players) {
   // Attach back button handler via DOM (avoids inline onclick)
   document.getElementById('btn-back').addEventListener('click', goBack);
 
+  // Sort column headers click
+  document.querySelectorAll('#players-table th.sortable').forEach(th => {
+    th.addEventListener('click', () => setSort(th.dataset.sortCol));
+  });
+
   // Event delegation: clicking any player row navigates to the player page
   document.getElementById('players-table').addEventListener('click', function (e) {
+    if (e.target.closest('th')) return;
     const row = e.target.closest('.player-row');
     if (!row) return;
     const pid = row.dataset.playerId;

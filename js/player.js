@@ -327,9 +327,9 @@ function drawRadar(canvasId, attrs) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(233, 69, 96, 0.3)';
+  ctx.fillStyle = 'rgba(139, 26, 26, 0.3)';
   ctx.fill();
-  ctx.strokeStyle = '#e94560';
+  ctx.strokeStyle = '#8b1a1a';
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
@@ -340,7 +340,7 @@ function drawRadar(canvasId, attrs) {
     const y = cy + r * Math.sin(angle);
     ctx.beginPath();
     ctx.arc(x, y, 3.5, 0, 2 * Math.PI);
-    ctx.fillStyle = '#e94560';
+    ctx.fillStyle = '#8b1a1a';
     ctx.fill();
   }
 
@@ -357,17 +357,43 @@ function drawRadar(canvasId, attrs) {
 
     const valY = cy + (labelR + 12) * Math.sin(angle);
     ctx.font = '10px Segoe UI, sans-serif';
-    ctx.fillStyle = '#e94560';
+    ctx.fillStyle = '#c0392b';
     ctx.fillText(values[i], x, valY);
   }
 }
 
+// ─── Special attribute configuration ─────────────────────────────────────────
+
+// Attributes that use special ranges and should NOT use standard 40-99 bars
+const SPECIAL_ATTRS = {
+  'Weak Foot Usage':   { max: 4, label: 'Uso de pie malo' },
+  'Weak Foot Acc.':    { max: 4, label: 'Precisión de pie malo' },
+  'Form':              { max: 8, label: 'Estabilidad' },
+  'Injury Resistance': { max: 3, label: 'Resist. a lesiones' },
+};
+
 // ─── Rendering helpers ────────────────────────────────────────────────────────
 
-function renderStatRow(label, value) {
+function renderStatRow(label, value, col) {
+  // Special attributes: render as pip indicators
+  if (col && SPECIAL_ATTRS[col]) {
+    const { max } = SPECIAL_ATTRS[col];
+    const v = parseInt(value, 10) || 0;
+    let pips = '';
+    for (let i = 1; i <= max; i++) {
+      pips += `<span class="pip${i <= v ? ' filled' : ''}"></span>`;
+    }
+    return `<div class="stat-row">
+      <span class="stat-name">${label}</span>
+      <span class="stat-value" style="background:transparent;color:var(--color-text);min-width:20px">${v}</span>
+      <div class="special-attr-pips">${pips}</div>
+    </div>`;
+  }
+  // Normal stat: scale bar from 40-99
   const colorClass = statColorClass(value);
   const barColor = statColor(value);
-  const pct = Math.min(100, parseInt(value, 10) || 0);
+  const v = parseInt(value, 10) || 0;
+  const pct = Math.max(0, Math.min(100, ((v - 40) / (99 - 40)) * 100));
   return `<div class="stat-row">
     <span class="stat-name">${label}</span>
     <span class="stat-value ${colorClass}">${value || '–'}</span>
@@ -380,10 +406,23 @@ function renderStatRow(label, value) {
 function renderPositionGrid(player) {
   const cells = POSITION_RATING_COLS.map(pos => {
     const val = parseInt(player[pos], 10);
-    const colorClass = isNaN(val) ? '' : statColorClass(val);
+    let profDisplay, profClass;
+    if (isNaN(val)) {
+      profDisplay = '–';
+      profClass = '';
+    } else if (val === 0) {
+      profDisplay = 'C';
+      profClass = 'pos-prof-c';
+    } else if (val === 1) {
+      profDisplay = 'B';
+      profClass = 'pos-prof-b';
+    } else {
+      profDisplay = 'A';
+      profClass = 'pos-prof-a';
+    }
     return `<div class="pos-rating-cell">
       <div class="pos-rating-label">${translatePosition(pos)}</div>
-      <div class="pos-rating-value ${colorClass}">${isNaN(val) ? '–' : val}</div>
+      <div class="pos-rating-value ${profClass}">${profDisplay}</div>
     </div>`;
   }).join('');
   return `<div class="pos-rating-grid">${cells}</div>`;
@@ -393,7 +432,7 @@ function renderAbilityGroups(player) {
   return ABILITY_GROUPS.map(group => {
     const rows = group.cols
       .filter(col => player[col] !== undefined && player[col] !== '')
-      .map(col => renderStatRow(translateStat(col), player[col]))
+      .map(col => renderStatRow(translateStat(col), player[col], col))
       .join('');
     if (!rows) return '';
     return `<div class="stats-group">

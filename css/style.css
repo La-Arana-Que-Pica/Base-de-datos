@@ -4,15 +4,15 @@
    ===================================================== */
 
 :root {
-  --color-primary: #1a1a2e;
-  --color-secondary: #16213e;
-  --color-accent: #0f3460;
-  --color-highlight: #e94560;
+  --color-primary: #0f0f0f;
+  --color-secondary: #1a1a1a;
+  --color-accent: #3d0a0a;
+  --color-highlight: #8b1a1a;
   --color-text: #eaeaea;
   --color-text-muted: #888;
-  --color-border: #2a2a4a;
-  --color-card: #1e1e3a;
-  --color-card-hover: #252548;
+  --color-border: #2d2d2d;
+  --color-card: #1a1a1a;
+  --color-card-hover: #242424;
   --color-stat-red: #e74c3c;
   --color-stat-yellow: #f39c12;
   --color-stat-green: #27ae60;
@@ -1050,6 +1050,168 @@ body {
   flex-shrink: 0;
   min-width: 32px;
   text-align: right;
+}
+
+/* ── Position proficiency (C/B/A) ── */
+.pos-prof-c {
+  color: var(--color-stat-red);
+  font-weight: 800;
+}
+.pos-prof-b {
+  color: var(--color-stat-yellow);
+  font-weight: 800;
+}
+.pos-prof-a {
+  color: var(--color-stat-green);
+  font-weight: 800;
+}
+
+/* ── Special attribute display (stars/pips) ── */
+.special-attr-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+
+.special-attr-pips {
+  display: flex;
+  gap: 3px;
+}
+
+.pip {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+
+.pip.filled {
+  background: var(--color-highlight);
+}
+
+/* ── Sort/Filter toolbar ── */
+.filters-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+
+.filter-label {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.filter-select,
+.filter-input {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  color: var(--color-text);
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.filter-input {
+  width: 80px;
+}
+
+.filter-select:hover,
+.filter-input:hover {
+  border-color: var(--color-highlight);
+}
+
+.filter-reset-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.filter-reset-btn:hover {
+  border-color: var(--color-highlight);
+  color: var(--color-text);
+}
+
+.players-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.players-table th.sortable:hover {
+  color: var(--color-text);
+}
+
+.players-table th .sort-icon {
+  margin-left: 4px;
+  font-size: 0.65rem;
+  opacity: 0.5;
+}
+
+.players-table th.sort-asc .sort-icon,
+.players-table th.sort-desc .sort-icon {
+  opacity: 1;
+  color: var(--color-highlight);
+}
+
+/* ── League grouping ── */
+.sidebar-country-group {
+  padding: 2px 0;
+}
+
+.sidebar-country-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-top: 1px solid var(--color-border);
+}
+
+.sidebar-country-header:hover {
+  background: var(--color-accent);
+  color: var(--color-text);
+}
+
+.sidebar-country-arrow {
+  font-size: 0.6rem;
+  transition: transform 0.2s;
+  margin-left: auto;
+}
+
+.sidebar-country-header.open .sidebar-country-arrow {
+  transform: rotate(90deg);
+}
+
+.sidebar-country-teams {
+  display: none;
+  padding: 0;
+}
+
+.sidebar-country-teams.open {
+  display: block;
 }
 
 /* ── Responsive ── */
