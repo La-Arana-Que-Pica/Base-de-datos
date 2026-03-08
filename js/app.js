@@ -575,31 +575,84 @@ function showHome() {
   document.getElementById('stat-players').textContent = uniqueIds.size;
 }
 
-// ─── All-players default view ─────────────────────────────────────────────────
+// ─── All-players default view (infinite scroll) ───────────────────────────────
 
-function showAllPlayers() {
-  hideAllViews();
-  const view = document.getElementById('players-view');
-  view.classList.add('active');
+const ALL_PLAYERS_PAGE_SIZE = 50;
 
-  // Deduplicate: each player appears once (keep first occurrence = highest OVR squad entry)
+// State for the infinite-scroll all-players view
+let _allPlayersList = [];      // sorted, deduplicated player array
+let _allPlayersOffset = 0;     // how many have been rendered so far
+let _allPlayersObserver = null; // IntersectionObserver watching the sentinel
+
+/**
+ * Build (or rebuild) the sorted, deduplicated players array and reset offset.
+ */
+function _prepareAllPlayersList() {
   const seen = new Set();
   const unique = DB.players.filter(p => {
     if (seen.has(p.ID)) return false;
     seen.add(p.ID);
     return true;
   });
-
-  // Sort by OVR descending
   unique.sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
+  _allPlayersList = unique;
+  _allPlayersOffset = 0;
+}
 
-  const rowsHtml = unique.map(p => renderPlayerRow(p, p._team)).join('');
+/**
+ * Append the next batch of player rows to the table body and advance the
+ * sentinel; disconnect the observer when all rows have been rendered.
+ */
+function _appendNextBatch() {
+  const tbody = document.getElementById('all-players-tbody');
+  const sentinel = document.getElementById('all-players-sentinel');
+  if (!tbody || !sentinel) return;
 
+  const batch = _allPlayersList.slice(_allPlayersOffset, _allPlayersOffset + ALL_PLAYERS_PAGE_SIZE);
+  if (!batch.length) {
+    // No more players – remove sentinel and stop observing
+    sentinel.remove();
+    if (_allPlayersObserver) {
+      _allPlayersObserver.disconnect();
+      _allPlayersObserver = null;
+    }
+    return;
+  }
+
+  const rowsHtml = batch.map(p => renderPlayerRow(p, p._team)).join('');
+  tbody.insertAdjacentHTML('beforeend', rowsHtml);
+  _allPlayersOffset += batch.length;
+
+  // If all players have now been rendered, clean up
+  if (_allPlayersOffset >= _allPlayersList.length) {
+    sentinel.remove();
+    if (_allPlayersObserver) {
+      _allPlayersObserver.disconnect();
+      _allPlayersObserver = null;
+    }
+  }
+}
+
+function showAllPlayers() {
+  // Tear down any existing observer before rebuilding the view
+  if (_allPlayersObserver) {
+    _allPlayersObserver.disconnect();
+    _allPlayersObserver = null;
+  }
+
+  hideAllViews();
+  const view = document.getElementById('players-view');
+  view.classList.add('active');
+
+  _prepareAllPlayersList();
+  const total = _allPlayersList.length;
+
+  // Render initial skeleton (header + empty tbody + sentinel)
   view.innerHTML = `
     <div class="view-header">
       <div>
         <div class="view-title">Todos los jugadores</div>
-        <div class="view-subtitle">${unique.length} jugadores · ordenados por valoración</div>
+        <div class="view-subtitle">${total} jugadores · ordenados por valoración</div>
       </div>
     </div>
     <table class="players-table">
@@ -609,8 +662,26 @@ function showAllPlayers() {
           <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
         </tr>
       </thead>
-      <tbody>${rowsHtml}</tbody>
-    </table>`;
+      <tbody id="all-players-tbody"></tbody>
+    </table>
+    <div id="all-players-sentinel" class="infinite-scroll-sentinel">
+      <div class="spinner"></div>
+    </div>`;
+
+  // Render the first batch immediately
+  _appendNextBatch();
+
+  // Set up IntersectionObserver to load more when sentinel becomes visible
+  const sentinel = document.getElementById('all-players-sentinel');
+  if (sentinel && _allPlayersOffset < total) {
+    _allPlayersObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) _appendNextBatch();
+      },
+      { rootMargin: '200px' }
+    );
+    _allPlayersObserver.observe(sentinel);
+  }
 }
 
 // ─── Team / Players view ──────────────────────────────────────────────────────
