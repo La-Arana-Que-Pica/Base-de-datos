@@ -1291,3 +1291,153 @@ body {
     order: 1;
   }
 }
+
+/* ── Sidebar nav sections (Ligas / Equipos / Jugadores) ── */
+.sidebar-nav-section {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sidebar-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+  background: var(--color-secondary);
+}
+
+.sidebar-nav-header:hover {
+  background: var(--color-accent);
+}
+
+.sidebar-nav-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text);
+}
+
+.sidebar-nav-arrow {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  transition: transform 0.2s;
+}
+
+.sidebar-nav-body {
+  padding-bottom: 6px;
+}
+
+/* League items inside Ligas section reuse existing .sidebar-league styles */
+.sidebar-league-item {
+  padding: 2px 0;
+}
+
+/* ── Position groups on team page ── */
+.squad-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.position-group {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.position-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--color-accent);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.position-group-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.position-group-positions {
+  font-size: 0.75rem;
+  color: var(--color-highlight);
+  font-weight: 600;
+}
+
+.position-group-count {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-left: auto;
+}
+
+/* ── Player page sections (Habilidades, Estilo de juego, etc.) ── */
+.player-section {
+  background: var(--color-secondary);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 0;
+}
+
+.player-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Playing style display */
+.playing-style-display {
+  padding: 4px 0;
+}
+
+.playing-style-badge {
+  display: inline-block;
+  background: var(--color-accent);
+  border: 1px solid var(--color-highlight);
+  color: var(--color-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+/* Skills and COM styles */
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skill-badge {
+  display: inline-block;
+  background: var(--color-accent);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.skill-badge.com-style {
+  background: rgba(139, 26, 26, 0.15);
+  border-color: var(--color-highlight);
+  color: var(--color-text);
+}
+
+.skills-empty {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}

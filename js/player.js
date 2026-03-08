@@ -148,35 +148,84 @@ const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF'
 // Position rating columns (same order as PES_POSITIONS)
 const POSITION_RATING_COLS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
 
-// Ability stat columns grouped by category (raw CSV column names)
-const ABILITY_GROUPS = [
-  {
-    title: 'Ataque',
-    cols: [
-      'Attacking Prowess', 'Ball Control', 'Dribbling',
-      'Low Pass', 'Lofted Pass', 'Finishing',
-      'Place Kicking', 'Controlled Spin', 'Header',
-    ],
-  },
-  {
-    title: 'Físico',
-    cols: [
-      'Kicking Power', 'Speed', 'Explosive Power',
-      'Body Control', 'Physical Contact', 'Jump', 'Stamina',
-    ],
-  },
-  {
-    title: 'Defensa',
-    cols: ['Defensive Prowess', 'Ball Winning'],
-  },
-  {
-    title: 'Portero',
-    cols: ['Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'],
-  },
-  {
-    title: 'Forma y condición',
-    cols: ['Weak Foot Usage', 'Weak Foot Acc.', 'Form', 'Injury Resistance'],
-  },
+// Ordered stat columns for the Habilidades section (exact game order)
+const STAT_COLUMNS_ORDERED = [
+  'Attacking Prowess', 'Ball Control', 'Dribbling',
+  'Low Pass', 'Lofted Pass', 'Finishing',
+  'Place Kicking', 'Controlled Spin', 'Header',
+  'Defensive Prowess', 'Ball Winning', 'Kicking Power',
+  'Speed', 'Explosive Power', 'Body Control',
+  'Physical Contact', 'Jump', 'Goalkeeping',
+  'Catching', 'Clearing', 'Reflexes',
+  'Coverage', 'Stamina',
+  'Weak Foot Usage', 'Weak Foot Acc.', 'Form', 'Injury Resistance',
+];
+
+// Playing style numeric index → Spanish label
+const PLAYING_STYLE_LABELS = {
+  '0':  'Goleador',
+  '1':  'Segunda punta',
+  '2':  'Señuelo',
+  '3':  'Delantero en el área',
+  '4':  'Enlace',
+  '5':  'Creador',
+  '6':  'Extremo prolífico',
+  '7':  'Clásico número 10',
+  '8':  'Caja a caja',
+  '9':  'Ancla',
+  '10': 'Destructor',
+  '11': 'Portero defensivo',
+  '12': 'Portero ofensivo',
+  '13': 'Director de juego',
+  '14': 'Especialista en centros',
+  '15': 'Extremo libre',
+  '16': 'Referencia',
+  '17': 'Pivote recuperador',
+  '18': 'Lateral ofensivo',
+  '19': 'Jugador dinámico',
+};
+
+// Player skills P01–P07 (True/False)
+const PLAYER_SKILLS = [
+  { col: 'P01', label: 'Finta de tijeras' },
+  { col: 'P02', label: 'Toque doble' },
+  { col: 'P03', label: 'Flip-flap' },
+  { col: 'P04', label: 'Giro marsellés' },
+  { col: 'P05', label: 'Sombrero flick' },
+  { col: 'P06', label: 'Cruce y giro' },
+  { col: 'P07', label: 'Corte y giro' },
+];
+
+// COM playing styles S01–S28 (True/False)
+const COM_PLAYING_STYLES = [
+  { col: 'S01', label: 'Balón largo' },
+  { col: 'S02', label: 'Centro al vuelo' },
+  { col: 'S03', label: 'Remate acrobático' },
+  { col: 'S04', label: 'Amague' },
+  { col: 'S05', label: 'Caída' },
+  { col: 'S06', label: 'Tiro de lejos' },
+  { col: 'S07', label: 'Tiro con efecto' },
+  { col: 'S08', label: 'Cabezazo' },
+  { col: 'S09', label: 'Regate bajo presión' },
+  { col: 'S10', label: 'Arrancada constante' },
+  { col: 'S11', label: 'Dribla hacia atrás' },
+  { col: 'S12', label: 'Mantiene posición' },
+  { col: 'S13', label: 'Marca en sombra' },
+  { col: 'S14', label: 'Desbordamiento' },
+  { col: 'S15', label: 'Centro desde atrás' },
+  { col: 'S16', label: 'Marcaje al hombre' },
+  { col: 'S17', label: 'Centros frecuentes' },
+  { col: 'S18', label: 'Presión alta' },
+  { col: 'S19', label: 'Recuperación de balón' },
+  { col: 'S20', label: 'Control del balón' },
+  { col: 'S21', label: 'Salida anticipada' },
+  { col: 'S22', label: 'Bloqueo expansivo' },
+  { col: 'S23', label: 'Primer contacto' },
+  { col: 'S24', label: 'Desmarque al espacio' },
+  { col: 'S25', label: 'Doble movimiento' },
+  { col: 'S26', label: 'Proteger el balón' },
+  { col: 'S27', label: 'Combinación rápida' },
+  { col: 'S28', label: 'Tiro desde lejos' },
 ];
 
 // Face / physique appearance columns
@@ -379,24 +428,24 @@ const SPECIAL_ATTRS = {
 // ─── Rendering helpers ────────────────────────────────────────────────────────
 
 function renderStatRow(label, value, col) {
-  // Special attributes: render as pip indicators
+  const v = parseInt(value, 10) || 0;
+  // Special attributes: render as bar scaled to their own range
   if (col && SPECIAL_ATTRS[col]) {
     const { max } = SPECIAL_ATTRS[col];
-    const v = parseInt(value, 10) || 0;
-    let pips = '';
-    for (let i = 1; i <= max; i++) {
-      pips += `<span class="pip${i <= v ? ' filled' : ''}"></span>`;
-    }
+    const pct = Math.max(0, Math.min(100, (v / max) * 100));
+    const barColor = v >= max * 0.75 ? '#27ae60' : v >= max * 0.5 ? '#f39c12' : '#e74c3c';
+    const colorClass = v >= max * 0.75 ? 'stat-green' : v >= max * 0.5 ? 'stat-yellow' : 'stat-red';
     return `<div class="stat-row">
       <span class="stat-name">${label}</span>
-      <span class="stat-value" style="background:transparent;color:var(--color-text);min-width:20px">${v}</span>
-      <div class="special-attr-pips">${pips}</div>
+      <span class="stat-value ${colorClass}">${v}</span>
+      <div class="stat-bar-container">
+        <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
+      </div>
     </div>`;
   }
   // Normal stat: scale bar from STAT_MIN to STAT_MAX
   const colorClass = statColorClass(value);
   const barColor = statColor(value);
-  const v = parseInt(value, 10) || 0;
   const pct = Math.max(0, Math.min(100, ((v - STAT_MIN) / (STAT_MAX - STAT_MIN)) * 100));
   return `<div class="stat-row">
     <span class="stat-name">${label}</span>
@@ -432,18 +481,48 @@ function renderPositionGrid(player) {
   return `<div class="pos-rating-grid">${cells}</div>`;
 }
 
-function renderAbilityGroups(player) {
-  return ABILITY_GROUPS.map(group => {
-    const rows = group.cols
-      .filter(col => player[col] !== undefined && player[col] !== '')
-      .map(col => renderStatRow(translateStat(col), player[col], col))
-      .join('');
-    if (!rows) return '';
-    return `<div class="stats-group">
-      <div class="stats-group-title">${group.title}</div>
-      <div class="stats-list">${rows}</div>
-    </div>`;
-  }).join('');
+function renderHabilidades(player) {
+  const rows = STAT_COLUMNS_ORDERED
+    .filter(col => player[col] !== undefined && player[col] !== '')
+    .map(col => renderStatRow(translateStat(col), player[col], col))
+    .join('');
+  return `<div class="player-section">
+    <div class="player-section-title">Habilidades</div>
+    <div class="stats-list">${rows}</div>
+  </div>`;
+}
+
+function renderEstiloDeJuego(player) {
+  const val = player['PlayingStyle'] || '';
+  const styleName = PLAYING_STYLE_LABELS[val] || (val ? `Estilo ${val}` : '–');
+  return `<div class="player-section">
+    <div class="player-section-title">Estilo de juego</div>
+    <div class="playing-style-display">
+      <span class="playing-style-badge">${styleName}</span>
+    </div>
+  </div>`;
+}
+
+function renderHabilidadesJugador(player) {
+  const active = PLAYER_SKILLS.filter(s => player[s.col] === 'True');
+  const content = active.length
+    ? `<div class="skills-list">${active.map(s => `<span class="skill-badge">${s.label}</span>`).join('')}</div>`
+    : `<div class="skills-empty">Sin habilidades especiales</div>`;
+  return `<div class="player-section">
+    <div class="player-section-title">Habilidades de jugador</div>
+    ${content}
+  </div>`;
+}
+
+function renderEstilosJuegoCOM(player) {
+  const active = COM_PLAYING_STYLES.filter(s => player[s.col] === 'True');
+  const content = active.length
+    ? `<div class="skills-list">${active.map(s => `<span class="skill-badge com-style">${s.label}</span>`).join('')}</div>`
+    : `<div class="skills-empty">Sin estilos COM asignados</div>`;
+  return `<div class="player-section">
+    <div class="player-section-title">Estilos de juego COM</div>
+    ${content}
+  </div>`;
 }
 
 function renderFaceData(appearance) {
@@ -509,7 +588,10 @@ function renderPlayerPage(player, team, appearance, typeLabel) {
         </div>
       </div>
       <div class="profile-stats-right">
-        ${renderAbilityGroups(player)}
+        ${renderHabilidades(player)}
+        ${renderEstiloDeJuego(player)}
+        ${renderHabilidadesJugador(player)}
+        ${renderEstilosJuegoCOM(player)}
       </div>
     </div>`;
 
