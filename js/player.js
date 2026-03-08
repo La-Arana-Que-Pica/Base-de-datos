@@ -10,6 +10,16 @@
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
+function handleMinifaceError(img, playerId) {
+  const ddsPath = 'img/players/player_' + playerId + '.dds';
+  if (!img.src.endsWith(ddsPath)) {
+    img.src = ddsPath;
+  } else {
+    img.onerror = null;
+    img.src = 'img/players/default.png';
+  }
+}
+
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
   if (lines.length < 2) return { headers: [], rows: [] };
@@ -606,7 +616,7 @@ function renderPlayerPage(player, team, appearance, typeLabel) {
       <div class="profile-header-card">
         <img class="profile-photo"
           src="img/players/${player['Id']}.png"
-          onerror="this.onerror=null;this.src='img/players/default.png'"
+          onerror="handleMinifaceError(this,'${player['Id']}')"
           alt="${player['Name']}">
         <div class="profile-header-info">
           <div class="profile-name">${player['Name'] || 'Jugador desconocido'}</div>

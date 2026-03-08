@@ -10,6 +10,18 @@
 
 'use strict';
 
+// ─── Image helpers ────────────────────────────────────────────────────────────
+
+function handleMinifaceError(img, playerId) {
+  const ddsPath = 'img/players/player_' + playerId + '.dds';
+  if (!img.src.endsWith(ddsPath)) {
+    img.src = ddsPath;
+  } else {
+    img.onerror = null;
+    img.src = 'img/players/default.png';
+  }
+}
+
 // ─── In-memory indexes ────────────────────────────────────────────────────────
 const DB = {
   teams: [],      // [{ id, folder, displayName, type, teamData, players, appearanceMap }]
@@ -743,7 +755,7 @@ function renderPlayerRow(player, team) {
     <td>
       <img class="player-row-photo"
         src="img/players/${player.ID}.png"
-        onerror="this.onerror=null;this.src='img/players/default.png'"
+        onerror="handleMinifaceError(this,'${player.ID}')"
         alt="${player.Name}">
     </td>
     <td>${player.ID}</td>
@@ -840,7 +852,7 @@ function renderPlayerProfile(player, team) {
           <img class="player-photo"
             id="profile-photo"
             src="img/players/${player.ID}.png"
-            onerror="this.onerror=null;this.src='img/players/default.png'"
+            onerror="handleMinifaceError(this,'${player.ID}')"
             alt="${player.Name}">
         </div>
         <div class="player-info-card">

@@ -10,6 +10,16 @@
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
+function handleMinifaceError(img, playerId) {
+  const ddsPath = 'img/players/player_' + playerId + '.dds';
+  if (!img.src.endsWith(ddsPath)) {
+    img.src = ddsPath;
+  } else {
+    img.onerror = null;
+    img.src = 'img/players/default.png';
+  }
+}
+
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
   if (lines.length < 2) return { headers: [], rows: [] };
@@ -271,7 +281,7 @@ function renderPlayerRow(player, teamId) {
     <td>
       <img class="player-row-photo"
         src="img/players/${escapeHtml(player.ID)}.png"
-        onerror="this.onerror=null;this.src='img/players/default.png'"
+        onerror="handleMinifaceError(this,'${escapeHtml(player.ID)}')"
         alt="${safeName}">
     </td>
     <td>${escapeHtml(player.ID)}</td>
