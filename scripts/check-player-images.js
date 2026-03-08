@@ -63,14 +63,15 @@ function main() {
     process.exit(1);
   }
 
-  const imageFiles = new Set(
-    fs.existsSync(playersImgDir)
-      ? fs.readdirSync(playersImgDir).filter(f => f.toLowerCase().endsWith('.png'))
-      : []
-  );
+  const allImgFiles = fs.existsSync(playersImgDir)
+    ? fs.readdirSync(playersImgDir)
+    : [];
+  const pngFiles = new Set(allImgFiles.filter(f => f.toLowerCase().endsWith('.png')));
+  const ddsFiles = new Set(allImgFiles.filter(f => f.toLowerCase().endsWith('.dds')));
 
   let totalPlayers = 0;
-  let withImage = 0;
+  let withPng = 0;
+  let withDds = 0;
   let withoutImage = 0;
   const missing = [];
 
@@ -94,10 +95,13 @@ function main() {
       if (!playerId) continue;
 
       totalPlayers++;
-      const imgFile = `${playerId}.png`;
+      const pngFile = `${playerId}.png`;
+      const ddsFile = `player_${playerId}.dds`;
 
-      if (imageFiles.has(imgFile)) {
-        withImage++;
+      if (pngFiles.has(pngFile)) {
+        withPng++;
+      } else if (ddsFiles.has(ddsFile)) {
+        withDds++;
       } else {
         withoutImage++;
         missing.push({ playerId, name: pickValue(row, ['Name', 'PlayerName']), team: displayName });
@@ -108,7 +112,8 @@ function main() {
   console.log(`\nPlayer image report`);
   console.log('===================');
   console.log(`Total players : ${totalPlayers}`);
-  console.log(`With image    : ${withImage}`);
+  console.log(`With PNG      : ${withPng}`);
+  console.log(`With DDS      : ${withDds}`);
   console.log(`Missing image : ${withoutImage}`);
 
   if (missing.length > 0) {

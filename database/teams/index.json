@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-07T22:32:47.659Z",
+  "generatedAt": "2026-03-08T20:01:48.887Z",
   "requiredFileTypes": [
     "team",
     "players",
@@ -7,18 +7,5 @@
     "formation",
     "squad"
   ],
-  "teams": [
-    {
-      "folder": "manchester-united",
-      "displayName": "Manchester United",
-      "files": {
-        "appearence": "MANCHESTER UNITED_appearence.csv",
-        "formation": "MANCHESTER UNITED_formation.csv",
-        "players": "MANCHESTER UNITED_players.csv",
-        "squad": "MANCHESTER UNITED_squad.csv",
-        "team": "MANCHESTER UNITED_team.csv"
-      },
-      "missingRequired": []
-    }
-  ]
+  "teams": []
 }

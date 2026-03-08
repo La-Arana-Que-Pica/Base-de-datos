@@ -13,9 +13,9 @@
 // ─── Image helpers ────────────────────────────────────────────────────────────
 
 function handleMinifaceError(img, playerId) {
-  const ddsPath = 'img/players/player_' + playerId + '.dds';
-  if (!img.src.endsWith(ddsPath)) {
-    img.src = ddsPath;
+  if (!img.dataset.ddsTried) {
+    img.dataset.ddsTried = '1';
+    img.src = 'img/players/player_' + playerId + '.dds';
   } else {
     img.onerror = null;
     img.src = 'img/players/default.png';
