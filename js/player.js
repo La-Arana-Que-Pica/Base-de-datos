@@ -343,7 +343,7 @@ function drawRadar(canvasId, attrs) {
   const H = canvas.height;
   const cx = W / 2;
   const cy = H / 2;
-  const maxR = Math.min(cx, cy) - 30;
+  const maxR = Math.min(cx, cy) - 42;
   const MAX_VAL = 99;
   const labels = Object.keys(attrs);
   const values = Object.values(attrs);
@@ -351,6 +351,8 @@ function drawRadar(canvasId, attrs) {
 
   ctx.clearRect(0, 0, W, H);
 
+  // Grid rings (5 levels)
+  const ringLevels = [20, 40, 60, 80, 99];
   for (let ring = 1; ring <= 5; ring++) {
     const r = (maxR * ring) / 5;
     ctx.beginPath();
@@ -361,21 +363,29 @@ function drawRadar(canvasId, attrs) {
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     }
     ctx.closePath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = ring === 5 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = ring === 5 ? 1.5 : 1;
     ctx.stroke();
+    // Ring value label at top
+    ctx.font = '9px Segoe UI, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(String(ringLevels[ring - 1]), cx, cy - r - 2);
   }
 
+  // Axis lines
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(cx + maxR * Math.cos(angle), cy + maxR * Math.sin(angle));
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
     ctx.lineWidth = 1;
     ctx.stroke();
   }
 
+  // Data polygon fill
   ctx.beginPath();
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
@@ -385,38 +395,43 @@ function drawRadar(canvasId, attrs) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(139, 26, 26, 0.3)';
+  ctx.fillStyle = 'rgba(192, 57, 43, 0.25)';
   ctx.fill();
-  ctx.strokeStyle = '#8b1a1a';
-  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = '#e74c3c';
+  ctx.lineWidth = 2;
   ctx.stroke();
 
+  // Data points
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
     const r = (values[i] / MAX_VAL) * maxR;
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
     ctx.beginPath();
-    ctx.arc(x, y, 3.5, 0, 2 * Math.PI);
-    ctx.fillStyle = '#8b1a1a';
+    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+    ctx.fillStyle = '#e74c3c';
     ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
   }
 
+  // Labels: "LABEL\nVAL" outside each axis
+  ctx.textAlign = 'center';
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-    const labelR = maxR + 18;
-    const x = cx + labelR * Math.cos(angle);
-    const y = cy + labelR * Math.sin(angle);
-    ctx.font = 'bold 11px Segoe UI, sans-serif';
-    ctx.fillStyle = '#eaeaea';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(labels[i], x, y);
+    const labelR = maxR + 26;
+    const lx = cx + labelR * Math.cos(angle);
+    const ly = cy + labelR * Math.sin(angle);
 
-    const valY = cy + (labelR + 12) * Math.sin(angle);
-    ctx.font = '10px Segoe UI, sans-serif';
-    ctx.fillStyle = '#c0392b';
-    ctx.fillText(values[i], x, valY);
+    ctx.font = 'bold 11px "Segoe UI", sans-serif';
+    ctx.fillStyle = '#eaeaea';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(labels[i], lx, ly - 6);
+
+    ctx.font = 'bold 12px "Segoe UI", sans-serif';
+    ctx.fillStyle = '#e74c3c';
+    ctx.fillText(String(values[i]), lx, ly + 8);
   }
 }
 
@@ -506,8 +521,8 @@ function renderEstiloDeJuego(player) {
   const styleName = PLAYING_STYLE_LABELS[val] || (val ? `Estilo ${val}` : '–');
   return `<div class="player-section">
     <div class="player-section-title">Estilo de juego</div>
-    <div class="playing-style-display">
-      <span class="playing-style-badge">${styleName}</span>
+    <div class="skill-items-list">
+      <div class="skill-item-row">${styleName}</div>
     </div>
   </div>`;
 }
@@ -515,7 +530,7 @@ function renderEstiloDeJuego(player) {
 function renderHabilidadesJugador(player) {
   const active = PLAYER_SKILLS.filter(s => player[s.col] === 'True');
   const content = active.length
-    ? `<div class="skills-list">${active.map(s => `<span class="skill-badge">${s.label}</span>`).join('')}</div>`
+    ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${s.label}</div>`).join('')}</div>`
     : `<div class="skills-empty">Sin habilidades especiales</div>`;
   return `<div class="player-section">
     <div class="player-section-title">Habilidades de jugador</div>
@@ -526,7 +541,7 @@ function renderHabilidadesJugador(player) {
 function renderEstilosJuegoCOM(player) {
   const active = COM_PLAYING_STYLES.filter(s => player[s.col] === 'True');
   const content = active.length
-    ? `<div class="skills-list">${active.map(s => `<span class="skill-badge com-style">${s.label}</span>`).join('')}</div>`
+    ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${s.label}</div>`).join('')}</div>`
     : `<div class="skills-empty">Sin estilos COM asignados</div>`;
   return `<div class="player-section">
     <div class="player-section-title">Estilos de juego COM</div>
@@ -593,7 +608,7 @@ function renderPlayerPage(player, team, appearance, typeLabel) {
         ${renderPositionGrid(player)}
         <div class="radar-card" style="margin-top:20px">
           <h3>Radar de atributos</h3>
-          <canvas id="radar-canvas" width="240" height="240"></canvas>
+          <canvas id="radar-canvas" width="260" height="260"></canvas>
         </div>
       </div>
       <div class="profile-stats-right">

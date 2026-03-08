@@ -387,85 +387,21 @@ async function boot() {
 
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
-  const teamById = {};
-  DB.teams.forEach(t => { teamById[t.id] = t; });
-
-  // ── Ligas section ──
-  const leagueItemsHtml = DB.leagues.map(league => {
-    const leagueTeams = league.teamIds.map(id => teamById[id]).filter(Boolean);
-    if (!leagueTeams.length) return '';
-    const teamItemsHtml = leagueTeams.map(team => `
-      <div class="sidebar-team-item" id="sidebar-team-${team.id}"
-        data-team-name="${normalizeText(team.displayName)}"
-        onclick="selectTeam('${team.id}')">
-        <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
-          onerror="this.onerror=null;this.src='img/teams/default.png'"
-          alt="${team.displayName}">
-        <span>${team.displayName}</span>
-      </div>`).join('');
-    return `
-      <div class="sidebar-league-item" data-league-name="${normalizeText(league.name)}">
-        <div class="sidebar-league-header" onclick="toggleLeague('lg-${league.id}')">
-          <img class="sidebar-league-logo" src="img/leagues/${league.id}.png"
-            onerror="this.onerror=null;this.src='img/leagues/default.png'"
-            alt="${league.name}">
-          <span class="sidebar-league-name">${league.name}</span>
-          <span class="sidebar-league-count">(${leagueTeams.length})</span>
-          <span class="sidebar-league-arrow">▶</span>
-        </div>
-        <div class="sidebar-teams-list" id="league-teams-lg-${league.id}">
-          ${teamItemsHtml}
-        </div>
-      </div>`;
-  }).join('');
-
-  // ── Equipos section ──
-  const allTeamItemsHtml = DB.teams.map(team => `
-    <div class="sidebar-team-item"
-      data-team-name="${normalizeText(team.displayName)}"
-      onclick="selectTeam('${team.id}')">
-      <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
-        onerror="this.onerror=null;this.src='img/teams/default.png'"
-        alt="${team.displayName}">
-      <span>${team.displayName}</span>
-    </div>`).join('');
 
   const html = `
     <!-- ── LIGAS ── -->
     <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" onclick="toggleNavSection('ligas')">
+      <div class="sidebar-nav-header" onclick="showLeaguesView()">
         <span class="sidebar-nav-title">Ligas</span>
         <span class="sidebar-nav-arrow">▶</span>
-      </div>
-      <div class="sidebar-nav-body" id="nav-ligas" style="display:none">
-        <div class="sidebar-filter-wrap">
-          <input type="text" class="sidebar-filter-input"
-            placeholder="Filtrar ligas..."
-            oninput="filterSidebarLeagues(this.value)"
-            autocomplete="off">
-        </div>
-        <div id="ligas-list">
-          ${leagueItemsHtml}
-        </div>
       </div>
     </div>
 
     <!-- ── EQUIPOS ── -->
     <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" onclick="toggleNavSection('equipos')">
+      <div class="sidebar-nav-header" onclick="showTeamsView()">
         <span class="sidebar-nav-title">Equipos</span>
         <span class="sidebar-nav-arrow">▶</span>
-      </div>
-      <div class="sidebar-nav-body" id="nav-equipos" style="display:none">
-        <div class="sidebar-filter-wrap">
-          <input type="text" class="sidebar-filter-input"
-            placeholder="Filtrar equipos..."
-            oninput="filterSidebarTeams(this.value)"
-            autocomplete="off">
-        </div>
-        <div id="equipos-list">
-          ${allTeamItemsHtml}
-        </div>
       </div>
     </div>
 
@@ -488,17 +424,6 @@ function buildSidebar() {
   sidebar.innerHTML = html;
 }
 
-function toggleNavSection(id) {
-  const body = document.getElementById(`nav-${id}`);
-  if (!body) return;
-  const section = body.parentElement;
-  const header = section && section.querySelector('.sidebar-nav-header');
-  const arrow = header && header.querySelector('.sidebar-nav-arrow');
-  const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : '';
-  if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
-}
-
 function showAllPlayersFromSidebar() {
   // Toggle the jugadores section body
   const body = document.getElementById('nav-jugadores');
@@ -511,23 +436,6 @@ function showAllPlayersFromSidebar() {
   showAllPlayers();
 }
 
-function filterSidebarLeagues(query) {
-  const normalized = normalizeText(query);
-  document.querySelectorAll('#ligas-list .sidebar-league-item').forEach(el => {
-    const name = el.dataset.leagueName || '';
-    el.style.display = !normalized || name.includes(normalized) ? '' : 'none';
-  });
-}
-
-function filterSidebarTeams(query) {
-  const normalized = normalizeText(query);
-  const hasFilter = normalized.length > 0;
-  document.querySelectorAll('#equipos-list .sidebar-team-item').forEach(el => {
-    const name = el.dataset.teamName || '';
-    el.style.display = !hasFilter || name.includes(normalized) ? '' : 'none';
-  });
-}
-
 function filterAllPlayers(query) {
   if (!query.trim()) {
     showAllPlayers();
@@ -536,20 +444,108 @@ function filterAllPlayers(query) {
   runSearch(query);
 }
 
-function toggleLeague(id) {
-  const list = document.getElementById(`league-teams-${id}`);
-  if (!list) return;
-  const header = list.previousElementSibling;
-  if (header) header.classList.toggle('open');
-  list.classList.toggle('open');
+// ─── Leagues grid view ────────────────────────────────────────────────────────
+
+function showLeaguesView() {
+  hideAllViews();
+  const view = document.getElementById('leagues-view');
+  view.classList.add('active');
+
+  const cardsHtml = DB.leagues.map(league => {
+    const teamCount = league.teamIds.length;
+    return `
+      <div class="grid-card" onclick="showLeagueTeamsView('${league.id}')">
+        <img class="grid-card-img"
+          src="img/leagues/${league.id}.png"
+          onerror="this.onerror=null;this.src='img/leagues/default.png'"
+          alt="${league.name}">
+        <div class="grid-card-name">${league.name}</div>
+        <div class="grid-card-sub">${teamCount} equipo${teamCount !== 1 ? 's' : ''}</div>
+      </div>`;
+  }).join('');
+
+  view.innerHTML = `
+    <div class="view-header">
+      <div>
+        <div class="view-title">Ligas</div>
+        <div class="view-subtitle">${DB.leagues.length} ligas disponibles</div>
+      </div>
+    </div>
+    <div class="grid-cards">${cardsHtml}</div>`;
 }
 
+function showLeagueTeamsView(leagueId) {
+  const league = DB.leagues.find(l => l.id === leagueId);
+  if (!league) return;
+
+  const teamById = {};
+  DB.teams.forEach(t => { teamById[t.id] = t; });
+  const leagueTeams = league.teamIds.map(id => teamById[id]).filter(Boolean);
+
+  hideAllViews();
+  const view = document.getElementById('leagues-view');
+  view.classList.add('active');
+
+  const cardsHtml = leagueTeams.map(team => `
+    <div class="grid-card" onclick="selectTeam('${team.id}')">
+      <img class="grid-card-img"
+        src="img/teams/${team.id}.png"
+        onerror="this.onerror=null;this.src='img/teams/default.png'"
+        alt="${team.displayName}">
+      <div class="grid-card-name">${team.displayName}</div>
+    </div>`).join('');
+
+  view.innerHTML = `
+    <div class="view-header">
+      <img class="grid-card-img" style="width:48px;height:48px;object-fit:contain"
+        src="img/leagues/${leagueId}.png"
+        onerror="this.onerror=null;this.src='img/leagues/default.png'"
+        alt="${league.name}">
+      <div>
+        <div class="view-title">${league.name}</div>
+        <div class="view-subtitle">${leagueTeams.length} equipo${leagueTeams.length !== 1 ? 's' : ''}</div>
+      </div>
+    </div>
+    <button class="back-btn" onclick="showLeaguesView()" style="margin-bottom:16px">◀ Volver a Ligas</button>
+    <div class="grid-cards">${cardsHtml}</div>`;
+}
+
+// ─── Teams grid view ──────────────────────────────────────────────────────────
+
+function showTeamsView() {
+  // Only show teams that belong to a league
+  const teamsInLeagues = new Set();
+  DB.leagues.forEach(l => l.teamIds.forEach(id => teamsInLeagues.add(id)));
+  const filteredTeams = DB.teams.filter(t => teamsInLeagues.has(t.id));
+
+  hideAllViews();
+  const view = document.getElementById('teams-grid-view');
+  view.classList.add('active');
+
+  const cardsHtml = filteredTeams.map(team => `
+    <div class="grid-card" onclick="selectTeam('${team.id}')">
+      <img class="grid-card-img"
+        src="img/teams/${team.id}.png"
+        onerror="this.onerror=null;this.src='img/teams/default.png'"
+        alt="${team.displayName}">
+      <div class="grid-card-name">${team.displayName}</div>
+    </div>`).join('');
+
+  view.innerHTML = `
+    <div class="view-header">
+      <div>
+        <div class="view-title">Equipos</div>
+        <div class="view-subtitle">${filteredTeams.length} equipos con liga asignada</div>
+      </div>
+    </div>
+    <div class="grid-cards">${cardsHtml}</div>`;
+}
 
 
 // ─── Views ────────────────────────────────────────────────────────────────────
 
 function hideAllViews() {
-  document.querySelectorAll('#home-view, #players-view, #player-view, #search-view').forEach(el => {
+  document.querySelectorAll('#home-view, #players-view, #player-view, #search-view, #leagues-view, #teams-grid-view').forEach(el => {
     el.classList.remove('active');
   });
   const loadingOverlay = document.getElementById('loading-overlay');
@@ -670,7 +666,7 @@ function showAllPlayers() {
     <table class="players-table">
       <thead>
         <tr>
-          <th></th><th>#</th><th>Nombre</th><th>Nac</th><th>Pos</th>
+          <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
           <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
         </tr>
       </thead>
@@ -726,7 +722,6 @@ function renderPlayersList(team) {
       <thead>
         <tr>
           <th></th>
-          <th>#</th>
           <th>Nombre</th>
           <th>Nac</th>
           <th>Pos</th>
@@ -758,7 +753,6 @@ function renderPlayerRow(player, team) {
         onerror="handleMinifaceError(this,'${player.ID}')"
         alt="${player.Name}">
     </td>
-    <td>${player.ID}</td>
     <td><strong>${player.Name || '–'}</strong></td>
     <td>
       <img class="player-flag"
@@ -918,7 +912,7 @@ function drawRadar(canvasId, attrs) {
   const H = canvas.height;
   const cx = W / 2;
   const cy = H / 2;
-  const maxR = Math.min(cx, cy) - 30;
+  const maxR = Math.min(cx, cy) - 42;
   const MAX_VAL = 99;
   const labels = Object.keys(attrs);
   const values = Object.values(attrs);
@@ -926,7 +920,8 @@ function drawRadar(canvasId, attrs) {
 
   ctx.clearRect(0, 0, W, H);
 
-  // Background grid (5 rings)
+  // Grid rings (5 levels)
+  const ringLevels = [20, 40, 60, 80, 99];
   for (let ring = 1; ring <= 5; ring++) {
     const r = (maxR * ring) / 5;
     ctx.beginPath();
@@ -937,9 +932,15 @@ function drawRadar(canvasId, attrs) {
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     }
     ctx.closePath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = ring === 5 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = ring === 5 ? 1.5 : 1;
     ctx.stroke();
+    // Ring value label at top
+    ctx.font = '9px Segoe UI, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(String(ringLevels[ring - 1]), cx, cy - r - 2);
   }
 
   // Axis lines
@@ -948,12 +949,12 @@ function drawRadar(canvasId, attrs) {
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(cx + maxR * Math.cos(angle), cy + maxR * Math.sin(angle));
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
     ctx.lineWidth = 1;
     ctx.stroke();
   }
 
-  // Data polygon
+  // Data polygon fill
   ctx.beginPath();
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
@@ -963,10 +964,10 @@ function drawRadar(canvasId, attrs) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(139, 26, 26, 0.3)';
+  ctx.fillStyle = 'rgba(192, 57, 43, 0.25)';
   ctx.fill();
-  ctx.strokeStyle = '#8b1a1a';
-  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = '#e74c3c';
+  ctx.lineWidth = 2;
   ctx.stroke();
 
   // Data points
@@ -976,28 +977,30 @@ function drawRadar(canvasId, attrs) {
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
     ctx.beginPath();
-    ctx.arc(x, y, 3.5, 0, 2 * Math.PI);
-    ctx.fillStyle = '#8b1a1a';
+    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+    ctx.fillStyle = '#e74c3c';
     ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
   }
 
-  // Labels
+  // Labels: attribute name + value outside each axis
+  ctx.textAlign = 'center';
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-    const labelR = maxR + 18;
-    const x = cx + labelR * Math.cos(angle);
-    const y = cy + labelR * Math.sin(angle);
-    ctx.font = 'bold 11px Segoe UI, sans-serif';
-    ctx.fillStyle = '#eaeaea';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(labels[i], x, y);
+    const labelR = maxR + 26;
+    const lx = cx + labelR * Math.cos(angle);
+    const ly = cy + labelR * Math.sin(angle);
 
-    // Value below label
-    const valY = cy + (labelR + 12) * Math.sin(angle);
-    ctx.font = '10px Segoe UI, sans-serif';
-    ctx.fillStyle = '#c0392b';
-    ctx.fillText(values[i], x, valY);
+    ctx.font = 'bold 11px "Segoe UI", sans-serif';
+    ctx.fillStyle = '#eaeaea';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(labels[i], lx, ly - 6);
+
+    ctx.font = 'bold 12px "Segoe UI", sans-serif';
+    ctx.fillStyle = '#e74c3c';
+    ctx.fillText(String(values[i]), lx, ly + 8);
   }
 }
 
@@ -1051,7 +1054,7 @@ function runSearch(query) {
     <table class="players-table">
       <thead>
         <tr>
-          <th></th><th>#</th><th>Nombre</th><th>Nac</th><th>Pos</th>
+          <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
           <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th>
           <th>PAS</th><th>FIS</th><th>DEF</th>
         </tr>
