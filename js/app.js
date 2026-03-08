@@ -493,20 +493,7 @@ function showHome() {
 let currentTeam = null;
 
 function selectTeam(teamId) {
-  const team = DB.teams.find(t => t.id === teamId);
-  if (!team) return;
-
-  currentTeam = team;
-
-  // Highlight in sidebar
-  document.querySelectorAll('.sidebar-team-item').forEach(el => el.classList.remove('active'));
-  const sidebarItem = document.getElementById(`sidebar-team-${teamId}`);
-  if (sidebarItem) sidebarItem.classList.add('active');
-
-  // Open the type section
-  openLeague(`type-${team.type}`);
-
-  renderPlayersList(team);
+  window.location.href = `team.html?id=${encodeURIComponent(teamId)}`;
 }
 
 function renderPlayersList(team) {
