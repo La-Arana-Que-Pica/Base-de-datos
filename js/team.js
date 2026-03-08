@@ -381,6 +381,7 @@ function renderTeamPage(team, players) {
   });
 
   // Event delegation: clicking any player row navigates to the player page
+  // Guard: ignore clicks on <th> elements (handled separately by sort listeners)
   document.getElementById('players-table').addEventListener('click', function (e) {
     if (e.target.closest('th')) return;
     const row = e.target.closest('.player-row');

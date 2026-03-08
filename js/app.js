@@ -84,6 +84,18 @@ function translatePosition(pesPos) {
   return POSITION_LABELS[pesPos] || pesPos;
 }
 
+// Stat bar range for standard attributes (PES stats go from 40 to 99)
+const STAT_MIN = 40;
+const STAT_MAX = 99;
+
+// Attributes that use special ranges and should NOT use standard bars
+const SPECIAL_ATTRS = {
+  'Weak Foot Usage':   { max: 4 },
+  'Weak Foot Acc.':    { max: 4 },
+  'Form':              { max: 8 },
+  'Injury Resistance': { max: 3 },
+};
+
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 /**
@@ -371,13 +383,13 @@ const COUNTRY_LEAGUE_LABELS = {
   '150': 'Liga Paraguaya',
   '151': 'Liga Peruana',
   '152': 'Liga Uruguaya',
-  '162': 'A-League',
+  '162': 'Liga Australiana',
   '135': 'MLS',
-  '31':  'Saudi Pro League',
-  '37':  'UAE Pro League',
+  '31':  'Liga Saudí',
+  '37':  'Liga Emiratos',
   '13':  'J.League',
   '16':  'K League',
-  '11':  'Persian Gulf Pro League',
+  '11':  'Liga Persa del Golfo',
   '200': 'HNL Croata',
   '240': 'Liga Uzbeka',
 };
@@ -412,6 +424,7 @@ function buildSidebar() {
     });
 
     // Sort country groups: known leagues first (by label alpha), then unknowns
+    // Unknown country IDs are prefixed with 'zz' so they sort to the end
     const sortedCountryKeys = Object.keys(countryGroups).sort((a, b) => {
       const la = COUNTRY_LEAGUE_LABELS[a] || 'zz' + a;
       const lb = COUNTRY_LEAGUE_LABELS[b] || 'zz' + b;
@@ -758,12 +771,8 @@ function renderPlayerProfile(player, team) {
   const statsHtml = Object.entries(STAT_LABELS).map(([csvCol, label]) => {
     const val = player[csvCol] || '0';
     // Special attributes (pips instead of bar)
-    const specialRanges = {
-      'Weak Foot Usage': 4, 'Weak Foot Acc.': 4,
-      'Form': 8, 'Injury Resistance': 3,
-    };
-    if (specialRanges[csvCol]) {
-      const max = specialRanges[csvCol];
+    if (SPECIAL_ATTRS[csvCol]) {
+      const max = SPECIAL_ATTRS[csvCol].max;
       const v = parseInt(val, 10) || 0;
       let pips = '';
       for (let i = 1; i <= max; i++) {
@@ -778,7 +787,7 @@ function renderPlayerProfile(player, team) {
     const colorClass = statColorClass(val);
     const barColor = statColor(val);
     const v = parseInt(val, 10) || 0;
-    const pct = Math.max(0, Math.min(100, ((v - 40) / (99 - 40)) * 100));
+    const pct = Math.max(0, Math.min(100, ((v - STAT_MIN) / (STAT_MAX - STAT_MIN)) * 100));
     return `<div class="stat-row">
       <span class="stat-name">${label}</span>
       <span class="stat-value ${colorClass}">${val}</span>

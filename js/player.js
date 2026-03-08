@@ -364,12 +364,16 @@ function drawRadar(canvasId, attrs) {
 
 // ─── Special attribute configuration ─────────────────────────────────────────
 
+// Stat bar range for standard attributes (PES stats go from 40 to 99)
+const STAT_MIN = 40;
+const STAT_MAX = 99;
+
 // Attributes that use special ranges and should NOT use standard 40-99 bars
 const SPECIAL_ATTRS = {
-  'Weak Foot Usage':   { max: 4, label: 'Uso de pie malo' },
-  'Weak Foot Acc.':    { max: 4, label: 'Precisión de pie malo' },
-  'Form':              { max: 8, label: 'Estabilidad' },
-  'Injury Resistance': { max: 3, label: 'Resist. a lesiones' },
+  'Weak Foot Usage':   { max: 4 },
+  'Weak Foot Acc.':    { max: 4 },
+  'Form':              { max: 8 },
+  'Injury Resistance': { max: 3 },
 };
 
 // ─── Rendering helpers ────────────────────────────────────────────────────────
@@ -389,11 +393,11 @@ function renderStatRow(label, value, col) {
       <div class="special-attr-pips">${pips}</div>
     </div>`;
   }
-  // Normal stat: scale bar from 40-99
+  // Normal stat: scale bar from STAT_MIN to STAT_MAX
   const colorClass = statColorClass(value);
   const barColor = statColor(value);
   const v = parseInt(value, 10) || 0;
-  const pct = Math.max(0, Math.min(100, ((v - 40) / (99 - 40)) * 100));
+  const pct = Math.max(0, Math.min(100, ((v - STAT_MIN) / (STAT_MAX - STAT_MIN)) * 100));
   return `<div class="stat-row">
     <span class="stat-name">${label}</span>
     <span class="stat-value ${colorClass}">${value || '–'}</span>
