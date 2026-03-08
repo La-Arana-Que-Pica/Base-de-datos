@@ -14,6 +14,7 @@
 const DB = {
   teams: [],      // [{ id, folder, displayName, type, teamData, players, appearanceMap }]
   players: [],    // flat list for global search
+  leagues: [],    // [{ id, name, teamIds }]
   searchIndex: Object.create(null), // token/prefix -> Set<"teamId:playerId">
   playersByKey: Object.create(null),
   loaded: false,
@@ -274,11 +275,12 @@ async function boot() {
   showLoading('Cargando base de datos...');
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText, appearancesText] = await Promise.all([
+  const [teamsText, playersText, squadsText, appearancesText, leaguesText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All appeaarances exported.csv'),
+    fetchText('database/All leagues exported.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -324,6 +326,16 @@ async function boot() {
   // Sort teams alphabetically
   DB.teams.sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'));
 
+  // Build leagues from CSV
+  if (leaguesText) {
+    const leagueRows = parseCSV(leaguesText);
+    DB.leagues = leagueRows.map(row => ({
+      id: row['league_id'] || '',
+      name: row['league_name'] || '',
+      teamIds: (row['team_ids'] || '').split(',').map(s => s.trim()).filter(Boolean),
+    })).filter(l => l.id && l.name);
+  }
+
   // Build normalized player map (playerId → normalized player row)
   const playerMap = {};
   playerRows.forEach(playerRow => {
@@ -356,231 +368,160 @@ async function boot() {
 
   DB.loaded = true;
   buildSidebar();
-  showHome();
+  showAllPlayers();
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-// Map country ID → league/competition display name (for club teams)
-const COUNTRY_LEAGUE_LABELS = {
-  '204': 'Liga Inglesa',
-  '236': 'La Liga',
-  '208': 'Ligue 1',
-  '215': 'Serie A',
-  '210': 'Bundesliga',
-  '224': 'Eredivisie',
-  '228': 'Primeira Liga',
-  '232': 'Liga Escocesa',
-  '197': 'Liga Belga',
-  '190': 'Süper Lig',
-  '211': 'Liga Griega',
-  '239': 'Liga Ucraniana',
-  '230': 'Liga Rusa',
-  '144': 'Liga Argentina',
-  '146': 'Brasileirão',
-  '147': 'Primera División Chile',
-  '148': 'Liga BetPlay',
-  '150': 'Liga Paraguaya',
-  '151': 'Liga Peruana',
-  '152': 'Liga Uruguaya',
-  '162': 'Liga Australiana',
-  '135': 'MLS',
-  '31':  'Liga Saudí',
-  '37':  'Liga Emiratos',
-  '13':  'J.League',
-  '16':  'K League',
-  '11':  'Liga Persa del Golfo',
-  '200': 'HNL Croata',
-  '240': 'Liga Uzbeka',
-};
-
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
+  const teamById = {};
+  DB.teams.forEach(t => { teamById[t.id] = t; });
 
-  // Separate teams by Type: 0=Clubs, 1=Special, 2=National
-  const clubs = DB.teams.filter(t => t.type === '0');
-  const nationals = DB.teams.filter(t => t.type === '2');
-  const special = DB.teams.filter(t => t.type === '1');
-  const other = DB.teams.filter(t => t.type !== '0' && t.type !== '1' && t.type !== '2');
+  // ── Ligas section ──
+  const leagueItemsHtml = DB.leagues.map(league => {
+    const leagueTeams = league.teamIds.map(id => teamById[id]).filter(Boolean);
+    if (!leagueTeams.length) return '';
+    const teamItemsHtml = leagueTeams.map(team => `
+      <div class="sidebar-team-item" id="sidebar-team-${team.id}"
+        data-team-name="${normalizeText(team.displayName)}"
+        onclick="selectTeam('${team.id}')">
+        <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
+          onerror="this.onerror=null;this.src='img/teams/default.png'"
+          alt="${team.displayName}">
+        <span>${team.displayName}</span>
+      </div>`).join('');
+    return `
+      <div class="sidebar-league-item" data-league-name="${normalizeText(league.name)}">
+        <div class="sidebar-league-header" onclick="toggleLeague('lg-${league.id}')">
+          <img class="sidebar-league-logo" src="img/leagues/${league.id}.png"
+            onerror="this.onerror=null;this.src='img/leagues/default.png'"
+            alt="${league.name}">
+          <span class="sidebar-league-name">${league.name}</span>
+          <span class="sidebar-league-count">(${leagueTeams.length})</span>
+          <span class="sidebar-league-arrow">▶</span>
+        </div>
+        <div class="sidebar-teams-list" id="league-teams-lg-${league.id}">
+          ${teamItemsHtml}
+        </div>
+      </div>`;
+  }).join('');
 
-  let html = `<div class="sidebar-section">
-    <div class="sidebar-section-title">Navegación</div>
-    <div class="sidebar-filter-wrap">
-      <input type="text" id="sidebar-team-filter"
-        class="sidebar-filter-input"
-        placeholder="Filtrar equipos..."
-        oninput="filterSidebarTeams(this.value)"
-        autocomplete="off">
-    </div>`;
+  // ── Equipos section ──
+  const allTeamItemsHtml = DB.teams.map(team => `
+    <div class="sidebar-team-item"
+      data-team-name="${normalizeText(team.displayName)}"
+      onclick="selectTeam('${team.id}')">
+      <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
+        onerror="this.onerror=null;this.src='img/teams/default.png'"
+        alt="${team.displayName}">
+      <span>${team.displayName}</span>
+    </div>`).join('');
 
-  // ── Clubs grouped by country/league ──
-  if (clubs.length) {
-    // Group clubs by country
-    const countryGroups = {};
-    clubs.forEach(team => {
-      const countryId = team.teamData && team.teamData['Country'] ? team.teamData['Country'] : '__unknown';
-      if (!countryGroups[countryId]) countryGroups[countryId] = [];
-      countryGroups[countryId].push(team);
-    });
-
-    // Sort country groups: known leagues first (by label alpha), then unknowns
-    // Unknown country IDs are prefixed with 'zz' so they sort to the end
-    const sortedCountryKeys = Object.keys(countryGroups).sort((a, b) => {
-      const la = COUNTRY_LEAGUE_LABELS[a] || 'zz' + a;
-      const lb = COUNTRY_LEAGUE_LABELS[b] || 'zz' + b;
-      return la.localeCompare(lb, 'es');
-    });
-
-    html += `
-    <div class="sidebar-league" data-type="clubs">
-      <div class="sidebar-league-header" onclick="toggleLeague('type-clubs')">
-        <span class="sidebar-league-name">Clubes</span>
-        <span class="sidebar-league-count">(${clubs.length})</span>
-        <span class="sidebar-league-arrow">▶</span>
+  const html = `
+    <!-- ── LIGAS ── -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-header" onclick="toggleNavSection('ligas')">
+        <span class="sidebar-nav-title">Ligas</span>
+        <span class="sidebar-nav-arrow">▶</span>
       </div>
-      <div class="sidebar-teams-list" id="league-teams-type-clubs">`;
-
-    sortedCountryKeys.forEach(countryId => {
-      const leagueLabel = COUNTRY_LEAGUE_LABELS[countryId] || `Liga (${countryId})`;
-      const leagueTeams = countryGroups[countryId];
-      const safeId = `country-${countryId}`;
-
-      html += `
-        <div class="sidebar-country-group">
-          <div class="sidebar-country-header" onclick="toggleCountryGroup('${safeId}')">
-            <span>${leagueLabel}</span>
-            <span style="color:var(--color-text-muted);font-size:0.72rem">(${leagueTeams.length})</span>
-            <span class="sidebar-country-arrow">▶</span>
-          </div>
-          <div class="sidebar-country-teams" id="country-group-${safeId}">`;
-
-      leagueTeams.forEach(team => {
-        html += `
-            <div class="sidebar-team-item" id="sidebar-team-${team.id}"
-              data-team-name="${normalizeText(team.displayName)}"
-              onclick="selectTeam('${team.id}')">
-              <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
-                onerror="this.onerror=null;this.src='img/teams/default.png'"
-                alt="${team.displayName}">
-              <span>${team.displayName}</span>
-            </div>`;
-      });
-
-      html += `
-          </div>
-        </div>`;
-    });
-
-    html += `
+      <div class="sidebar-nav-body" id="nav-ligas" style="display:none">
+        <div class="sidebar-filter-wrap">
+          <input type="text" class="sidebar-filter-input"
+            placeholder="Filtrar ligas..."
+            oninput="filterSidebarLeagues(this.value)"
+            autocomplete="off">
+        </div>
+        <div id="ligas-list">
+          ${leagueItemsHtml}
+        </div>
       </div>
-    </div>`;
-  }
+    </div>
 
-  // ── National teams ──
-  if (nationals.length) {
-    html += `
-    <div class="sidebar-league" data-type="2">
-      <div class="sidebar-league-header" onclick="toggleLeague('type-2')">
-        <span class="sidebar-league-name">Selecciones</span>
-        <span class="sidebar-league-count">(${nationals.length})</span>
-        <span class="sidebar-league-arrow">▶</span>
+    <!-- ── EQUIPOS ── -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-header" onclick="toggleNavSection('equipos')">
+        <span class="sidebar-nav-title">Equipos</span>
+        <span class="sidebar-nav-arrow">▶</span>
       </div>
-      <div class="sidebar-teams-list" id="league-teams-type-2">`;
+      <div class="sidebar-nav-body" id="nav-equipos" style="display:none">
+        <div class="sidebar-filter-wrap">
+          <input type="text" class="sidebar-filter-input"
+            placeholder="Filtrar equipos..."
+            oninput="filterSidebarTeams(this.value)"
+            autocomplete="off">
+        </div>
+        <div id="equipos-list">
+          ${allTeamItemsHtml}
+        </div>
+      </div>
+    </div>
 
-    nationals.forEach(team => {
-      html += `
-        <div class="sidebar-team-item" id="sidebar-team-${team.id}"
-          data-team-name="${normalizeText(team.displayName)}"
-          onclick="selectTeam('${team.id}')">
-          <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
-            onerror="this.onerror=null;this.src='img/teams/default.png'"
-            alt="${team.displayName}">
-          <span>${team.displayName}</span>
-        </div>`;
-    });
-
-    html += `
+    <!-- ── JUGADORES ── -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-header" onclick="showAllPlayersFromSidebar()">
+        <span class="sidebar-nav-title">Jugadores</span>
+        <span class="sidebar-nav-arrow sidebar-players-arrow">▶</span>
+      </div>
+      <div class="sidebar-nav-body" id="nav-jugadores" style="display:none">
+        <div class="sidebar-filter-wrap">
+          <input type="text" class="sidebar-filter-input"
+            placeholder="Buscar jugadores..."
+            oninput="filterAllPlayers(this.value)"
+            autocomplete="off">
+        </div>
       </div>
     </div>`;
-  }
 
-  // ── Special teams ──
-  if (special.length) {
-    html += `
-    <div class="sidebar-league" data-type="1">
-      <div class="sidebar-league-header" onclick="toggleLeague('type-1')">
-        <span class="sidebar-league-name">Equipos especiales</span>
-        <span class="sidebar-league-count">(${special.length})</span>
-        <span class="sidebar-league-arrow">▶</span>
-      </div>
-      <div class="sidebar-teams-list" id="league-teams-type-1">`;
-
-    special.forEach(team => {
-      html += `
-        <div class="sidebar-team-item" id="sidebar-team-${team.id}"
-          data-team-name="${normalizeText(team.displayName)}"
-          onclick="selectTeam('${team.id}')">
-          <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
-            onerror="this.onerror=null;this.src='img/teams/default.png'"
-            alt="${team.displayName}">
-          <span>${team.displayName}</span>
-        </div>`;
-    });
-
-    html += `
-      </div>
-    </div>`;
-  }
-
-  // ── Other types ──
-  other.forEach(team => {
-    html += `
-        <div class="sidebar-team-item" id="sidebar-team-${team.id}"
-          data-team-name="${normalizeText(team.displayName)}"
-          onclick="selectTeam('${team.id}')">
-          <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
-            onerror="this.onerror=null;this.src='img/teams/default.png'"
-            alt="${team.displayName}">
-          <span>${team.displayName}</span>
-        </div>`;
-  });
-
-  html += `</div>`;
   sidebar.innerHTML = html;
+}
+
+function toggleNavSection(id) {
+  const body = document.getElementById(`nav-${id}`);
+  if (!body) return;
+  const section = body.parentElement;
+  const header = section && section.querySelector('.sidebar-nav-header');
+  const arrow = header && header.querySelector('.sidebar-nav-arrow');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
+}
+
+function showAllPlayersFromSidebar() {
+  // Toggle the jugadores section body
+  const body = document.getElementById('nav-jugadores');
+  const arrow = document.querySelector('.sidebar-players-arrow');
+  if (body) {
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : '';
+    if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
+  }
+  showAllPlayers();
+}
+
+function filterSidebarLeagues(query) {
+  const normalized = normalizeText(query);
+  document.querySelectorAll('#ligas-list .sidebar-league-item').forEach(el => {
+    const name = el.dataset.leagueName || '';
+    el.style.display = !normalized || name.includes(normalized) ? '' : 'none';
+  });
 }
 
 function filterSidebarTeams(query) {
   const normalized = normalizeText(query);
   const hasFilter = normalized.length > 0;
-
-  document.querySelectorAll('.sidebar-team-item').forEach(el => {
+  document.querySelectorAll('#equipos-list .sidebar-team-item').forEach(el => {
     const name = el.dataset.teamName || '';
     el.style.display = !hasFilter || name.includes(normalized) ? '' : 'none';
   });
+}
 
-  // When filtering, open all sections so results are visible
-  if (hasFilter) {
-    document.querySelectorAll('.sidebar-league').forEach(section => {
-      const list = section.querySelector('.sidebar-teams-list');
-      const header = section.querySelector('.sidebar-league-header');
-      if (!list || !header) return;
-      const visible = list.querySelectorAll('.sidebar-team-item:not([style*="none"])').length;
-      if (visible > 0) {
-        header.classList.add('open');
-        list.classList.add('open');
-      }
-    });
-    document.querySelectorAll('.sidebar-country-group').forEach(group => {
-      const list = group.querySelector('.sidebar-country-teams');
-      const header = group.querySelector('.sidebar-country-header');
-      if (!list || !header) return;
-      const visible = list.querySelectorAll('.sidebar-team-item:not([style*="none"])').length;
-      if (visible > 0) {
-        header.classList.add('open');
-        list.classList.add('open');
-      }
-    });
+function filterAllPlayers(query) {
+  if (!query.trim()) {
+    showAllPlayers();
+    return;
   }
+  runSearch(query);
 }
 
 function toggleLeague(id) {
@@ -591,21 +532,7 @@ function toggleLeague(id) {
   list.classList.toggle('open');
 }
 
-function toggleCountryGroup(id) {
-  const list = document.getElementById(`country-group-${id}`);
-  if (!list) return;
-  const header = list.previousElementSibling;
-  if (header) header.classList.toggle('open');
-  list.classList.toggle('open');
-}
 
-function openLeague(id) {
-  const list = document.getElementById(`league-teams-${id}`);
-  if (!list) return;
-  const header = list.previousElementSibling;
-  if (header) header.classList.add('open');
-  list.classList.add('open');
-}
 
 // ─── Views ────────────────────────────────────────────────────────────────────
 
@@ -640,15 +567,50 @@ function showHome() {
   hideAllViews();
   document.getElementById('home-view').classList.add('active');
 
-  // Count unique leagues (clubs by country + national + special categories)
-  const clubCountries = new Set(
-    DB.teams.filter(t => t.type === '0')
-      .map(t => t.teamData && t.teamData['Country'] ? t.teamData['Country'] : '__unknown')
-  );
-  const leagueCount = clubCountries.size + (DB.teams.some(t => t.type === '2') ? 1 : 0) + (DB.teams.some(t => t.type === '1') ? 1 : 0);
+  const leagueCount = DB.leagues.length;
   document.getElementById('stat-leagues').textContent = leagueCount;
   document.getElementById('stat-teams').textContent = DB.teams.length;
-  document.getElementById('stat-players').textContent = DB.players.length;
+  // Count unique players
+  const uniqueIds = new Set(DB.players.map(p => p.ID));
+  document.getElementById('stat-players').textContent = uniqueIds.size;
+}
+
+// ─── All-players default view ─────────────────────────────────────────────────
+
+function showAllPlayers() {
+  hideAllViews();
+  const view = document.getElementById('players-view');
+  view.classList.add('active');
+
+  // Deduplicate: each player appears once (keep first occurrence = highest OVR squad entry)
+  const seen = new Set();
+  const unique = DB.players.filter(p => {
+    if (seen.has(p.ID)) return false;
+    seen.add(p.ID);
+    return true;
+  });
+
+  // Sort by OVR descending
+  unique.sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
+
+  const rowsHtml = unique.map(p => renderPlayerRow(p, p._team)).join('');
+
+  view.innerHTML = `
+    <div class="view-header">
+      <div>
+        <div class="view-title">Todos los jugadores</div>
+        <div class="view-subtitle">${unique.length} jugadores · ordenados por valoración</div>
+      </div>
+    </div>
+    <table class="players-table">
+      <thead>
+        <tr>
+          <th></th><th>#</th><th>Nombre</th><th>Nac</th><th>Pos</th>
+          <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
+        </tr>
+      </thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>`;
 }
 
 // ─── Team / Players view ──────────────────────────────────────────────────────
@@ -770,23 +732,23 @@ function renderPlayerProfile(player, team) {
 
   const statsHtml = Object.entries(STAT_LABELS).map(([csvCol, label]) => {
     const val = player[csvCol] || '0';
-    // Special attributes (pips instead of bar)
+    const v = parseInt(val, 10) || 0;
+    // Special attributes: bar scaled to their own range
     if (SPECIAL_ATTRS[csvCol]) {
       const max = SPECIAL_ATTRS[csvCol].max;
-      const v = parseInt(val, 10) || 0;
-      let pips = '';
-      for (let i = 1; i <= max; i++) {
-        pips += `<span class="pip${i <= v ? ' filled' : ''}"></span>`;
-      }
+      const pct = Math.max(0, Math.min(100, (v / max) * 100));
+      const barColor = v >= max * 0.75 ? '#27ae60' : v >= max * 0.5 ? '#f39c12' : '#e74c3c';
+      const colorClass = v >= max * 0.75 ? 'stat-green' : v >= max * 0.5 ? 'stat-yellow' : 'stat-red';
       return `<div class="stat-row">
         <span class="stat-name">${label}</span>
-        <span class="stat-value" style="background:transparent;color:var(--color-text);min-width:20px">${v}</span>
-        <div class="special-attr-pips">${pips}</div>
+        <span class="stat-value ${colorClass}">${v}</span>
+        <div class="stat-bar-container">
+          <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
+        </div>
       </div>`;
     }
     const colorClass = statColorClass(val);
     const barColor = statColor(val);
-    const v = parseInt(val, 10) || 0;
     const pct = Math.max(0, Math.min(100, ((v - STAT_MIN) / (STAT_MAX - STAT_MIN)) * 100));
     return `<div class="stat-row">
       <span class="stat-name">${label}</span>
@@ -860,7 +822,7 @@ function renderPlayerProfile(player, team) {
 
 function goBackToTeam() {
   if (currentTeam) renderPlayersList(currentTeam);
-  else showHome();
+  else showAllPlayers();
 }
 
 // ─── Radar Chart ─────────────────────────────────────────────────────────────
@@ -965,7 +927,7 @@ function onSearchInput(event) {
   clearTimeout(searchTimeout);
   if (!query) {
     if (currentTeam) renderPlayersList(currentTeam);
-    else showHome();
+    else showAllPlayers();
     return;
   }
   searchTimeout = setTimeout(() => runSearch(query), 200);

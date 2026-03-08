@@ -102,6 +102,14 @@ function translatePosition(pesPos) {
 
 const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
 
+// Position groups for squad display
+const POSITION_GROUPS = [
+  { key: 'PT',  label: 'Porteros',        positions: ['GK'] },
+  { key: 'DEF', label: 'Defensas',        positions: ['CB', 'RB', 'LB'] },
+  { key: 'MID', label: 'Mediocampistas',  positions: ['DMF', 'CMF', 'RMF', 'LMF', 'AMF'] },
+  { key: 'FWD', label: 'Delanteros',      positions: ['RWF', 'LWF', 'SS', 'CF'] },
+];
+
 function normalizePlayerRow(row) {
   const rawPos = row['POS'] || '';
   const posIdx = parseInt(rawPos, 10);
@@ -292,25 +300,12 @@ function selectPlayer(playerId, teamId) {
 function renderTeamPage(team, players) {
   _players = players;
   _teamId = team.id;
-  _sortCol = 'OVR';
-  _sortDir = 'desc';
-  _filterPos = '';
-  _filterMinOvr = '';
-  _filterMaxOvr = '';
 
   const typeLabel = TYPE_LABELS[team.type] || '';
   const safeTeamName = escapeHtml(team.displayName);
 
-  // Build unique positions for filter dropdown
-  const positions = [...new Set(players.map(p => p.Position).filter(Boolean))].sort();
-  const posOptions = positions.map(pos =>
-    `<option value="${escapeHtml(pos)}">${escapeHtml(translatePosition(pos))}</option>`
-  ).join('');
-
-  const sortedPlayers = getSortedFilteredPlayers();
-  const rowsHtml = sortedPlayers.length
-    ? sortedPlayers.map(p => renderPlayerRow(p, team.id)).join('')
-    : `<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--color-text-muted)">No hay jugadores en este equipo.</td></tr>`;
+  // Build grouped layout
+  const groupedHtml = renderPositionGroups(players, team.id);
 
   const content = document.getElementById('team-content');
   content.innerHTML = `
@@ -322,52 +317,13 @@ function renderTeamPage(team, players) {
         alt="${safeTeamName}">
       <div>
         <div class="view-title">${safeTeamName}</div>
-        <div class="view-subtitle">${escapeHtml(typeLabel)}</div>
+        <div class="view-subtitle">${escapeHtml(typeLabel)} · ${players.length} jugadores</div>
       </div>
     </div>
 
-    <div class="filters-toolbar">
-      <div class="filter-group">
-        <span class="filter-label">Posición:</span>
-        <select id="filter-position" class="filter-select" onchange="applyFilters()">
-          <option value="">Todas</option>
-          ${posOptions}
-        </select>
-      </div>
-      <div class="filter-group">
-        <span class="filter-label">OVR mín:</span>
-        <input id="filter-min-ovr" type="number" min="40" max="99" class="filter-input"
-          placeholder="40" oninput="applyFilters()">
-      </div>
-      <div class="filter-group">
-        <span class="filter-label">OVR máx:</span>
-        <input id="filter-max-ovr" type="number" min="40" max="99" class="filter-input"
-          placeholder="99" oninput="applyFilters()">
-      </div>
-      <button class="filter-reset-btn" onclick="resetFilters()">Restablecer</button>
-    </div>
-
-    <table class="players-table" id="players-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>#</th>
-          <th class="sortable" data-sort-col="NAME">Nombre <span class="sort-icon">⇅</span></th>
-          <th>Nac</th>
-          <th class="sortable" data-sort-col="POS">Pos <span class="sort-icon">⇅</span></th>
-          <th class="sortable sort-desc" data-sort-col="OVR">OVR <span class="sort-icon">▼</span></th>
-          <th class="sortable" data-sort-col="VEL">VEL <span class="sort-icon">⇅</span></th>
-          <th class="sortable" data-sort-col="DRI">DRI <span class="sort-icon">⇅</span></th>
-          <th class="sortable" data-sort-col="TIR">TIR <span class="sort-icon">⇅</span></th>
-          <th class="sortable" data-sort-col="PAS">PAS <span class="sort-icon">⇅</span></th>
-          <th class="sortable" data-sort-col="FIS">FIS <span class="sort-icon">⇅</span></th>
-          <th class="sortable" data-sort-col="DEF">DEF <span class="sort-icon">⇅</span></th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rowsHtml}
-      </tbody>
-    </table>`;
+    <div class="squad-groups">
+      ${groupedHtml}
+    </div>`;
 
   content.style.display = 'block';
   document.getElementById('loading-overlay').style.display = 'none';
@@ -375,15 +331,8 @@ function renderTeamPage(team, players) {
   // Attach back button handler via DOM (avoids inline onclick)
   document.getElementById('btn-back').addEventListener('click', goBack);
 
-  // Sort column headers click
-  document.querySelectorAll('#players-table th.sortable').forEach(th => {
-    th.addEventListener('click', () => setSort(th.dataset.sortCol));
-  });
-
   // Event delegation: clicking any player row navigates to the player page
-  // Guard: ignore clicks on <th> elements (handled separately by sort listeners)
-  document.getElementById('players-table').addEventListener('click', function (e) {
-    if (e.target.closest('th')) return;
+  content.addEventListener('click', function (e) {
     const row = e.target.closest('.player-row');
     if (!row) return;
     const pid = row.dataset.playerId;
@@ -393,6 +342,91 @@ function renderTeamPage(team, players) {
 
   // Update page title
   document.title = `${team.displayName} – Base de datos PES`;
+}
+
+function renderPositionGroups(players, teamId) {
+  // Sort each group by OVR descending
+  const byPos = {};
+  players.forEach(p => {
+    const pos = p.Position || '__other';
+    if (!byPos[pos]) byPos[pos] = [];
+    byPos[pos].push(p);
+  });
+
+  const sortByOvr = arr =>
+    arr.slice().sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
+
+  let html = '';
+
+  POSITION_GROUPS.forEach(group => {
+    const groupPlayers = [];
+    group.positions.forEach(pos => {
+      if (byPos[pos]) groupPlayers.push(...byPos[pos]);
+    });
+    if (!groupPlayers.length) return;
+
+    const sorted = sortByOvr(groupPlayers);
+    const rowsHtml = sorted.map(p => renderPlayerRow(p, teamId)).join('');
+
+    // Show position abbreviations in the group header
+    const posLabels = group.positions.map(p => translatePosition(p)).join(', ');
+
+    html += `
+      <div class="position-group">
+        <div class="position-group-header">
+          <span class="position-group-label">${group.label}</span>
+          <span class="position-group-positions">${posLabels}</span>
+          <span class="position-group-count">(${sorted.length})</span>
+        </div>
+        <table class="players-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Nac</th>
+              <th>Pos</th>
+              <th>OVR</th>
+              <th>VEL</th>
+              <th>DRI</th>
+              <th>TIR</th>
+              <th>PAS</th>
+              <th>FIS</th>
+              <th>DEF</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>`;
+  });
+
+  // Uncategorized players (positions not in any group)
+  const categorizedPos = new Set(POSITION_GROUPS.flatMap(g => g.positions));
+  const uncategorized = sortByOvr(players.filter(p => !categorizedPos.has(p.Position || '')));
+  if (uncategorized.length) {
+    html += `
+      <div class="position-group">
+        <div class="position-group-header">
+          <span class="position-group-label">Otros</span>
+          <span class="position-group-count">(${uncategorized.length})</span>
+        </div>
+        <table class="players-table">
+          <thead>
+            <tr>
+              <th></th><th>#</th><th>Nombre</th><th>Nac</th><th>Pos</th>
+              <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
+            </tr>
+          </thead>
+          <tbody>${uncategorized.map(p => renderPlayerRow(p, teamId)).join('')}</tbody>
+        </table>
+      </div>`;
+  }
+
+  if (!html) {
+    html = `<div class="error-message">No hay jugadores en este equipo.</div>`;
+  }
+
+  return html;
 }
 
 // ─── Back navigation ─────────────────────────────────────────────────────────
