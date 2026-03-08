@@ -3,8 +3,8 @@
  * Main Application Script
  *
  * Architecture:
- *  1. Boot indexer: loads all CSV files on startup
- *  2. In-memory indexes for players, teams, leagues
+ *  1. Boot indexer: loads all CSV files on startup from global exports
+ *  2. In-memory indexes for players, teams
  *  3. UI rendering for player list and player profile
  */
 
@@ -12,19 +12,83 @@
 
 // ─── In-memory indexes ────────────────────────────────────────────────────────
 const DB = {
-  leagues: {},    // league_id -> { league_id, league_name, country_id }
-  teams: [],      // [{ folder, displayName, files, teamData, players, appearances, leagueId }]
+  teams: [],      // [{ id, folder, displayName, type, teamData, players, appearanceMap }]
   players: [],    // flat list for global search
-  searchIndex: Object.create(null), // token/prefix -> Set<"teamFolder:playerId">
+  searchIndex: Object.create(null), // token/prefix -> Set<"teamId:playerId">
   playersByKey: Object.create(null),
   loaded: false,
 };
+
+// ─── Translations (UI display only) ──────────────────────────────────────────
+
+// Stats: CSV column name → Spanish display label
+const STAT_LABELS = {
+  'Attacking Prowess': 'Ataque',
+  'Ball Control':      'Control de balón',
+  'Dribbling':         'Drible',
+  'Low Pass':          'Pase al ras',
+  'Lofted Pass':       'Pase bombeado',
+  'Finishing':         'Finalización',
+  'Place Kicking':     'Balón parado',
+  'Controlled Spin':   'Efecto',
+  'Header':            'Cabeza',
+  'Defensive Prowess': 'Defensa',
+  'Ball Winning':      'Recup. de balón',
+  'Kicking Power':     'Potencia de tiro',
+  'Speed':             'Velocidad',
+  'Explosive Power':   'Fuerza explosiva',
+  'Body Control':      'Control corporal',
+  'Physical Contact':  'Contacto físico',
+  'Jump':              'Salto',
+  'Goalkeeping':       'Capac. de portero',
+  'Catching':          'Atajar',
+  'Clearing':          'Despejar',
+  'Reflexes':          'Reflejos',
+  'Coverage':          'Alcance',
+  'Stamina':           'Resistencia',
+  'Weak Foot Usage':   'Uso de pie malo',
+  'Weak Foot Acc.':    'Precisión de pie malo',
+  'Form':              'Estabilidad',
+  'Injury Resistance': 'Resist. a lesiones',
+};
+
+// Positions: PES abbreviation → Spanish UI label
+const POSITION_LABELS = {
+  'GK':  'PT',
+  'CB':  'DEC',
+  'LB':  'LI',
+  'RB':  'LD',
+  'DMF': 'MCD',
+  'CMF': 'MC',
+  'LMF': 'MDI',
+  'RMF': 'MDD',
+  'AMF': 'MO',
+  'LWF': 'EXI',
+  'RWF': 'EXD',
+  'SS':  'SD',
+  'CF':  'CD',
+};
+
+// Team type → Spanish group label
+const TYPE_LABELS = {
+  '0': 'Clubes',
+  '1': 'Equipos especiales',
+  '2': 'Selecciones',
+};
+
+function translateStat(csvCol) {
+  return STAT_LABELS[csvCol] || csvCol;
+}
+
+function translatePosition(pesPos) {
+  return POSITION_LABELS[pesPos] || pesPos;
+}
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 /**
  * Parse a semicolon-delimited CSV string into an array of objects.
- * Handles Windows-style line endings.
+ * Handles Windows-style line endings and UTF-8 BOM.
  */
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
@@ -67,40 +131,35 @@ function tokenizeSearchText(input) {
   return normalized.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 }
 
-// PES numeric position index → abbreviated name
-// Order matches the GK;CB;LB;RB;DMF;CMF;LMF;RMF;AMF;LWF;RWF;SS;CF column sequence
+// PES numeric POS → abbreviated name
+// Order matches: GK;CB;LB;RB;DMF;CMF;LMF;RMF;AMF;LWF;RWF;SS;CF
 const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
 
+/**
+ * Normalize a raw CSV player row:
+ * - Convert numeric POS to PES position abbreviation
+ * - Add convenience aliases (ID, Name, Position, Nationality, Overall)
+ * - Keep all original CSV column names unchanged
+ */
 function normalizePlayerRow(row) {
-  const rawPos = pickValue(row, ['Position', 'POS', 'Pos']);
+  const rawPos = row['POS'] || '';
   const posIdx = parseInt(rawPos, 10);
-  const position = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
+  const pesPosition = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
     ? PES_POSITIONS[posIdx]
     : rawPos;
 
   return {
     ...row,
-    ID: pickValue(row, ['ID', 'Id', 'id']),
-    Name: pickValue(row, ['Name', 'PlayerName', 'Player']),
-    Position: position,
-    Nationality: pickValue(row, ['Nationality', 'Country', 'country_id']),
-    Overall: pickValue(row, ['Overall', 'OverallStats']),
-    AttackingProwess: pickValue(row, ['AttackingProwess', 'Attacking Prowess']),
-    BallControl: pickValue(row, ['BallControl', 'Ball Control']),
-    Dribbling: pickValue(row, ['Dribbling']),
-    LowPass: pickValue(row, ['LowPass', 'Low Pass']),
-    LoftedPass: pickValue(row, ['LoftedPass', 'Lofted Pass']),
-    Finishing: pickValue(row, ['Finishing']),
-    SetPieceTaking: pickValue(row, ['SetPieceTaking', 'Place Kicking']),
-    Curve: pickValue(row, ['Curve', 'Controlled Spin']),
-    Speed: pickValue(row, ['Speed']),
-    PhysicalContact: pickValue(row, ['PhysicalContact', 'Physical Contact']),
-    DefensiveAwareness: pickValue(row, ['DefensiveAwareness', 'Defensive Prowess']),
+    ID: row['Id'] || '',
+    Name: row['Name'] || '',
+    Position: pesPosition,
+    Nationality: row['Country'] || '',
+    Overall: row['OverallStats'] || '',
   };
 }
 
-function getPlayerKey(teamFolder, playerId) {
-  return `${teamFolder}:${playerId}`;
+function getPlayerKey(teamId, playerId) {
+  return `${teamId}:${playerId}`;
 }
 
 function addToSearchIndex(term, playerKey) {
@@ -114,7 +173,7 @@ function indexPlayerForSearch(player) {
   const playerId = player.ID;
   if (!playerId) return;
 
-  const playerKey = getPlayerKey(player._team.folder, playerId);
+  const playerKey = getPlayerKey(player._team.id, playerId);
   DB.playersByKey[playerKey] = player;
 
   const terms = new Set([
@@ -157,40 +216,7 @@ async function fetchText(url) {
 }
 
 /**
- * Fetch a JSON file from the given URL. Returns null on error.
- */
-async function fetchJSON(url) {
-  try {
-    const resp = await fetch(url);
-    if (!resp.ok) return null;
-    return await resp.json();
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Return a path to an image, falling back to default if the specific image is missing.
- * We detect broken images via onerror handlers in HTML.
- */
-function imgSrc(folder, name, ext = 'png') {
-  if (!name) return `img/${folder}/default.${ext}`;
-  return `img/${folder}/${name}.${ext}`;
-}
-
-/**
- * Set onerror fallback on an <img> element.
- */
-function setImgFallback(img, fallbackSrc) {
-  img.onerror = () => {
-    img.onerror = null; // prevent infinite loop
-    img.src = fallbackSrc;
-  };
-}
-
-/**
- * Convert a country_id (stored as Nationality in player CSV) to a flag image filename.
- * We use the numeric ID as the filename.
+ * Convert a country_id to a flag image filename.
  */
 function flagSrc(countryId) {
   if (!countryId) return 'img/flags/default.png';
@@ -233,86 +259,86 @@ function overallColor(value) {
 // ─── Boot / Indexer ───────────────────────────────────────────────────────────
 
 async function boot() {
-  showLoading('Loading database...');
+  showLoading('Cargando base de datos...');
 
-  // 1. Load leagues
-  const leagueText = await fetchText('database/leagues/leagues.csv');
-  if (leagueText) {
-    const rows = parseCSV(leagueText);
-    rows.forEach(row => {
-      DB.leagues[row.league_id] = row;
-    });
-  }
+  // Load all global CSV files in parallel
+  const [teamsText, playersText, squadsText, appearancesText] = await Promise.all([
+    fetchText('database/All teams exported.csv'),
+    fetchText('database/All players exported.csv'),
+    fetchText('database/All squads exported.csv'),
+    fetchText('database/All appeaarances exported.csv'),
+  ]);
 
-  // 2. Load teams manifest (generated from folder discovery)
-  const manifest = await fetchJSON('database/teams/index.json');
-  if (!manifest || !Array.isArray(manifest.teams)) {
-    showError('Failed to load teams manifest (database/teams/index.json).');
+  if (!teamsText || !playersText || !squadsText) {
+    showError('Error al cargar los archivos de la base de datos.');
     return;
   }
 
-  // 3. Load each team's CSV files in parallel
-  await Promise.all(manifest.teams.map(async teamMeta => {
-    const { folder } = teamMeta;
-    const displayName = teamMeta.displayName || folder;
-    const files = teamMeta.files || {};
-    const base = `database/teams/${folder}`;
+  // Parse all CSVs
+  const teamRows = parseCSV(teamsText);
+  const playerRows = parseCSV(playersText);
+  const squadRows = parseCSV(squadsText);
+  const appearanceRows = appearancesText ? parseCSV(appearancesText) : [];
 
-    const [teamText, playersText, appearenceText, formationText, squadText] = await Promise.all([
-      files.team ? fetchText(`${base}/${files.team}`) : null,
-      files.players ? fetchText(`${base}/${files.players}`) : null,
-      files.appearence ? fetchText(`${base}/${files.appearence}`) : null,
-      files.formation ? fetchText(`${base}/${files.formation}`) : null,
-      files.squad ? fetchText(`${base}/${files.squad}`) : null,
-    ]);
+  // Build global appearance map (playerId → appearanceData)
+  const globalAppearanceMap = {};
+  appearanceRows.forEach(row => {
+    const id = row['Id'];
+    if (id) globalAppearanceMap[id] = row;
+  });
 
-    if (!teamText || !playersText) {
-      console.warn(`Skipping team "${folder}" due to missing required CSV files.`);
-      return;
-    }
-
-    const teamRows = teamText ? parseCSV(teamText) : [];
-    const playerRows = playersText ? parseCSV(playersText).map(normalizePlayerRow) : [];
-    const appearanceRows = appearenceText ? parseCSV(appearenceText) : [];
-    const formationRows = formationText ? parseCSV(formationText) : [];
-    const squadRows = squadText ? parseCSV(squadText) : [];
-
-    // Map appearances by player ID for quick lookup
-    const appearanceMap = {};
-    appearanceRows.forEach(a => {
-      const playerId = pickValue(a, ['PlayerID', 'PlayerId', 'ID', 'Id']);
-      if (playerId) appearanceMap[playerId] = a;
-    });
-
-    // Determine league from Country field in team CSV
-    const leagueId = teamRows.length > 0 ? teamRows[0].Country : null;
-    const league = leagueId ? DB.leagues[leagueId] : null;
-
+  // Build team map (teamId → team object)
+  const teamById = {};
+  teamRows.forEach(teamRow => {
+    const teamId = teamRow['Id'];
+    if (!teamId) return;
+    const teamName = teamRow['Name'] || '';
+    // Skip placeholder teams with no real name
+    if (!teamName || teamName === '-') return;
     const team = {
-      folder,
-      displayName,
-      files,
-      teamData: teamRows[0] || {},
-      players: playerRows,
-      appearanceMap,
-      formationRows,
-      squadRows,
-      leagueId,
-      league,
+      id: teamId,
+      folder: teamId,
+      displayName: teamName,
+      abbreviation: teamRow['Abbreviation'] || '',
+      type: teamRow['Type'] || '0',
+      teamData: teamRow,
+      players: [],
+      appearanceMap: globalAppearanceMap,
     };
-
+    teamById[teamId] = team;
     DB.teams.push(team);
+  });
 
-    // Add players to global flat list with team reference
-    playerRows.forEach(p => {
-      const player = { ...p, _team: team };
-      DB.players.push(player);
-      indexPlayerForSearch(player);
-    });
-  }));
+  // Sort teams alphabetically
+  DB.teams.sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'));
+
+  // Build normalized player map (playerId → normalized player row)
+  const playerMap = {};
+  playerRows.forEach(playerRow => {
+    const playerId = playerRow['Id'];
+    if (!playerId) return;
+    playerMap[playerId] = normalizePlayerRow(playerRow);
+  });
+
+  // Assign players to teams using squad data
+  squadRows.forEach(squadRow => {
+    const teamId = squadRow['Id'];
+    const team = teamById[teamId];
+    if (!team) return;
+    for (let i = 1; i <= 32; i++) {
+      const playerId = squadRow[`Player ${i}`];
+      if (!playerId || playerId === '0') continue;
+      const player = playerMap[playerId];
+      if (!player) continue;
+      const p = { ...player, _team: team };
+      team.players.push(p);
+      DB.players.push(p);
+      indexPlayerForSearch(p);
+    }
+  });
 
   if (!DB.teams.length) {
-    showError('No valid teams could be loaded from database/teams.');
+    showError('No se encontraron equipos en la base de datos.');
     return;
   }
 
@@ -326,41 +352,47 @@ async function boot() {
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
 
-  // Group teams by league
-  const leagueGroups = {};
+  // Group teams by Type
+  const typeGroups = {};
   DB.teams.forEach(team => {
-    const lid = team.leagueId || 'unknown';
-    if (!leagueGroups[lid]) {
-      leagueGroups[lid] = {
-        league: team.league || { league_id: lid, league_name: 'Unknown League', country_id: '' },
-        teams: [],
-      };
-    }
-    leagueGroups[lid].teams.push(team);
+    const t = team.type || '0';
+    if (!typeGroups[t]) typeGroups[t] = [];
+    typeGroups[t].push(team);
   });
 
-  let html = `<div class="sidebar-section">
-    <div class="sidebar-section-title">Leagues &amp; Teams</div>`;
+  // Preferred type order
+  const typeOrder = ['0', '2', '1'];
+  const sortedTypes = typeOrder.filter(t => typeGroups[t])
+    .concat(Object.keys(typeGroups).filter(t => !typeOrder.includes(t)));
 
-  Object.values(leagueGroups).forEach(group => {
-    const lid = group.league.league_id;
-    const leagueName = group.league.league_name;
+  let html = `<div class="sidebar-section">
+    <div class="sidebar-section-title">Equipos</div>
+    <div class="sidebar-filter-wrap">
+      <input type="text" id="sidebar-team-filter"
+        class="sidebar-filter-input"
+        placeholder="Filtrar equipos..."
+        oninput="filterSidebarTeams(this.value)"
+        autocomplete="off">
+    </div>`;
+
+  sortedTypes.forEach(typeKey => {
+    const label = TYPE_LABELS[typeKey] || `Tipo ${typeKey}`;
+    const teams = typeGroups[typeKey];
     html += `
-    <div class="sidebar-league" data-league-id="${lid}">
-      <div class="sidebar-league-header" onclick="toggleLeague('${lid}')">
-        <img class="sidebar-league-logo" src="img/leagues/${lid}.png"
-          onerror="this.onerror=null;this.src='img/leagues/default.png'"
-          alt="${leagueName}">
-        <span class="sidebar-league-name">${leagueName}</span>
+    <div class="sidebar-league" data-type="${typeKey}">
+      <div class="sidebar-league-header" onclick="toggleLeague('type-${typeKey}')">
+        <span class="sidebar-league-name">${label}</span>
+        <span class="sidebar-league-count">(${teams.length})</span>
         <span class="sidebar-league-arrow">▶</span>
       </div>
-      <div class="sidebar-teams-list" id="league-teams-${lid}">`;
+      <div class="sidebar-teams-list" id="league-teams-type-${typeKey}">`;
 
-    group.teams.forEach(team => {
+    teams.forEach(team => {
       html += `
-        <div class="sidebar-team-item" id="sidebar-team-${team.folder}"
-          onclick="selectTeam('${team.folder}')">
-          <img class="sidebar-team-crest" src="img/teams/${team.folder}.png"
+        <div class="sidebar-team-item" id="sidebar-team-${team.id}"
+          data-team-name="${normalizeText(team.displayName)}"
+          onclick="selectTeam('${team.id}')">
+          <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
             onerror="this.onerror=null;this.src='img/teams/default.png'"
             alt="${team.displayName}">
           <span>${team.displayName}</span>
@@ -376,19 +408,43 @@ function buildSidebar() {
   sidebar.innerHTML = html;
 }
 
-function toggleLeague(leagueId) {
-  const header = document.querySelector(`[data-league-id="${leagueId}"] .sidebar-league-header`);
-  const list = document.getElementById(`league-teams-${leagueId}`);
-  if (!header || !list) return;
-  header.classList.toggle('open');
+function filterSidebarTeams(query) {
+  const normalized = normalizeText(query);
+  const hasFilter = normalized.length > 0;
+
+  document.querySelectorAll('.sidebar-team-item').forEach(el => {
+    const name = el.dataset.teamName || '';
+    el.style.display = !hasFilter || name.includes(normalized) ? '' : 'none';
+  });
+
+  // When filtering, open all sections so results are visible
+  document.querySelectorAll('.sidebar-league').forEach(section => {
+    const list = section.querySelector('.sidebar-teams-list');
+    const header = section.querySelector('.sidebar-league-header');
+    if (!list || !header) return;
+    if (hasFilter) {
+      const visible = list.querySelectorAll('.sidebar-team-item:not([style*="none"])').length;
+      if (visible > 0) {
+        header.classList.add('open');
+        list.classList.add('open');
+      }
+    }
+  });
+}
+
+function toggleLeague(id) {
+  const list = document.getElementById(`league-teams-${id}`);
+  if (!list) return;
+  const header = list.previousElementSibling;
+  if (header) header.classList.toggle('open');
   list.classList.toggle('open');
 }
 
-function openLeague(leagueId) {
-  const header = document.querySelector(`[data-league-id="${leagueId}"] .sidebar-league-header`);
-  const list = document.getElementById(`league-teams-${leagueId}`);
-  if (!header || !list) return;
-  header.classList.add('open');
+function openLeague(id) {
+  const list = document.getElementById(`league-teams-${id}`);
+  if (!list) return;
+  const header = list.previousElementSibling;
+  if (header) header.classList.add('open');
   list.classList.add('open');
 }
 
@@ -402,7 +458,7 @@ function hideAllViews() {
   if (loadingOverlay) loadingOverlay.style.display = 'none';
 }
 
-function showLoading(message = 'Loading...') {
+function showLoading(message = 'Cargando...') {
   hideAllViews();
   const overlay = document.getElementById('loading-overlay');
   if (overlay) {
@@ -425,29 +481,30 @@ function showHome() {
   hideAllViews();
   document.getElementById('home-view').classList.add('active');
 
-  // Update stats
+  // Count distinct type groups
+  const typeCount = new Set(DB.teams.map(t => t.type)).size;
+  document.getElementById('stat-leagues').textContent = typeCount;
   document.getElementById('stat-teams').textContent = DB.teams.length;
   document.getElementById('stat-players').textContent = DB.players.length;
-  document.getElementById('stat-leagues').textContent = Object.keys(DB.leagues).length;
 }
 
 // ─── Team / Players view ──────────────────────────────────────────────────────
 
 let currentTeam = null;
 
-function selectTeam(folder) {
-  const team = DB.teams.find(t => t.folder === folder);
+function selectTeam(teamId) {
+  const team = DB.teams.find(t => t.id === teamId);
   if (!team) return;
 
   currentTeam = team;
 
   // Highlight in sidebar
   document.querySelectorAll('.sidebar-team-item').forEach(el => el.classList.remove('active'));
-  const sidebarItem = document.getElementById(`sidebar-team-${folder}`);
+  const sidebarItem = document.getElementById(`sidebar-team-${teamId}`);
   if (sidebarItem) sidebarItem.classList.add('active');
 
-  // Open the league section
-  if (team.leagueId) openLeague(team.leagueId);
+  // Open the type section
+  openLeague(`type-${team.type}`);
 
   renderPlayersList(team);
 }
@@ -458,16 +515,16 @@ function renderPlayersList(team) {
   const view = document.getElementById('players-view');
   view.classList.add('active');
 
-  const leagueName = team.league ? team.league.league_name : 'Unknown League';
+  const typeLabel = TYPE_LABELS[team.type] || '';
 
   view.innerHTML = `
     <div class="view-header">
-      <img class="team-crest" src="img/teams/${team.folder}.png"
+      <img class="team-crest" src="img/teams/${team.id}.png"
         onerror="this.onerror=null;this.src='img/teams/default.png'"
         alt="${team.displayName}">
       <div>
         <div class="view-title">${team.displayName}</div>
-        <div class="view-subtitle">${leagueName}</div>
+        <div class="view-subtitle">${typeLabel}</div>
       </div>
     </div>
     <table class="players-table">
@@ -475,18 +532,16 @@ function renderPlayersList(team) {
         <tr>
           <th></th>
           <th>#</th>
-          <th>Name</th>
-          <th>Nat</th>
+          <th>Nombre</th>
+          <th>Nac</th>
           <th>Pos</th>
           <th>OVR</th>
-          <th>SPD</th>
+          <th>VEL</th>
           <th>DRI</th>
-          <th>SHT</th>
+          <th>TIR</th>
           <th>PAS</th>
-          <th>PHY</th>
+          <th>FIS</th>
           <th>DEF</th>
-          <th>Apps</th>
-          <th>Goals</th>
         </tr>
       </thead>
       <tbody>
@@ -498,13 +553,10 @@ function renderPlayersList(team) {
 function renderPlayerRow(player, team) {
   const ovr = player.Overall || '–';
   const ovrClass = overallColor(ovr);
-  const appearance = team.appearanceMap[player.ID] || {};
-  const games = pickValue(appearance, ['Games', 'Appearances', 'Apps'], '–');
-  const goals = pickValue(appearance, ['Goals'], '–');
-
+  const posDisplay = translatePosition(player.Position);
   const radarAttrs = computeRadarAttributes(player);
 
-  return `<tr onclick="selectPlayer('${player.ID}', '${team.folder}')">
+  return `<tr onclick="selectPlayer('${player.ID}', '${team.id}')">
     <td>
       <img class="player-row-photo"
         src="img/players/${player.ID}.png"
@@ -519,44 +571,25 @@ function renderPlayerRow(player, team) {
         onerror="this.onerror=null;this.src='img/flags/default.png'"
         alt="">
     </td>
-    <td><span class="position-badge">${player.Position || '–'}</span></td>
+    <td><span class="position-badge">${posDisplay || '–'}</span></td>
     <td><span class="overall-badge ${ovrClass}">${ovr}</span></td>
-    <td>${radarAttrs.SPD}</td>
+    <td>${radarAttrs.VEL}</td>
     <td>${radarAttrs.DRI}</td>
-    <td>${radarAttrs.SHT}</td>
+    <td>${radarAttrs.TIR}</td>
     <td>${radarAttrs.PAS}</td>
-    <td>${radarAttrs.PHY}</td>
+    <td>${radarAttrs.FIS}</td>
     <td>${radarAttrs.DEF}</td>
-    <td>${games}</td>
-    <td>${goals}</td>
   </tr>`;
 }
 
 // ─── Player profile ───────────────────────────────────────────────────────────
 
-function selectPlayer(playerId, teamFolder) {
-  window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamFolder)}`;
+function selectPlayer(playerId, teamId) {
+  window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
 }
 
 /**
- * The stats to show in the Ability Settings panel.
- */
-const ABILITY_STATS = [
-  { key: 'AttackingProwess', label: 'Attacking Prowess' },
-  { key: 'BallControl',      label: 'Ball Control' },
-  { key: 'Dribbling',        label: 'Dribbling' },
-  { key: 'LowPass',          label: 'Low Pass' },
-  { key: 'LoftedPass',       label: 'Lofted Pass' },
-  { key: 'Finishing',        label: 'Finishing' },
-  { key: 'SetPieceTaking',   label: 'Set Piece Taking' },
-  { key: 'Curve',            label: 'Curve' },
-  { key: 'Speed',            label: 'Speed' },
-  { key: 'PhysicalContact',  label: 'Physical Contact' },
-  { key: 'DefensiveAwareness', label: 'Defensive Awareness' },
-];
-
-/**
- * Compute the 6 radar chart attributes from raw player stats.
+ * Compute the 6 radar chart attributes from raw player CSV stats.
  */
 function computeRadarAttributes(player) {
   const avg = (...keys) => {
@@ -566,12 +599,12 @@ function computeRadarAttributes(player) {
   };
 
   return {
-    PAS: avg('LowPass', 'LoftedPass', 'Curve', 'SetPieceTaking'),
-    SHT: avg('Finishing', 'AttackingProwess'),
-    PHY: avg('PhysicalContact'),
-    DEF: avg('DefensiveAwareness'),
-    SPD: avg('Speed'),
-    DRI: avg('Dribbling', 'BallControl'),
+    PAS: avg('Low Pass', 'Lofted Pass', 'Controlled Spin', 'Place Kicking'),
+    TIR: avg('Finishing', 'Attacking Prowess'),
+    FIS: avg('Physical Contact'),
+    DEF: avg('Defensive Prowess'),
+    VEL: avg('Speed'),
+    DRI: avg('Dribbling', 'Ball Control'),
   };
 }
 
@@ -580,17 +613,18 @@ function renderPlayerProfile(player, team) {
   const view = document.getElementById('player-view');
   view.classList.add('active');
 
-  const appearance = team.appearanceMap[player.ID] || {};
+  const appearance = team.appearanceMap ? team.appearanceMap[player.ID] : null;
   const radarAttrs = computeRadarAttributes(player);
-  const leagueName = team.league ? team.league.league_name : 'Unknown League';
+  const typeLabel = TYPE_LABELS[team.type] || '';
+  const posDisplay = translatePosition(player.Position);
 
-  const statsHtml = ABILITY_STATS.map(stat => {
-    const val = player[stat.key] || '0';
+  const statsHtml = Object.entries(STAT_LABELS).map(([csvCol, label]) => {
+    const val = player[csvCol] || '0';
     const colorClass = statColorClass(val);
     const barColor = statColor(val);
     const pct = Math.min(100, parseInt(val, 10) || 0);
     return `<div class="stat-row">
-      <span class="stat-name">${stat.label}</span>
+      <span class="stat-name">${label}</span>
       <span class="stat-value ${colorClass}">${val}</span>
       <div class="stat-bar-container">
         <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
@@ -599,7 +633,7 @@ function renderPlayerProfile(player, team) {
   }).join('');
 
   view.innerHTML = `
-    <button class="back-btn" onclick="goBackToTeam()">◀ Back to ${team.displayName}</button>
+    <button class="back-btn" onclick="goBackToTeam()">◀ Volver a ${team.displayName}</button>
 
     <div class="player-profile">
       <!-- LEFT: photo + info -->
@@ -613,76 +647,49 @@ function renderPlayerProfile(player, team) {
         </div>
         <div class="player-info-card">
           <div class="player-info-row">
-            <span class="info-label">Nationality</span>
+            <span class="info-label">Nacionalidad</span>
             <img src="${flagSrc(player.Nationality)}"
               onerror="this.onerror=null;this.src='img/flags/default.png'"
               alt="">
             <span>${player.Nationality || '–'}</span>
           </div>
           <div class="player-info-row">
-            <span class="info-label">Team</span>
+            <span class="info-label">Equipo</span>
             <img class="team-crest-sm"
-              src="img/teams/${team.folder}.png"
+              src="img/teams/${team.id}.png"
               onerror="this.onerror=null;this.src='img/teams/default.png'"
               alt="${team.displayName}">
             <span>${team.displayName}</span>
           </div>
           <div class="player-info-row">
-            <span class="info-label">League</span>
-            <img class="sidebar-league-logo"
-              src="img/leagues/${team.leagueId || 'default'}.png"
-              onerror="this.onerror=null;this.src='img/leagues/default.png'"
-              alt="${leagueName}">
-            <span>${leagueName}</span>
+            <span class="info-label">Categoría</span>
+            <span>${typeLabel}</span>
           </div>
         </div>
       </div>
 
       <!-- CENTER: ability settings -->
       <div class="player-center">
-        <div class="player-name-line">${player.Name || 'Unknown Player'}</div>
+        <div class="player-name-line">${player.Name || 'Jugador desconocido'}</div>
         <div class="player-position-overall">
-          <span class="position-badge">${player.Position || '–'}</span>
+          <span class="position-badge">${posDisplay || '–'}</span>
           <span class="overall-large">${player.Overall || '–'}</span>
         </div>
-        <div class="ability-title">Ability Settings</div>
+        <div class="ability-title">Estadísticas</div>
         <div class="stats-list">
           ${statsHtml}
         </div>
       </div>
 
-      <!-- RIGHT: radar + appearances -->
+      <!-- RIGHT: radar -->
       <div class="player-right">
         <div class="radar-card">
-          <h3>Attribute Radar</h3>
+          <h3>Radar de atributos</h3>
           <canvas id="radar-canvas" width="260" height="260"></canvas>
-          <div id="radar-labels-row" style="margin-top:8px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;font-size:0.72rem;color:var(--color-text-muted)"></div>
-        </div>
-        <div class="appearance-card">
-          <h3>Season Stats</h3>
-          <div class="appearance-stats">
-            <div class="appearance-item">
-              <div class="value">${pickValue(appearance, ['Games', 'Appearances', 'Apps'], 0)}</div>
-              <div class="label">Games</div>
-            </div>
-            <div class="appearance-item">
-              <div class="value">${pickValue(appearance, ['Goals'], 0)}</div>
-              <div class="label">Goals</div>
-            </div>
-            <div class="appearance-item">
-              <div class="value">${pickValue(appearance, ['Assists'], 0)}</div>
-              <div class="label">Assists</div>
-            </div>
-            <div class="appearance-item">
-              <div class="value">${pickValue(appearance, ['YellowCards', 'Yellow Cards'], 0)}</div>
-              <div class="label">Yellow Cards</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>`;
 
-  // Draw radar chart after DOM is updated
   requestAnimationFrame(() => drawRadar('radar-canvas', radarAttrs));
 }
 
@@ -817,8 +824,8 @@ function runSearch(query) {
   view.classList.add('active');
 
   if (!results.length) {
-    view.innerHTML = `<div class="view-header"><div class="view-title">Search results for "${query}"</div></div>
-      <div class="error-message">No players found matching "${query}"</div>`;
+    view.innerHTML = `<div class="view-header"><div class="view-title">Resultados: "${query}"</div></div>
+      <div class="error-message">No se encontraron jugadores para "${query}"</div>`;
     return;
   }
 
@@ -827,16 +834,16 @@ function runSearch(query) {
   view.innerHTML = `
     <div class="view-header">
       <div>
-        <div class="view-title">Search: "${query}"</div>
-        <div class="view-subtitle">${results.length} player(s) found</div>
+        <div class="view-title">Búsqueda: "${query}"</div>
+        <div class="view-subtitle">${results.length} jugador(es) encontrado(s)</div>
       </div>
     </div>
     <table class="players-table">
       <thead>
         <tr>
-          <th></th><th>#</th><th>Name</th><th>Nat</th><th>Pos</th>
-          <th>OVR</th><th>SPD</th><th>DRI</th><th>SHT</th>
-          <th>PAS</th><th>PHY</th><th>DEF</th><th>Apps</th><th>Goals</th>
+          <th></th><th>#</th><th>Nombre</th><th>Nac</th><th>Pos</th>
+          <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th>
+          <th>PAS</th><th>FIS</th><th>DEF</th>
         </tr>
       </thead>
       <tbody>${rowsHtml}</tbody>
@@ -854,7 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Boot the indexer
   boot().catch(err => {
-    showError(`Unexpected error during startup: ${err.message}`);
+    showError(`Error inesperado al iniciar: ${err.message}`);
     console.error(err);
   });
 });
