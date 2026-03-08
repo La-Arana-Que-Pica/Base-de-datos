@@ -1445,8 +1445,192 @@ body {
   color: var(--color-text);
 }
 
-.skills-empty {
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-  font-style: italic;
+/* ── Skill items list (Estilo de juego / Habilidades / COM styles) ── */
+.skill-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
+
+.skill-item-row {
+  font-size: 0.88rem;
+  color: var(--color-text);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.skill-item-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ── Leagues view & Teams grid view ── */
+#leagues-view {
+  display: none;
+}
+
+#leagues-view.active {
+  display: block;
+}
+
+#teams-grid-view {
+  display: none;
+}
+
+#teams-grid-view.active {
+  display: block;
+}
+
+/* ── Grid cards (leagues and teams) ── */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.grid-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  text-align: center;
+}
+
+.grid-card:hover {
+  background: var(--color-card-hover);
+  border-color: var(--color-highlight);
+  transform: translateY(-2px);
+}
+
+.grid-card-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.grid-card-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.grid-card-sub {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+/* ── Formation pitch ── */
+.formation-section {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.formation-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pitch-container {
+  display: flex;
+  justify-content: center;
+}
+
+.pitch-field {
+  position: relative;
+  width: 280px;
+  height: 440px;
+  background: linear-gradient(to bottom,
+    #2d5a27 0%, #2a5424 48%, #2a5424 52%, #2d5a27 100%);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  overflow: visible;
+}
+
+.pitch-halfway-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.pitch-penalty-area-bottom {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: 0;
+  height: 25%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-bottom: none;
+}
+
+.pitch-goal-area-bottom {
+  position: absolute;
+  left: 36%;
+  right: 36%;
+  bottom: 0;
+  height: 9%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-bottom: none;
+}
+
+.pitch-player {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  z-index: 10;
+}
+
+.pitch-player-photo-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-highlight);
+  background: var(--color-secondary);
+  flex-shrink: 0;
+}
+
+.pitch-player-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pitch-player-name {
+  font-size: 0.63rem;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 1px 5px;
+  border-radius: 3px;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

@@ -268,7 +268,67 @@ function resetFilters() {
   refreshTableBody();
 }
 
-// ─── Rendering ────────────────────────────────────────────────────────────────
+// ─── Formation pitch rendering ────────────────────────────────────────────────
+
+/**
+ * Build an HTML string showing the formation as a football pitch with player
+ * mini-faces and names. Coordinates from the formation CSV:
+ *   Ubicacion X = depth (0 = own goal, ~52 = midfield)
+ *   Ubicacion Y = width  (0 = left touchline, ~100 = right touchline)
+ */
+function renderFormationPitch(players, formationRow) {
+  if (!formationRow || !players.length) return '';
+
+  const tokens = [];
+
+  for (let i = 1; i <= 11; i++) {
+    const rawIdx = formationRow[`Indice Jugador ${i}`];
+    const squadIdx = parseInt(rawIdx, 10);
+    if (isNaN(squadIdx) || squadIdx < 1 || squadIdx > players.length) continue;
+    const player = players[squadIdx - 1];
+    if (!player) continue;
+
+    const xDepth = parseFloat(formationRow[`Ubicacion X${i} F1`]) || 0;
+    const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} F1`]) || 50;
+
+    // Map to CSS percentage positions:
+    //   left: yWidth / 100 * 100%   (0=left, 100=right)
+    //   top:  (1 - xDepth / 52) * 100%  (xDepth=0 → bottom, xDepth=52 → top)
+    const leftPct   = (yWidth / 100) * 100;
+    const topPct    = (1 - xDepth / 52) * 100;
+
+    // Show the last word of the name as a short label
+    const shortName = escapeHtml((player.Name || '').split(' ').slice(-1)[0] || player.Name);
+    const pid = escapeHtml(player.ID);
+
+    tokens.push(`
+      <div class="pitch-player" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
+        <div class="pitch-player-photo-wrap">
+          <img src="img/players/${pid}.png"
+            onerror="handleMinifaceError(this,'${pid}')"
+            class="pitch-player-photo" alt="${shortName}">
+        </div>
+        <div class="pitch-player-name">${shortName}</div>
+      </div>`);
+  }
+
+  if (!tokens.length) return '';
+
+  return `
+    <div class="formation-section">
+      <div class="formation-section-title">Formación inicial</div>
+      <div class="pitch-container">
+        <div class="pitch-field">
+          <div class="pitch-halfway-line"></div>
+          <div class="pitch-penalty-area-bottom"></div>
+          <div class="pitch-goal-area-bottom"></div>
+          ${tokens.join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+
 
 function renderPlayerRow(player, teamId) {
   const ovr = player.Overall || '–';
@@ -284,7 +344,6 @@ function renderPlayerRow(player, teamId) {
         onerror="handleMinifaceError(this,'${escapeHtml(player.ID)}')"
         alt="${safeName}">
     </td>
-    <td>${escapeHtml(player.ID)}</td>
     <td><strong>${safeName || '–'}</strong></td>
     <td>
       <img class="player-flag"
@@ -307,7 +366,7 @@ function selectPlayer(playerId, teamId) {
   window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
 }
 
-function renderTeamPage(team, players) {
+function renderTeamPage(team, players, formationRow) {
   _players = players;
   _teamId = team.id;
 
@@ -316,6 +375,9 @@ function renderTeamPage(team, players) {
 
   // Build grouped layout
   const groupedHtml = renderPositionGroups(players, team.id);
+
+  // Build formation pitch (above the squad table)
+  const pitchHtml = renderFormationPitch(players, formationRow);
 
   const content = document.getElementById('team-content');
   content.innerHTML = `
@@ -330,6 +392,8 @@ function renderTeamPage(team, players) {
         <div class="view-subtitle">${escapeHtml(typeLabel)} · ${players.length} jugadores</div>
       </div>
     </div>
+
+    ${pitchHtml}
 
     <div class="squad-groups">
       ${groupedHtml}
@@ -392,7 +456,6 @@ function renderPositionGroups(players, teamId) {
           <thead>
             <tr>
               <th></th>
-              <th>#</th>
               <th>Nombre</th>
               <th>Nac</th>
               <th>Pos</th>
@@ -423,7 +486,7 @@ function renderPositionGroups(players, teamId) {
         <table class="players-table">
           <thead>
             <tr>
-              <th></th><th>#</th><th>Nombre</th><th>Nac</th><th>Pos</th>
+              <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
               <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
             </tr>
           </thead>
@@ -461,10 +524,11 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText] = await Promise.all([
+  const [teamsText, playersText, squadsText, formationsText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
+    fetchText('database/All formations exported.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -475,6 +539,7 @@ async function boot() {
   const { rows: teamRows } = parseCSV(teamsText);
   const { rows: playerRows } = parseCSV(playersText);
   const { rows: squadRows } = parseCSV(squadsText);
+  const { rows: formationRows } = formationsText ? parseCSV(formationsText) : { rows: [] };
 
   // Find the team
   const teamRow = teamRows.find(t => t['Id'] === teamId);
@@ -508,7 +573,10 @@ async function boot() {
     }
   }
 
-  renderTeamPage(team, players);
+  // Find this team's formation data
+  const formationRow = formationRows.find(f => f['Id'] === teamId) || null;
+
+  renderTeamPage(team, players, formationRow);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
