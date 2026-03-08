@@ -84,6 +84,18 @@ function translatePosition(pesPos) {
   return POSITION_LABELS[pesPos] || pesPos;
 }
 
+// Stat bar range for standard attributes (PES stats go from 40 to 99)
+const STAT_MIN = 40;
+const STAT_MAX = 99;
+
+// Attributes that use special ranges and should NOT use standard bars
+const SPECIAL_ATTRS = {
+  'Weak Foot Usage':   { max: 4 },
+  'Weak Foot Acc.':    { max: 4 },
+  'Form':              { max: 8 },
+  'Injury Resistance': { max: 3 },
+};
+
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 /**
@@ -349,24 +361,50 @@ async function boot() {
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
+// Map country ID → league/competition display name (for club teams)
+const COUNTRY_LEAGUE_LABELS = {
+  '204': 'Liga Inglesa',
+  '236': 'La Liga',
+  '208': 'Ligue 1',
+  '215': 'Serie A',
+  '210': 'Bundesliga',
+  '224': 'Eredivisie',
+  '228': 'Primeira Liga',
+  '232': 'Liga Escocesa',
+  '197': 'Liga Belga',
+  '190': 'Süper Lig',
+  '211': 'Liga Griega',
+  '239': 'Liga Ucraniana',
+  '230': 'Liga Rusa',
+  '144': 'Liga Argentina',
+  '146': 'Brasileirão',
+  '147': 'Primera División Chile',
+  '148': 'Liga BetPlay',
+  '150': 'Liga Paraguaya',
+  '151': 'Liga Peruana',
+  '152': 'Liga Uruguaya',
+  '162': 'Liga Australiana',
+  '135': 'MLS',
+  '31':  'Liga Saudí',
+  '37':  'Liga Emiratos',
+  '13':  'J.League',
+  '16':  'K League',
+  '11':  'Liga Persa del Golfo',
+  '200': 'HNL Croata',
+  '240': 'Liga Uzbeka',
+};
+
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
 
-  // Group teams by Type
-  const typeGroups = {};
-  DB.teams.forEach(team => {
-    const t = team.type || '0';
-    if (!typeGroups[t]) typeGroups[t] = [];
-    typeGroups[t].push(team);
-  });
-
-  // Preferred type order
-  const typeOrder = ['0', '2', '1'];
-  const sortedTypes = typeOrder.filter(t => typeGroups[t])
-    .concat(Object.keys(typeGroups).filter(t => !typeOrder.includes(t)));
+  // Separate teams by Type: 0=Clubs, 1=Special, 2=National
+  const clubs = DB.teams.filter(t => t.type === '0');
+  const nationals = DB.teams.filter(t => t.type === '2');
+  const special = DB.teams.filter(t => t.type === '1');
+  const other = DB.teams.filter(t => t.type !== '0' && t.type !== '1' && t.type !== '2');
 
   let html = `<div class="sidebar-section">
-    <div class="sidebar-section-title">Equipos</div>
+    <div class="sidebar-section-title">Navegación</div>
     <div class="sidebar-filter-wrap">
       <input type="text" id="sidebar-team-filter"
         class="sidebar-filter-input"
@@ -375,19 +413,81 @@ function buildSidebar() {
         autocomplete="off">
     </div>`;
 
-  sortedTypes.forEach(typeKey => {
-    const label = TYPE_LABELS[typeKey] || `Tipo ${typeKey}`;
-    const teams = typeGroups[typeKey];
+  // ── Clubs grouped by country/league ──
+  if (clubs.length) {
+    // Group clubs by country
+    const countryGroups = {};
+    clubs.forEach(team => {
+      const countryId = team.teamData && team.teamData['Country'] ? team.teamData['Country'] : '__unknown';
+      if (!countryGroups[countryId]) countryGroups[countryId] = [];
+      countryGroups[countryId].push(team);
+    });
+
+    // Sort country groups: known leagues first (by label alpha), then unknowns
+    // Unknown country IDs are prefixed with 'zz' so they sort to the end
+    const sortedCountryKeys = Object.keys(countryGroups).sort((a, b) => {
+      const la = COUNTRY_LEAGUE_LABELS[a] || 'zz' + a;
+      const lb = COUNTRY_LEAGUE_LABELS[b] || 'zz' + b;
+      return la.localeCompare(lb, 'es');
+    });
+
     html += `
-    <div class="sidebar-league" data-type="${typeKey}">
-      <div class="sidebar-league-header" onclick="toggleLeague('type-${typeKey}')">
-        <span class="sidebar-league-name">${label}</span>
-        <span class="sidebar-league-count">(${teams.length})</span>
+    <div class="sidebar-league" data-type="clubs">
+      <div class="sidebar-league-header" onclick="toggleLeague('type-clubs')">
+        <span class="sidebar-league-name">Clubes</span>
+        <span class="sidebar-league-count">(${clubs.length})</span>
         <span class="sidebar-league-arrow">▶</span>
       </div>
-      <div class="sidebar-teams-list" id="league-teams-type-${typeKey}">`;
+      <div class="sidebar-teams-list" id="league-teams-type-clubs">`;
 
-    teams.forEach(team => {
+    sortedCountryKeys.forEach(countryId => {
+      const leagueLabel = COUNTRY_LEAGUE_LABELS[countryId] || `Liga (${countryId})`;
+      const leagueTeams = countryGroups[countryId];
+      const safeId = `country-${countryId}`;
+
+      html += `
+        <div class="sidebar-country-group">
+          <div class="sidebar-country-header" onclick="toggleCountryGroup('${safeId}')">
+            <span>${leagueLabel}</span>
+            <span style="color:var(--color-text-muted);font-size:0.72rem">(${leagueTeams.length})</span>
+            <span class="sidebar-country-arrow">▶</span>
+          </div>
+          <div class="sidebar-country-teams" id="country-group-${safeId}">`;
+
+      leagueTeams.forEach(team => {
+        html += `
+            <div class="sidebar-team-item" id="sidebar-team-${team.id}"
+              data-team-name="${normalizeText(team.displayName)}"
+              onclick="selectTeam('${team.id}')">
+              <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
+                onerror="this.onerror=null;this.src='img/teams/default.png'"
+                alt="${team.displayName}">
+              <span>${team.displayName}</span>
+            </div>`;
+      });
+
+      html += `
+          </div>
+        </div>`;
+    });
+
+    html += `
+      </div>
+    </div>`;
+  }
+
+  // ── National teams ──
+  if (nationals.length) {
+    html += `
+    <div class="sidebar-league" data-type="2">
+      <div class="sidebar-league-header" onclick="toggleLeague('type-2')">
+        <span class="sidebar-league-name">Selecciones</span>
+        <span class="sidebar-league-count">(${nationals.length})</span>
+        <span class="sidebar-league-arrow">▶</span>
+      </div>
+      <div class="sidebar-teams-list" id="league-teams-type-2">`;
+
+    nationals.forEach(team => {
       html += `
         <div class="sidebar-team-item" id="sidebar-team-${team.id}"
           data-team-name="${normalizeText(team.displayName)}"
@@ -402,6 +502,47 @@ function buildSidebar() {
     html += `
       </div>
     </div>`;
+  }
+
+  // ── Special teams ──
+  if (special.length) {
+    html += `
+    <div class="sidebar-league" data-type="1">
+      <div class="sidebar-league-header" onclick="toggleLeague('type-1')">
+        <span class="sidebar-league-name">Equipos especiales</span>
+        <span class="sidebar-league-count">(${special.length})</span>
+        <span class="sidebar-league-arrow">▶</span>
+      </div>
+      <div class="sidebar-teams-list" id="league-teams-type-1">`;
+
+    special.forEach(team => {
+      html += `
+        <div class="sidebar-team-item" id="sidebar-team-${team.id}"
+          data-team-name="${normalizeText(team.displayName)}"
+          onclick="selectTeam('${team.id}')">
+          <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
+            onerror="this.onerror=null;this.src='img/teams/default.png'"
+            alt="${team.displayName}">
+          <span>${team.displayName}</span>
+        </div>`;
+    });
+
+    html += `
+      </div>
+    </div>`;
+  }
+
+  // ── Other types ──
+  other.forEach(team => {
+    html += `
+        <div class="sidebar-team-item" id="sidebar-team-${team.id}"
+          data-team-name="${normalizeText(team.displayName)}"
+          onclick="selectTeam('${team.id}')">
+          <img class="sidebar-team-crest" src="img/teams/${team.id}.png"
+            onerror="this.onerror=null;this.src='img/teams/default.png'"
+            alt="${team.displayName}">
+          <span>${team.displayName}</span>
+        </div>`;
   });
 
   html += `</div>`;
@@ -418,22 +559,40 @@ function filterSidebarTeams(query) {
   });
 
   // When filtering, open all sections so results are visible
-  document.querySelectorAll('.sidebar-league').forEach(section => {
-    const list = section.querySelector('.sidebar-teams-list');
-    const header = section.querySelector('.sidebar-league-header');
-    if (!list || !header) return;
-    if (hasFilter) {
+  if (hasFilter) {
+    document.querySelectorAll('.sidebar-league').forEach(section => {
+      const list = section.querySelector('.sidebar-teams-list');
+      const header = section.querySelector('.sidebar-league-header');
+      if (!list || !header) return;
       const visible = list.querySelectorAll('.sidebar-team-item:not([style*="none"])').length;
       if (visible > 0) {
         header.classList.add('open');
         list.classList.add('open');
       }
-    }
-  });
+    });
+    document.querySelectorAll('.sidebar-country-group').forEach(group => {
+      const list = group.querySelector('.sidebar-country-teams');
+      const header = group.querySelector('.sidebar-country-header');
+      if (!list || !header) return;
+      const visible = list.querySelectorAll('.sidebar-team-item:not([style*="none"])').length;
+      if (visible > 0) {
+        header.classList.add('open');
+        list.classList.add('open');
+      }
+    });
+  }
 }
 
 function toggleLeague(id) {
   const list = document.getElementById(`league-teams-${id}`);
+  if (!list) return;
+  const header = list.previousElementSibling;
+  if (header) header.classList.toggle('open');
+  list.classList.toggle('open');
+}
+
+function toggleCountryGroup(id) {
+  const list = document.getElementById(`country-group-${id}`);
   if (!list) return;
   const header = list.previousElementSibling;
   if (header) header.classList.toggle('open');
@@ -481,9 +640,13 @@ function showHome() {
   hideAllViews();
   document.getElementById('home-view').classList.add('active');
 
-  // Count distinct type groups
-  const typeCount = new Set(DB.teams.map(t => t.type)).size;
-  document.getElementById('stat-leagues').textContent = typeCount;
+  // Count unique leagues (clubs by country + national + special categories)
+  const clubCountries = new Set(
+    DB.teams.filter(t => t.type === '0')
+      .map(t => t.teamData && t.teamData['Country'] ? t.teamData['Country'] : '__unknown')
+  );
+  const leagueCount = clubCountries.size + (DB.teams.some(t => t.type === '2') ? 1 : 0) + (DB.teams.some(t => t.type === '1') ? 1 : 0);
+  document.getElementById('stat-leagues').textContent = leagueCount;
   document.getElementById('stat-teams').textContent = DB.teams.length;
   document.getElementById('stat-players').textContent = DB.players.length;
 }
@@ -607,9 +770,24 @@ function renderPlayerProfile(player, team) {
 
   const statsHtml = Object.entries(STAT_LABELS).map(([csvCol, label]) => {
     const val = player[csvCol] || '0';
+    // Special attributes (pips instead of bar)
+    if (SPECIAL_ATTRS[csvCol]) {
+      const max = SPECIAL_ATTRS[csvCol].max;
+      const v = parseInt(val, 10) || 0;
+      let pips = '';
+      for (let i = 1; i <= max; i++) {
+        pips += `<span class="pip${i <= v ? ' filled' : ''}"></span>`;
+      }
+      return `<div class="stat-row">
+        <span class="stat-name">${label}</span>
+        <span class="stat-value" style="background:transparent;color:var(--color-text);min-width:20px">${v}</span>
+        <div class="special-attr-pips">${pips}</div>
+      </div>`;
+    }
     const colorClass = statColorClass(val);
     const barColor = statColor(val);
-    const pct = Math.min(100, parseInt(val, 10) || 0);
+    const v = parseInt(val, 10) || 0;
+    const pct = Math.max(0, Math.min(100, ((v - STAT_MIN) / (STAT_MAX - STAT_MIN)) * 100));
     return `<div class="stat-row">
       <span class="stat-name">${label}</span>
       <span class="stat-value ${colorClass}">${val}</span>
@@ -740,9 +918,9 @@ function drawRadar(canvasId, attrs) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(233, 69, 96, 0.3)';
+  ctx.fillStyle = 'rgba(139, 26, 26, 0.3)';
   ctx.fill();
-  ctx.strokeStyle = '#e94560';
+  ctx.strokeStyle = '#8b1a1a';
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
@@ -754,7 +932,7 @@ function drawRadar(canvasId, attrs) {
     const y = cy + r * Math.sin(angle);
     ctx.beginPath();
     ctx.arc(x, y, 3.5, 0, 2 * Math.PI);
-    ctx.fillStyle = '#e94560';
+    ctx.fillStyle = '#8b1a1a';
     ctx.fill();
   }
 
@@ -773,7 +951,7 @@ function drawRadar(canvasId, attrs) {
     // Value below label
     const valY = cy + (labelR + 12) * Math.sin(angle);
     ctx.font = '10px Segoe UI, sans-serif';
-    ctx.fillStyle = '#e94560';
+    ctx.fillStyle = '#c0392b';
     ctx.fillText(values[i], x, valY);
   }
 }
