@@ -705,13 +705,18 @@ body {
 }
 
 .position-badge {
-  background: var(--color-highlight-dim);
-  border: 1px solid var(--color-highlight);
-  color: var(--color-highlight);
+  background: transparent;
+  border: 1px solid #8b949e;
+  color: #8b949e;
   font-size: 0.8rem;
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  text-align: center;
 }
 
 .overall-large {
@@ -776,18 +781,17 @@ body {
 }
 
 /* Stat color classes */
-.stat-red {
-  background: var(--color-stat-red);
-  color: #fff;
-}
-.stat-yellow {
-  background: var(--color-stat-yellow);
-  color: #fff;
-}
-.stat-green {
-  background: var(--color-stat-green);
-  color: #fff;
-}
+/* Updated stat color classes - 6 levels */
+.stat-range-1 { background: #d33d35; color: #fff; }
+.stat-range-2 { background: #e59f01; color: #fff; }
+.stat-range-3 { background: #e5dc00; color: #111; }
+.stat-range-4 { background: #a8ff00; color: #111; }
+.stat-range-5 { background: #62ff51; color: #111; }
+.stat-range-6 { background: #00ff87; color: #111; }
+/* Keep old classes for backward compatibility */
+.stat-red { background: #d33d35; color: #fff; }
+.stat-yellow { background: #e59f01; color: #fff; }
+.stat-green { background: #a8ff00; color: #111; }
 
 /* Right column */
 .player-right {
@@ -1935,5 +1939,147 @@ body {
   max-width: 72px;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.pitch-player-pos-badge {
+  font-size: 0.55rem;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+  text-align: center;
+  min-width: 24px;
+  line-height: 1.4;
+}
+
+/* ── Position field visualization ── */
+.position-field-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.position-field {
+  position: relative;
+  width: 160px;
+  height: 240px;
+  background: linear-gradient(to bottom, #2d5a27 0%, #2a5424 48%, #2a5424 52%, #2d5a27 100%);
+  border: 1.5px solid rgba(255,255,255,0.45);
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.position-field-line {
+  position: absolute;
+  background: rgba(255,255,255,0.3);
+}
+
+.pf-halfway {
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+}
+
+.pf-penalty-bottom {
+  left: 18%; right: 18%;
+  bottom: 0; height: 22%;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-bottom: none;
+  background: transparent;
+}
+
+.pf-penalty-top {
+  left: 18%; right: 18%;
+  top: 0; height: 22%;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-top: none;
+  background: transparent;
+}
+
+.pf-goal-bottom {
+  left: 35%; right: 35%;
+  bottom: 0; height: 8%;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-bottom: none;
+  background: transparent;
+}
+
+.pf-goal-top {
+  left: 35%; right: 35%;
+  top: 0; height: 8%;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-top: none;
+  background: transparent;
+}
+
+.position-field-center-circle {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 44px; height: 44px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+}
+
+.field-pos-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  border: 2px solid;
+  padding: 2px 5px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: default;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-pos-primary {
+  z-index: 10;
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  font-size: 0.65rem;
+}
+
+.field-pos-secondary {
+  background: rgba(0,0,0,0.5);
+  opacity: 0.85;
+}
+
+.field-pos-label {
+  line-height: 1;
+}
+
+.position-field-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.pf-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pf-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.pf-legend-primary {
+  background: var(--color-text-muted);
+}
+
+.pf-legend-secondary {
+  background: transparent;
+  border: 2px solid var(--color-text-muted);
 }
 

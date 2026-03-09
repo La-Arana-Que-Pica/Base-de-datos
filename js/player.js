@@ -64,26 +64,39 @@ function flagSrc(countryId) {
 
 function statColorClass(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 75) return 'stat-green';
-  if (v >= 60) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
 }
 
 function statColor(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return '#e74c3c';
-  if (v >= 75) return '#27ae60';
-  if (v >= 60) return '#f39c12';
-  return '#e74c3c';
+  if (isNaN(v)) return '#d33d35';
+  if (v >= 95) return '#00ff87';
+  if (v >= 90) return '#62ff51';
+  if (v >= 80) return '#a8ff00';
+  if (v >= 70) return '#e5dc00';
+  if (v >= 60) return '#e59f01';
+  return '#d33d35';
+}
+
+function statTextColor(hexColor) {
+  return ['#e5dc00', '#a8ff00', '#62ff51', '#00ff87'].includes(hexColor) ? '#111' : '#fff';
 }
 
 function overallColor(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 80) return 'stat-green';
-  if (v >= 70) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
 }
 
 // ─── Translations (UI display only) ──────────────────────────────────────────
@@ -136,6 +149,51 @@ const POSITION_LABELS = {
   'CF':  'CD',
 };
 
+const NATIONALITY_NAMES = {
+  '7':   'China',        '10':  'Indonesia',   '11':  'Irán',
+  '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
+  '15':  'Corea del Norte', '16': 'Corea del Sur', '17': 'Kuwait',
+  '19':  'Líbano',       '26':  'Omán',         '30':  'Qatar',
+  '31':  'Arabia Saudita', '36': 'Tailandia',   '37':  'Emiratos Árabes Unidos',
+  '44':  'Argelia',      '45':  'Angola',       '48':  'Burkina Faso',
+  '50':  'Camerún',      '51':  'Cabo Verde',   '52':  'Benín',
+  '55':  'Congo DR',     '56':  'Costa de Marfil', '58': 'Egipto',
+  '59':  'Andorra',      '63':  'Gambia',       '64':  'Ghana',
+  '65':  'Guinea',       '66':  'Guinea-Bisáu', '70':  'Libia',
+  '73':  'Malí',         '76':  'Marruecos',    '77':  'Mozambique',
+  '79':  'Níger',        '80':  'Nigeria',      '83':  'Senegal',
+  '87':  'Sudáfrica',    '91':  'Togo',         '92':  'Túnez',
+  '94':  'Zambia',       '95':  'Zimbabue',     '110': 'Canadá',
+  '112': 'Costa Rica',   '115': 'Rep. Dominicana', '120': 'Haití',
+  '121': 'Honduras',     '122': 'Jamaica',      '124': 'México',
+  '128': 'Panamá',       '133': 'Filipinas',    '135': 'Estados Unidos',
+  '139': 'Surinam',      '144': 'Argentina',    '145': 'Bolivia',
+  '146': 'Brasil',       '147': 'Chile',        '148': 'Colombia',
+  '149': 'Ecuador',      '150': 'Paraguay',     '151': 'Perú',
+  '152': 'Uruguay',      '153': 'Venezuela',    '162': 'Australia',
+  '166': 'Nueva Zelanda','189': 'Israel',       '190': 'Turquía',
+  '191': 'Albania',      '193': 'Armenia',      '194': 'Austria',
+  '196': 'Bielorrusia',  '197': 'Bélgica',      '198': 'Bosnia y Herzegovina',
+  '199': 'Bulgaria',     '200': 'Croacia',       '201': 'Chipre',
+  '202': 'Rep. Checa',   '203': 'Dinamarca',    '204': 'Inglaterra',
+  '207': 'Finlandia',    '208': 'Francia',      '209': 'Georgia',
+  '210': 'Alemania',     '211': 'Grecia',       '212': 'Hungría',
+  '213': 'Islandia',     '214': 'Irlanda',      '215': 'Italia',
+  '219': 'Lituania',     '221': 'Macedonia del Norte', '223': 'Moldavia',
+  '224': 'Países Bajos', '225': 'Irlanda del Norte', '226': 'Noruega',
+  '227': 'Polonia',      '228': 'Portugal',     '229': 'Rumanía',
+  '230': 'Rusia',        '232': 'Escocia',      '234': 'Eslovaquia',
+  '235': 'Eslovenia',    '236': 'España',       '237': 'Suecia',
+  '238': 'Suiza',        '239': 'Ucrania',      '240': 'Uzbekistán',
+  '241': 'Gales',        '303': 'Serbia',       '304': 'Montenegro',
+  '311': 'Kosovo',
+};
+
+function nationalityName(countryId) {
+  if (!countryId) return '–';
+  return NATIONALITY_NAMES[String(countryId)] || countryId;
+}
+
 // Team type → Spanish label
 const TYPE_LABELS = {
   '0': 'Clubes',
@@ -151,12 +209,36 @@ function translatePosition(pesPos) {
   return POSITION_LABELS[pesPos] || pesPos;
 }
 
+function positionGroupColor(pesPos) {
+  if (pesPos === 'GK') return '#f9d901';
+  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
+  if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
+  if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
+  return '#8b949e';
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
 
 // Position rating columns (same order as PES_POSITIONS)
 const POSITION_RATING_COLS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
+
+const POSITION_FIELD_COORDS = {
+  'GK':  { left: 50, top: 88 },
+  'CB':  { left: 50, top: 72 },
+  'LB':  { left: 16, top: 65 },
+  'RB':  { left: 84, top: 65 },
+  'DMF': { left: 50, top: 52 },
+  'CMF': { left: 50, top: 42 },
+  'LMF': { left: 22, top: 42 },
+  'RMF': { left: 78, top: 42 },
+  'AMF': { left: 50, top: 30 },
+  'LWF': { left: 16, top: 20 },
+  'RWF': { left: 84, top: 20 },
+  'SS':  { left: 50, top: 22 },
+  'CF':  { left: 50, top: 10 },
+};
 
 // Ordered stat columns for the Habilidades section (exact game order)
 const STAT_COLUMNS_ORDERED = [
@@ -618,23 +700,23 @@ function renderStatRow(label, value, col) {
   if (col && SPECIAL_ATTRS[col]) {
     const { max } = SPECIAL_ATTRS[col];
     const pct = Math.max(0, Math.min(100, (v / max) * 100));
-    const barColor = v >= max * 0.75 ? '#27ae60' : v >= max * 0.5 ? '#f39c12' : '#e74c3c';
-    const colorClass = v >= max * 0.75 ? 'stat-green' : v >= max * 0.5 ? 'stat-yellow' : 'stat-red';
+    const barColor = v >= max * 0.75 ? '#a8ff00' : v >= max * 0.5 ? '#e59f01' : '#d33d35';
+    const textColor = statTextColor(barColor);
     return `<div class="stat-row">
       <span class="stat-name">${label}</span>
-      <span class="stat-value ${colorClass}">${v}</span>
+      <span class="stat-value" style="background:${barColor};color:${textColor}">${v}</span>
       <div class="stat-bar-container">
         <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
       </div>
     </div>`;
   }
   // Normal stat: scale bar from STAT_MIN to STAT_MAX
-  const colorClass = statColorClass(value);
   const barColor = statColor(value);
+  const textColor = statTextColor(barColor);
   const pct = Math.max(0, Math.min(100, ((v - STAT_MIN) / (STAT_MAX - STAT_MIN)) * 100));
   return `<div class="stat-row">
     <span class="stat-name">${label}</span>
-    <span class="stat-value ${colorClass}">${value || '–'}</span>
+    <span class="stat-value" style="background:${barColor};color:${textColor}">${value || '–'}</span>
     <div class="stat-bar-container">
       <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
     </div>
@@ -881,8 +963,67 @@ function switchTab(tabId) {
 
 // ─── Main render ─────────────────────────────────────────────────────────────
 
+function renderPositionPitch(player) {
+  const rawPos = player['POS'] || '';
+  const posIdx = parseInt(rawPos, 10);
+  const primaryPos = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
+    ? PES_POSITIONS[posIdx] : rawPos;
+
+  const playedPositions = POSITION_RATING_COLS.filter(pos => {
+    const val = parseInt(player[pos], 10);
+    return !isNaN(val) && val >= 1;
+  });
+
+  const markers = [];
+
+  playedPositions.forEach(pos => {
+    if (pos === primaryPos) return;
+    const coords = POSITION_FIELD_COORDS[pos];
+    if (!coords) return;
+    const color = positionGroupColor(pos);
+    const label = translatePosition(pos);
+    markers.push(`
+      <div class="field-pos-marker field-pos-secondary" style="left:${coords.left}%;top:${coords.top}%;border-color:${color};color:${color}">
+        <span class="field-pos-label">${label}</span>
+      </div>`);
+  });
+
+  const primaryCoords = POSITION_FIELD_COORDS[primaryPos];
+  if (primaryCoords) {
+    const color = positionGroupColor(primaryPos);
+    const label = translatePosition(primaryPos);
+    markers.push(`
+      <div class="field-pos-marker field-pos-primary" style="left:${primaryCoords.left}%;top:${primaryCoords.top}%;background:${color};color:#111;border-color:${color}">
+        <span class="field-pos-label">${label}</span>
+      </div>`);
+  }
+
+  if (!markers.length) return '';
+
+  return `
+    <div class="player-section" style="margin-bottom:0">
+      <div class="player-section-title">Posiciones en el campo</div>
+      <div class="position-field-wrap">
+        <div class="position-field">
+          <div class="position-field-line pf-halfway"></div>
+          <div class="position-field-line pf-penalty-bottom"></div>
+          <div class="position-field-line pf-goal-bottom"></div>
+          <div class="position-field-line pf-penalty-top"></div>
+          <div class="position-field-line pf-goal-top"></div>
+          <div class="position-field-center-circle"></div>
+          ${markers.join('')}
+        </div>
+        <div class="position-field-legend">
+          <div class="pf-legend-item"><span class="pf-legend-dot pf-legend-primary"></span>Principal</div>
+          <div class="pf-legend-item"><span class="pf-legend-dot pf-legend-secondary"></span>Secundaria</div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function renderPlayerPage(player, team, appearance, typeLabel, playsForNational) {
-  const ovrClass = overallColor(player['OverallStats'] || '');
+  const ovrColor = statColor(player['OverallStats'] || '');
+  const ovrTextColor = statTextColor(ovrColor);
   const ovr = player['OverallStats'] || '–';
 
   const rawPos = player['POS'] || '';
@@ -903,7 +1044,9 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational)
   const statsHtml = `
     <div class="profile-stats-layout">
       <div class="profile-stats-left">
-        <div class="stats-section-title">Valoraciones por posición</div>
+        <div class="stats-section-title">Posiciones</div>
+        ${renderPositionPitch(player)}
+        <div class="stats-section-title" style="margin-top:16px">Valoraciones por posición</div>
         ${renderPositionGrid(player)}
         <div class="radar-card" style="margin-top:20px">
           <h3>Radar de atributos</h3>
@@ -935,14 +1078,14 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational)
         <div class="profile-header-info">
           <div class="profile-name">${player['Name'] || 'Jugador desconocido'}</div>
           <div class="profile-badges">
-            <span class="position-badge">${posDisplay || '–'}</span>
-            <span class="overall-badge ${ovrClass}">${ovr}</span>
+            <span class="position-badge" style="color:${positionGroupColor(pesPosition)};border-color:${positionGroupColor(pesPosition)};background:${positionGroupColor(pesPosition)}18">${posDisplay || '–'}</span>
+            <span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
           </div>
           <div class="profile-meta-row">
             <img src="${flagSrc(player['Country'])}"
               onerror="this.onerror=null;this.src='img/flags/default.png'"
               alt="" class="profile-flag">
-            <span>${player['Country'] || '–'}</span>
+            <span>${nationalityName(player['Country'])}</span>
           </div>
           <div class="profile-meta-row">
             <img class="team-crest-sm"
