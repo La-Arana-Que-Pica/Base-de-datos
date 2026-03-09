@@ -904,6 +904,15 @@ body {
   margin-right: auto;
 }
 
+/* ── League page (league.html) ── */
+#league-page {
+  margin-top: var(--header-height);
+  padding: 24px 32px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .header-logo-link {
   display: flex;
   align-items: center;
@@ -925,6 +934,7 @@ body {
   display: flex;
   gap: 28px;
   align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .profile-photo {
@@ -940,6 +950,14 @@ body {
   flex-direction: column;
   gap: 10px;
   flex: 1;
+  min-width: 200px;
+}
+
+.profile-radar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .profile-name {
@@ -1572,9 +1590,19 @@ body {
     padding: 16px;
   }
 
+  /* League page responsive */
+  #league-page {
+    padding: 16px;
+  }
+
   .profile-header-card {
     flex-direction: column;
     gap: 16px;
+  }
+
+  .profile-radar-wrap canvas {
+    width: 180px !important;
+    height: 180px !important;
   }
 
   .profile-photo {
@@ -1829,6 +1857,19 @@ body {
   color: var(--color-text-muted);
 }
 
+.grid-card-ovr {
+  display: flex;
+  justify-content: center;
+}
+
+.team-avg-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 /* ── Formation pitch ── */
 .formation-section {
   background: var(--color-card);
@@ -1849,17 +1890,27 @@ body {
   border-bottom: 1px solid var(--color-border);
 }
 
+.formation-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
 .pitch-container {
   display: flex;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .pitch-field {
   position: relative;
   width: 280px;
-  height: 440px;
-  background: linear-gradient(to bottom,
-    #2d5a27 0%, #2a5424 48%, #2a5424 52%, #2d5a27 100%);
+  height: 397px;
+  background-color: #2a5424;
+  background-image: url('../img/pitch/StadiumSetting_turf_02.png');
+  background-size: cover;
+  background-position: center;
   border: 2px solid rgba(255, 255, 255, 0.45);
   border-radius: 6px;
   overflow: visible;
@@ -1900,7 +1951,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   z-index: 10;
   text-decoration: none;
   cursor: pointer;
@@ -1911,14 +1962,28 @@ body {
   transform: translate(-50%, -50%) scale(1.12);
 }
 
+.pitch-player-top {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  position: relative;
+}
+
+.pitch-player-pos-sm {
+  font-size: 0.52rem;
+  font-weight: 800;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  white-space: nowrap;
+  line-height: 1;
+}
+
 .pitch-player-photo-wrap {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 34px;
+  height: 34px;
   overflow: hidden;
-  border: 2px solid var(--color-highlight);
   background: var(--color-secondary);
   flex-shrink: 0;
+  border-radius: 3px;
 }
 
 .pitch-player-photo {
@@ -1927,29 +1992,109 @@ body {
   object-fit: cover;
 }
 
-.pitch-player-name {
-  font-size: 0.63rem;
-  color: #fff;
-  font-weight: 600;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-  white-space: nowrap;
-  background: rgba(0, 0, 0, 0.55);
-  padding: 1px 5px;
-  border-radius: 3px;
-  max-width: 72px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.pitch-captain-badge {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  background: #f9d901;
+  color: #111;
+  font-size: 0.55rem;
+  font-weight: 900;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #111;
+  z-index: 11;
+  line-height: 1;
 }
 
-.pitch-player-pos-badge {
-  font-size: 0.55rem;
+.pitch-player-bar {
+  display: flex;
+  align-items: center;
+  background: rgba(0,0,0,0.72);
+  border-radius: 3px;
+  overflow: hidden;
+  gap: 0;
+  max-width: 80px;
+}
+
+.pitch-player-ovr {
+  font-size: 0.6rem;
   font-weight: 800;
   padding: 1px 4px;
-  border-radius: 3px;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.pitch-player-name {
+  font-size: 0.6rem;
+  color: #fff;
+  font-weight: 600;
+  padding: 1px 5px 1px 3px;
   white-space: nowrap;
-  text-align: center;
-  min-width: 24px;
-  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 58px;
+  line-height: 1.5;
+}
+
+/* ── Formation tactics & assignments ── */
+.formation-info-columns {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 200px;
+}
+
+.formation-tactic-block {
+  flex: 1;
+  min-width: 160px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.formation-block-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tactic-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.8rem;
+}
+
+.tactic-row:last-child {
+  border-bottom: none;
+}
+
+.tactic-label {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.tactic-value {
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-align: right;
 }
 
 /* ── Position field visualization ── */

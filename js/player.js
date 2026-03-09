@@ -99,6 +99,13 @@ function overallColor(value) {
   return 'stat-range-1';
 }
 
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 // ─── Translations (UI display only) ──────────────────────────────────────────
 
 // Stats: CSV column name → Spanish display label
@@ -575,6 +582,7 @@ function computeRadarAttributes(player) {
     DEF: avg('Defensive Prowess'),
     VEL: avg('Speed'),
     DRI: avg('Dribbling', 'Ball Control'),
+    POR: avg('Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'),
   };
 }
 
@@ -587,6 +595,7 @@ function drawRadar(canvasId, attrs) {
   const cx = W / 2;
   const cy = H / 2;
   const maxR = Math.min(cx, cy) - 42;
+  const MIN_VAL = 40;
   const MAX_VAL = 99;
   const labels = Object.keys(attrs);
   const values = Object.values(attrs);
@@ -594,8 +603,7 @@ function drawRadar(canvasId, attrs) {
 
   ctx.clearRect(0, 0, W, H);
 
-  // Grid rings (5 levels)
-  const ringLevels = [20, 40, 60, 80, 99];
+  // Grid rings (5 levels, center = MIN_VAL)
   for (let ring = 1; ring <= 5; ring++) {
     const r = (maxR * ring) / 5;
     ctx.beginPath();
@@ -609,12 +617,6 @@ function drawRadar(canvasId, attrs) {
     ctx.strokeStyle = ring === 5 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)';
     ctx.lineWidth = ring === 5 ? 1.5 : 1;
     ctx.stroke();
-    // Ring value label at top
-    ctx.font = '9px Segoe UI, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(String(ringLevels[ring - 1]), cx, cy - r - 2);
   }
 
   // Axis lines
@@ -628,11 +630,11 @@ function drawRadar(canvasId, attrs) {
     ctx.stroke();
   }
 
-  // Data polygon fill
+  // Data polygon fill (center = MIN_VAL)
   ctx.beginPath();
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-    const r = (values[i] / MAX_VAL) * maxR;
+    const r = Math.max(0, (values[i] - MIN_VAL) / (MAX_VAL - MIN_VAL)) * maxR;
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
@@ -647,7 +649,7 @@ function drawRadar(canvasId, attrs) {
   // Data points
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-    const r = (values[i] / MAX_VAL) * maxR;
+    const r = Math.max(0, (values[i] - MIN_VAL) / (MAX_VAL - MIN_VAL)) * maxR;
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
     ctx.beginPath();
@@ -659,22 +661,18 @@ function drawRadar(canvasId, attrs) {
     ctx.stroke();
   }
 
-  // Labels: "LABEL\nVAL" outside each axis
+  // Labels: attribute name only (no numeric value)
   ctx.textAlign = 'center';
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-    const labelR = maxR + 26;
+    const labelR = maxR + 24;
     const lx = cx + labelR * Math.cos(angle);
     const ly = cy + labelR * Math.sin(angle);
 
     ctx.font = 'bold 11px "Segoe UI", sans-serif';
     ctx.fillStyle = '#eaeaea';
     ctx.textBaseline = 'middle';
-    ctx.fillText(labels[i], lx, ly - 6);
-
-    ctx.font = 'bold 12px "Segoe UI", sans-serif';
-    ctx.fillStyle = '#e74c3c';
-    ctx.fillText(String(values[i]), lx, ly + 8);
+    ctx.fillText(labels[i], lx, ly);
   }
 }
 
@@ -904,40 +902,43 @@ function renderFaceData(appearance, player) {
   const idFace = appearance ? (appearance['Id_Face'] || '0') : '0';
   const hasScannedFace = idFace !== '0' && idFace !== '';
 
-  const navButtons = APPEARANCE_SECTIONS.map((section, i) =>
+  // When player has a scanned face: hide Cara and Peinado sections,
+  // show a notice, and only render Físico, Forma de vestir, Movimiento.
+  const sectionsToShow = hasScannedFace
+    ? APPEARANCE_SECTIONS.slice(2)
+    : APPEARANCE_SECTIONS;
+
+  const scannedNoticeHtml = hasScannedFace
+    ? `<div class="scanned-face-notice">
+        <span class="scanned-face-icon">✅</span>
+        Este jugador tiene una cara escaneada.
+      </div>`
+    : '';
+
+  const navButtons = sectionsToShow.map((section, i) =>
     `<button class="appearance-section-btn${i === 0 ? ' active' : ''}" onclick="switchAppearanceSection(${i})">${section.title}</button>`
   ).join('');
 
-  const sectionsHtml = APPEARANCE_SECTIONS.map((section, i) => {
-    let sectionContent;
+  const sectionsHtml = sectionsToShow.map((section, i) => {
+    const subsectionsHtml = section.subsections.map(sub => {
+      const fieldsHtml = sub.fields
+        .map(field => renderAppearanceField(field, appearance, player))
+        .join('');
+      if (!fieldsHtml) return '';
+      const subTitle = sub.title
+        ? `<div class="face-subsection-title">${sub.title}</div>`
+        : '';
+      return `<div class="face-subsection">${subTitle}<div class="face-data-grid">${fieldsHtml}</div></div>`;
+    }).join('');
 
-    // Sections 0 (Cara) and 1 (Peinado) are skipped when player has a scanned face
-    if (hasScannedFace && (i === 0 || i === 1)) {
-      sectionContent = `<div class="scanned-face-notice">
-        <span class="scanned-face-icon">✅</span>
-        Este jugador ya tiene una cara escaneada.
-      </div>`;
-    } else {
-      const subsectionsHtml = section.subsections.map(sub => {
-        const fieldsHtml = sub.fields
-          .map(field => renderAppearanceField(field, appearance, player))
-          .join('');
-        if (!fieldsHtml) return '';
-        const subTitle = sub.title
-          ? `<div class="face-subsection-title">${sub.title}</div>`
-          : '';
-        return `<div class="face-subsection">${subTitle}<div class="face-data-grid">${fieldsHtml}</div></div>`;
-      }).join('');
-      sectionContent = subsectionsHtml || '';
-    }
-
-    if (!sectionContent) return '';
+    if (!subsectionsHtml) return '';
     return `<div class="face-section${i === 0 ? ' active' : ''}" id="appearance-section-${i}">
-      ${sectionContent}
+      ${subsectionsHtml}
     </div>`;
   }).join('');
 
-  return `<div class="appearance-section-nav">${navButtons}</div>
+  return `${scannedNoticeHtml}
+<div class="appearance-section-nav">${navButtons}</div>
 <div class="appearance-section-panels">${sectionsHtml}</div>`;
 }
 
@@ -969,34 +970,51 @@ function renderPositionPitch(player) {
   const primaryPos = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
     ? PES_POSITIONS[posIdx] : rawPos;
 
-  const playedPositions = POSITION_RATING_COLS.filter(pos => {
-    const val = parseInt(player[pos], 10);
-    return !isNaN(val) && val >= 1;
-  });
-
   const markers = [];
 
-  playedPositions.forEach(pos => {
-    if (pos === primaryPos) return;
+  PES_POSITIONS.forEach(pos => {
     const coords = POSITION_FIELD_COORDS[pos];
     if (!coords) return;
+
+    const val = parseInt(player[pos], 10);
     const color = positionGroupColor(pos);
-    const label = translatePosition(pos);
+    const isPrimary = pos === primaryPos;
+
+    let bgStyle, borderStyle, textColor, zIdx;
+
+    if (isNaN(val)) {
+      // No rating data – show very faintly
+      bgStyle = 'background:rgba(0,0,0,0.25)';
+      borderStyle = `border-color:rgba(255,255,255,0.12)`;
+      textColor = 'rgba(255,255,255,0.25)';
+      zIdx = 1;
+    } else if (val === 0) {
+      // Grade C – transparent fill, visible border and text
+      bgStyle = 'background:transparent';
+      borderStyle = `border-color:${color}`;
+      textColor = color;
+      zIdx = 3;
+    } else if (val === 1) {
+      // Grade B – medium opacity fill
+      bgStyle = `background:${hexToRgba(color, 0.40)}`;
+      borderStyle = `border-color:${color}`;
+      textColor = color;
+      zIdx = 4;
+    } else {
+      // Grade A – fully filled
+      bgStyle = `background:${color}`;
+      borderStyle = `border-color:${color}`;
+      textColor = '#111';
+      zIdx = 5;
+    }
+
+    if (isPrimary && !isNaN(val)) zIdx = 10;
+
     markers.push(`
-      <div class="field-pos-marker field-pos-secondary" style="left:${coords.left}%;top:${coords.top}%;border-color:${color};color:${color}">
-        <span class="field-pos-label">${label}</span>
+      <div class="field-pos-marker" style="${bgStyle};${borderStyle};color:${textColor};z-index:${zIdx}${isPrimary && !isNaN(val) ? ';box-shadow:0 0 6px rgba(0,0,0,0.5)' : ''};left:${coords.left}%;top:${coords.top}%">
+        <span class="field-pos-label">${pos}</span>
       </div>`);
   });
-
-  const primaryCoords = POSITION_FIELD_COORDS[primaryPos];
-  if (primaryCoords) {
-    const color = positionGroupColor(primaryPos);
-    const label = translatePosition(primaryPos);
-    markers.push(`
-      <div class="field-pos-marker field-pos-primary" style="left:${primaryCoords.left}%;top:${primaryCoords.top}%;background:${color};color:#111;border-color:${color}">
-        <span class="field-pos-label">${label}</span>
-      </div>`);
-  }
 
   if (!markers.length) return '';
 
@@ -1014,8 +1032,9 @@ function renderPositionPitch(player) {
           ${markers.join('')}
         </div>
         <div class="position-field-legend">
-          <div class="pf-legend-item"><span class="pf-legend-dot pf-legend-primary"></span>Principal</div>
-          <div class="pf-legend-item"><span class="pf-legend-dot pf-legend-secondary"></span>Secundaria</div>
+          <div class="pf-legend-item"><span class="pf-legend-dot" style="background:var(--color-text-muted)"></span>A: Relleno completo</div>
+          <div class="pf-legend-item"><span class="pf-legend-dot" style="background:rgba(139,148,158,0.4);border:2px solid var(--color-text-muted)"></span>B: Semitransparente</div>
+          <div class="pf-legend-item"><span class="pf-legend-dot" style="background:transparent;border:2px solid var(--color-text-muted)"></span>C: Solo borde</div>
         </div>
       </div>
     </div>`;
@@ -1046,12 +1065,6 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational)
       <div class="profile-stats-left">
         <div class="stats-section-title">Posiciones</div>
         ${renderPositionPitch(player)}
-        <div class="stats-section-title" style="margin-top:16px">Valoraciones por posición</div>
-        ${renderPositionGrid(player)}
-        <div class="radar-card" style="margin-top:20px">
-          <h3>Radar de atributos</h3>
-          <canvas id="radar-canvas" width="260" height="260"></canvas>
-        </div>
       </div>
       <div class="profile-stats-right">
         ${renderHabilidades(player)}
@@ -1104,6 +1117,9 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational)
             <div class="quick-stat"><span class="qs-label">Edad</span><span class="qs-val">${player['Age'] || '–'}</span></div>
             <div class="quick-stat"><span class="qs-label">Pie</span><span class="qs-val">${footDisplay}</span></div>
           </div>
+        </div>
+        <div class="profile-radar-wrap">
+          <canvas id="radar-canvas" width="220" height="220"></canvas>
         </div>
       </div>
 
