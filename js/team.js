@@ -377,7 +377,6 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     tokens.push(`
       <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
         <div class="pitch-player-top">
-          <span class="pitch-player-pos-sm" style="color:${posColor}">${posDisplay}</span>
           <div class="pitch-player-photo-wrap">
             <img src="img/players/${pid}.png"
               onerror="handleMinifaceError(this,'${pid}')"
@@ -387,6 +386,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
         <div class="pitch-player-bar">
           <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
           <span class="pitch-player-name">${shortName}</span>
+          <span class="pitch-player-pos-badge" style="background:${posColor};color:#111">${posDisplay}</span>
         </div>
       </a>`);
   }
@@ -524,38 +524,56 @@ function renderPlayerCard(player, teamId) {
 }
 
 function renderPlayerCarousel(players, teamId) {
-  // Sort by position group order, then OVR descending
-  const posOrder = {};
-  PES_POSITIONS.forEach((pos, idx) => { posOrder[pos] = idx; });
-  const sorted = players.slice().sort((a, b) => {
-    const pa = posOrder[a.Position] !== undefined ? posOrder[a.Position] : 99;
-    const pb = posOrder[b.Position] !== undefined ? posOrder[b.Position] : 99;
-    if (pa !== pb) return pa - pb;
-    return (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0);
-  });
-
-  if (!sorted.length) {
+  if (!players || !players.length) {
     return `<div class="player-cards-section"><p style="color:var(--color-text-muted);padding:16px 0">No hay jugadores en este equipo.</p></div>`;
   }
 
-  const total = sorted.length;
-  const cardsHtml = sorted.map(p => renderPlayerCard(p, teamId)).join('');
+  const sortByOvr = arr =>
+    arr.slice().sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
+
+  // Build grouped sections by POSITION_GROUPS
+  const categorizedPos = new Set(POSITION_GROUPS.flatMap(g => g.positions));
+  let groupsHtml = '';
+
+  POSITION_GROUPS.forEach(group => {
+    const groupPlayers = sortByOvr(
+      players.filter(p => group.positions.includes(p.Position || ''))
+    );
+    if (!groupPlayers.length) return;
+
+    groupsHtml += `
+      <div class="player-cards-group">
+        <div class="player-cards-group-header">
+          <span class="player-cards-group-title">${group.label}</span>
+          <span class="player-cards-group-count">${groupPlayers.length}</span>
+        </div>
+        <div class="player-cards-row">
+          ${groupPlayers.map(p => renderPlayerCard(p, teamId)).join('')}
+        </div>
+      </div>`;
+  });
+
+  // Uncategorized players
+  const uncategorized = sortByOvr(players.filter(p => !categorizedPos.has(p.Position || '')));
+  if (uncategorized.length) {
+    groupsHtml += `
+      <div class="player-cards-group">
+        <div class="player-cards-group-header">
+          <span class="player-cards-group-title">Otros</span>
+          <span class="player-cards-group-count">${uncategorized.length}</span>
+        </div>
+        <div class="player-cards-row">
+          ${uncategorized.map(p => renderPlayerCard(p, teamId)).join('')}
+        </div>
+      </div>`;
+  }
 
   return `
     <div class="player-cards-section">
       <div class="player-cards-header">
         <span class="player-cards-title">Plantilla</span>
-        <div class="player-cards-nav">
-          <button class="player-cards-nav-btn" id="cards-prev" aria-label="Anterior" disabled>◀</button>
-          <span class="player-cards-counter" id="cards-counter"></span>
-          <button class="player-cards-nav-btn" id="cards-next" aria-label="Siguiente"${total <= 1 ? ' disabled' : ''}>▶</button>
-        </div>
       </div>
-      <div class="player-cards-viewport" id="player-cards-viewport">
-        <div class="player-cards-track" id="player-cards-track">
-          ${cardsHtml}
-        </div>
-      </div>
+      ${groupsHtml}
     </div>`;
 }
 
