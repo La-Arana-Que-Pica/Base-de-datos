@@ -694,26 +694,50 @@ function showHome() {
   const uniqueIds = new Set(DB.players.map(p => p.ID));
   document.getElementById('stat-players').textContent = uniqueIds.size;
 
-  // Populate featured leagues section
+  // Populate featured leagues + teams section
   const featuredSection = document.getElementById('home-leagues-section');
-  if (featuredSection && DB.leagues.length > 0) {
-    const leaguesHtml = DB.leagues.map(l => {
-      const safeName = l.name
+  if (!featuredSection) return;
+  if (!DB.leagues.length) {
+    featuredSection.innerHTML = '';
+    return;
+  }
+
+  const teamById = {};
+  DB.teams.forEach(t => { teamById[t.id] = t; });
+
+  const leaguesHtml = DB.leagues.map(l => {
+    const safeName = l.name
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const leagueTeams = l.teamIds.map(id => teamById[id]).filter(Boolean);
+    const teamsHtml = leagueTeams.map(t => {
+      const safeTName = (t.displayName || '')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      return `<div class="home-league-item" data-league-id="${l.id.replace(/"/g, '&quot;')}">
+      return `<a class="home-team-crest" href="team.html?id=${t.id.replace(/"/g, '&quot;')}" title="${safeTName}">
+        <img src="img/teams/${t.id}.png"
+          onerror="this.onerror=null;this.src='img/teams/default.png'"
+          alt="${safeTName}">
+      </a>`;
+    }).join('');
+    return `<div class="home-league-block">
+      <div class="home-league-header" data-league-id="${l.id.replace(/"/g, '&quot;')}">
         <img src="img/leagues/${l.id}.png"
           onerror="this.onerror=null;this.src='img/leagues/default.png'"
           alt="${safeName}">
         <span>${safeName}</span>
-      </div>`;
-    }).join('');
-    featuredSection.innerHTML = `<div class="home-section-title">Ligas disponibles</div>
-      <div class="home-leagues-grid">${leaguesHtml}</div>`;
-    featuredSection.querySelectorAll('.home-league-item').forEach(item => {
-      item.addEventListener('click', () => showLeagueTeamsView(item.dataset.leagueId));
-    });
-  }
+        <span class="home-league-count">${leagueTeams.length} equipos</span>
+      </div>
+      ${teamsHtml ? `<div class="home-team-crests-row">${teamsHtml}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  featuredSection.innerHTML = `<div class="home-section-title">Ligas y equipos</div>
+    <div class="home-leagues-blocks">${leaguesHtml}</div>`;
+
+  featuredSection.querySelectorAll('.home-league-header').forEach(header => {
+    header.addEventListener('click', () => showLeagueTeamsView(header.dataset.leagueId));
+  });
 }
 
 function goHome() {
@@ -1279,11 +1303,13 @@ function renderPlayersList(team) {
 
   view.innerHTML = `
     <div class="view-header">
-      <img class="team-crest" src="img/teams/${team.id}.png"
-        onerror="this.onerror=null;this.src='img/teams/default.png'"
-        alt="${team.displayName}">
+      <a href="team.html?id=${team.id}">
+        <img class="team-crest" src="img/teams/${team.id}.png"
+          onerror="this.onerror=null;this.src='img/teams/default.png'"
+          alt="${team.displayName}" title="Ver página del equipo">
+      </a>
       <div>
-        <div class="view-title">${team.displayName}</div>
+        <a class="view-title-link" href="team.html?id=${team.id}">${team.displayName}</a>
         <div class="view-subtitle">${typeLabel}</div>
       </div>
     </div>
@@ -1455,11 +1481,13 @@ function renderPlayerProfile(player, team) {
           </div>
           <div class="player-info-row">
             <span class="info-label">Equipo</span>
-            <img class="team-crest-sm"
-              src="img/teams/${team.id}.png"
-              onerror="this.onerror=null;this.src='img/teams/default.png'"
-              alt="${team.displayName}">
-            <span>${team.displayName}</span>
+            <a href="team.html?id=${team.id}" class="team-crest-link">
+              <img class="team-crest-sm"
+                src="img/teams/${team.id}.png"
+                onerror="this.onerror=null;this.src='img/teams/default.png'"
+                alt="${team.displayName}">
+              <span>${team.displayName}</span>
+            </a>
           </div>
           <div class="player-info-row">
             <span class="info-label">Categoría</span>

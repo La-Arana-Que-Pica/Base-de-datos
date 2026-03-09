@@ -1096,11 +1096,13 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational)
             <span>${nationalityName(player['Country'])}</span>
           </div>
           <div class="profile-meta-row">
-            <img class="team-crest-sm"
-              src="img/teams/${team.id}.png"
-              onerror="this.onerror=null;this.src='img/teams/default.png'"
-              alt="${team.displayName}">
-            <span>${team.displayName}</span>
+            <a href="team.html?id=${team.id}" class="team-crest-link">
+              <img class="team-crest-sm"
+                src="img/teams/${team.id}.png"
+                onerror="this.onerror=null;this.src='img/teams/default.png'"
+                alt="${team.displayName}">
+              <span>${team.displayName}</span>
+            </a>
           </div>
           <div class="profile-meta-row">
             <span>${typeLabel}</span>

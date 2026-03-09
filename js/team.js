@@ -354,9 +354,9 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
 
     // Map to CSS percentage positions on a full pitch (630×670):
     //   left: 5 + (yWidth / 104) * 90%  (0=left touchline → 5%, 52=center → 50%, 104=right → 95%)
-    //   top:  50 + (1 - xDepth / 52) * 43%  (xDepth=52=midfield → 50%, xDepth=0=own goal → 93%)
+    //   top:  7 + (1 - xDepth / 52) * 86%  (xDepth=52=midfield → 7%, xDepth=0=own goal → 93%)
     const leftPct = 5 + (yWidth / 104) * 90;
-    const topPct  = 50 + (1 - xDepth / 52) * 43;
+    const topPct  = 7 + (1 - xDepth / 52) * 86;
 
     const shortName = escapeHtml(formatShortName(player.Name || ''));
     const pid = escapeHtml(player.ID);

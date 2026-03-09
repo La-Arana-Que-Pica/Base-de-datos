@@ -418,6 +418,87 @@ body {
   max-width: 90px;
 }
 
+/* ── Home leagues + teams blocks ── */
+.home-leagues-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.home-league-block {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.home-league-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.15s;
+}
+
+.home-league-header:hover {
+  background: var(--color-card-hover);
+}
+
+.home-league-header img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.home-league-header span {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.home-league-count {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  color: var(--color-text-muted) !important;
+  flex: 0 !important;
+  white-space: nowrap;
+}
+
+.home-team-crests-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+.home-team-crest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+
+.home-team-crest:hover {
+  border-color: var(--color-highlight);
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.18);
+}
+
+.home-team-crest img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
 /* ── Players list view ── */
 #players-view {
   display: none;
@@ -546,11 +627,30 @@ body {
   width: 56px;
   height: 56px;
   object-fit: contain;
+  transition: opacity 0.15s;
+}
+
+.view-header a:has(.team-crest):hover .team-crest,
+.view-header a:hover .team-crest {
+  opacity: 0.8;
 }
 
 .view-header .view-title {
   font-size: 1.4rem;
   font-weight: 700;
+}
+
+.view-title-link {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.view-title-link:hover {
+  color: var(--color-highlight);
+  text-decoration: underline;
 }
 
 .view-header .view-subtitle {
@@ -1064,6 +1164,20 @@ body {
   width: 22px;
   height: 22px;
   object-fit: contain;
+}
+
+.team-crest-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.team-crest-link:hover {
+  color: var(--color-highlight);
+  text-decoration: underline;
 }
 
 .profile-flag {
@@ -2051,6 +2165,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  width: 106px;
   z-index: 10;
   text-decoration: none;
   cursor: pointer;
@@ -2067,10 +2182,11 @@ body {
   align-items: center;
   gap: 2px;
   position: relative;
+  width: 100%;
 }
 
 .pitch-player-pos-sm {
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   font-weight: 800;
   text-shadow: 0 1px 3px rgba(0,0,0,0.9);
   white-space: nowrap;
@@ -2079,8 +2195,8 @@ body {
 
 .pitch-player-photo-wrap {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   background: var(--color-secondary);
   flex-shrink: 0;
 }
@@ -2119,26 +2235,27 @@ body {
   border-radius: 3px;
   overflow: hidden;
   gap: 0;
-  max-width: 90px;
+  width: 106px;
 }
 
 .pitch-player-ovr {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  padding: 1px 4px;
+  padding: 2px 5px;
   flex-shrink: 0;
   line-height: 1.5;
 }
 
 .pitch-player-name {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: #fff;
   font-weight: 600;
-  padding: 1px 5px 1px 3px;
+  padding: 2px 5px 2px 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 66px;
+  flex: 1;
+  min-width: 0;
   line-height: 1.5;
 }
 
