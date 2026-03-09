@@ -472,6 +472,147 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
 }
 
 
+// ─── Player card carousel ─────────────────────────────────────────────────────
+
+function renderPlayerCard(player, teamId) {
+  const ovr = player.Overall || '–';
+  const ovrColor = statColor(ovr);
+  const posDisplay = escapeHtml(translatePosition(player.Position || ''));
+  const posColor = positionGroupColor(player.Position || '');
+  const radarAttrs = computeRadarAttributes(player);
+  const safeName = escapeHtml(player.Name || '–');
+  const pid = escapeHtml(player.ID);
+  const tid = escapeHtml(teamId || '');
+
+  const velColor = statColor(radarAttrs.VEL);
+  const driColor = statColor(radarAttrs.DRI);
+  const tirColor = statColor(radarAttrs.TIR);
+  const pasColor = statColor(radarAttrs.PAS);
+  const fisColor = statColor(radarAttrs.FIS);
+  const defColor = statColor(radarAttrs.DEF);
+
+  return `
+    <a class="player-card" href="player.html?id=${pid}&team=${tid}">
+      <div class="player-card-top" style="background:linear-gradient(135deg,${ovrColor}33 0%,${ovrColor}11 100%)">
+        <div class="player-card-ovr-block">
+          <span class="player-card-ovr" style="color:${ovrColor}">${escapeHtml(ovr)}</span>
+          <span class="player-card-pos" style="color:${posColor}">${posDisplay}</span>
+        </div>
+        <div class="player-card-badge-col">
+          <img class="player-card-flag" src="${flagSrc(player.Nationality)}"
+            onerror="this.onerror=null;this.src='img/flags/default.png'" alt="">
+          <img class="player-card-crest" src="img/teams/${tid}.png"
+            onerror="this.onerror=null;this.src='img/teams/default.png'" alt="">
+        </div>
+      </div>
+      <div class="player-card-photo-wrap">
+        <img class="player-card-photo" src="img/players/${pid}.png"
+          onerror="handleMinifaceError(this,'${pid}')" alt="${safeName}">
+      </div>
+      <div class="player-card-footer">
+        <div class="player-card-name">${safeName}</div>
+        <div class="player-card-stats">
+          <div class="pcs"><span class="pcs-val" style="color:${velColor}">${radarAttrs.VEL}</span><span class="pcs-key">VEL</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${driColor}">${radarAttrs.DRI}</span><span class="pcs-key">DRI</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${tirColor}">${radarAttrs.TIR}</span><span class="pcs-key">TIR</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${pasColor}">${radarAttrs.PAS}</span><span class="pcs-key">PAS</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${fisColor}">${radarAttrs.FIS}</span><span class="pcs-key">FIS</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${defColor}">${radarAttrs.DEF}</span><span class="pcs-key">DEF</span></div>
+        </div>
+      </div>
+    </a>`;
+}
+
+function renderPlayerCarousel(players, teamId) {
+  // Sort by position group order, then OVR descending
+  const posOrder = {};
+  PES_POSITIONS.forEach((pos, idx) => { posOrder[pos] = idx; });
+  const sorted = players.slice().sort((a, b) => {
+    const pa = posOrder[a.Position] !== undefined ? posOrder[a.Position] : 99;
+    const pb = posOrder[b.Position] !== undefined ? posOrder[b.Position] : 99;
+    if (pa !== pb) return pa - pb;
+    return (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0);
+  });
+
+  if (!sorted.length) {
+    return `<div class="player-cards-section"><p style="color:var(--color-text-muted);padding:16px 0">No hay jugadores en este equipo.</p></div>`;
+  }
+
+  const total = sorted.length;
+  const cardsHtml = sorted.map(p => renderPlayerCard(p, teamId)).join('');
+
+  return `
+    <div class="player-cards-section">
+      <div class="player-cards-header">
+        <span class="player-cards-title">Plantilla</span>
+        <div class="player-cards-nav">
+          <button class="player-cards-nav-btn" id="cards-prev" aria-label="Anterior" disabled>◀</button>
+          <span class="player-cards-counter" id="cards-counter"></span>
+          <button class="player-cards-nav-btn" id="cards-next" aria-label="Siguiente"${total <= 1 ? ' disabled' : ''}>▶</button>
+        </div>
+      </div>
+      <div class="player-cards-viewport" id="player-cards-viewport">
+        <div class="player-cards-track" id="player-cards-track">
+          ${cardsHtml}
+        </div>
+      </div>
+    </div>`;
+}
+
+function initPlayerCarousel() {
+  const track = document.getElementById('player-cards-track');
+  const viewport = document.getElementById('player-cards-viewport');
+  const prevBtn = document.getElementById('cards-prev');
+  const nextBtn = document.getElementById('cards-next');
+  const counter = document.getElementById('cards-counter');
+  if (!track || !viewport || !prevBtn || !nextBtn || !counter) return;
+
+  const cards = track.querySelectorAll('.player-card');
+  const total = cards.length;
+  if (!total) return;
+
+  const GAP = 12;
+  let currentIndex = 0;
+
+  function getCardWidth() {
+    return cards[0].offsetWidth + GAP;
+  }
+
+  function getVisibleCount() {
+    const vpWidth = viewport.clientWidth;
+    return Math.max(1, Math.floor((vpWidth + GAP) / getCardWidth()));
+  }
+
+  function update() {
+    const visCount = getVisibleCount();
+    const maxIndex = Math.max(0, total - visCount);
+    currentIndex = Math.min(currentIndex, maxIndex);
+
+    track.style.transform = `translateX(-${currentIndex * getCardWidth()}px)`;
+
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex >= maxIndex;
+
+    const displayEnd = Math.min(currentIndex + visCount, total);
+    counter.textContent = `${currentIndex + 1}–${displayEnd} de ${total}`;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    const visCount = getVisibleCount();
+    currentIndex = Math.max(0, currentIndex - visCount);
+    update();
+  });
+
+  nextBtn.addEventListener('click', () => {
+    const visCount = getVisibleCount();
+    const maxIndex = Math.max(0, total - visCount);
+    currentIndex = Math.min(maxIndex, currentIndex + visCount);
+    update();
+  });
+
+  update();
+  window.addEventListener('resize', update);
+}
 
 function renderPlayerRow(player, teamId) {
   const ovr = player.Overall || '–';
@@ -519,10 +660,10 @@ function renderTeamPage(team, players, formationRow, squadSlots) {
   const typeLabel = TYPE_LABELS[team.type] || '';
   const safeTeamName = escapeHtml(team.displayName);
 
-  // Build grouped layout
-  const groupedHtml = renderPositionGroups(players, team.id);
+  // Build player card carousel
+  const carouselHtml = renderPlayerCarousel(players, team.id);
 
-  // Build formation pitch (above the squad table)
+  // Build formation pitch (above the carousel)
   const pitchHtml = renderFormationPitch(players, formationRow, squadSlots, team.id);
 
   const content = document.getElementById('team-content');
@@ -541,9 +682,7 @@ function renderTeamPage(team, players, formationRow, squadSlots) {
 
     ${pitchHtml}
 
-    <div class="squad-groups">
-      ${groupedHtml}
-    </div>`;
+    ${carouselHtml}`;
 
   content.style.display = 'block';
   document.getElementById('loading-overlay').style.display = 'none';
@@ -551,14 +690,8 @@ function renderTeamPage(team, players, formationRow, squadSlots) {
   // Attach back button handler via DOM (avoids inline onclick)
   document.getElementById('btn-back').addEventListener('click', goBack);
 
-  // Event delegation: clicking any player row navigates to the player page
-  content.addEventListener('click', function (e) {
-    const row = e.target.closest('.player-row');
-    if (!row) return;
-    const pid = row.dataset.playerId;
-    const tid = row.dataset.teamId;
-    if (pid && tid) selectPlayer(pid, tid);
-  });
+  // Initialise the player card carousel navigation
+  initPlayerCarousel();
 
   // Update page title
   document.title = `${team.displayName} – Base de datos PES`;
