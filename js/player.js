@@ -327,11 +327,11 @@ const APPEARANCE_SECTIONS = [
       {
         title: 'Vello Facial',
         fields: [
-          { col: 'Facial Hair Type',    label: 'Tipo vello fac.',          imageKey: 'facial_hair' },
-          { col: 'Facial Hair Colour R',label: 'Color del vello facial R', noPlus: true },
-          { col: 'Facial Hair Colour G',label: 'Color del vello facial V', noPlus: true },
-          { col: 'Facial Hair Colour B',label: 'Color del vello facial A', noPlus: true },
-          { col: 'Thickness',           label: 'Espesura' },
+          { col: 'Facial Hair Type',    label: 'Tipo vello fac.',          imageKey: 'facial_hair', conditionalLabel: { value: '1', label: 'No' } },
+          { col: 'Facial Hair Colour R',label: 'Color del vello facial R', noPlus: true, conditionalDash: { col: 'Facial Hair Type', value: '1' } },
+          { col: 'Facial Hair Colour G',label: 'Color del vello facial V', noPlus: true, conditionalDash: { col: 'Facial Hair Type', value: '1' } },
+          { col: 'Facial Hair Colour B',label: 'Color del vello facial A', noPlus: true, conditionalDash: { col: 'Facial Hair Type', value: '1' } },
+          { col: 'Thickness',           label: 'Espesura',                              conditionalDash: { col: 'Facial Hair Type', value: '1' } },
         ],
       },
       {
@@ -743,6 +743,11 @@ function renderAppearanceField(field, appearance, player) {
     if (depVal === field.notApplicableWhen.value) {
       return renderAppearanceRow(field.label, '*', null, null);
     }
+  }
+
+  // conditionalLabel: show a specific label when rawVal matches the given value (takes priority over imageKey)
+  if (field.conditionalLabel && rawVal === field.conditionalLabel.value) {
+    return renderAppearanceRow(field.label, field.conditionalLabel.label, null, null);
   }
 
   // zeroLabel: show a custom label (e.g. "No") when value is '0'
