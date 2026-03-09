@@ -2165,7 +2165,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  width: 54px;
+  width: 62px;
   z-index: 10;
   text-decoration: none;
   cursor: pointer;
@@ -2195,8 +2195,8 @@ body {
 
 .pitch-player-photo-wrap {
   position: relative;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
 }
 
@@ -2233,7 +2233,7 @@ body {
   border-radius: 3px;
   overflow: hidden;
   gap: 0;
-  width: 54px;
+  width: 62px;
 }
 
 .pitch-player-ovr {
@@ -2254,6 +2254,14 @@ body {
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
+  line-height: 1.5;
+}
+
+.pitch-player-pos-badge {
+  font-size: 0.45rem;
+  font-weight: 800;
+  padding: 2px 3px;
+  flex-shrink: 0;
   line-height: 1.5;
 }
 
@@ -2390,6 +2398,48 @@ body {
   gap: 12px;
   transition: transform 0.3s ease;
   will-change: transform;
+}
+
+.player-cards-group {
+  margin-bottom: 20px;
+}
+
+.player-cards-group:last-child {
+  margin-bottom: 0;
+}
+
+.player-cards-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.player-cards-group-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--color-text-muted);
+}
+
+.player-cards-group-count {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1px 7px;
+  line-height: 1.6;
+}
+
+.player-cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .player-card {
