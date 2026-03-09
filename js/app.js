@@ -1590,9 +1590,19 @@ function runSearch(query) {
     matchedKeys = intersectSets(matchedKeys, keysForTerm);
   });
 
-  const results = matchedKeys
+  const rawResults = matchedKeys
     ? Array.from(matchedKeys).map(key => DB.playersByKey[key]).filter(Boolean)
     : [];
+
+  // Deduplicate by player ID: prefer club/special-team entries over national team entries
+  const clubPlayerIds = new Set(DB.players.filter(p => p._team.type !== '2').map(p => p.ID));
+  const seenIds = new Set();
+  const results = rawResults.filter(p => {
+    if (p._team.type === '2' && clubPlayerIds.has(p.ID)) return false;
+    if (seenIds.has(p.ID)) return false;
+    seenIds.add(p.ID);
+    return true;
+  });
 
   hideAllViews();
   const view = document.getElementById('search-view');

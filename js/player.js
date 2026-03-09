@@ -1031,11 +1031,6 @@ function renderPositionPitch(player) {
           <div class="position-field-center-circle"></div>
           ${markers.join('')}
         </div>
-        <div class="position-field-legend">
-          <div class="pf-legend-item"><span class="pf-legend-dot" style="background:var(--color-text-muted)"></span>A: Relleno completo</div>
-          <div class="pf-legend-item"><span class="pf-legend-dot" style="background:rgba(139,148,158,0.4);border:2px solid var(--color-text-muted)"></span>B: Semitransparente</div>
-          <div class="pf-legend-item"><span class="pf-legend-dot" style="background:transparent;border:2px solid var(--color-text-muted)"></span>C: Solo borde</div>
-        </div>
       </div>
     </div>`;
 }

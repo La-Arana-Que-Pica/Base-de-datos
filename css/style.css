@@ -553,27 +553,26 @@ body {
   width: 36px;
   height: 36px;
   object-fit: cover;
-  border-radius: 50%;
-  border: 2px solid var(--color-border);
+  border-radius: 4px;
 }
 
 .player-flag {
-  width: 20px;
-  height: 14px;
+  width: 26px;
+  height: 18px;
   object-fit: cover;
   border-radius: 2px;
   vertical-align: middle;
 }
 
 .overall-badge {
-  display: inline-block;
-  width: 34px;
-  height: 34px;
-  line-height: 34px;
-  text-align: center;
-  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 /* ── Player profile view ── */
@@ -708,14 +707,15 @@ body {
   background: transparent;
   border: 1px solid #8b949e;
   color: #8b949e;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 3px 10px;
+  padding: 0 8px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 36px;
+  height: 26px;
+  min-width: 26px;
   text-align: center;
 }
 
@@ -1905,44 +1905,27 @@ body {
 
 .pitch-field {
   position: relative;
-  width: 280px;
-  height: 397px;
-  background-color: #2a5424;
-  background-image: url('../img/pitch/StadiumSetting_turf_02.png');
-  background-size: cover;
+  width: 340px;
+  height: 480px;
+  background-color: #2a5f24;
+  background-image: url('../img/pitch/pitch.svg');
+  background-size: 100% 100%;
   background-position: center;
   border: 2px solid rgba(255, 255, 255, 0.45);
   border-radius: 6px;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .pitch-halfway-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.35);
+  display: none;
 }
 
 .pitch-penalty-area-bottom {
-  position: absolute;
-  left: 20%;
-  right: 20%;
-  bottom: 0;
-  height: 25%;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-bottom: none;
+  display: none;
 }
 
 .pitch-goal-area-bottom {
-  position: absolute;
-  left: 36%;
-  right: 36%;
-  bottom: 0;
-  height: 9%;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-bottom: none;
+  display: none;
 }
 
 .pitch-player {
@@ -1970,7 +1953,7 @@ body {
 }
 
 .pitch-player-pos-sm {
-  font-size: 0.52rem;
+  font-size: 0.58rem;
   font-weight: 800;
   text-shadow: 0 1px 3px rgba(0,0,0,0.9);
   white-space: nowrap;
@@ -1978,8 +1961,8 @@ body {
 }
 
 .pitch-player-photo-wrap {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   overflow: hidden;
   background: var(--color-secondary);
   flex-shrink: 0;
@@ -2018,11 +2001,11 @@ body {
   border-radius: 3px;
   overflow: hidden;
   gap: 0;
-  max-width: 80px;
+  max-width: 90px;
 }
 
 .pitch-player-ovr {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 800;
   padding: 1px 4px;
   flex-shrink: 0;
@@ -2030,14 +2013,14 @@ body {
 }
 
 .pitch-player-name {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   color: #fff;
   font-weight: 600;
   padding: 1px 5px 1px 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 58px;
+  max-width: 66px;
   line-height: 1.5;
 }
 
@@ -2110,7 +2093,7 @@ body {
   position: relative;
   width: 160px;
   height: 240px;
-  background: linear-gradient(to bottom, #2d5a27 0%, #2a5424 48%, #2a5424 52%, #2d5a27 100%);
+  background: linear-gradient(to bottom, #264d21 0%, #224020 48%, #224020 52%, #264d21 100%);
   border: 1.5px solid rgba(255,255,255,0.45);
   border-radius: 4px;
   overflow: visible;
@@ -2172,7 +2155,7 @@ body {
   position: absolute;
   transform: translate(-50%, -50%);
   border-radius: 4px;
-  border: 2px solid;
+  border: 1px solid;
   padding: 2px 5px;
   font-size: 0.6rem;
   font-weight: 800;

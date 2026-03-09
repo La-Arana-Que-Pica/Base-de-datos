@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="480" viewBox="0 0 340 480">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2d6a27"/>
+      <stop offset="100%" stop-color="#236b1e"/>
+    </linearGradient>
+    <pattern id="st" x="0" y="14.4" width="340" height="128.9" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="340" height="64.5" fill="rgba(255,255,255,0.035)"/>
+    </pattern>
+    <clipPath id="pitch-clip">
+      <rect x="17.0" y="14.4" width="306.0" height="451.2"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="340" height="480" fill="url(#g1)"/>
+  <!-- Stripes -->
+  <rect x="17.0" y="14.4" width="306.0" height="451.2" fill="url(#st)"/>
+
+  <!-- Pitch boundary -->
+  <rect x="17.0" y="14.4" width="306.0" height="451.2"
+        fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"/>
+
+  <!-- Midfield line -->
+  <line x1="17.0" y1="14.4" x2="323.0" y2="14.4"
+        stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
+
+  <!-- Center circle (partial – shows arc above midfield within pitch) -->
+  <circle cx="170.0" cy="14.4" r="79.4"
+          fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" clip-path="url(#pitch-clip)"/>
+
+  <!-- Center spot -->
+  <circle cx="170.0" cy="14.4" r="2.5" fill="rgba(255,255,255,0.75)"/>
+
+  <!-- Penalty area -->
+  <rect x="79.3" y="322.4" width="181.4" height="143.2"
+        fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"/>
+
+  <!-- Goal area -->
+  <rect x="128.8" y="417.9" width="82.4" height="47.7"
+        fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"/>
+
+  <!-- Goal (between posts) -->
+  <rect x="153.5" y="465.6" width="32.9" height="9"
+        fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"/>
+
+  <!-- Penalty spot -->
+  <circle cx="170.0" cy="370.2" r="2.5" fill="rgba(255,255,255,0.75)"/>
+
+  <!-- Penalty arc -->
+  <path d="M 106.6 322.4 A 79.4 79.4 0 0 1 233.4 322.4" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"/>
+</svg>
