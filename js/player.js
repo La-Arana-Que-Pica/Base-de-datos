@@ -290,9 +290,9 @@ const APPEARANCE_SECTIONS = [
           { col: 'Eyebrow Thickness',   label: 'Espesor de cejas' },
           { col: 'Eyebrow Style',       label: 'Tipo de cejas',        enum: { '0': 'Fina', '1': 'Normal', '2': 'Gruesa' } },
           { col: 'Eyebrow Density',     label: 'Densidad de cejas' },
-          { col: 'Eyebrow Colour R',    label: 'Color de cejas R' },
-          { col: 'Eyebrow Colour G',    label: 'Color de cejas V' },
-          { col: 'Eyebrow Colour B',    label: 'Color de cejas A' },
+          { col: 'Eyebrow Colour R',    label: 'Color de cejas R',   noPlus: true },
+          { col: 'Eyebrow Colour G',    label: 'Color de cejas V',   noPlus: true },
+          { col: 'Eyebrow Colour B',    label: 'Color de cejas A',   noPlus: true },
           { col: 'Inner Eyebrow Height',label: 'Altura interior cejas' },
           { col: 'Brow Width',          label: 'Ancho del entrecejo' },
           { col: 'Outer Edyebrow Height',label: 'Altura exterior cejas' },
@@ -328,9 +328,9 @@ const APPEARANCE_SECTIONS = [
         title: 'Vello Facial',
         fields: [
           { col: 'Facial Hair Type',    label: 'Tipo vello fac.',          imageKey: 'facial_hair' },
-          { col: 'Facial Hair Colour R',label: 'Color del vello facial R' },
-          { col: 'Facial Hair Colour G',label: 'Color del vello facial V' },
-          { col: 'Facial Hair Colour B',label: 'Color del vello facial A' },
+          { col: 'Facial Hair Colour R',label: 'Color del vello facial R', noPlus: true },
+          { col: 'Facial Hair Colour G',label: 'Color del vello facial V', noPlus: true },
+          { col: 'Facial Hair Colour B',label: 'Color del vello facial A', noPlus: true },
           { col: 'Thickness',           label: 'Espesura' },
         ],
       },
@@ -364,8 +364,8 @@ const APPEARANCE_SECTIONS = [
         title: 'General',
         fields: [
           { col: 'Overall - Style',         label: 'Estilo',    enum: { '0': '-', '1': 'Normal', '2': 'Seco', '3': 'Mohicano', '4': 'Afro', '5': 'Rastas', '6': 'Trenzado', '7': 'Especial' } },
-          { col: 'Overall - Length',        label: 'Longitud',  enum: { '0': '-', '1': 'Afeitado', '2': 'Muy corto', '3': 'Corto', '4': 'Mediano', '5': 'Largo' } },
-          { col: 'Overall - Wave Level',    label: 'Ondulado' },
+          { col: 'Overall - Length',        label: 'Longitud',  enum: { '0': '-', '1': 'Afeitado', '2': 'Muy corto', '3': 'Corto', '4': 'Mediano', '5': 'Largo' }, notApplicableWhen: { col: 'Overall - Style', value: '7' } },
+          { col: 'Overall - Wave Level',    label: 'Ondulado',  notApplicableWhen: { col: 'Overall - Style', value: '7' } },
           { col: 'Overall - Hair Variation',label: 'Variación del pelo', imageKey: 'hair_variation' },
         ],
       },
@@ -388,12 +388,12 @@ const APPEARANCE_SECTIONS = [
       {
         title: 'Color de pelo / Accesorios',
         fields: [
-          { col: 'Hair Colour',    label: 'Color de pelo' },
-          { col: 'Hair Colour R',  label: 'Color de pelo R' },
-          { col: 'Hair Colour G',  label: 'Color de pelo V' },
-          { col: 'Hair Colour B',  label: 'Color de pelo A' },
+          { col: 'Hair Colour',    label: 'Color de pelo',    imageKey: 'hair_colour' },
+          { col: 'Hair Colour R',  label: 'Color de pelo R',  noPlus: true },
+          { col: 'Hair Colour G',  label: 'Color de pelo V',  noPlus: true },
+          { col: 'Hair Colour B',  label: 'Color de pelo A',  noPlus: true },
           { col: 'Accessories',    label: 'Accesorios',       enum: { 'False': 'No', 'True': 'Sí' } },
-          { col: 'Accessory Colour',label: 'Color de accesorio' },
+          { col: 'Accessory Colour',label: 'Color de accesorio', noPlus: true },
         ],
       },
     ],
@@ -404,8 +404,8 @@ const APPEARANCE_SECTIONS = [
       {
         title: null,
         fields: [
-          { col: 'Height',            label: 'Altura (cm)',          source: 'player' },
-          { col: 'Weight',            label: 'Peso (kg)',            source: 'player' },
+          { col: 'Height',            label: 'Altura (cm)',          source: 'player', noPlus: true },
+          { col: 'Weight',            label: 'Peso (kg)',            source: 'player', noPlus: true },
           { col: 'Neck Length',       label: 'Longitud del cuello' },
           { col: 'Neck Size',         label: 'Anchura del cuello' },
           { col: 'Shoulder Height',   label: 'Altura de hombros' },
@@ -435,7 +435,6 @@ const APPEARANCE_SECTIONS = [
           { col: 'Colour',             label: 'Color de guantes',              conditionalDash: { col: 'Player Gloves', value: '0' } },
           { col: 'Gloves',             label: 'Guantes portero',               imageKey: 'gloves', gkOnly: true },
           { col: 'Undershorts',        label: 'Calentadores',                  enum: { '0': 'V: No / I: No', '1': 'V: No / I: Largo', '2': 'V: Corto / I: Corto', '3': 'V: Corto / I: Largo' } },
-          { col: 'Sleeves',            label: 'Mangas' },
           { col: 'Shirttail',          label: 'Estilo de la camiseta',         enum: { '0': 'Dentro', '1': 'Fuera' } },
           { col: 'Sock Length',        label: 'Largo de las calcetas',         enum: { '0': 'Normal', '1': 'Corto', '2': 'Largo' } },
           { col: 'Long-Sleeved Inners',label: 'Playera interior manga larga',  enum: { '0': 'No', '1': 'Normal', '2': 'Cuello tortuga' } },
@@ -471,8 +470,8 @@ const APPEARANCE_SECTIONS = [
       {
         title: 'Celebración de goles',
         fields: [
-          { col: 'Celebration 1', label: 'Celebración de goles 1', source: 'player', dashIfZero: true },
-          { col: 'Celebration 2', label: 'Celebración de goles 2', source: 'player', dashIfZero: true },
+          { col: 'Celebration 1', label: 'Celebración de goles 1', source: 'player', noPlus: true, zeroLabel: 'No' },
+          { col: 'Celebration 2', label: 'Celebración de goles 2', source: 'player', noPlus: true, zeroLabel: 'No' },
         ],
       },
     ],
@@ -738,6 +737,19 @@ function renderAppearanceField(field, appearance, player) {
     }
   }
 
+  // notApplicableWhen: show '*' when a dependency column matches a specific value
+  if (field.notApplicableWhen) {
+    const depVal = appearance ? (appearance[field.notApplicableWhen.col] || '') : '';
+    if (depVal === field.notApplicableWhen.value) {
+      return renderAppearanceRow(field.label, '*', null, null);
+    }
+  }
+
+  // zeroLabel: show a custom label (e.g. "No") when value is '0'
+  if (field.zeroLabel !== undefined && rawVal === '0') {
+    return renderAppearanceRow(field.label, field.zeroLabel, null, null);
+  }
+
   // dashIfZero: show '-' if value is '0'
   if (field.dashIfZero && rawVal === '0') {
     return renderAppearanceRow(field.label, '-', null, null);
@@ -765,9 +777,13 @@ function renderAppearanceField(field, appearance, player) {
   }
 
   const numVal = Number(displayVal);
-  const formattedVal = (!isNaN(numVal) && displayVal !== '' && displayVal !== '-')
-    ? (numVal > 0 ? '+' + numVal : String(numVal))
-    : displayVal;
+  const isNumeric = !isNaN(numVal) && displayVal !== '' && displayVal !== '-';
+  let formattedVal;
+  if (isNumeric && !field.noPlus) {
+    formattedVal = numVal >= 0 ? '+' + numVal : String(numVal);
+  } else {
+    formattedVal = displayVal;
+  }
   return renderAppearanceRow(field.label, formattedVal, null, null);
 }
 
@@ -782,7 +798,9 @@ function renderAppearanceRow(label, value, imgPath, imageKey) {
       <span class="appearance-thumb-val">${value}</span>
     </span>`;
   } else {
-    valueHtml = `<span class="face-data-value${value === '-' ? ' face-data-dash' : ''}">${value}</span>`;
+    const VALUE_EXTRA_CLASS = { '-': ' face-data-dash', '*': ' face-data-na' };
+    const extraClass = VALUE_EXTRA_CLASS[value] || '';
+    valueHtml = `<span class="face-data-value${extraClass}">${value}</span>`;
   }
   return `<div class="face-data-row">
     <span class="face-data-label">${label}</span>
