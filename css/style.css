@@ -2091,8 +2091,8 @@ body {
 
 .pitch-field {
   position: relative;
-  width: 630px;
-  height: 670px;
+  width: 300px;
+  height: 380px;
   background-color: #2d6a27;
   background-image: none;
   border: 2px solid rgba(255, 255, 255, 0.45);
@@ -2115,7 +2115,7 @@ body {
 }
 
 .pf-center-circle {
-  width: 80px; height: 80px;
+  width: 40px; height: 40px;
   left: 50%; top: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
@@ -2165,7 +2165,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  width: 106px;
+  width: 54px;
   z-index: 10;
   text-decoration: none;
   cursor: pointer;
@@ -2186,7 +2186,7 @@ body {
 }
 
 .pitch-player-pos-sm {
-  font-size: 0.62rem;
+  font-size: 0.5rem;
   font-weight: 800;
   text-shadow: 0 1px 3px rgba(0,0,0,0.9);
   white-space: nowrap;
@@ -2195,30 +2195,28 @@ body {
 
 .pitch-player-photo-wrap {
   position: relative;
-  width: 48px;
-  height: 48px;
-  background: var(--color-secondary);
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 }
 
 .pitch-player-photo {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  border-radius: 3px;
+  object-fit: contain;
   display: block;
 }
 
 .pitch-captain-badge {
   position: absolute;
-  top: -5px;
-  right: -6px;
+  top: -4px;
+  right: -5px;
   background: #f9d901;
   color: #111;
-  font-size: 0.55rem;
+  font-size: 0.45rem;
   font-weight: 900;
-  width: 13px;
-  height: 13px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2235,22 +2233,22 @@ body {
   border-radius: 3px;
   overflow: hidden;
   gap: 0;
-  width: 106px;
+  width: 54px;
 }
 
 .pitch-player-ovr {
-  font-size: 0.7rem;
+  font-size: 0.55rem;
   font-weight: 800;
-  padding: 2px 5px;
+  padding: 2px 3px;
   flex-shrink: 0;
   line-height: 1.5;
 }
 
 .pitch-player-name {
-  font-size: 0.7rem;
+  font-size: 0.55rem;
   color: #fff;
   font-weight: 600;
-  padding: 2px 5px 2px 3px;
+  padding: 2px 3px 2px 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2313,6 +2311,217 @@ body {
   font-weight: 600;
   font-size: 0.8rem;
   text-align: right;
+}
+
+/* ── Player cards carousel ── */
+.player-cards-section {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.player-cards-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.player-cards-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+}
+
+.player-cards-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-cards-nav-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  padding: 0;
+}
+
+.player-cards-nav-btn:hover:not(:disabled) {
+  background: var(--color-card-hover);
+  border-color: var(--color-highlight);
+  color: var(--color-highlight);
+}
+
+.player-cards-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.player-cards-counter {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  min-width: 90px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.player-cards-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.player-cards-track {
+  display: flex;
+  gap: 12px;
+  transition: transform 0.3s ease;
+  will-change: transform;
+}
+
+.player-card {
+  flex-shrink: 0;
+  width: 155px;
+  background: linear-gradient(160deg, #1d2433 0%, #141921 100%);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.player-card:hover {
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+  border-color: var(--color-highlight);
+}
+
+.player-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 10px 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.player-card-ovr-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.player-card-ovr {
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.player-card-pos {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.player-card-badge-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.player-card-flag {
+  width: 26px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.player-card-crest {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.player-card-photo-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background: rgba(0,0,0,0.15);
+  height: 90px;
+  overflow: hidden;
+}
+
+.player-card-photo {
+  width: 80px;
+  height: 90px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.player-card-footer {
+  padding: 8px 10px 10px;
+  flex: 1;
+}
+
+.player-card-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+}
+
+.player-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 7px;
+}
+
+.pcs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.pcs-val {
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pcs-key {
+  font-size: 0.52rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 /* ── Position field visualization ── */
