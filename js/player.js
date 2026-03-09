@@ -798,7 +798,8 @@ function renderAppearanceRow(label, value, imgPath, imageKey) {
       <span class="appearance-thumb-val">${value}</span>
     </span>`;
   } else {
-    const extraClass = value === '-' ? ' face-data-dash' : value === '*' ? ' face-data-na' : '';
+    const VALUE_EXTRA_CLASS = { '-': ' face-data-dash', '*': ' face-data-na' };
+    const extraClass = VALUE_EXTRA_CLASS[value] || '';
     valueHtml = `<span class="face-data-value${extraClass}">${value}</span>`;
   }
   return `<div class="face-data-row">
