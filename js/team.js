@@ -275,17 +275,21 @@ function resetFilters() {
  * mini-faces and names. Coordinates from the formation CSV:
  *   Ubicacion X = depth (0 = own goal, ~52 = midfield)
  *   Ubicacion Y = width  (0 = left touchline, ~100 = right touchline)
+ *
+ * Note: "Indice Jugador i" values are 0-based indices into the 32-slot squad
+ * array, so we use squadSlots[idx] (a 32-element array indexed from 0).
  */
-function renderFormationPitch(players, formationRow) {
-  if (!formationRow || !players.length) return '';
+function renderFormationPitch(players, formationRow, squadSlots, teamId) {
+  if (!formationRow || !squadSlots || !players.length) return '';
 
   const tokens = [];
 
   for (let i = 1; i <= 11; i++) {
     const rawIdx = formationRow[`Indice Jugador ${i}`];
     const squadIdx = parseInt(rawIdx, 10);
-    if (isNaN(squadIdx) || squadIdx < 1 || squadIdx > players.length) continue;
-    const player = players[squadIdx - 1];
+    // Indice Jugador is 0-based into the 32-slot squad array
+    if (isNaN(squadIdx) || squadIdx < 0 || squadIdx >= squadSlots.length) continue;
+    const player = squadSlots[squadIdx];
     if (!player) continue;
 
     const xDepth = parseFloat(formationRow[`Ubicacion X${i} F1`]) || 0;
@@ -300,16 +304,17 @@ function renderFormationPitch(players, formationRow) {
     // Show the last word of the name as a short label
     const shortName = escapeHtml((player.Name || '').split(' ').slice(-1)[0] || player.Name);
     const pid = escapeHtml(player.ID);
+    const tid = escapeHtml(teamId || '');
 
     tokens.push(`
-      <div class="pitch-player" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
+      <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
         <div class="pitch-player-photo-wrap">
           <img src="img/players/${pid}.png"
             onerror="handleMinifaceError(this,'${pid}')"
             class="pitch-player-photo" alt="${shortName}">
         </div>
         <div class="pitch-player-name">${shortName}</div>
-      </div>`);
+      </a>`);
   }
 
   if (!tokens.length) return '';
@@ -336,8 +341,10 @@ function renderPlayerRow(player, teamId) {
   const posDisplay = translatePosition(player.Position);
   const radarAttrs = computeRadarAttributes(player);
   const safeName = escapeHtml(player.Name);
+  const shirtNum = player._shirtNumber ? escapeHtml(String(player._shirtNumber)) : '–';
 
   return `<tr class="player-row" data-player-id="${escapeHtml(player.ID)}" data-team-id="${escapeHtml(teamId)}">
+    <td class="shirt-number-cell">${shirtNum}</td>
     <td>
       <img class="player-row-photo"
         src="img/players/${escapeHtml(player.ID)}.png"
@@ -366,7 +373,7 @@ function selectPlayer(playerId, teamId) {
   window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
 }
 
-function renderTeamPage(team, players, formationRow) {
+function renderTeamPage(team, players, formationRow, squadSlots) {
   _players = players;
   _teamId = team.id;
 
@@ -377,7 +384,7 @@ function renderTeamPage(team, players, formationRow) {
   const groupedHtml = renderPositionGroups(players, team.id);
 
   // Build formation pitch (above the squad table)
-  const pitchHtml = renderFormationPitch(players, formationRow);
+  const pitchHtml = renderFormationPitch(players, formationRow, squadSlots, team.id);
 
   const content = document.getElementById('team-content');
   content.innerHTML = `
@@ -455,6 +462,7 @@ function renderPositionGroups(players, teamId) {
         <table class="players-table">
           <thead>
             <tr>
+              <th class="shirt-number-cell">#</th>
               <th></th>
               <th>Nombre</th>
               <th>Nac</th>
@@ -486,6 +494,7 @@ function renderPositionGroups(players, teamId) {
         <table class="players-table">
           <thead>
             <tr>
+              <th class="shirt-number-cell">#</th>
               <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
               <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
             </tr>
@@ -564,19 +573,26 @@ async function boot() {
   // Find this team's squad
   const squadRow = squadRows.find(s => s['Id'] === teamId);
   const players = [];
+  // Build a 0-indexed 32-slot array (some slots may be null) for formation lookup
+  const squadSlots = new Array(32).fill(null);
   if (squadRow) {
     for (let i = 1; i <= 32; i++) {
       const pid = squadRow[`Player ${i}`];
       if (!pid || pid === '0') continue;
       const player = playerMap[pid];
-      if (player) players.push(player);
+      if (player) {
+        const shirtNum = squadRow[`Shirt number ${i}`];
+        const playerWithShirt = { ...player, _shirtNumber: shirtNum && shirtNum !== '0' ? parseInt(shirtNum, 10) || null : null };
+        players.push(playerWithShirt);
+        squadSlots[i - 1] = playerWithShirt;  // 0-indexed (slot i → index i-1)
+      }
     }
   }
 
   // Find this team's formation data
   const formationRow = formationRows.find(f => f['Id'] === teamId) || null;
 
-  renderTeamPage(team, players, formationRow);
+  renderTeamPage(team, players, formationRow, squadSlots);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────

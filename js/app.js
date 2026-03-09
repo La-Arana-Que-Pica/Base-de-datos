@@ -29,6 +29,7 @@ const DB = {
   leagues: [],    // [{ id, name, teamIds }]
   searchIndex: Object.create(null), // token/prefix -> Set<"teamId:playerId">
   playersByKey: Object.create(null),
+  appearanceMap: Object.create(null), // playerId → appearanceData (global)
   loaded: false,
 };
 
@@ -312,6 +313,7 @@ async function boot() {
     const id = row['Id'];
     if (id) globalAppearanceMap[id] = row;
   });
+  DB.appearanceMap = globalAppearanceMap;
 
   // Build team map (teamId → team object)
   const teamById = {};
@@ -370,6 +372,24 @@ async function boot() {
       team.players.push(p);
       DB.players.push(p);
       indexPlayerForSearch(p);
+    }
+  });
+
+  // Mark players who play for both a club/special team and a national team.
+  // Club entries (type 0 or 1) get _playsForNational = true when the same
+  // player also appears in a national team squad (type 2).
+  const playerNationalTeam = new Map(); // playerId → national team
+  const playerHasClub = new Set();     // playerIds with a club/special team entry
+  DB.players.forEach(p => {
+    if (p._team.type === '2') {
+      if (!playerNationalTeam.has(p.ID)) playerNationalTeam.set(p.ID, p._team);
+    } else {
+      playerHasClub.add(p.ID);
+    }
+  });
+  DB.players.forEach(p => {
+    if (p._team.type !== '2' && playerNationalTeam.has(p.ID)) {
+      p._playsForNational = true;
     }
   });
 
@@ -588,20 +608,118 @@ function showHome() {
 const ALL_PLAYERS_PAGE_SIZE = 50;
 
 // State for the infinite-scroll all-players view
-let _allPlayersList = [];      // sorted, deduplicated player array
+let _allPlayersList = [];      // sorted, filtered, deduplicated player array
 let _allPlayersOffset = 0;     // how many have been rendered so far
 let _allPlayersObserver = null; // IntersectionObserver watching the sentinel
 
+// Advanced filter state
+const _advFilters = {
+  position: '',
+  role: '',
+  nationality: '',
+  club: '',
+  minAge: '',
+  maxAge: '',
+  minHeight: '',
+  maxHeight: '',
+  minWeight: '',
+  maxWeight: '',
+  foot: '',
+  minOvr: '',
+  maxOvr: '',
+  hasFaceScan: '',
+};
+
+// Playing role → position group for filter
+const ROLE_POSITIONS = {
+  'GK':  ['GK'],
+  'DEF': ['CB', 'LB', 'RB'],
+  'MID': ['DMF', 'CMF', 'LMF', 'RMF', 'AMF'],
+  'FWD': ['LWF', 'RWF', 'SS', 'CF'],
+};
+
 /**
- * Build (or rebuild) the sorted, deduplicated players array and reset offset.
+ * Build (or rebuild) the sorted, deduplicated players array with active filters.
+ * Players who appear in both a club team and a national team are shown only
+ * under their club team (national team duplicate entries are skipped).
  */
 function _prepareAllPlayersList() {
+  // Collect all player IDs that have a club/special team entry
+  const clubPlayerIds = new Set(
+    DB.players.filter(p => p._team.type !== '2').map(p => p.ID)
+  );
+
   const seen = new Set();
-  const unique = DB.players.filter(p => {
+  let unique = DB.players.filter(p => {
+    // Skip national team entry if the same player also has a club entry
+    if (p._team.type === '2' && clubPlayerIds.has(p.ID)) return false;
     if (seen.has(p.ID)) return false;
     seen.add(p.ID);
     return true;
   });
+
+  // Apply advanced filters
+  const f = _advFilters;
+
+  if (f.position) {
+    unique = unique.filter(p => p.Position === f.position);
+  }
+  if (f.role) {
+    const rolePosSet = new Set(ROLE_POSITIONS[f.role] || []);
+    unique = unique.filter(p => rolePosSet.has(p.Position));
+  }
+  if (f.nationality) {
+    unique = unique.filter(p => (p.Nationality || '') === f.nationality);
+  }
+  if (f.club) {
+    unique = unique.filter(p => p._team.id === f.club);
+  }
+  if (f.minAge !== '') {
+    const min = parseInt(f.minAge, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Age'], 10) || 0) >= min);
+  }
+  if (f.maxAge !== '') {
+    const max = parseInt(f.maxAge, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Age'], 10) || 0) <= max);
+  }
+  if (f.minHeight !== '') {
+    const min = parseInt(f.minHeight, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Height'], 10) || 0) >= min);
+  }
+  if (f.maxHeight !== '') {
+    const max = parseInt(f.maxHeight, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Height'], 10) || 0) <= max);
+  }
+  if (f.minWeight !== '') {
+    const min = parseInt(f.minWeight, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Weight'], 10) || 0) >= min);
+  }
+  if (f.maxWeight !== '') {
+    const max = parseInt(f.maxWeight, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Weight'], 10) || 0) <= max);
+  }
+  if (f.foot) {
+    // Foot column: 'True' = left foot, 'False' = right foot
+    if (f.foot === 'left')  unique = unique.filter(p => p['Foot'] === 'True');
+    if (f.foot === 'right') unique = unique.filter(p => p['Foot'] === 'False');
+  }
+  if (f.minOvr !== '') {
+    const min = parseInt(f.minOvr, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p.Overall, 10) || 0) >= min);
+  }
+  if (f.maxOvr !== '') {
+    const max = parseInt(f.maxOvr, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p.Overall, 10) || 0) <= max);
+  }
+  if (f.hasFaceScan !== '') {
+    unique = unique.filter(p => {
+      const app = DB.appearanceMap ? DB.appearanceMap[p.ID] : null;
+      const idFace = app ? (app['Id_Face'] || '0') : '0';
+      const hasScan = idFace !== '0' && idFace !== '';
+      return f.hasFaceScan === 'yes' ? hasScan : !hasScan;
+    });
+  }
+
   unique.sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
   _allPlayersList = unique;
   _allPlayersOffset = 0;
@@ -641,6 +759,196 @@ function _appendNextBatch() {
   }
 }
 
+function _buildFilterPanel() {
+  // Collect unique sorted nationalities from all (deduplicated) players
+  const clubPlayerIds = new Set(DB.players.filter(p => p._team.type !== '2').map(p => p.ID));
+  const seen = new Set();
+  const basePlayers = DB.players.filter(p => {
+    if (p._team.type === '2' && clubPlayerIds.has(p.ID)) return false;
+    if (seen.has(p.ID)) return false;
+    seen.add(p.ID);
+    return true;
+  });
+
+  const nationalities = [...new Set(basePlayers.map(p => p.Nationality || '').filter(Boolean))].sort();
+  const clubTeams = DB.teams
+    .filter(t => t.type !== '2' && t.players.length > 0)
+    .sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'));
+
+  const f = _advFilters;
+
+  const natOptions = nationalities.map(n =>
+    `<option value="${n}"${f.nationality === n ? ' selected' : ''}>${n}</option>`
+  ).join('');
+
+  const clubOptions = clubTeams.map(t =>
+    `<option value="${t.id}"${f.club === t.id ? ' selected' : ''}>${t.displayName}</option>`
+  ).join('');
+
+  const posOptions = PES_POSITIONS.map(p =>
+    `<option value="${p}"${f.position === p ? ' selected' : ''}>${translatePosition(p)} (${p})</option>`
+  ).join('');
+
+  return `
+    <div class="adv-filter-panel" id="adv-filter-panel">
+      <div class="adv-filter-grid">
+        <div class="adv-filter-group">
+          <label>Posición</label>
+          <select id="flt-position" onchange="onAdvFilterChange()">
+            <option value="">Todas</option>
+            ${posOptions}
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Rol</label>
+          <select id="flt-role" onchange="onAdvFilterChange()">
+            <option value="">Todos</option>
+            <option value="GK"${f.role === 'GK' ? ' selected' : ''}>Portero</option>
+            <option value="DEF"${f.role === 'DEF' ? ' selected' : ''}>Defensa</option>
+            <option value="MID"${f.role === 'MID' ? ' selected' : ''}>Mediocampista</option>
+            <option value="FWD"${f.role === 'FWD' ? ' selected' : ''}>Delantero</option>
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Nacionalidad</label>
+          <select id="flt-nationality" onchange="onAdvFilterChange()">
+            <option value="">Todas</option>
+            ${natOptions}
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Club</label>
+          <select id="flt-club" onchange="onAdvFilterChange()">
+            <option value="">Todos</option>
+            ${clubOptions}
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Pie dominante</label>
+          <select id="flt-foot" onchange="onAdvFilterChange()">
+            <option value="">Ambos</option>
+            <option value="right"${f.foot === 'right' ? ' selected' : ''}>Derecho</option>
+            <option value="left"${f.foot === 'left' ? ' selected' : ''}>Izquierdo</option>
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Cara escaneada</label>
+          <select id="flt-facescan" onchange="onAdvFilterChange()">
+            <option value="">Todos</option>
+            <option value="yes"${f.hasFaceScan === 'yes' ? ' selected' : ''}>Sí</option>
+            <option value="no"${f.hasFaceScan === 'no' ? ' selected' : ''}>No</option>
+          </select>
+        </div>
+        <div class="adv-filter-group adv-filter-range">
+          <label>Valoración (OVR)</label>
+          <div class="range-inputs">
+            <input type="number" id="flt-min-ovr" placeholder="Min" min="0" max="99" value="${f.minOvr}" oninput="onAdvFilterChange()">
+            <span>–</span>
+            <input type="number" id="flt-max-ovr" placeholder="Máx" min="0" max="99" value="${f.maxOvr}" oninput="onAdvFilterChange()">
+          </div>
+        </div>
+        <div class="adv-filter-group adv-filter-range">
+          <label>Edad</label>
+          <div class="range-inputs">
+            <input type="number" id="flt-min-age" placeholder="Min" min="15" max="50" value="${f.minAge}" oninput="onAdvFilterChange()">
+            <span>–</span>
+            <input type="number" id="flt-max-age" placeholder="Máx" min="15" max="50" value="${f.maxAge}" oninput="onAdvFilterChange()">
+          </div>
+        </div>
+        <div class="adv-filter-group adv-filter-range">
+          <label>Altura (cm)</label>
+          <div class="range-inputs">
+            <input type="number" id="flt-min-height" placeholder="Min" min="150" max="220" value="${f.minHeight}" oninput="onAdvFilterChange()">
+            <span>–</span>
+            <input type="number" id="flt-max-height" placeholder="Máx" min="150" max="220" value="${f.maxHeight}" oninput="onAdvFilterChange()">
+          </div>
+        </div>
+        <div class="adv-filter-group adv-filter-range">
+          <label>Peso (kg)</label>
+          <div class="range-inputs">
+            <input type="number" id="flt-min-weight" placeholder="Min" min="50" max="120" value="${f.minWeight}" oninput="onAdvFilterChange()">
+            <span>–</span>
+            <input type="number" id="flt-max-weight" placeholder="Máx" min="50" max="120" value="${f.maxWeight}" oninput="onAdvFilterChange()">
+          </div>
+        </div>
+      </div>
+      <div class="adv-filter-actions">
+        <button class="adv-filter-reset" onclick="resetAdvancedFilters()">✕ Limpiar filtros</button>
+      </div>
+    </div>`;
+}
+
+function onAdvFilterChange() {
+  _advFilters.position   = (document.getElementById('flt-position')   || {}).value || '';
+  _advFilters.role       = (document.getElementById('flt-role')       || {}).value || '';
+  _advFilters.nationality= (document.getElementById('flt-nationality') || {}).value || '';
+  _advFilters.club       = (document.getElementById('flt-club')       || {}).value || '';
+  _advFilters.foot       = (document.getElementById('flt-foot')       || {}).value || '';
+  _advFilters.hasFaceScan= (document.getElementById('flt-facescan')   || {}).value || '';
+  _advFilters.minOvr     = (document.getElementById('flt-min-ovr')    || {}).value || '';
+  _advFilters.maxOvr     = (document.getElementById('flt-max-ovr')    || {}).value || '';
+  _advFilters.minAge     = (document.getElementById('flt-min-age')    || {}).value || '';
+  _advFilters.maxAge     = (document.getElementById('flt-max-age')    || {}).value || '';
+  _advFilters.minHeight  = (document.getElementById('flt-min-height') || {}).value || '';
+  _advFilters.maxHeight  = (document.getElementById('flt-max-height') || {}).value || '';
+  _advFilters.minWeight  = (document.getElementById('flt-min-weight') || {}).value || '';
+  _advFilters.maxWeight  = (document.getElementById('flt-max-weight') || {}).value || '';
+
+  // Tear down existing observer
+  if (_allPlayersObserver) {
+    _allPlayersObserver.disconnect();
+    _allPlayersObserver = null;
+  }
+
+  _prepareAllPlayersList();
+  const total = _allPlayersList.length;
+
+  // Update subtitle
+  const subtitle = document.getElementById('all-players-subtitle');
+  if (subtitle) subtitle.textContent = `${total} jugadores encontrados`;
+
+  // Reset and re-render tbody
+  const tbody = document.getElementById('all-players-tbody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    // Re-add sentinel
+    const old = document.getElementById('all-players-sentinel');
+    if (old) old.remove();
+    tbody.insertAdjacentHTML('afterend', '<div id="all-players-sentinel" class="infinite-scroll-sentinel"><div class="spinner"></div></div>');
+    _appendNextBatch();
+
+    const sentinel = document.getElementById('all-players-sentinel');
+    if (sentinel && _allPlayersOffset < total) {
+      _allPlayersObserver = new IntersectionObserver(
+        (entries) => { if (entries[0].isIntersecting) _appendNextBatch(); },
+        { rootMargin: '200px' }
+      );
+      _allPlayersObserver.observe(sentinel);
+    }
+  }
+}
+
+function resetAdvancedFilters() {
+  Object.keys(_advFilters).forEach(k => { _advFilters[k] = ''; });
+  // Reset all filter inputs
+  ['flt-position','flt-role','flt-nationality','flt-club','flt-foot','flt-facescan',
+   'flt-min-ovr','flt-max-ovr','flt-min-age','flt-max-age',
+   'flt-min-height','flt-max-height','flt-min-weight','flt-max-weight'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  onAdvFilterChange();
+}
+
+function toggleFilterPanel() {
+  const panel = document.getElementById('adv-filter-panel');
+  const btn = document.getElementById('btn-toggle-filters');
+  if (!panel) return;
+  const isVisible = panel.style.display !== 'none';
+  panel.style.display = isVisible ? 'none' : '';
+  if (btn) btn.textContent = isVisible ? '⚙ Filtros avanzados' : '⚙ Ocultar filtros';
+}
+
 function showAllPlayers() {
   // Tear down any existing observer before rebuilding the view
   if (_allPlayersObserver) {
@@ -655,14 +963,18 @@ function showAllPlayers() {
   _prepareAllPlayersList();
   const total = _allPlayersList.length;
 
-  // Render initial skeleton (header + empty tbody + sentinel)
+  const hasActiveFilters = Object.values(_advFilters).some(v => v !== '');
+
+  // Render initial skeleton (header + filter panel + empty tbody + sentinel)
   view.innerHTML = `
     <div class="view-header">
       <div>
         <div class="view-title">Todos los jugadores</div>
-        <div class="view-subtitle">${total} jugadores · ordenados por valoración</div>
+        <div class="view-subtitle" id="all-players-subtitle">${total} jugadores · ordenados por valoración</div>
       </div>
+      <button id="btn-toggle-filters" class="adv-filter-toggle" onclick="toggleFilterPanel()">⚙ Filtros avanzados</button>
     </div>
+    ${_buildFilterPanel()}
     <table class="players-table">
       <thead>
         <tr>
@@ -675,6 +987,10 @@ function showAllPlayers() {
     <div id="all-players-sentinel" class="infinite-scroll-sentinel">
       <div class="spinner"></div>
     </div>`;
+
+  // Hide the filter panel by default unless filters are active
+  const filterPanel = document.getElementById('adv-filter-panel');
+  if (filterPanel && !hasActiveFilters) filterPanel.style.display = 'none';
 
   // Render the first batch immediately
   _appendNextBatch();
@@ -745,6 +1061,9 @@ function renderPlayerRow(player, team) {
   const ovrClass = overallColor(ovr);
   const posDisplay = translatePosition(player.Position);
   const radarAttrs = computeRadarAttributes(player);
+  const nationalNote = player._playsForNational
+    ? `<span class="national-team-badge" title="También juega para su selección">🌍</span>`
+    : '';
 
   return `<tr onclick="selectPlayer('${player.ID}', '${team.id}')">
     <td>
@@ -753,7 +1072,7 @@ function renderPlayerRow(player, team) {
         onerror="handleMinifaceError(this,'${player.ID}')"
         alt="${player.Name}">
     </td>
-    <td><strong>${player.Name || '–'}</strong></td>
+    <td><strong>${player.Name || '–'}</strong>${nationalNote}</td>
     <td>
       <img class="player-flag"
         src="${flagSrc(player.Nationality)}"
@@ -869,6 +1188,7 @@ function renderPlayerProfile(player, team) {
             <span class="info-label">Categoría</span>
             <span>${typeLabel}</span>
           </div>
+          ${player._playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
         </div>
       </div>
 

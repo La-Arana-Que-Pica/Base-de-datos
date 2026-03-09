@@ -818,25 +818,40 @@ function renderFaceData(appearance, player) {
     return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
 
+  // Check if the player has a scanned face (Id_Face ≠ 0)
+  const idFace = appearance ? (appearance['Id_Face'] || '0') : '0';
+  const hasScannedFace = idFace !== '0' && idFace !== '';
+
   const navButtons = APPEARANCE_SECTIONS.map((section, i) =>
     `<button class="appearance-section-btn${i === 0 ? ' active' : ''}" onclick="switchAppearanceSection(${i})">${section.title}</button>`
   ).join('');
 
   const sectionsHtml = APPEARANCE_SECTIONS.map((section, i) => {
-    const subsectionsHtml = section.subsections.map(sub => {
-      const fieldsHtml = sub.fields
-        .map(field => renderAppearanceField(field, appearance, player))
-        .join('');
-      if (!fieldsHtml) return '';
-      const subTitle = sub.title
-        ? `<div class="face-subsection-title">${sub.title}</div>`
-        : '';
-      return `<div class="face-subsection">${subTitle}<div class="face-data-grid">${fieldsHtml}</div></div>`;
-    }).join('');
+    let sectionContent;
 
-    if (!subsectionsHtml) return '';
+    // Sections 0 (Cara) and 1 (Peinado) are skipped when player has a scanned face
+    if (hasScannedFace && (i === 0 || i === 1)) {
+      sectionContent = `<div class="scanned-face-notice">
+        <span class="scanned-face-icon">✅</span>
+        Este jugador ya tiene una cara escaneada.
+      </div>`;
+    } else {
+      const subsectionsHtml = section.subsections.map(sub => {
+        const fieldsHtml = sub.fields
+          .map(field => renderAppearanceField(field, appearance, player))
+          .join('');
+        if (!fieldsHtml) return '';
+        const subTitle = sub.title
+          ? `<div class="face-subsection-title">${sub.title}</div>`
+          : '';
+        return `<div class="face-subsection">${subTitle}<div class="face-data-grid">${fieldsHtml}</div></div>`;
+      }).join('');
+      sectionContent = subsectionsHtml || '';
+    }
+
+    if (!sectionContent) return '';
     return `<div class="face-section${i === 0 ? ' active' : ''}" id="appearance-section-${i}">
-      ${subsectionsHtml}
+      ${sectionContent}
     </div>`;
   }).join('');
 
@@ -866,7 +881,7 @@ function switchTab(tabId) {
 
 // ─── Main render ─────────────────────────────────────────────────────────────
 
-function renderPlayerPage(player, team, appearance, typeLabel) {
+function renderPlayerPage(player, team, appearance, typeLabel, playsForNational) {
   const ovrClass = overallColor(player['OverallStats'] || '');
   const ovr = player['OverallStats'] || '–';
 
@@ -939,6 +954,7 @@ function renderPlayerPage(player, team, appearance, typeLabel) {
           <div class="profile-meta-row">
             <span>${typeLabel}</span>
           </div>
+          ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
           <div class="profile-quick-stats">
             <div class="quick-stat"><span class="qs-label">Altura</span><span class="qs-val">${player['Height'] || '–'} cm</span></div>
             <div class="quick-stat"><span class="qs-label">Peso</span><span class="qs-val">${player['Weight'] || '–'} kg</span></div>
@@ -1047,7 +1063,29 @@ async function boot() {
   });
   const appearance = appearanceMap[playerId] || null;
 
-  renderPlayerPage(player, team, appearance, typeLabel);
+  // Check if player also plays for a national team (type '2')
+  const teamTypeMap = {};
+  teamRows.forEach(t => { teamTypeMap[t['Id']] = t['Type'] || '0'; });
+  const currentTeamType = teamTypeMap[teamId] || '0';
+  let playsForNational = false;
+  if (currentTeamType !== '2') {
+    // Player is on a club/special team — check if they're also on any national team squad
+    for (const squadRow of squadRows) {
+      const sqTeamId = squadRow['Id'];
+      if (sqTeamId === teamId) continue;
+      if ((teamTypeMap[sqTeamId] || '0') !== '2') continue;
+      // This is a national team squad
+      for (let i = 1; i <= 32; i++) {
+        if (squadRow[`Player ${i}`] === playerId) {
+          playsForNational = true;
+          break;
+        }
+      }
+      if (playsForNational) break;
+    }
+  }
+
+  renderPlayerPage(player, team, appearance, typeLabel, playsForNational);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
