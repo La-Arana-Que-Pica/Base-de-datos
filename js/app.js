@@ -83,6 +83,51 @@ const POSITION_LABELS = {
   'CF':  'CD',
 };
 
+const NATIONALITY_NAMES = {
+  '7':   'China',        '10':  'Indonesia',   '11':  'Irán',
+  '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
+  '15':  'Corea del Norte', '16': 'Corea del Sur', '17': 'Kuwait',
+  '19':  'Líbano',       '26':  'Omán',         '30':  'Qatar',
+  '31':  'Arabia Saudita', '36': 'Tailandia',   '37':  'Emiratos Árabes Unidos',
+  '44':  'Argelia',      '45':  'Angola',       '48':  'Burkina Faso',
+  '50':  'Camerún',      '51':  'Cabo Verde',   '52':  'Benín',
+  '55':  'Congo DR',     '56':  'Costa de Marfil', '58': 'Egipto',
+  '59':  'Andorra',      '63':  'Gambia',       '64':  'Ghana',
+  '65':  'Guinea',       '66':  'Guinea-Bisáu', '70':  'Libia',
+  '73':  'Malí',         '76':  'Marruecos',    '77':  'Mozambique',
+  '79':  'Níger',        '80':  'Nigeria',      '83':  'Senegal',
+  '87':  'Sudáfrica',    '91':  'Togo',         '92':  'Túnez',
+  '94':  'Zambia',       '95':  'Zimbabue',     '110': 'Canadá',
+  '112': 'Costa Rica',   '115': 'Rep. Dominicana', '120': 'Haití',
+  '121': 'Honduras',     '122': 'Jamaica',      '124': 'México',
+  '128': 'Panamá',       '133': 'Filipinas',    '135': 'Estados Unidos',
+  '139': 'Surinam',      '144': 'Argentina',    '145': 'Bolivia',
+  '146': 'Brasil',       '147': 'Chile',        '148': 'Colombia',
+  '149': 'Ecuador',      '150': 'Paraguay',     '151': 'Perú',
+  '152': 'Uruguay',      '153': 'Venezuela',    '162': 'Australia',
+  '166': 'Nueva Zelanda','189': 'Israel',       '190': 'Turquía',
+  '191': 'Albania',      '193': 'Armenia',      '194': 'Austria',
+  '196': 'Bielorrusia',  '197': 'Bélgica',      '198': 'Bosnia y Herzegovina',
+  '199': 'Bulgaria',     '200': 'Croacia',       '201': 'Chipre',
+  '202': 'Rep. Checa',   '203': 'Dinamarca',    '204': 'Inglaterra',
+  '207': 'Finlandia',    '208': 'Francia',      '209': 'Georgia',
+  '210': 'Alemania',     '211': 'Grecia',       '212': 'Hungría',
+  '213': 'Islandia',     '214': 'Irlanda',      '215': 'Italia',
+  '219': 'Lituania',     '221': 'Macedonia del Norte', '223': 'Moldavia',
+  '224': 'Países Bajos', '225': 'Irlanda del Norte', '226': 'Noruega',
+  '227': 'Polonia',      '228': 'Portugal',     '229': 'Rumanía',
+  '230': 'Rusia',        '232': 'Escocia',      '234': 'Eslovaquia',
+  '235': 'Eslovenia',    '236': 'España',       '237': 'Suecia',
+  '238': 'Suiza',        '239': 'Ucrania',      '240': 'Uzbekistán',
+  '241': 'Gales',        '303': 'Serbia',       '304': 'Montenegro',
+  '311': 'Kosovo',
+};
+
+function nationalityName(countryId) {
+  if (!countryId) return '–';
+  return NATIONALITY_NAMES[String(countryId)] || countryId;
+}
+
 // Team type → Spanish group label
 const TYPE_LABELS = {
   '0': 'Clubes',
@@ -90,12 +135,45 @@ const TYPE_LABELS = {
   '2': 'Selecciones',
 };
 
+const PLAYING_STYLE_LABELS = {
+  '1':'Cazagoles','2':'Señuelo','3':'Hombre de área','4':'Extremo prolífico',
+  '5':'Diez clásico','6':'Jugador de huecos','7':'Omnipresente','8':'Medio escudo',
+  '9':'El destructor','10':'Atacante extra','11':'Lateral ofensivo','12':'Lateral defensivo',
+  '13':'Referente','14':'Creador de jugadas','15':'Creación','16':'Portero ofensivo',
+  '17':'Portero defensivo',
+};
+
+const PLAYER_SKILLS_LABELS = [
+  ['S01','Tijera'],['S02','Gambeta'],['S03','Marsellesa'],['S04','Sombrerito'],
+  ['S05','Amago por detrás'],['S06','Rebote interior'],['S07','Cabeceador'],
+  ['S08','Cañonero'],['S09','Tiro con empeine'],['S10','Finaliz. acrobática'],
+  ['S11','Taconazo'],['S12','Remate primer toque'],['S13','Pase al primer toque'],
+  ['S14','Pase a profundidad'],['S15','Pase cruzado'],['S16','Centro con rosca'],
+  ['S17','Rabona'],['S18','Pase bombeado bajo'],['S19','Trayect. en picada'],
+  ['S20','Saque largo de banda'],['S21','Saq. meta largo'],['S22','Malicia'],
+  ['S23','Marcar hombre'],['S24','Delantero atrasado'],['S25','Despeje acrobático'],
+  ['S26','Capitanía'],['S27','Super refuerzo'],['S28','Espíritu de lucha'],
+];
+
+const COM_STYLES_LABELS = [
+  ['P01','Mago del balón'],['P02','Esquivo'],['P03','Misil con el balón'],
+  ['P04','Llegador'],['P05','Experto pases largos'],['P06','Centrador'],['P07','Cañonero'],
+];
+
 function translateStat(csvCol) {
   return STAT_LABELS[csvCol] || csvCol;
 }
 
 function translatePosition(pesPos) {
   return POSITION_LABELS[pesPos] || pesPos;
+}
+
+function positionGroupColor(pesPos) {
+  if (pesPos === 'GK') return '#f9d901';
+  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
+  if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
+  if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
+  return '#8b949e';
 }
 
 // Stat bar range for standard attributes (PES stats go from 40 to 99)
@@ -254,10 +332,13 @@ function flagSrc(countryId) {
  */
 function statColorClass(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 75) return 'stat-green';
-  if (v >= 60) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
 }
 
 /**
@@ -265,10 +346,17 @@ function statColorClass(value) {
  */
 function statColor(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return '#e74c3c';
-  if (v >= 75) return '#27ae60';
-  if (v >= 60) return '#f39c12';
-  return '#e74c3c';
+  if (isNaN(v)) return '#d33d35';
+  if (v >= 95) return '#00ff87';
+  if (v >= 90) return '#62ff51';
+  if (v >= 80) return '#a8ff00';
+  if (v >= 70) return '#e5dc00';
+  if (v >= 60) return '#e59f01';
+  return '#d33d35';
+}
+
+function statTextColor(hexColor) {
+  return ['#e5dc00', '#a8ff00', '#62ff51', '#00ff87'].includes(hexColor) ? '#111' : '#fff';
 }
 
 /**
@@ -276,10 +364,13 @@ function statColor(value) {
  */
 function overallColor(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 80) return 'stat-green';
-  if (v >= 70) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
 }
 
 // ─── Boot / Indexer ───────────────────────────────────────────────────────────
@@ -413,7 +504,6 @@ function buildSidebar() {
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-header" onclick="showLeaguesView()">
         <span class="sidebar-nav-title">Ligas</span>
-        <span class="sidebar-nav-arrow">▶</span>
       </div>
     </div>
 
@@ -421,7 +511,6 @@ function buildSidebar() {
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-header" onclick="showTeamsView()">
         <span class="sidebar-nav-title">Equipos</span>
-        <span class="sidebar-nav-arrow">▶</span>
       </div>
     </div>
 
@@ -429,7 +518,6 @@ function buildSidebar() {
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-header" onclick="showAllPlayersFromSidebar()">
         <span class="sidebar-nav-title">Jugadores</span>
-        <span class="sidebar-nav-arrow sidebar-players-arrow">▶</span>
       </div>
       <div class="sidebar-nav-body" id="nav-jugadores" style="display:none">
         <div class="sidebar-filter-wrap">
@@ -445,13 +533,10 @@ function buildSidebar() {
 }
 
 function showAllPlayersFromSidebar() {
-  // Toggle the jugadores section body
   const body = document.getElementById('nav-jugadores');
-  const arrow = document.querySelector('.sidebar-players-arrow');
   if (body) {
     const isOpen = body.style.display !== 'none';
     body.style.display = isOpen ? 'none' : '';
-    if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
   }
   showAllPlayers();
 }
@@ -617,6 +702,7 @@ const _advFilters = {
   position: '',
   role: '',
   nationality: '',
+  league: '',
   club: '',
   minAge: '',
   maxAge: '',
@@ -628,6 +714,15 @@ const _advFilters = {
   minOvr: '',
   maxOvr: '',
   hasFaceScan: '',
+  playingStyle: '',
+  minSpeed: '',
+  maxSpeed: '',
+  minShooting: '',
+  maxShooting: '',
+  minPassing: '',
+  maxPassing: '',
+  skill: '',
+  comStyle: '',
 };
 
 // Playing role → position group for filter
@@ -720,6 +815,53 @@ function _prepareAllPlayersList() {
     });
   }
 
+  // League filter
+  if (f.league) {
+    const leagueTeamIds = new Set();
+    const league = DB.leagues ? DB.leagues.find(l => l.id === f.league) : null;
+    if (league) league.teamIds.forEach(id => leagueTeamIds.add(id));
+    unique = unique.filter(p => leagueTeamIds.has(p._team.id));
+  }
+  // Playing style filter
+  if (f.playingStyle) {
+    unique = unique.filter(p => (p['PlayingStyle'] || '') === f.playingStyle);
+  }
+  // Speed filter
+  if (f.minSpeed !== '') {
+    const min = parseInt(f.minSpeed, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Speed'], 10) || 0) >= min);
+  }
+  if (f.maxSpeed !== '') {
+    const max = parseInt(f.maxSpeed, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Speed'], 10) || 0) <= max);
+  }
+  // Shooting filter (Finishing)
+  if (f.minShooting !== '') {
+    const min = parseInt(f.minShooting, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Finishing'], 10) || 0) >= min);
+  }
+  if (f.maxShooting !== '') {
+    const max = parseInt(f.maxShooting, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Finishing'], 10) || 0) <= max);
+  }
+  // Passing filter (Low Pass)
+  if (f.minPassing !== '') {
+    const min = parseInt(f.minPassing, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Low Pass'], 10) || 0) >= min);
+  }
+  if (f.maxPassing !== '') {
+    const max = parseInt(f.maxPassing, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Low Pass'], 10) || 0) <= max);
+  }
+  // Skill filter
+  if (f.skill) {
+    unique = unique.filter(p => p[f.skill] === 'True');
+  }
+  // COM style filter
+  if (f.comStyle) {
+    unique = unique.filter(p => p[f.comStyle] === 'True');
+  }
+
   unique.sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
   _allPlayersList = unique;
   _allPlayersOffset = 0;
@@ -770,7 +912,8 @@ function _buildFilterPanel() {
     return true;
   });
 
-  const nationalities = [...new Set(basePlayers.map(p => p.Nationality || '').filter(Boolean))].sort();
+  const nationalities = [...new Set(basePlayers.map(p => p.Nationality || '').filter(Boolean))]
+    .sort((a, b) => nationalityName(a).localeCompare(nationalityName(b), 'es'));
   const clubTeams = DB.teams
     .filter(t => t.type !== '2' && t.players.length > 0)
     .sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'));
@@ -778,12 +921,19 @@ function _buildFilterPanel() {
   const f = _advFilters;
 
   const natOptions = nationalities.map(n =>
-    `<option value="${n}"${f.nationality === n ? ' selected' : ''}>${n}</option>`
+    `<option value="${n}"${f.nationality === n ? ' selected' : ''}>${nationalityName(n)}</option>`
   ).join('');
 
   const clubOptions = clubTeams.map(t =>
     `<option value="${t.id}"${f.club === t.id ? ' selected' : ''}>${t.displayName}</option>`
   ).join('');
+
+  // IDs 9001/9002 are internal placeholder leagues (e.g. "Free Agents", "Unknown") not shown in filters
+  const leagueOptions = DB.leagues
+    .filter(l => l.name && l.id !== '9001' && l.id !== '9002')
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+    .map(l => `<option value="${l.id}"${f.league === l.id ? ' selected' : ''}>${l.name}</option>`)
+    .join('');
 
   const posOptions = PES_POSITIONS.map(p =>
     `<option value="${p}"${f.position === p ? ' selected' : ''}>${translatePosition(p)} (${p})</option>`
@@ -821,6 +971,40 @@ function _buildFilterPanel() {
           <select id="flt-club" onchange="onAdvFilterChange()">
             <option value="">Todos</option>
             ${clubOptions}
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Liga</label>
+          <select id="flt-league" onchange="onAdvFilterChange()">
+            <option value="">Todas</option>
+            ${leagueOptions}
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Estilo de juego</label>
+          <select id="flt-playing-style" onchange="onAdvFilterChange()">
+            <option value="">Todos</option>
+            ${Object.entries(PLAYING_STYLE_LABELS).map(([k,v]) =>
+              `<option value="${k}"${f.playingStyle === k ? ' selected' : ''}>${v}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Habilidad específica</label>
+          <select id="flt-skill" onchange="onAdvFilterChange()">
+            <option value="">Cualquiera</option>
+            ${PLAYER_SKILLS_LABELS.map(([k,v]) =>
+              `<option value="${k}"${f.skill === k ? ' selected' : ''}>${v}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Estilo COM</label>
+          <select id="flt-com-style" onchange="onAdvFilterChange()">
+            <option value="">Cualquiera</option>
+            ${COM_STYLES_LABELS.map(([k,v]) =>
+              `<option value="${k}"${f.comStyle === k ? ' selected' : ''}>${v}</option>`
+            ).join('')}
           </select>
         </div>
         <div class="adv-filter-group">
@@ -871,6 +1055,30 @@ function _buildFilterPanel() {
             <input type="number" id="flt-max-weight" placeholder="Máx" min="50" max="120" value="${f.maxWeight}" oninput="onAdvFilterChange()">
           </div>
         </div>
+        <div class="adv-filter-group adv-filter-range">
+          <label>Velocidad</label>
+          <div class="range-inputs">
+            <input type="number" id="flt-min-speed" placeholder="Min" min="40" max="99" value="${f.minSpeed}" oninput="onAdvFilterChange()">
+            <span>–</span>
+            <input type="number" id="flt-max-speed" placeholder="Máx" min="40" max="99" value="${f.maxSpeed}" oninput="onAdvFilterChange()">
+          </div>
+        </div>
+        <div class="adv-filter-group adv-filter-range">
+          <label>Finalización</label>
+          <div class="range-inputs">
+            <input type="number" id="flt-min-shooting" placeholder="Min" min="40" max="99" value="${f.minShooting}" oninput="onAdvFilterChange()">
+            <span>–</span>
+            <input type="number" id="flt-max-shooting" placeholder="Máx" min="40" max="99" value="${f.maxShooting}" oninput="onAdvFilterChange()">
+          </div>
+        </div>
+        <div class="adv-filter-group adv-filter-range">
+          <label>Pase al ras</label>
+          <div class="range-inputs">
+            <input type="number" id="flt-min-passing" placeholder="Min" min="40" max="99" value="${f.minPassing}" oninput="onAdvFilterChange()">
+            <span>–</span>
+            <input type="number" id="flt-max-passing" placeholder="Máx" min="40" max="99" value="${f.maxPassing}" oninput="onAdvFilterChange()">
+          </div>
+        </div>
       </div>
       <div class="adv-filter-actions">
         <button class="adv-filter-reset" onclick="resetAdvancedFilters()">✕ Limpiar filtros</button>
@@ -893,6 +1101,16 @@ function onAdvFilterChange() {
   _advFilters.maxHeight  = (document.getElementById('flt-max-height') || {}).value || '';
   _advFilters.minWeight  = (document.getElementById('flt-min-weight') || {}).value || '';
   _advFilters.maxWeight  = (document.getElementById('flt-max-weight') || {}).value || '';
+  _advFilters.league       = (document.getElementById('flt-league')         || {}).value || '';
+  _advFilters.playingStyle = (document.getElementById('flt-playing-style')  || {}).value || '';
+  _advFilters.minSpeed     = (document.getElementById('flt-min-speed')      || {}).value || '';
+  _advFilters.maxSpeed     = (document.getElementById('flt-max-speed')      || {}).value || '';
+  _advFilters.minShooting  = (document.getElementById('flt-min-shooting')   || {}).value || '';
+  _advFilters.maxShooting  = (document.getElementById('flt-max-shooting')   || {}).value || '';
+  _advFilters.minPassing   = (document.getElementById('flt-min-passing')    || {}).value || '';
+  _advFilters.maxPassing   = (document.getElementById('flt-max-passing')    || {}).value || '';
+  _advFilters.skill        = (document.getElementById('flt-skill')          || {}).value || '';
+  _advFilters.comStyle     = (document.getElementById('flt-com-style')      || {}).value || '';
 
   // Tear down existing observer
   if (_allPlayersObserver) {
@@ -931,9 +1149,12 @@ function onAdvFilterChange() {
 function resetAdvancedFilters() {
   Object.keys(_advFilters).forEach(k => { _advFilters[k] = ''; });
   // Reset all filter inputs
-  ['flt-position','flt-role','flt-nationality','flt-club','flt-foot','flt-facescan',
+  ['flt-position','flt-role','flt-nationality','flt-league','flt-club','flt-foot','flt-facescan',
    'flt-min-ovr','flt-max-ovr','flt-min-age','flt-max-age',
-   'flt-min-height','flt-max-height','flt-min-weight','flt-max-weight'].forEach(id => {
+   'flt-min-height','flt-max-height','flt-min-weight','flt-max-weight',
+   'flt-playing-style','flt-skill','flt-com-style',
+   'flt-min-speed','flt-max-speed','flt-min-shooting','flt-max-shooting',
+   'flt-min-passing','flt-max-passing'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -1013,7 +1234,7 @@ function showAllPlayers() {
 let currentTeam = null;
 
 function selectTeam(teamId) {
-  window.location.href = `team.html?id=${encodeURIComponent(teamId)}`;
+  window.open(`team.html?id=${encodeURIComponent(teamId)}`, '_blank');
 }
 
 function renderPlayersList(team) {
@@ -1058,7 +1279,8 @@ function renderPlayersList(team) {
 
 function renderPlayerRow(player, team) {
   const ovr = player.Overall || '–';
-  const ovrClass = overallColor(ovr);
+  const ovrColor = statColor(ovr);
+  const ovrTextColor = statTextColor(ovrColor);
   const posDisplay = translatePosition(player.Position);
   const radarAttrs = computeRadarAttributes(player);
   const nationalNote = player._playsForNational
@@ -1079,8 +1301,8 @@ function renderPlayerRow(player, team) {
         onerror="this.onerror=null;this.src='img/flags/default.png'"
         alt="">
     </td>
-    <td><span class="position-badge">${posDisplay || '–'}</span></td>
-    <td><span class="overall-badge ${ovrClass}">${ovr}</span></td>
+    <td><span class="position-badge" style="color:${positionGroupColor(player.Position)};border-color:${positionGroupColor(player.Position)};background:${positionGroupColor(player.Position)}18">${posDisplay || '–'}</span></td>
+    <td><span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span></td>
     <td>${radarAttrs.VEL}</td>
     <td>${radarAttrs.DRI}</td>
     <td>${radarAttrs.TIR}</td>
@@ -1093,7 +1315,7 @@ function renderPlayerRow(player, team) {
 // ─── Player profile ───────────────────────────────────────────────────────────
 
 function selectPlayer(playerId, teamId) {
-  window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
+  window.open(`player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`, '_blank');
 }
 
 /**
@@ -1133,22 +1355,22 @@ function renderPlayerProfile(player, team) {
     if (SPECIAL_ATTRS[csvCol]) {
       const max = SPECIAL_ATTRS[csvCol].max;
       const pct = Math.max(0, Math.min(100, (v / max) * 100));
-      const barColor = v >= max * 0.75 ? '#27ae60' : v >= max * 0.5 ? '#f39c12' : '#e74c3c';
-      const colorClass = v >= max * 0.75 ? 'stat-green' : v >= max * 0.5 ? 'stat-yellow' : 'stat-red';
+      const barColor = v >= max * 0.75 ? '#a8ff00' : v >= max * 0.5 ? '#e59f01' : '#d33d35';
+      const textColor = statTextColor(barColor);
       return `<div class="stat-row">
         <span class="stat-name">${label}</span>
-        <span class="stat-value ${colorClass}">${v}</span>
+        <span class="stat-value" style="background:${barColor};color:${textColor}">${v}</span>
         <div class="stat-bar-container">
           <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
         </div>
       </div>`;
     }
-    const colorClass = statColorClass(val);
     const barColor = statColor(val);
+    const textColor = statTextColor(barColor);
     const pct = Math.max(0, Math.min(100, ((v - STAT_MIN) / (STAT_MAX - STAT_MIN)) * 100));
     return `<div class="stat-row">
       <span class="stat-name">${label}</span>
-      <span class="stat-value ${colorClass}">${val}</span>
+      <span class="stat-value" style="background:${barColor};color:${textColor}">${val}</span>
       <div class="stat-bar-container">
         <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
       </div>

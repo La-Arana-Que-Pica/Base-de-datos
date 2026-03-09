@@ -64,18 +64,39 @@ function escapeHtml(str) {
 
 function statColorClass(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 75) return 'stat-green';
-  if (v >= 60) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
+}
+
+function statColor(value) {
+  const v = parseInt(value, 10);
+  if (isNaN(v)) return '#d33d35';
+  if (v >= 95) return '#00ff87';
+  if (v >= 90) return '#62ff51';
+  if (v >= 80) return '#a8ff00';
+  if (v >= 70) return '#e5dc00';
+  if (v >= 60) return '#e59f01';
+  return '#d33d35';
+}
+
+function statTextColor(hexColor) {
+  return ['#e5dc00', '#a8ff00', '#62ff51', '#00ff87'].includes(hexColor) ? '#111' : '#fff';
 }
 
 function overallColor(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 80) return 'stat-green';
-  if (v >= 70) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
 }
 
 // ─── Translations (UI display only) ──────────────────────────────────────────
@@ -106,6 +127,14 @@ const TYPE_LABELS = {
 
 function translatePosition(pesPos) {
   return POSITION_LABELS[pesPos] || pesPos;
+}
+
+function positionGroupColor(pesPos) {
+  if (pesPos === 'GK') return '#f9d901';
+  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
+  if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
+  if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
+  return '#8b949e';
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -305,9 +334,12 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     const shortName = escapeHtml((player.Name || '').split(' ').slice(-1)[0] || player.Name);
     const pid = escapeHtml(player.ID);
     const tid = escapeHtml(teamId || '');
+    const posDisplay = translatePosition(player.Position || '');
+    const posColor = positionGroupColor(player.Position || '');
 
     tokens.push(`
       <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
+        <div class="pitch-player-pos-badge" style="background:${posColor};color:#111">${escapeHtml(posDisplay)}</div>
         <div class="pitch-player-photo-wrap">
           <img src="img/players/${pid}.png"
             onerror="handleMinifaceError(this,'${pid}')"
@@ -337,7 +369,8 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
 
 function renderPlayerRow(player, teamId) {
   const ovr = player.Overall || '–';
-  const ovrClass = overallColor(ovr);
+  const ovrColor = statColor(ovr);
+  const ovrTextColor = statTextColor(ovrColor);
   const posDisplay = translatePosition(player.Position);
   const radarAttrs = computeRadarAttributes(player);
   const safeName = escapeHtml(player.Name);
@@ -358,8 +391,8 @@ function renderPlayerRow(player, teamId) {
         onerror="this.onerror=null;this.src='img/flags/default.png'"
         alt="">
     </td>
-    <td><span class="position-badge">${escapeHtml(posDisplay) || '–'}</span></td>
-    <td><span class="overall-badge ${ovrClass}">${escapeHtml(ovr)}</span></td>
+    <td><span class="position-badge" style="color:${positionGroupColor(player.Position)};border-color:${positionGroupColor(player.Position)};background:${positionGroupColor(player.Position)}18">${escapeHtml(posDisplay) || '–'}</span></td>
+    <td><span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${escapeHtml(ovr)}</span></td>
     <td>${radarAttrs.VEL}</td>
     <td>${radarAttrs.DRI}</td>
     <td>${radarAttrs.TIR}</td>
