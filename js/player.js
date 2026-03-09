@@ -278,7 +278,7 @@ const APPEARANCE_SECTIONS = [
           { col: 'Inner Eye Position',       label: 'Posición interior de ojos' },
           { col: 'Eye Corner Height',        label: 'Altura exterior ojos' },
           { col: 'Outer Eye Position',       label: 'Posición exterior de ojos' },
-          { col: 'Bottom Eyelid Height ',    label: 'Altura Párpado Inferior' },
+          { col: 'Bottom Eyelid Height',     label: 'Altura Párpado Inferior' },
           { col: 'Eye Depth',                label: 'Prof. de los ojos' },
         ],
       },
@@ -764,7 +764,11 @@ function renderAppearanceField(field, appearance, player) {
     return renderAppearanceRow(field.label, rawVal, imgPath, field.imageKey);
   }
 
-  return renderAppearanceRow(field.label, displayVal, null, null);
+  const numVal = Number(displayVal);
+  const formattedVal = (!isNaN(numVal) && displayVal !== '' && displayVal !== '-')
+    ? (numVal > 0 ? '+' + numVal : String(numVal))
+    : displayVal;
+  return renderAppearanceRow(field.label, formattedVal, null, null);
 }
 
 function renderAppearanceRow(label, value, imgPath, imageKey) {
@@ -791,7 +795,11 @@ function renderFaceData(appearance, player) {
     return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
 
-  return APPEARANCE_SECTIONS.map(section => {
+  const navButtons = APPEARANCE_SECTIONS.map((section, i) =>
+    `<button class="appearance-section-btn${i === 0 ? ' active' : ''}" onclick="switchAppearanceSection(${i})">${section.title}</button>`
+  ).join('');
+
+  const sectionsHtml = APPEARANCE_SECTIONS.map((section, i) => {
     const subsectionsHtml = section.subsections.map(sub => {
       const fieldsHtml = sub.fields
         .map(field => renderAppearanceField(field, appearance, player))
@@ -804,14 +812,25 @@ function renderFaceData(appearance, player) {
     }).join('');
 
     if (!subsectionsHtml) return '';
-    return `<div class="face-section">
-      <div class="face-section-title">${section.title}</div>
+    return `<div class="face-section${i === 0 ? ' active' : ''}" id="appearance-section-${i}">
       ${subsectionsHtml}
     </div>`;
   }).join('');
+
+  return `<div class="appearance-section-nav">${navButtons}</div>
+<div class="appearance-section-panels">${sectionsHtml}</div>`;
 }
 
 // ─── Tab switching ────────────────────────────────────────────────────────────
+
+function switchAppearanceSection(idx) {
+  document.querySelectorAll('.appearance-section-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.face-section').forEach((panel, i) => {
+    panel.classList.toggle('active', i === idx);
+  });
+}
 
 function switchTab(tabId) {
   document.querySelectorAll('.profile-tab-btn').forEach(btn => {
