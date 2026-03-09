@@ -559,7 +559,7 @@ function showLeaguesView() {
   const cardsHtml = DB.leagues.map(league => {
     const teamCount = league.teamIds.length;
     return `
-      <div class="grid-card" onclick="showLeagueTeamsView('${league.id}')">
+      <div class="grid-card" onclick="window.location.href='league.html?id=${encodeURIComponent(league.id)}'">
         <img class="grid-card-img"
           src="img/leagues/${league.id}.png"
           onerror="this.onerror=null;this.src='img/leagues/default.png'"
@@ -627,14 +627,21 @@ function showTeamsView() {
   const view = document.getElementById('teams-grid-view');
   view.classList.add('active');
 
-  const cardsHtml = filteredTeams.map(team => `
+  const cardsHtml = filteredTeams.map(team => {
+    const avg = teamAvgOvr(team);
+    const avgHtml = avg !== null
+      ? `<div class="grid-card-ovr"><span class="team-avg-badge" style="background:${statColor(avg)};color:${statTextColor(statColor(avg))}">${avg}</span></div>`
+      : '';
+    return `
     <div class="grid-card" onclick="selectTeam('${team.id}')">
       <img class="grid-card-img"
         src="img/teams/${team.id}.png"
         onerror="this.onerror=null;this.src='img/teams/default.png'"
         alt="${team.displayName}">
       <div class="grid-card-name">${team.displayName}</div>
-    </div>`).join('');
+      ${avgHtml}
+    </div>`;
+  }).join('');
 
   view.innerHTML = `
     <div class="view-header">
@@ -1234,7 +1241,7 @@ function showAllPlayers() {
 let currentTeam = null;
 
 function selectTeam(teamId) {
-  window.open(`team.html?id=${encodeURIComponent(teamId)}`, '_blank');
+  window.location.href = `team.html?id=${encodeURIComponent(teamId)}`;
 }
 
 function renderPlayersList(team) {
@@ -1315,7 +1322,7 @@ function renderPlayerRow(player, team) {
 // ─── Player profile ───────────────────────────────────────────────────────────
 
 function selectPlayer(playerId, teamId) {
-  window.open(`player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`, '_blank');
+  window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
 }
 
 /**
@@ -1336,6 +1343,19 @@ function computeRadarAttributes(player) {
     VEL: avg('Speed'),
     DRI: avg('Dribbling', 'Ball Control'),
   };
+}
+
+/**
+ * Compute average OVR of top 16 players on a team.
+ */
+function teamAvgOvr(team) {
+  const ovrs = (team.players || [])
+    .map(p => parseInt(p.Overall, 10))
+    .filter(v => !isNaN(v) && v > 0)
+    .sort((a, b) => b - a)
+    .slice(0, 16);
+  if (!ovrs.length) return null;
+  return Math.round(ovrs.reduce((a, b) => a + b, 0) / ovrs.length);
 }
 
 function renderPlayerProfile(player, team) {

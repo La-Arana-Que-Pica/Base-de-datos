@@ -149,6 +149,27 @@ const POSITION_GROUPS = [
   { key: 'FWD', label: 'Delanteros',      positions: ['RWF', 'LWF', 'SS', 'CF'] },
 ];
 
+// Tactics labels and value maps
+const FORMATION_TACTIC_FIELDS = [
+  { col: 'EstiloAtaque F1',   label: 'Estilo de ataque',   values: { '0': 'Pelotazo', '1': 'Pase corto', '2': 'Contragolpe', '3': 'Por las bandas', '4': 'Posesión' } },
+  { col: 'Creacion F1',       label: 'Creación',           values: { '0': 'Saque de meta', '1': 'Pase corto', '2': 'Pase largo', '3': 'Ataque total' } },
+  { col: 'ZonaAtaque F1',     label: 'Zona de ataque',     values: { '0': 'Por las bandas', '1': 'Central', '2': 'Mixto' } },
+  { col: 'NumAtaq F1',        label: 'Nº atacantes',       values: {} },
+  { col: 'EstiloDefensa F1',  label: 'Estilo defensivo',   values: { '0': 'Caer atrás', '1': 'Corte básico', '2': 'Presión', '3': 'Presión agresiva' } },
+  { col: 'ZonaContencion F1', label: 'Zona de contención', values: { '0': 'Media', '1': 'Alta', '2': 'Baja' } },
+  { col: 'Presion F1',        label: 'Presión',            values: { '0': 'Sin presión', '1': 'Moderada', '2': 'Agresiva' } },
+  { col: 'LineaDefensiva F1', label: 'Línea defensiva',    values: {} },
+  { col: 'CierreFilas F1',    label: 'Compacidad',         values: {} },
+  { col: 'NumDef F1',         label: 'Nº defensores',      values: {} },
+];
+
+// Helper: "J. Álvarez" format
+function formatShortName(fullName) {
+  const parts = (fullName || '').trim().split(/\s+/);
+  if (parts.length <= 1) return parts[0] || '';
+  return parts[0].charAt(0).toUpperCase() + '. ' + parts[parts.length - 1];
+}
+
 function normalizePlayerRow(row) {
   const rawPos = row['POS'] || '';
   const posIdx = parseInt(rawPos, 10);
@@ -311,6 +332,7 @@ function resetFilters() {
 function renderFormationPitch(players, formationRow, squadSlots, teamId) {
   if (!formationRow || !squadSlots || !players.length) return '';
 
+  const captainRawIdx = parseInt(formationRow['Capitan'], 10);
   const tokens = [];
 
   for (let i = 1; i <= 11; i++) {
@@ -330,37 +352,83 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     const leftPct   = (yWidth / 100) * 100;
     const topPct    = (1 - xDepth / 52) * 100;
 
-    // Show the last word of the name as a short label
-    const shortName = escapeHtml((player.Name || '').split(' ').slice(-1)[0] || player.Name);
+    const shortName = escapeHtml(formatShortName(player.Name || ''));
     const pid = escapeHtml(player.ID);
     const tid = escapeHtml(teamId || '');
-    const posDisplay = translatePosition(player.Position || '');
+    const posDisplay = escapeHtml(player.Position || '');
     const posColor = positionGroupColor(player.Position || '');
+    const ovr = escapeHtml(player.Overall || '–');
+    const ovrColor = statColor(player.Overall || '');
+    const ovrTextColor = statTextColor(ovrColor);
+    const isCapitan = !isNaN(captainRawIdx) && squadIdx === captainRawIdx;
 
     tokens.push(`
       <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
-        <div class="pitch-player-pos-badge" style="background:${posColor};color:#111">${escapeHtml(posDisplay)}</div>
-        <div class="pitch-player-photo-wrap">
-          <img src="img/players/${pid}.png"
-            onerror="handleMinifaceError(this,'${pid}')"
-            class="pitch-player-photo" alt="${shortName}">
+        <div class="pitch-player-top">
+          <span class="pitch-player-pos-sm" style="color:${posColor}">${posDisplay}</span>
+          <div class="pitch-player-photo-wrap">
+            <img src="img/players/${pid}.png"
+              onerror="handleMinifaceError(this,'${pid}')"
+              class="pitch-player-photo" alt="${shortName}">
+          </div>${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
         </div>
-        <div class="pitch-player-name">${shortName}</div>
+        <div class="pitch-player-bar">
+          <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
+          <span class="pitch-player-name">${shortName}</span>
+        </div>
       </a>`);
   }
 
   if (!tokens.length) return '';
 
+  // Build tactics section
+  const tacticsRows = FORMATION_TACTIC_FIELDS.map(tf => {
+    const raw = formationRow[tf.col];
+    if (raw === undefined || raw === '') return '';
+    const translated = tf.values[raw];
+    const display = translated !== undefined ? `${translated} (${raw})` : raw;
+    return `<div class="tactic-row"><span class="tactic-label">${escapeHtml(tf.label)}</span><span class="tactic-value">${escapeHtml(display)}</span></div>`;
+  }).filter(Boolean).join('');
+
+  // Build assignments section
+  const assignmentRows = [];
+  const addAssignment = (label, colName) => {
+    const rawIdx = parseInt(formationRow[colName], 10);
+    if (isNaN(rawIdx) || rawIdx >= 32 || rawIdx < 0) return;
+    const p = squadSlots[rawIdx];
+    if (!p) return;
+    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
+  };
+
+  addAssignment('Capitán', 'Capitan');
+  addAssignment('Tiro libre corto', 'TiroCorto');
+  addAssignment('Tiro libre largo', 'TiroLargo');
+  addAssignment('Córner derecho', 'EsquinaDerecho');
+  addAssignment('Córner izquierdo', 'EsquinaIzquierdo');
+  addAssignment('Penal', 'Penalti');
+  addAssignment('Remate de cabeza 1', 'Cabeceador1');
+  addAssignment('Remate de cabeza 2', 'Cabeceador2');
+  addAssignment('Remate de cabeza 3', 'Cabeceador3');
+
+  const infoHtml = (tacticsRows || assignmentRows.length) ? `
+    <div class="formation-info-columns">
+      ${tacticsRows ? `<div class="formation-tactic-block"><div class="formation-block-title">Tácticas</div>${tacticsRows}</div>` : ''}
+      ${assignmentRows.length ? `<div class="formation-tactic-block"><div class="formation-block-title">Asignaciones</div>${assignmentRows.join('')}</div>` : ''}
+    </div>` : '';
+
   return `
     <div class="formation-section">
       <div class="formation-section-title">Formación inicial</div>
-      <div class="pitch-container">
-        <div class="pitch-field">
-          <div class="pitch-halfway-line"></div>
-          <div class="pitch-penalty-area-bottom"></div>
-          <div class="pitch-goal-area-bottom"></div>
-          ${tokens.join('')}
+      <div class="formation-layout">
+        <div class="pitch-container">
+          <div class="pitch-field">
+            <div class="pitch-halfway-line"></div>
+            <div class="pitch-penalty-area-bottom"></div>
+            <div class="pitch-goal-area-bottom"></div>
+            ${tokens.join('')}
+          </div>
         </div>
+        ${infoHtml}
       </div>
     </div>`;
 }
