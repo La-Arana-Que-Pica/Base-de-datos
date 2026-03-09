@@ -237,82 +237,244 @@ const COM_PLAYING_STYLES = [
   { col: 'P07', label: 'Cañonero' },
 ];
 
-// Face / physique appearance columns
-const FACE_GROUPS = [
+// ─── Appearance section/subsection definitions ────────────────────────────────
+
+// Fields with image: path is img/appearance/{imageKey}/{value}.png
+// Fields with enum: numeric/bool value → Spanish label
+// Fields with source:'player': read from the players CSV row, not appearances
+// Fields with conditionalDash: show '-' when another col matches a value
+// Fields with dashIfZero: show '-' when the field value is '0'
+// Fields with showImageIf: show image only when value is not '0' (and not empty)
+
+const APPEARANCE_SECTIONS = [
+  {
+    title: 'Cara',
+    subsections: [
+      {
+        title: 'Color de piel / Proporción de cabeza',
+        fields: [
+          { col: 'Skin Colour',  label: 'Color de piel',          imageKey: 'skin_colour' },
+          { col: 'Head Length',  label: 'Altura de la cabeza' },
+          { col: 'Head Width',   label: 'Anchura de la cabeza' },
+          { col: 'Head Depth',   label: 'Profundidad de la cabeza' },
+          { col: 'Face Height',  label: 'Largo de la cara' },
+          { col: 'Face Size',    label: 'Tamaño de la cara' },
+        ],
+      },
+      {
+        title: 'Ojos',
+        fields: [
+          { col: 'Upper Eyelid Type',        label: 'Tipo de párpado superior',   imageKey: 'upper_eyelid' },
+          { col: 'Bottom Eyelid Type',       label: 'Tipo de párpado inferior',   imageKey: 'bottom_eyelid' },
+          { col: 'Eye Height',               label: 'Altura de los ojos' },
+          { col: 'Horizontal Eye Position',  label: 'Posición horizontal ojos' },
+          { col: 'Iris Colour',              label: 'Color del iris',             imageKey: 'iris_colour' },
+          { col: 'Pupil Size',               label: 'Tamaño del iris' },
+          { col: 'Upper Eyelid Ht. (Inner)', label: 'Alt. Párpado sup. (I.)' },
+          { col: 'Upper Eyelid Wd. (Inner)', label: 'Ancho Párpado sup. (I.)' },
+          { col: 'Upper Eyelid Ht. (Outer)', label: 'Alt. Párpado sup. (E.)' },
+          { col: 'Upper Eyelid Wd. (Outer)', label: 'Ancho Párpado sup. (E.)' },
+          { col: 'Inner Eye Height',         label: 'Altura interior ojos' },
+          { col: 'Inner Eye Position',       label: 'Posición interior de ojos' },
+          { col: 'Eye Corner Height',        label: 'Altura exterior ojos' },
+          { col: 'Outer Eye Position',       label: 'Posición exterior de ojos' },
+          { col: 'Bottom Eyelid Height ',    label: 'Altura Párpado Inferior' },
+          { col: 'Eye Depth',                label: 'Prof. de los ojos' },
+        ],
+      },
+      {
+        title: 'Frente / Cejas',
+        fields: [
+          { col: 'Forehead',            label: 'Frente',               imageKey: 'forehead' },
+          { col: 'Eyebrow Type',        label: 'Estilo de cejas',      imageKey: 'eyebrow_type' },
+          { col: 'Eyebrow Thickness',   label: 'Espesor de cejas' },
+          { col: 'Eyebrow Style',       label: 'Tipo de cejas',        enum: { '0': 'Fina', '1': 'Normal', '2': 'Gruesa' } },
+          { col: 'Eyebrow Density',     label: 'Densidad de cejas' },
+          { col: 'Eyebrow Colour R',    label: 'Color de cejas R' },
+          { col: 'Eyebrow Colour G',    label: 'Color de cejas V' },
+          { col: 'Eyebrow Colour B',    label: 'Color de cejas A' },
+          { col: 'Inner Eyebrow Height',label: 'Altura interior cejas' },
+          { col: 'Brow Width',          label: 'Ancho del entrecejo' },
+          { col: 'Outer Edyebrow Height',label: 'Altura exterior cejas' },
+          { col: 'Temple Width',        label: 'Ancho de la sien' },
+          { col: 'Eyebrow Depth',       label: 'Profundidad de las cejas' },
+        ],
+      },
+      {
+        title: 'Nariz',
+        fields: [
+          { col: 'Nose Type',      label: 'Tipo de nariz',         imageKey: 'nose_type' },
+          { col: 'Laughter Lines', label: 'Arrugas',               imageKey: 'laughter_lines' },
+          { col: 'Nose Height',    label: 'Altura de la nariz' },
+          { col: 'Nostril Width',  label: 'Tamaño fosas nasales' },
+          { col: 'Nose Width',     label: 'Grosor de la nariz' },
+          { col: 'Nose Tip Depth', label: 'Profundidad punta nariz' },
+          { col: 'Nose Depth',     label: 'Profundidad nariz' },
+        ],
+      },
+      {
+        title: 'Boca',
+        fields: [
+          { col: 'Upper Lip Type',     label: 'Tipo labio sup.',    imageKey: 'upper_lip' },
+          { col: 'Lower Lip Type',     label: 'Tipo labio inf.',    imageKey: 'lower_lip' },
+          { col: 'Mouth Position',     label: 'Posición de la boca' },
+          { col: 'Lip Size',           label: 'Tamaño labios' },
+          { col: 'Lip Width',          label: 'Ancho de labio' },
+          { col: 'Mouth Corner Height',label: 'Alt. comisuras lab.' },
+          { col: 'Mouth Depth',        label: 'Profundidad de boca' },
+        ],
+      },
+      {
+        title: 'Vello Facial',
+        fields: [
+          { col: 'Facial Hair Type',    label: 'Tipo vello fac.',          imageKey: 'facial_hair' },
+          { col: 'Facial Hair Colour R',label: 'Color del vello facial R' },
+          { col: 'Facial Hair Colour G',label: 'Color del vello facial V' },
+          { col: 'Facial Hair Colour B',label: 'Color del vello facial A' },
+          { col: 'Thickness',           label: 'Espesura' },
+        ],
+      },
+      {
+        title: 'Mejillas / Maxilar / Mentón',
+        fields: [
+          { col: 'Cheek Type',    label: 'Tipo mejillas',              imageKey: 'cheek_type' },
+          { col: 'Neck Line Type',label: 'Tipo de línea del cuello',   imageKey: 'neck_line' },
+          { col: 'Cheekbones',    label: 'Pómulos' },
+          { col: 'Chin Height',   label: 'Altura del mentón' },
+          { col: 'Chin Width',    label: 'Ancho del mentón' },
+          { col: 'Jaw Height',    label: 'Altura del maxilar' },
+          { col: 'Jawline',       label: 'Línea del maxilar' },
+          { col: 'Chin Depth',    label: 'Profundidad del mentón' },
+        ],
+      },
+      {
+        title: 'Orejas',
+        fields: [
+          { col: 'Ear Length', label: 'Largo de orejas' },
+          { col: 'Ear Width',  label: 'Ancho de orejas' },
+          { col: 'Ear Angle',  label: 'Ángulo de la oreja' },
+        ],
+      },
+    ],
+  },
+  {
+    title: 'Peinado',
+    subsections: [
+      {
+        title: 'General',
+        fields: [
+          { col: 'Overall - Style',         label: 'Estilo',    enum: { '0': '-', '1': 'Normal', '2': 'Seco', '3': 'Mohicano', '4': 'Afro', '5': 'Rastas', '6': 'Trenzado', '7': 'Especial' } },
+          { col: 'Overall - Length',        label: 'Longitud',  enum: { '0': '-', '1': 'Afeitado', '2': 'Muy corto', '3': 'Corto', '4': 'Mediano', '5': 'Largo' } },
+          { col: 'Overall - Wave Level',    label: 'Ondulado' },
+          { col: 'Overall - Hair Variation',label: 'Variación del pelo', imageKey: 'hair_variation' },
+        ],
+      },
+      {
+        title: 'Delante',
+        fields: [
+          { col: 'Font - Style',          label: 'Estilo',        enum: { '0': '-', '1': 'Arriba', '2': 'Abajo', '3': 'Hacia atrás' } },
+          { col: 'Font - Parted',         label: 'Con raya',      enum: { '0': '-', '1': 'No', '2': 'Izquierda 2', '3': 'Izquierda 1', '4': 'Centro', '5': 'Derecha 1', '6': 'Derecha 2' } },
+          { col: 'Font - Hairline',       label: 'A raíz',        enum: { '0': '-', '1': 'Tipo 1', '2': 'Tipo 2', '3': 'Tipo 3' } },
+          { col: 'Font - Forehead Width', label: 'Ancho de frente', enum: { '0': '-', '1': 'Estrecha', '2': 'Normal', '3': 'Amplia' } },
+        ],
+      },
+      {
+        title: 'Lateral / Atrás',
+        fields: [
+          { col: 'Side/Back - Style',   label: 'Estilo',    enum: { '0': '-', '1': 'Normal', '2': 'Menos volumen', '3': 'Menos lateral', '4': 'Recortado' } },
+          { col: 'Side/Back - Cropped', label: 'Recortado', showImageIf: true, imageKey: 'hair_cropped' },
+        ],
+      },
+      {
+        title: 'Color de pelo / Accesorios',
+        fields: [
+          { col: 'Hair Colour',    label: 'Color de pelo' },
+          { col: 'Hair Colour R',  label: 'Color de pelo R' },
+          { col: 'Hair Colour G',  label: 'Color de pelo V' },
+          { col: 'Hair Colour B',  label: 'Color de pelo A' },
+          { col: 'Accessories',    label: 'Accesorios',       enum: { 'False': 'No', 'True': 'Sí' } },
+          { col: 'Accessory Colour',label: 'Color de accesorio' },
+        ],
+      },
+    ],
+  },
   {
     title: 'Físico',
-    cols: [
-      'Neck Length', 'Neck Size', 'Shoulder Height', 'Shoulder Width',
-      'Chest Measurement', 'Waist Size', 'Arm Size', 'Thigh Size',
-      'Calf Size', 'Leg Length', 'Arm Length', 'Skin Colour',
+    subsections: [
+      {
+        title: null,
+        fields: [
+          { col: 'Height',            label: 'Altura (cm)',          source: 'player' },
+          { col: 'Weight',            label: 'Peso (kg)',            source: 'player' },
+          { col: 'Neck Length',       label: 'Longitud del cuello' },
+          { col: 'Neck Size',         label: 'Anchura del cuello' },
+          { col: 'Shoulder Height',   label: 'Altura de hombros' },
+          { col: 'Shoulder Width',    label: 'Anchura de hombros' },
+          { col: 'Chest Measurement', label: 'Medida del pecho' },
+          { col: 'Waist Size',        label: 'Grosor cintura' },
+          { col: 'Arm Size',          label: 'Medida de brazos' },
+          { col: 'Thigh Size',        label: 'Grosor muslos' },
+          { col: 'Calf Size',         label: 'Grosor pantorrillas' },
+          { col: 'Leg Length',        label: 'Longitud de piernas' },
+          { col: 'Arm Length',        label: 'Longitud del brazo' },
+        ],
+      },
     ],
   },
   {
-    title: 'Cabeza',
-    cols: [
-      'Head Length', 'Head Width', 'Head Depth',
-      'Face Height', 'Face Size', 'Forehead',
+    title: 'Forma de vestir',
+    subsections: [
+      {
+        title: null,
+        fields: [
+          { col: 'Boots',              label: 'Calzado',                       imageKey: 'boots', imagePath: 'img/boots' },
+          { col: 'Wrist taping',       label: 'Vendaje',                       enum: { '0': 'No', '1': 'Derecha', '2': 'Izquierda', '3': 'Ambos' } },
+          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' } },
+          { col: 'Ankle Taping',       label: 'Vendaje tobillo',               enum: { '0': 'No', '1': 'Sí' } },
+          { col: 'Player Gloves',      label: 'Guantes',                       enum: { '0': 'No', '1': 'Para invierno' } },
+          { col: 'Colour',             label: 'Color de guantes',              conditionalDash: { col: 'Player Gloves', value: '0' } },
+          { col: 'Gloves',             label: 'Guantes portero',               imageKey: 'gloves', gkOnly: true },
+          { col: 'Undershorts',        label: 'Calentadores',                  enum: { '0': 'V: No / I: No', '1': 'V: No / I: Largo', '2': 'V: Corto / I: Corto', '3': 'V: Corto / I: Largo' } },
+          { col: 'Sleeves',            label: 'Mangas' },
+          { col: 'Shirttail',          label: 'Estilo de la camiseta',         enum: { '0': 'Dentro', '1': 'Fuera' } },
+          { col: 'Sock Length',        label: 'Largo de las calcetas',         enum: { '0': 'Normal', '1': 'Corto', '2': 'Largo' } },
+          { col: 'Long-Sleeved Inners',label: 'Playera interior manga larga',  enum: { '0': 'No', '1': 'Normal', '2': 'Cuello tortuga' } },
+        ],
+      },
     ],
   },
   {
-    title: 'Ojos',
-    cols: [
-      'Upper Eyelid Type', 'Bottom Eyelid Type', 'Eye Height',
-      'Horizontal Eye Position', 'Iris Colour', 'Pupil Size',
-      'Upper Eyelid Ht. (Inner)', 'Upper Eyelid Wd. (Inner)',
-      'Upper Eyelid Ht. (Outer)', 'Upper Eyelid Wd. (Outer)',
-      'Inner Eye Height', 'Inner Eye Position', 'Eye Corner Height',
-      'Outer Eye Position', 'Bottom Eyelid Height ', 'Eye Depth',
-    ],
-  },
-  {
-    title: 'Cejas',
-    cols: [
-      'Eyebrow Type', 'Eyebrow Thickness', 'Eyebrow Style', 'Eyebrow Density',
-      'Eyebrow Colour R', 'Eyebrow Colour G', 'Eyebrow Colour B',
-      'Inner Eyebrow Height', 'Brow Width', 'Outer Edyebrow Height',
-      'Temple Width', 'Eyebrow Depth',
-    ],
-  },
-  {
-    title: 'Nariz',
-    cols: [
-      'Nose Type', 'Laughter Lines', 'Nose Height', 'Nostril Width',
-      'Nose Width', 'Nose Tip Depth', 'Nose Depth',
-    ],
-  },
-  {
-    title: 'Boca',
-    cols: [
-      'Upper Lip Type', 'Lower Lip Type', 'Mouth Position',
-      'Lip Size', 'Lip Width', 'Mouth Corner Height', 'Mouth Depth',
-    ],
-  },
-  {
-    title: 'Rasgos faciales',
-    cols: [
-      'Facial Hair Type', 'Facial Hair Colour R', 'Facial Hair Colour G', 'Facial Hair Colour B',
-      'Thickness', 'Cheek Type', 'Neck Line Type', 'Cheekbones',
-      'Chin Height', 'Chin Width', 'Jaw Height', 'Jawline', 'Chin Depth',
-      'Ear Length', 'Ear Width', 'Ear Angle',
-    ],
-  },
-  {
-    title: 'Cabello',
-    cols: [
-      'Overall - Style', 'Overall - Length', 'Overall - Wave Level', 'Overall - Hair Variation',
-      'Font - Style', 'Font - Parted', 'Font - Hairline', 'Font - Forehead Width',
-      'Side/Back - Style', 'Side/Back - Cropped',
-      'Hair Colour R', 'Hair Colour G', 'Hair Colour B', 'Accessory Colour', 'Hair Colour',
-    ],
-  },
-  {
-    title: 'Equipación y accesorios',
-    cols: [
-      'Accessories', 'Wrist taping', 'Wrist Tape Colou', 'Ankle Taping',
-      'Player Gloves', 'Colour', 'Undershorts', 'Sleeves',
-      'Shirttail', 'Sock Length', 'Long-Sleeved Inners',
-      'Boots', 'Gloves',
+    title: 'Movimiento',
+    subsections: [
+      {
+        title: 'Drible',
+        fields: [
+          { col: 'Drib. Hunching', label: 'Encorvadura', source: 'player' },
+          { col: 'Drib. Arm Move.',label: 'Mov. de brazo', source: 'player' },
+        ],
+      },
+      {
+        title: 'Animación de carrera',
+        fields: [
+          { col: 'Run. Hunching', label: 'Encorvadura', source: 'player' },
+          { col: 'Run. Arm Move.',label: 'Mov. de brazo', source: 'player' },
+        ],
+      },
+      {
+        title: 'Animación de disparo',
+        fields: [
+          { col: 'Corner Kicks', label: 'Tiro de esquina', source: 'player' },
+          { col: 'Free Kicks',   label: 'Tiro libre',      source: 'player' },
+          { col: 'Penalty Kick', label: 'Penal',           source: 'player' },
+        ],
+      },
+      {
+        title: 'Celebración de goles',
+        fields: [
+          { col: 'Celebration 1', label: 'Celebración de goles 1', source: 'player', dashIfZero: true },
+          { col: 'Celebration 2', label: 'Celebración de goles 2', source: 'player', dashIfZero: true },
+        ],
+      },
     ],
   },
 ];
@@ -518,11 +680,12 @@ function renderHabilidades(player) {
 
 function renderEstiloDeJuego(player) {
   const val = player['PlayingStyle'] || '';
-  const styleName = PLAYING_STYLE_LABELS[val] || (val ? `Estilo ${val}` : '–');
+  const styleName = PLAYING_STYLE_LABELS[val] || (val ? `Estilo ${val}` : '-');
+  const isEmpty = !val || val === '0' || val === '18' || styleName === '-';
   return `<div class="player-section">
-    <div class="player-section-title">Estilo de juego</div>
+    <div class="player-section-title">Roles</div>
     <div class="skill-items-list">
-      <div class="skill-item-row">${styleName}</div>
+      <div class="skill-item-row${isEmpty ? ' skill-item-empty' : ''}">${isEmpty ? '-' : styleName}</div>
     </div>
   </div>`;
 }
@@ -531,7 +694,7 @@ function renderHabilidadesJugador(player) {
   const active = PLAYER_SKILLS.filter(s => player[s.col] === 'True');
   const content = active.length
     ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${s.label}</div>`).join('')}</div>`
-    : `<div class="skills-empty">Sin habilidades especiales</div>`;
+    : `<div class="skill-items-list"><div class="skill-item-row skill-item-empty">-</div></div>`;
   return `<div class="player-section">
     <div class="player-section-title">Habilidades de jugador</div>
     ${content}
@@ -542,29 +705,108 @@ function renderEstilosJuegoCOM(player) {
   const active = COM_PLAYING_STYLES.filter(s => player[s.col] === 'True');
   const content = active.length
     ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${s.label}</div>`).join('')}</div>`
-    : `<div class="skills-empty">Sin estilos COM asignados</div>`;
+    : `<div class="skill-items-list"><div class="skill-item-row skill-item-empty">-</div></div>`;
   return `<div class="player-section">
     <div class="player-section-title">Estilos de juego COM</div>
     ${content}
   </div>`;
 }
 
-function renderFaceData(appearance) {
-  if (!appearance) {
+function appearanceImagePath(imageKey, value) {
+  if (imageKey === 'boots') return `img/boots/${value}.png`;
+  if (imageKey === 'gloves') return `img/appearance/gloves/${value}.png`;
+  return `img/appearance/${imageKey}/${value}.png`;
+}
+
+function renderAppearanceField(field, appearance, player) {
+  const source = field.source === 'player' ? player : appearance;
+  const rawVal = source ? (source[field.col] !== undefined ? source[field.col] : '') : '';
+
+  // Conditional dash: show '-' when a dependency column matches a specific value
+  if (field.conditionalDash) {
+    const depVal = appearance ? (appearance[field.conditionalDash.col] || '') : '';
+    if (depVal === field.conditionalDash.value) {
+      return renderAppearanceRow(field.label, '-', null, null);
+    }
+  }
+
+  // gkOnly: show '-' if player is not a GK (POS index 0 = GK)
+  if (field.gkOnly) {
+    const posIdx = parseInt(player ? (player['POS'] || '') : '', 10);
+    if (isNaN(posIdx) || posIdx !== 0) {
+      return renderAppearanceRow(field.label, '-', null, null);
+    }
+  }
+
+  // dashIfZero: show '-' if value is '0'
+  if (field.dashIfZero && rawVal === '0') {
+    return renderAppearanceRow(field.label, '-', null, null);
+  }
+
+  const displayVal = rawVal !== undefined && rawVal !== '' ? rawVal : '-';
+
+  // Enum translation
+  if (field.enum) {
+    const translated = field.enum[rawVal];
+    const label = translated !== undefined ? translated : displayVal;
+    return renderAppearanceRow(field.label, label, null, null);
+  }
+
+  // imageKey: always show image for the field when value is present
+  if (field.imageKey && rawVal) {
+    const imgPath = appearanceImagePath(field.imageKey, rawVal);
+    return renderAppearanceRow(field.label, rawVal, imgPath, field.imageKey);
+  }
+
+  // showImageIf: show image only when value is non-zero and non-empty (e.g. Side/Back - Cropped)
+  if (field.showImageIf && rawVal && rawVal !== '0') {
+    const imgPath = appearanceImagePath(field.imageKey, rawVal);
+    return renderAppearanceRow(field.label, rawVal, imgPath, field.imageKey);
+  }
+
+  return renderAppearanceRow(field.label, displayVal, null, null);
+}
+
+function renderAppearanceRow(label, value, imgPath, imageKey) {
+  let valueHtml;
+  if (imgPath) {
+    const fallback = `img/appearance/placeholder.png`;
+    valueHtml = `<span class="face-data-value face-data-with-img">
+      <img class="appearance-thumb" src="${imgPath}"
+        onerror="this.onerror=null;this.src='${fallback}'"
+        alt="${imageKey || ''}" title="${value}">
+      <span class="appearance-thumb-val">${value}</span>
+    </span>`;
+  } else {
+    valueHtml = `<span class="face-data-value${value === '-' ? ' face-data-dash' : ''}">${value}</span>`;
+  }
+  return `<div class="face-data-row">
+    <span class="face-data-label">${label}</span>
+    ${valueHtml}
+  </div>`;
+}
+
+function renderFaceData(appearance, player) {
+  if (!appearance && !player) {
     return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
-  return FACE_GROUPS.map(group => {
-    const rows = group.cols
-      .filter(col => appearance[col] !== undefined && appearance[col] !== '')
-      .map(col => `<div class="face-data-row">
-        <span class="face-data-label">${col}</span>
-        <span class="face-data-value">${appearance[col]}</span>
-      </div>`)
-      .join('');
-    if (!rows) return '';
-    return `<div class="face-group">
-      <div class="face-group-title">${group.title}</div>
-      <div class="face-data-grid">${rows}</div>
+
+  return APPEARANCE_SECTIONS.map(section => {
+    const subsectionsHtml = section.subsections.map(sub => {
+      const fieldsHtml = sub.fields
+        .map(field => renderAppearanceField(field, appearance, player))
+        .join('');
+      if (!fieldsHtml) return '';
+      const subTitle = sub.title
+        ? `<div class="face-subsection-title">${sub.title}</div>`
+        : '';
+      return `<div class="face-subsection">${subTitle}<div class="face-data-grid">${fieldsHtml}</div></div>`;
+    }).join('');
+
+    if (!subsectionsHtml) return '';
+    return `<div class="face-section">
+      <div class="face-section-title">${section.title}</div>
+      ${subsectionsHtml}
     </div>`;
   }).join('');
 }
@@ -619,7 +861,7 @@ function renderPlayerPage(player, team, appearance, typeLabel) {
       </div>
     </div>`;
 
-  const appearanceHtml = renderFaceData(appearance);
+  const appearanceHtml = renderFaceData(appearance, player);
 
   const content = document.getElementById('player-content');
   content.innerHTML = `
