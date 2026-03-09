@@ -379,6 +379,112 @@ body {
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.adv-filter-toggle {
+  margin-left: auto;
+  padding: 7px 16px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.adv-filter-toggle:hover {
+  background: var(--color-highlight);
+  color: #fff;
+  border-color: var(--color-highlight);
+}
+
+.adv-filter-panel {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 18px 20px 12px;
+  margin-bottom: 20px;
+}
+
+.adv-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px 16px;
+}
+
+.adv-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.adv-filter-group label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-text-muted);
+}
+
+.adv-filter-group select,
+.adv-filter-group input[type="number"] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.84rem;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.adv-filter-group select:focus,
+.adv-filter-group input[type="number"]:focus {
+  border-color: var(--color-highlight);
+}
+
+.adv-filter-range .range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adv-filter-range .range-inputs span {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.adv-filter-range .range-inputs input {
+  width: 0;
+  flex: 1;
+}
+
+.adv-filter-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.adv-filter-reset {
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.adv-filter-reset:hover {
+  background: var(--color-highlight);
+  color: #fff;
+  border-color: var(--color-highlight);
 }
 
 .view-header .team-crest {
@@ -433,6 +539,14 @@ body {
 .players-table tr:hover td {
   background: var(--color-card-hover);
   cursor: pointer;
+}
+
+.shirt-number-cell {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  min-width: 28px;
 }
 
 .player-row-photo {
@@ -863,6 +977,19 @@ body {
   height: 18px !important;
 }
 
+.national-team-note {
+  font-size: 0.82rem;
+  color: #5dade2;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.national-team-badge {
+  margin-left: 6px;
+  font-size: 0.82rem;
+  opacity: 0.85;
+}
+
 .profile-quick-stats {
   display: flex;
   gap: 20px;
@@ -1037,6 +1164,24 @@ body {
   color: var(--color-text-muted);
   font-size: 0.9rem;
   padding: 20px 0;
+}
+
+.scanned-face-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px;
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.35);
+  border-radius: 8px;
+  color: #2ecc71;
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 8px 0;
+}
+
+.scanned-face-icon {
+  font-size: 1.3rem;
 }
 
 /* ── Appearance structured sections ── */
@@ -1753,6 +1898,13 @@ body {
   align-items: center;
   gap: 3px;
   z-index: 10;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.pitch-player:hover {
+  transform: translate(-50%, -50%) scale(1.12);
 }
 
 .pitch-player-photo-wrap {
