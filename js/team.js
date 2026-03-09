@@ -335,9 +335,15 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
   const captainRawIdx = parseInt(formationRow['Capitan'], 10);
   const tokens = [];
 
+  // Build the starting-11 squad-index array for formation-slot lookups
+  const startingSquadIndices = [];
   for (let i = 1; i <= 11; i++) {
-    const rawIdx = formationRow[`Indice Jugador ${i}`];
-    const squadIdx = parseInt(rawIdx, 10);
+    const raw = formationRow[`Indice Jugador ${i}`];
+    startingSquadIndices.push(parseInt(raw, 10));
+  }
+
+  for (let i = 1; i <= 11; i++) {
+    const squadIdx = startingSquadIndices[i - 1];
     // Indice Jugador is 0-based into the 32-slot squad array
     if (isNaN(squadIdx) || squadIdx < 0 || squadIdx >= squadSlots.length) continue;
     const player = squadSlots[squadIdx];
@@ -346,17 +352,23 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     const xDepth = parseFloat(formationRow[`Ubicacion X${i} F1`]) || 0;
     const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} F1`]) || 50;
 
-    // Map to CSS percentage positions:
-    //   left: yWidth / 100 * 100%   (0=left, 100=right)
-    //   top:  (1 - xDepth / 52) * 100%  (xDepth=0 → bottom, xDepth=52 → top)
-    const leftPct   = (yWidth / 100) * 100;
-    const topPct    = (1 - xDepth / 52) * 100;
+    // Map to CSS percentage positions with 5% padding on each side:
+    //   left: 5 + (yWidth / 100) * 90%  (0=left, 100=right, padded to 5%..95%)
+    //   top:  3 + (1 - xDepth / 52) * 94%  (xDepth=0 → bottom, xDepth=52 → top)
+    const leftPct = 5 + (yWidth / 100) * 90;
+    const topPct  = 3 + (1 - xDepth / 52) * 94;
 
     const shortName = escapeHtml(formatShortName(player.Name || ''));
     const pid = escapeHtml(player.ID);
     const tid = escapeHtml(teamId || '');
-    const posDisplay = escapeHtml(player.Position || '');
-    const posColor = positionGroupColor(player.Position || '');
+
+    // Use the formation position (Posicion i F1) rather than the player's natural position
+    const posRawVal = parseInt(formationRow[`Posicion ${i} F1`], 10);
+    const formationPos = (!isNaN(posRawVal) && posRawVal >= 0 && posRawVal < PES_POSITIONS.length)
+      ? PES_POSITIONS[posRawVal] : (player.Position || '');
+    const posDisplay = escapeHtml(translatePosition(formationPos));
+    const posColor = positionGroupColor(formationPos);
+
     const ovr = escapeHtml(player.Overall || '–');
     const ovrColor = statColor(player.Overall || '');
     const ovrTextColor = statTextColor(ovrColor);
@@ -392,23 +404,46 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
 
   // Build assignments section
   const assignmentRows = [];
-  const addAssignment = (label, colName) => {
+
+  // For set-piece roles using direct squad-slot indices (0-based)
+  const addSquadAssignment = (label, colName) => {
     const rawIdx = parseInt(formationRow[colName], 10);
-    if (isNaN(rawIdx) || rawIdx >= 32 || rawIdx < 0) return;
+    if (isNaN(rawIdx) || rawIdx < 0 || rawIdx >= squadSlots.length) return;
     const p = squadSlots[rawIdx];
     if (!p) return;
     assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
   };
 
-  addAssignment('Capitán', 'Capitan');
-  addAssignment('Tiro libre corto', 'TiroCorto');
-  addAssignment('Tiro libre largo', 'TiroLargo');
-  addAssignment('Córner derecho', 'EsquinaDerecho');
-  addAssignment('Córner izquierdo', 'EsquinaIzquierdo');
-  addAssignment('Penal', 'Penalti');
-  addAssignment('Remate de cabeza 1', 'Cabeceador1');
-  addAssignment('Remate de cabeza 2', 'Cabeceador2');
-  addAssignment('Remate de cabeza 3', 'Cabeceador3');
+  // For header roles: the value is a 0-based index into the starting-11 formation array
+  // (so value 10 means the 11th player in the formation, i.e. startingSquadIndices[10])
+  const addHeaderAssignment = (label, colName) => {
+    const rawIdx = parseInt(formationRow[colName], 10);
+    if (isNaN(rawIdx) || rawIdx < 0) return;
+    let p = null;
+    if (rawIdx <= 10) {
+      // 0-based formation-slot index → look up through the starting-11 squad-index array
+      const squadIdx = startingSquadIndices[rawIdx];
+      if (!isNaN(squadIdx) && squadIdx >= 0 && squadIdx < squadSlots.length) {
+        p = squadSlots[squadIdx];
+      }
+    }
+    if (!p && rawIdx < squadSlots.length) {
+      // Fallback: direct squad index
+      p = squadSlots[rawIdx];
+    }
+    if (!p) return;
+    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
+  };
+
+  addSquadAssignment('Capitán', 'Capitan');
+  addSquadAssignment('Tiro libre corto', 'TiroCorto');
+  addSquadAssignment('Tiro libre largo', 'TiroLargo');
+  addSquadAssignment('Córner derecho', 'EsquinaDerecho');
+  addSquadAssignment('Córner izquierdo', 'EsquinaIzquierdo');
+  addSquadAssignment('Penal', 'Penalti');
+  addHeaderAssignment('Remate de cabeza 1', 'Cabeceador1');
+  addHeaderAssignment('Remate de cabeza 2', 'Cabeceador2');
+  addHeaderAssignment('Remate de cabeza 3', 'Cabeceador3');
 
   const infoHtml = (tacticsRows || assignmentRows.length) ? `
     <div class="formation-info-columns">
@@ -422,9 +457,6 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       <div class="formation-layout">
         <div class="pitch-container">
           <div class="pitch-field">
-            <div class="pitch-halfway-line"></div>
-            <div class="pitch-penalty-area-bottom"></div>
-            <div class="pitch-goal-area-bottom"></div>
             ${tokens.join('')}
           </div>
         </div>
