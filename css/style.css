@@ -2075,11 +2075,11 @@ body {
 }
 
 .pf-legend-primary {
-  background: #57e42b;
+  background: var(--color-text-muted);
 }
 
 .pf-legend-secondary {
   background: transparent;
-  border: 2px solid #57e42b;
+  border: 2px solid var(--color-text-muted);
 }
 
