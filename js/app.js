@@ -693,6 +693,31 @@ function showHome() {
   // Count unique players
   const uniqueIds = new Set(DB.players.map(p => p.ID));
   document.getElementById('stat-players').textContent = uniqueIds.size;
+
+  // Populate featured leagues section
+  const featuredSection = document.getElementById('home-leagues-section');
+  if (featuredSection && DB.leagues.length > 0) {
+    const leaguesHtml = DB.leagues.map(l => {
+      const safeName = l.name
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      return `<div class="home-league-item" data-league-id="${l.id.replace(/"/g, '&quot;')}">
+        <img src="img/leagues/${l.id}.png"
+          onerror="this.onerror=null;this.src='img/leagues/default.png'"
+          alt="${safeName}">
+        <span>${safeName}</span>
+      </div>`;
+    }).join('');
+    featuredSection.innerHTML = `<div class="home-section-title">Ligas disponibles</div>
+      <div class="home-leagues-grid">${leaguesHtml}</div>`;
+    featuredSection.querySelectorAll('.home-league-item').forEach(item => {
+      item.addEventListener('click', () => showLeagueTeamsView(item.dataset.leagueId));
+    });
+  }
+}
+
+function goHome() {
+  if (DB.loaded) showHome();
 }
 
 // ─── All-players default view (infinite scroll) ───────────────────────────────
@@ -1206,7 +1231,7 @@ function showAllPlayers() {
     <table class="players-table">
       <thead>
         <tr>
-          <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
+          <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
           <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
         </tr>
       </thead>
@@ -1266,6 +1291,7 @@ function renderPlayersList(team) {
       <thead>
         <tr>
           <th></th>
+          <th></th>
           <th>Nombre</th>
           <th>Nac</th>
           <th>Pos</th>
@@ -1300,6 +1326,15 @@ function renderPlayerRow(player, team) {
         src="img/players/${player.ID}.png"
         onerror="handleMinifaceError(this,'${player.ID}')"
         alt="${player.Name}">
+    </td>
+    <td class="team-crest-cell">
+      <a href="team.html?id=${team.id}" onclick="event.stopPropagation()">
+        <img class="player-row-team-crest"
+          src="img/teams/${team.id}.png"
+          onerror="this.onerror=null;this.src='img/teams/default.png'"
+          alt="${team.displayName}"
+          title="${team.displayName}">
+      </a>
     </td>
     <td><strong>${player.Name || '–'}</strong>${nationalNote}</td>
     <td>
@@ -1626,7 +1661,7 @@ function runSearch(query) {
     <table class="players-table">
       <thead>
         <tr>
-          <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
+          <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
           <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th>
           <th>PAS</th><th>FIS</th><th>DEF</th>
         </tr>

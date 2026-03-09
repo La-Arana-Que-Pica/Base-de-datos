@@ -350,13 +350,13 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     if (!player) continue;
 
     const xDepth = parseFloat(formationRow[`Ubicacion X${i} F1`]) || 0;
-    const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} F1`]) || 50;
+    const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} F1`]) || 52;
 
-    // Map to CSS percentage positions with 5% padding on each side:
-    //   left: 5 + (yWidth / 100) * 90%  (0=left, 100=right, padded to 5%..95%)
-    //   top:  3 + (1 - xDepth / 52) * 94%  (xDepth=0 → bottom, xDepth=52 → top)
-    const leftPct = 5 + (yWidth / 100) * 90;
-    const topPct  = 3 + (1 - xDepth / 52) * 94;
+    // Map to CSS percentage positions on a full pitch (630×670):
+    //   left: 5 + (yWidth / 104) * 90%  (0=left touchline → 5%, 52=center → 50%, 104=right → 95%)
+    //   top:  50 + (1 - xDepth / 52) * 43%  (xDepth=52=midfield → 50%, xDepth=0=own goal → 93%)
+    const leftPct = 5 + (yWidth / 104) * 90;
+    const topPct  = 50 + (1 - xDepth / 52) * 43;
 
     const shortName = escapeHtml(formatShortName(player.Name || ''));
     const pid = escapeHtml(player.ID);
@@ -381,8 +381,8 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
           <div class="pitch-player-photo-wrap">
             <img src="img/players/${pid}.png"
               onerror="handleMinifaceError(this,'${pid}')"
-              class="pitch-player-photo" alt="${shortName}">
-          </div>${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
+              class="pitch-player-photo" alt="${shortName}">${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
+          </div>
         </div>
         <div class="pitch-player-bar">
           <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
@@ -457,6 +457,12 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       <div class="formation-layout">
         <div class="pitch-container">
           <div class="pitch-field">
+            <div class="pf-mark pf-halfway"></div>
+            <div class="pf-mark pf-center-circle"></div>
+            <div class="pf-mark pf-penalty-top"></div>
+            <div class="pf-mark pf-goal-top"></div>
+            <div class="pf-mark pf-penalty-bottom"></div>
+            <div class="pf-mark pf-goal-bottom"></div>
             ${tokens.join('')}
           </div>
         </div>
