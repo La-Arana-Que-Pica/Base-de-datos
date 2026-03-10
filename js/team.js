@@ -64,18 +64,39 @@ function escapeHtml(str) {
 
 function statColorClass(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 75) return 'stat-green';
-  if (v >= 60) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
+}
+
+function statColor(value) {
+  const v = parseInt(value, 10);
+  if (isNaN(v)) return '#d33d35';
+  if (v >= 95) return '#00ff87';
+  if (v >= 90) return '#62ff51';
+  if (v >= 80) return '#a8ff00';
+  if (v >= 70) return '#e5dc00';
+  if (v >= 60) return '#e59f01';
+  return '#d33d35';
+}
+
+function statTextColor(hexColor) {
+  return ['#e5dc00', '#a8ff00', '#62ff51', '#00ff87'].includes(hexColor) ? '#111' : '#fff';
 }
 
 function overallColor(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 80) return 'stat-green';
-  if (v >= 70) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
 }
 
 // ─── Translations (UI display only) ──────────────────────────────────────────
@@ -108,6 +129,14 @@ function translatePosition(pesPos) {
   return POSITION_LABELS[pesPos] || pesPos;
 }
 
+function positionGroupColor(pesPos) {
+  if (pesPos === 'GK') return '#f9d901';
+  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
+  if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
+  if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
+  return '#8b949e';
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
@@ -119,6 +148,27 @@ const POSITION_GROUPS = [
   { key: 'MID', label: 'Mediocampistas',  positions: ['DMF', 'CMF', 'RMF', 'LMF', 'AMF'] },
   { key: 'FWD', label: 'Delanteros',      positions: ['RWF', 'LWF', 'SS', 'CF'] },
 ];
+
+// Tactics labels and value maps
+const FORMATION_TACTIC_FIELDS = [
+  { col: 'EstiloAtaque F1',   label: 'Estilo de ataque',   values: { '0': 'Pelotazo', '1': 'Pase corto', '2': 'Contragolpe', '3': 'Por las bandas', '4': 'Posesión' } },
+  { col: 'Creacion F1',       label: 'Creación',           values: { '0': 'Saque de meta', '1': 'Pase corto', '2': 'Pase largo', '3': 'Ataque total' } },
+  { col: 'ZonaAtaque F1',     label: 'Zona de ataque',     values: { '0': 'Por las bandas', '1': 'Central', '2': 'Mixto' } },
+  { col: 'NumAtaq F1',        label: 'Nº atacantes',       values: {} },
+  { col: 'EstiloDefensa F1',  label: 'Estilo defensivo',   values: { '0': 'Caer atrás', '1': 'Corte básico', '2': 'Presión', '3': 'Presión agresiva' } },
+  { col: 'ZonaContencion F1', label: 'Zona de contención', values: { '0': 'Media', '1': 'Alta', '2': 'Baja' } },
+  { col: 'Presion F1',        label: 'Presión',            values: { '0': 'Sin presión', '1': 'Moderada', '2': 'Agresiva' } },
+  { col: 'LineaDefensiva F1', label: 'Línea defensiva',    values: {} },
+  { col: 'CierreFilas F1',    label: 'Compacidad',         values: {} },
+  { col: 'NumDef F1',         label: 'Nº defensores',      values: {} },
+];
+
+// Helper: "J. Álvarez" format
+function formatShortName(fullName) {
+  const parts = (fullName || '').trim().split(/\s+/);
+  if (parts.length <= 1) return parts[0] || '';
+  return parts[0].charAt(0).toUpperCase() + '. ' + parts[parts.length - 1];
+}
 
 function normalizePlayerRow(row) {
   const rawPos = row['POS'] || '';
@@ -275,69 +325,326 @@ function resetFilters() {
  * mini-faces and names. Coordinates from the formation CSV:
  *   Ubicacion X = depth (0 = own goal, ~52 = midfield)
  *   Ubicacion Y = width  (0 = left touchline, ~100 = right touchline)
+ *
+ * Note: "Indice Jugador i" values are 0-based indices into the 32-slot squad
+ * array, so we use squadSlots[idx] (a 32-element array indexed from 0).
  */
-function renderFormationPitch(players, formationRow) {
-  if (!formationRow || !players.length) return '';
+function renderFormationPitch(players, formationRow, squadSlots, teamId) {
+  if (!formationRow || !squadSlots || !players.length) return '';
 
+  const captainRawIdx = parseInt(formationRow['Capitan'], 10);
   const tokens = [];
 
+  // Build the starting-11 squad-index array for formation-slot lookups
+  const startingSquadIndices = [];
   for (let i = 1; i <= 11; i++) {
-    const rawIdx = formationRow[`Indice Jugador ${i}`];
-    const squadIdx = parseInt(rawIdx, 10);
-    if (isNaN(squadIdx) || squadIdx < 1 || squadIdx > players.length) continue;
-    const player = players[squadIdx - 1];
+    const raw = formationRow[`Indice Jugador ${i}`];
+    startingSquadIndices.push(parseInt(raw, 10));
+  }
+
+  for (let i = 1; i <= 11; i++) {
+    const squadIdx = startingSquadIndices[i - 1];
+    // Indice Jugador is 0-based into the 32-slot squad array
+    if (isNaN(squadIdx) || squadIdx < 0 || squadIdx >= squadSlots.length) continue;
+    const player = squadSlots[squadIdx];
     if (!player) continue;
 
     const xDepth = parseFloat(formationRow[`Ubicacion X${i} F1`]) || 0;
-    const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} F1`]) || 50;
+    const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} F1`]) || 52;
 
-    // Map to CSS percentage positions:
-    //   left: yWidth / 100 * 100%   (0=left, 100=right)
-    //   top:  (1 - xDepth / 52) * 100%  (xDepth=0 → bottom, xDepth=52 → top)
-    const leftPct   = (yWidth / 100) * 100;
-    const topPct    = (1 - xDepth / 52) * 100;
+    // Map to CSS percentage positions on a full pitch (630×670):
+    //   left: 5 + (yWidth / 104) * 90%  (0=left touchline → 5%, 52=center → 50%, 104=right → 95%)
+    //   top:  7 + (1 - xDepth / 52) * 86%  (xDepth=52=midfield → 7%, xDepth=0=own goal → 93%)
+    const leftPct = 5 + (yWidth / 104) * 90;
+    const topPct  = 7 + (1 - xDepth / 52) * 86;
 
-    // Show the last word of the name as a short label
-    const shortName = escapeHtml((player.Name || '').split(' ').slice(-1)[0] || player.Name);
+    const shortName = escapeHtml(formatShortName(player.Name || ''));
     const pid = escapeHtml(player.ID);
+    const tid = escapeHtml(teamId || '');
+
+    // Use the formation position (Posicion i F1) rather than the player's natural position
+    const posRawVal = parseInt(formationRow[`Posicion ${i} F1`], 10);
+    const formationPos = (!isNaN(posRawVal) && posRawVal >= 0 && posRawVal < PES_POSITIONS.length)
+      ? PES_POSITIONS[posRawVal] : (player.Position || '');
+    const posDisplay = escapeHtml(translatePosition(formationPos));
+    const posColor = positionGroupColor(formationPos);
+
+    const ovr = escapeHtml(player.Overall || '–');
+    const ovrColor = statColor(player.Overall || '');
+    const ovrTextColor = statTextColor(ovrColor);
+    const isCapitan = !isNaN(captainRawIdx) && squadIdx === captainRawIdx;
 
     tokens.push(`
-      <div class="pitch-player" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
-        <div class="pitch-player-photo-wrap">
-          <img src="img/players/${pid}.png"
-            onerror="handleMinifaceError(this,'${pid}')"
-            class="pitch-player-photo" alt="${shortName}">
+      <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
+        <div class="pitch-player-top">
+          <div class="pitch-player-photo-wrap">
+            <img src="img/players/${pid}.png"
+              onerror="handleMinifaceError(this,'${pid}')"
+              class="pitch-player-photo" alt="${shortName}">${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
+          </div>
         </div>
-        <div class="pitch-player-name">${shortName}</div>
-      </div>`);
+        <div class="pitch-player-bar">
+          <span class="pitch-player-ovr-block">
+            <span class="pitch-player-pos-sm" style="color:${posColor};opacity:0.65">${posDisplay}</span>
+            <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
+          </span>
+          <span class="pitch-player-name">${shortName}</span>
+        </div>
+      </a>`);
   }
 
   if (!tokens.length) return '';
 
+  // Build tactics section
+  const tacticsRows = FORMATION_TACTIC_FIELDS.map(tf => {
+    const raw = formationRow[tf.col];
+    if (raw === undefined || raw === '') return '';
+    const translated = tf.values[raw];
+    const display = translated !== undefined ? `${translated} (${raw})` : raw;
+    return `<div class="tactic-row"><span class="tactic-label">${escapeHtml(tf.label)}</span><span class="tactic-value">${escapeHtml(display)}</span></div>`;
+  }).filter(Boolean).join('');
+
+  // Build assignments section
+  const assignmentRows = [];
+
+  // For set-piece roles using direct squad-slot indices (0-based)
+  const addSquadAssignment = (label, colName) => {
+    const rawIdx = parseInt(formationRow[colName], 10);
+    if (isNaN(rawIdx) || rawIdx < 0 || rawIdx >= squadSlots.length) return;
+    const p = squadSlots[rawIdx];
+    if (!p) return;
+    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
+  };
+
+  // For header roles: the value is a 0-based index into the starting-11 formation array
+  // (so value 10 means the 11th player in the formation, i.e. startingSquadIndices[10])
+  const addHeaderAssignment = (label, colName) => {
+    const rawIdx = parseInt(formationRow[colName], 10);
+    if (isNaN(rawIdx) || rawIdx < 0) return;
+    let p = null;
+    if (rawIdx <= 10) {
+      // 0-based formation-slot index → look up through the starting-11 squad-index array
+      const squadIdx = startingSquadIndices[rawIdx];
+      if (!isNaN(squadIdx) && squadIdx >= 0 && squadIdx < squadSlots.length) {
+        p = squadSlots[squadIdx];
+      }
+    }
+    if (!p && rawIdx < squadSlots.length) {
+      // Fallback: direct squad index
+      p = squadSlots[rawIdx];
+    }
+    if (!p) return;
+    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
+  };
+
+  addSquadAssignment('Capitán', 'Capitan');
+  addSquadAssignment('Tiro libre corto', 'TiroCorto');
+  addSquadAssignment('Tiro libre largo', 'TiroLargo');
+  addSquadAssignment('Córner derecho', 'EsquinaDerecho');
+  addSquadAssignment('Córner izquierdo', 'EsquinaIzquierdo');
+  addSquadAssignment('Penal', 'Penalti');
+  addHeaderAssignment('Remate de cabeza 1', 'Cabeceador1');
+  addHeaderAssignment('Remate de cabeza 2', 'Cabeceador2');
+  addHeaderAssignment('Remate de cabeza 3', 'Cabeceador3');
+
+  const infoHtml = (tacticsRows || assignmentRows.length) ? `
+    <div class="formation-info-columns">
+      ${tacticsRows ? `<div class="formation-tactic-block"><div class="formation-block-title">Tácticas</div>${tacticsRows}</div>` : ''}
+      ${assignmentRows.length ? `<div class="formation-tactic-block"><div class="formation-block-title">Asignaciones</div>${assignmentRows.join('')}</div>` : ''}
+    </div>` : '';
+
   return `
     <div class="formation-section">
       <div class="formation-section-title">Formación inicial</div>
-      <div class="pitch-container">
-        <div class="pitch-field">
-          <div class="pitch-halfway-line"></div>
-          <div class="pitch-penalty-area-bottom"></div>
-          <div class="pitch-goal-area-bottom"></div>
-          ${tokens.join('')}
+      <div class="formation-layout">
+        <div class="pitch-container">
+          <div class="pitch-field">
+            <div class="pf-mark pf-halfway"></div>
+            <div class="pf-mark pf-center-circle"></div>
+            <div class="pf-mark pf-penalty-top"></div>
+            <div class="pf-mark pf-goal-top"></div>
+            <div class="pf-mark pf-penalty-bottom"></div>
+            <div class="pf-mark pf-goal-bottom"></div>
+            ${tokens.join('')}
+          </div>
         </div>
+        ${infoHtml}
       </div>
     </div>`;
 }
 
 
+// ─── Player card carousel ─────────────────────────────────────────────────────
+
+function renderPlayerCard(player, teamId) {
+  const ovr = player.Overall || '–';
+  const ovrColor = statColor(ovr);
+  const posDisplay = escapeHtml(translatePosition(player.Position || ''));
+  const posColor = positionGroupColor(player.Position || '');
+  const radarAttrs = computeRadarAttributes(player);
+  const safeName = escapeHtml(player.Name || '–');
+  const pid = escapeHtml(player.ID);
+  const tid = escapeHtml(teamId || '');
+
+  const velColor = statColor(radarAttrs.VEL);
+  const driColor = statColor(radarAttrs.DRI);
+  const tirColor = statColor(radarAttrs.TIR);
+  const pasColor = statColor(radarAttrs.PAS);
+  const fisColor = statColor(radarAttrs.FIS);
+  const defColor = statColor(radarAttrs.DEF);
+
+  return `
+    <a class="player-card" href="player.html?id=${pid}&team=${tid}">
+      <div class="player-card-top" style="background:linear-gradient(135deg,${ovrColor}33 0%,${ovrColor}11 100%)">
+        <div class="player-card-ovr-block">
+          <span class="player-card-ovr" style="color:${ovrColor}">${escapeHtml(ovr)}</span>
+          <span class="player-card-pos" style="color:${posColor}">${posDisplay}</span>
+        </div>
+        <div class="player-card-badge-col">
+          <img class="player-card-flag" src="${flagSrc(player.Nationality)}"
+            onerror="this.onerror=null;this.src='img/flags/default.png'" alt="">
+          <img class="player-card-crest" src="img/teams/${tid}.png"
+            onerror="this.onerror=null;this.src='img/teams/default.png'" alt="">
+        </div>
+      </div>
+      <div class="player-card-photo-wrap">
+        <img class="player-card-photo" src="img/players/${pid}.png"
+          onerror="handleMinifaceError(this,'${pid}')" alt="${safeName}">
+      </div>
+      <div class="player-card-footer">
+        <div class="player-card-name">${safeName}</div>
+        <div class="player-card-stats">
+          <div class="pcs"><span class="pcs-val" style="color:${velColor}">${radarAttrs.VEL}</span><span class="pcs-key">VEL</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${driColor}">${radarAttrs.DRI}</span><span class="pcs-key">DRI</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${tirColor}">${radarAttrs.TIR}</span><span class="pcs-key">TIR</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${pasColor}">${radarAttrs.PAS}</span><span class="pcs-key">PAS</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${fisColor}">${radarAttrs.FIS}</span><span class="pcs-key">FIS</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${defColor}">${radarAttrs.DEF}</span><span class="pcs-key">DEF</span></div>
+        </div>
+      </div>
+    </a>`;
+}
+
+function renderPlayerCarousel(players, teamId) {
+  if (!players || !players.length) {
+    return `<div class="player-cards-section"><p style="color:var(--color-text-muted);padding:16px 0">No hay jugadores en este equipo.</p></div>`;
+  }
+
+  const sortByOvr = arr =>
+    arr.slice().sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
+
+  // Build grouped sections by POSITION_GROUPS
+  const categorizedPos = new Set(POSITION_GROUPS.flatMap(g => g.positions));
+  let groupsHtml = '';
+
+  POSITION_GROUPS.forEach(group => {
+    const groupPlayers = sortByOvr(
+      players.filter(p => group.positions.includes(p.Position || ''))
+    );
+    if (!groupPlayers.length) return;
+
+    groupsHtml += `
+      <div class="player-cards-group">
+        <div class="player-cards-group-header">
+          <span class="player-cards-group-title">${group.label}</span>
+          <span class="player-cards-group-count">${groupPlayers.length}</span>
+        </div>
+        <div class="player-cards-row">
+          ${groupPlayers.map(p => renderPlayerCard(p, teamId)).join('')}
+        </div>
+      </div>`;
+  });
+
+  // Uncategorized players
+  const uncategorized = sortByOvr(players.filter(p => !categorizedPos.has(p.Position || '')));
+  if (uncategorized.length) {
+    groupsHtml += `
+      <div class="player-cards-group">
+        <div class="player-cards-group-header">
+          <span class="player-cards-group-title">Otros</span>
+          <span class="player-cards-group-count">${uncategorized.length}</span>
+        </div>
+        <div class="player-cards-row">
+          ${uncategorized.map(p => renderPlayerCard(p, teamId)).join('')}
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div class="player-cards-section">
+      <div class="player-cards-header">
+        <span class="player-cards-title">Plantilla</span>
+      </div>
+      ${groupsHtml}
+    </div>`;
+}
+
+function initPlayerCarousel() {
+  const track = document.getElementById('player-cards-track');
+  const viewport = document.getElementById('player-cards-viewport');
+  const prevBtn = document.getElementById('cards-prev');
+  const nextBtn = document.getElementById('cards-next');
+  const counter = document.getElementById('cards-counter');
+  if (!track || !viewport || !prevBtn || !nextBtn || !counter) return;
+
+  const cards = track.querySelectorAll('.player-card');
+  const total = cards.length;
+  if (!total) return;
+
+  const GAP = 12;
+  let currentIndex = 0;
+
+  function getCardWidth() {
+    return cards[0].offsetWidth + GAP;
+  }
+
+  function getVisibleCount() {
+    const vpWidth = viewport.clientWidth;
+    return Math.max(1, Math.floor((vpWidth + GAP) / getCardWidth()));
+  }
+
+  function update() {
+    const visCount = getVisibleCount();
+    const maxIndex = Math.max(0, total - visCount);
+    currentIndex = Math.min(currentIndex, maxIndex);
+
+    track.style.transform = `translateX(-${currentIndex * getCardWidth()}px)`;
+
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex >= maxIndex;
+
+    const displayEnd = Math.min(currentIndex + visCount, total);
+    counter.textContent = `${currentIndex + 1}–${displayEnd} de ${total}`;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    const visCount = getVisibleCount();
+    currentIndex = Math.max(0, currentIndex - visCount);
+    update();
+  });
+
+  nextBtn.addEventListener('click', () => {
+    const visCount = getVisibleCount();
+    const maxIndex = Math.max(0, total - visCount);
+    currentIndex = Math.min(maxIndex, currentIndex + visCount);
+    update();
+  });
+
+  update();
+  window.addEventListener('resize', update);
+}
 
 function renderPlayerRow(player, teamId) {
   const ovr = player.Overall || '–';
-  const ovrClass = overallColor(ovr);
+  const ovrColor = statColor(ovr);
+  const ovrTextColor = statTextColor(ovrColor);
   const posDisplay = translatePosition(player.Position);
   const radarAttrs = computeRadarAttributes(player);
   const safeName = escapeHtml(player.Name);
+  const shirtNum = player._shirtNumber ? escapeHtml(String(player._shirtNumber)) : '–';
 
   return `<tr class="player-row" data-player-id="${escapeHtml(player.ID)}" data-team-id="${escapeHtml(teamId)}">
+    <td class="shirt-number-cell">${shirtNum}</td>
     <td>
       <img class="player-row-photo"
         src="img/players/${escapeHtml(player.ID)}.png"
@@ -351,8 +658,8 @@ function renderPlayerRow(player, teamId) {
         onerror="this.onerror=null;this.src='img/flags/default.png'"
         alt="">
     </td>
-    <td><span class="position-badge">${escapeHtml(posDisplay) || '–'}</span></td>
-    <td><span class="overall-badge ${ovrClass}">${escapeHtml(ovr)}</span></td>
+    <td><span class="position-badge" style="color:${positionGroupColor(player.Position)};border-color:${positionGroupColor(player.Position)};background:${positionGroupColor(player.Position)}18">${escapeHtml(posDisplay) || '–'}</span></td>
+    <td><span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${escapeHtml(ovr)}</span></td>
     <td>${radarAttrs.VEL}</td>
     <td>${radarAttrs.DRI}</td>
     <td>${radarAttrs.TIR}</td>
@@ -366,18 +673,25 @@ function selectPlayer(playerId, teamId) {
   window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
 }
 
-function renderTeamPage(team, players, formationRow) {
+function renderTeamPage(team, players, formationRow, squadSlots, coachName, stadiumName, leagueName) {
   _players = players;
   _teamId = team.id;
 
   const typeLabel = TYPE_LABELS[team.type] || '';
   const safeTeamName = escapeHtml(team.displayName);
 
-  // Build grouped layout
-  const groupedHtml = renderPositionGroups(players, team.id);
+  // Build extra info row
+  const extraInfoHtml = [
+    leagueName ? `<span class="team-info-item">🏆 ${escapeHtml(leagueName)}</span>` : '',
+    stadiumName ? `<span class="team-info-item">🏟️ ${escapeHtml(stadiumName)}</span>` : '',
+    coachName ? `<span class="team-info-item">👨‍💼 ${escapeHtml(coachName)}</span>` : '',
+  ].filter(Boolean).join('');
 
-  // Build formation pitch (above the squad table)
-  const pitchHtml = renderFormationPitch(players, formationRow);
+  // Build player card carousel
+  const carouselHtml = renderPlayerCarousel(players, team.id);
+
+  // Build formation pitch (above the carousel)
+  const pitchHtml = renderFormationPitch(players, formationRow, squadSlots, team.id);
 
   const content = document.getElementById('team-content');
   content.innerHTML = `
@@ -390,14 +704,13 @@ function renderTeamPage(team, players, formationRow) {
       <div>
         <div class="view-title">${safeTeamName}</div>
         <div class="view-subtitle">${escapeHtml(typeLabel)} · ${players.length} jugadores</div>
+        ${extraInfoHtml ? `<div class="team-extra-info">${extraInfoHtml}</div>` : ''}
       </div>
     </div>
 
     ${pitchHtml}
 
-    <div class="squad-groups">
-      ${groupedHtml}
-    </div>`;
+    ${carouselHtml}`;
 
   content.style.display = 'block';
   document.getElementById('loading-overlay').style.display = 'none';
@@ -405,14 +718,8 @@ function renderTeamPage(team, players, formationRow) {
   // Attach back button handler via DOM (avoids inline onclick)
   document.getElementById('btn-back').addEventListener('click', goBack);
 
-  // Event delegation: clicking any player row navigates to the player page
-  content.addEventListener('click', function (e) {
-    const row = e.target.closest('.player-row');
-    if (!row) return;
-    const pid = row.dataset.playerId;
-    const tid = row.dataset.teamId;
-    if (pid && tid) selectPlayer(pid, tid);
-  });
+  // Initialise the player card carousel navigation
+  initPlayerCarousel();
 
   // Update page title
   document.title = `${team.displayName} – Base de datos PES`;
@@ -455,6 +762,7 @@ function renderPositionGroups(players, teamId) {
         <table class="players-table">
           <thead>
             <tr>
+              <th class="shirt-number-cell">#</th>
               <th></th>
               <th>Nombre</th>
               <th>Nac</th>
@@ -486,6 +794,7 @@ function renderPositionGroups(players, teamId) {
         <table class="players-table">
           <thead>
             <tr>
+              <th class="shirt-number-cell">#</th>
               <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
               <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
             </tr>
@@ -524,11 +833,13 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText, formationsText] = await Promise.all([
+  const [teamsText, playersText, squadsText, formationsText, coachsText, leaguesText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All formations exported.csv'),
+    fetchText('database/All coachs exported.csv'),
+    fetchText('database/All leagues exported.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -540,6 +851,8 @@ async function boot() {
   const { rows: playerRows } = parseCSV(playersText);
   const { rows: squadRows } = parseCSV(squadsText);
   const { rows: formationRows } = formationsText ? parseCSV(formationsText) : { rows: [] };
+  const { rows: coachRows } = coachsText ? parseCSV(coachsText) : { rows: [] };
+  const { rows: leagueRows } = leaguesText ? parseCSV(leaguesText) : { rows: [] };
 
   // Find the team
   const teamRow = teamRows.find(t => t['Id'] === teamId);
@@ -564,19 +877,44 @@ async function boot() {
   // Find this team's squad
   const squadRow = squadRows.find(s => s['Id'] === teamId);
   const players = [];
+  // Build a 0-indexed 32-slot array (some slots may be null) for formation lookup
+  const squadSlots = new Array(32).fill(null);
   if (squadRow) {
     for (let i = 1; i <= 32; i++) {
       const pid = squadRow[`Player ${i}`];
       if (!pid || pid === '0') continue;
       const player = playerMap[pid];
-      if (player) players.push(player);
+      if (player) {
+        const shirtNum = squadRow[`Shirt number ${i}`];
+        const playerWithShirt = { ...player, _shirtNumber: shirtNum && shirtNum !== '0' ? parseInt(shirtNum, 10) || null : null };
+        players.push(playerWithShirt);
+        squadSlots[i - 1] = playerWithShirt;  // 0-indexed (slot i → index i-1)
+      }
     }
   }
 
   // Find this team's formation data
   const formationRow = formationRows.find(f => f['Id'] === teamId) || null;
 
-  renderTeamPage(team, players, formationRow);
+  // Build coach map: coachId → coachName
+  const coachsMap = {};
+  coachRows.forEach(row => {
+    const cid = row['Id'];
+    if (cid) coachsMap[cid] = row['Name'] || '';
+  });
+
+  const coachId = teamRow['Coach'];
+  const coachName = coachId ? (coachsMap[coachId] || null) : null;
+  const stadiumName = teamRow['StadiumName'] || null;
+
+  // Find the league this team belongs to
+  const teamLeague = leagueRows.find(l => {
+    const ids = (l['team_ids'] || '').split(',').map(s => s.trim());
+    return ids.includes(teamId);
+  });
+  const leagueName = teamLeague ? (teamLeague['league_name'] || null) : null;
+
+  renderTeamPage(team, players, formationRow, squadSlots, coachName, stadiumName, leagueName);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────

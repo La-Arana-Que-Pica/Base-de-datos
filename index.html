@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Base de datos Option File PES 2018–2026</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="img/logo.png" type="image/png" />
 </head>
 <body>
 
@@ -15,6 +16,8 @@
       src="img/logo.png"
       onerror="this.onerror=null;this.src='img/logo.png'"
       alt="Logo"
+      onclick="goHome()"
+      style="cursor:pointer"
     />
     <h1>
       Base de datos Option File <span>PES 2018–2026</span>
@@ -54,19 +57,20 @@
           <p>Selecciona un equipo del menú lateral para explorar jugadores, o utiliza la barra de búsqueda.</p>
         </div>
         <div class="stats-grid">
-          <div class="stat-card">
+          <div class="stat-card" onclick="showLeaguesView()">
             <div class="number" id="stat-leagues">0</div>
             <div class="label">Ligas</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" onclick="showTeamsView()">
             <div class="number" id="stat-teams">0</div>
             <div class="label">Equipos</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" onclick="showAllPlayers()">
             <div class="number" id="stat-players">0</div>
             <div class="label">Jugadores</div>
           </div>
         </div>
+        <div id="home-leagues-section"></div>
       </div>
 
       <!-- Players list view -->

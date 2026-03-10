@@ -64,26 +64,46 @@ function flagSrc(countryId) {
 
 function statColorClass(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 75) return 'stat-green';
-  if (v >= 60) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
 }
 
 function statColor(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return '#e74c3c';
-  if (v >= 75) return '#27ae60';
-  if (v >= 60) return '#f39c12';
-  return '#e74c3c';
+  if (isNaN(v)) return '#d33d35';
+  if (v >= 95) return '#00ff87';
+  if (v >= 90) return '#62ff51';
+  if (v >= 80) return '#a8ff00';
+  if (v >= 70) return '#e5dc00';
+  if (v >= 60) return '#e59f01';
+  return '#d33d35';
+}
+
+function statTextColor(hexColor) {
+  return ['#e5dc00', '#a8ff00', '#62ff51', '#00ff87'].includes(hexColor) ? '#111' : '#fff';
 }
 
 function overallColor(value) {
   const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-red';
-  if (v >= 80) return 'stat-green';
-  if (v >= 70) return 'stat-yellow';
-  return 'stat-red';
+  if (isNaN(v)) return 'stat-range-1';
+  if (v >= 95) return 'stat-range-6';
+  if (v >= 90) return 'stat-range-5';
+  if (v >= 80) return 'stat-range-4';
+  if (v >= 70) return 'stat-range-3';
+  if (v >= 60) return 'stat-range-2';
+  return 'stat-range-1';
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 // ─── Translations (UI display only) ──────────────────────────────────────────
@@ -136,6 +156,53 @@ const POSITION_LABELS = {
   'CF':  'CD',
 };
 
+const NATIONALITY_NAMES = {
+  '7':   'China',        '10':  'Indonesia',   '11':  'Irán',
+  '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
+  '15':  'Corea del Norte', '16': 'Corea del Sur', '17': 'Kuwait',
+  '21':  'Malasia', '34':  'Siria', 
+  '19':  'Líbano',       '26':  'Omán',         '30':  'Qatar',
+  '31':  'Arabia Saudita', '36': 'Tailandia',   '37':  'Emiratos Árabes Unidos',
+  '44':  'Argelia',      '45':  'Angola',       '48':  'Burkina Faso',
+  '50':  'Camerún',      '51':  'Cabo Verde',   '52':  'República Centroafricana',
+  '55':  'Congo DR',     '56':  'Costa de Marfil', '58': 'Egipto',
+  '62':  'Gabón',
+  '59':  'Guinea Ecuatorial',      '63':  'Gambia',       '64':  'Ghana',
+  '65':  'Guinea',       '66':  'Guinea-Bisáu', '70':  'Libia',
+  '73':  'Malí',         '76':  'Marruecos',    '77':  'Mozambique',
+  '79':  'Níger',        '80':  'Nigeria',      '83':  'Senegal',
+  '87':  'Sudáfrica',    '91':  'Togo',         '92':  'Túnez',
+  '94':  'Zambia',       '95':  'Zimbabue',     '110': 'Canadá',
+  '112': 'Costa Rica',   '115': 'Rep. Dominicana', '120': 'Haití',
+  '121': 'Honduras',     '122': 'Jamaica',      '124': 'México',
+  '128': 'Panamá',       '133': 'Trinidad y Tobago',    '135': 'Estados Unidos',
+  '139': 'Surinam',      '144': 'Argentina',    '145': 'Bolivia',
+  '146': 'Brasil',       '147': 'Chile',        '148': 'Colombia',
+  '149': 'Ecuador',      '150': 'Paraguay',     '151': 'Perú',
+  '152': 'Uruguay',      '153': 'Venezuela',    '162': 'Australia',
+  '166': 'Nueva Zelanda','189': 'Israel',       '190': 'Turquía',
+  '191': 'Albania',      '193': 'Armenia',      '194': 'Austria',
+  '196': 'Bielorrusia',  '197': 'Bélgica',      '198': 'Bosnia y Herzegovina',
+  '199': 'Bulgaria',     '200': 'Croacia',       '201': 'Chipre',
+  '202': 'Rep. Checa',   '203': 'Dinamarca',    '204': 'Inglaterra',
+  '207': 'Finlandia',    '208': 'Francia',      '209': 'Georgia',
+  '210': 'Alemania',     '211': 'Grecia',       '212': 'Hungría',
+  '213': 'Islandia',     '214': 'Irlanda',      '215': 'Italia',
+  '219': 'Lituania',     '221': 'Macedonia del Norte', '223': 'Moldavia',
+  '224': 'Países Bajos', '225': 'Irlanda del Norte', '226': 'Noruega',
+  '227': 'Polonia',      '228': 'Portugal',     '229': 'Rumanía',
+  '230': 'Rusia',        '232': 'Escocia',      '234': 'Eslovaquia',
+  '235': 'Eslovenia',    '236': 'España',       '237': 'Suecia',
+  '238': 'Suiza',        '239': 'Ucrania',      '240': 'Uzbekistán',
+  '241': 'Gales',        '303': 'Serbia',       '304': 'Montenegro',
+  '311': 'Kosovo',
+};
+
+function nationalityName(countryId) {
+  if (!countryId) return '–';
+  return NATIONALITY_NAMES[String(countryId)] || countryId;
+}
+
 // Team type → Spanish label
 const TYPE_LABELS = {
   '0': 'Clubes',
@@ -151,12 +218,36 @@ function translatePosition(pesPos) {
   return POSITION_LABELS[pesPos] || pesPos;
 }
 
+function positionGroupColor(pesPos) {
+  if (pesPos === 'GK') return '#f9d901';
+  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
+  if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
+  if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
+  return '#8b949e';
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
 
 // Position rating columns (same order as PES_POSITIONS)
 const POSITION_RATING_COLS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
+
+const POSITION_FIELD_COORDS = {
+  'GK':  { left: 50, top: 88 },
+  'CB':  { left: 50, top: 72 },
+  'LB':  { left: 16, top: 65 },
+  'RB':  { left: 84, top: 65 },
+  'DMF': { left: 50, top: 52 },
+  'CMF': { left: 50, top: 42 },
+  'LMF': { left: 22, top: 42 },
+  'RMF': { left: 78, top: 42 },
+  'AMF': { left: 50, top: 30 },
+  'LWF': { left: 16, top: 20 },
+  'RWF': { left: 84, top: 20 },
+  'SS':  { left: 50, top: 22 },
+  'CF':  { left: 50, top: 10 },
+};
 
 // Ordered stat columns for the Habilidades section (exact game order)
 const STAT_COLUMNS_ORDERED = [
@@ -429,7 +520,7 @@ const APPEARANCE_SECTIONS = [
         fields: [
           { col: 'Boots',              label: 'Calzado',                       imageKey: 'boots', imagePath: 'img/boots' },
           { col: 'Wrist taping',       label: 'Vendaje',                       enum: { '0': 'No', '1': 'Derecha', '2': 'Izquierda', '3': 'Ambos' } },
-          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' } },
+          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' }, conditionalLabel: { value: '10', label: 'Kit Color' } },
           { col: 'Ankle Taping',       label: 'Vendaje tobillo',               enum: { '0': 'No', '1': 'Sí' } },
           { col: 'Player Gloves',      label: 'Guantes',                       enum: { '0': 'No', '1': 'Para invierno' } },
           { col: 'Colour',             label: 'Color de guantes',              conditionalDash: { col: 'Player Gloves', value: '0' } },
@@ -448,23 +539,23 @@ const APPEARANCE_SECTIONS = [
       {
         title: 'Drible',
         fields: [
-          { col: 'Drib. Hunching', label: 'Encorvadura', source: 'player' },
-          { col: 'Drib. Arm Move.',label: 'Mov. de brazo', source: 'player' },
+          { col: 'Drib. Hunching', label: 'Encorvadura', source: 'player', noPlus: true },
+          { col: 'Drib. Arm Move.',label: 'Mov. de brazo', source: 'player', noPlus: true },
         ],
       },
       {
         title: 'Animación de carrera',
         fields: [
-          { col: 'Run. Hunching', label: 'Encorvadura', source: 'player' },
-          { col: 'Run. Arm Move.',label: 'Mov. de brazo', source: 'player' },
+          { col: 'Run. Hunching', label: 'Encorvadura', source: 'player', noPlus: true },
+          { col: 'Run. Arm Move.',label: 'Mov. de brazo', source: 'player', noPlus: true },
         ],
       },
       {
         title: 'Animación de disparo',
         fields: [
-          { col: 'Corner Kicks', label: 'Tiro de esquina', source: 'player' },
-          { col: 'Free Kicks',   label: 'Tiro libre',      source: 'player' },
-          { col: 'Penalty Kick', label: 'Penal',           source: 'player' },
+          { col: 'Corner Kicks', label: 'Tiro de esquina', source: 'player', noPlus: true },
+          { col: 'Free Kicks',   label: 'Tiro libre',      source: 'player', noPlus: true },
+          { col: 'Penalty Kick', label: 'Penal',           source: 'player', noPlus: true },
         ],
       },
       {
@@ -493,6 +584,7 @@ function computeRadarAttributes(player) {
     DEF: avg('Defensive Prowess'),
     VEL: avg('Speed'),
     DRI: avg('Dribbling', 'Ball Control'),
+    POR: avg('Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'),
   };
 }
 
@@ -505,6 +597,7 @@ function drawRadar(canvasId, attrs) {
   const cx = W / 2;
   const cy = H / 2;
   const maxR = Math.min(cx, cy) - 42;
+  const MIN_VAL = 40;
   const MAX_VAL = 99;
   const labels = Object.keys(attrs);
   const values = Object.values(attrs);
@@ -512,8 +605,7 @@ function drawRadar(canvasId, attrs) {
 
   ctx.clearRect(0, 0, W, H);
 
-  // Grid rings (5 levels)
-  const ringLevels = [20, 40, 60, 80, 99];
+  // Grid rings (5 levels, center = MIN_VAL)
   for (let ring = 1; ring <= 5; ring++) {
     const r = (maxR * ring) / 5;
     ctx.beginPath();
@@ -527,12 +619,6 @@ function drawRadar(canvasId, attrs) {
     ctx.strokeStyle = ring === 5 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)';
     ctx.lineWidth = ring === 5 ? 1.5 : 1;
     ctx.stroke();
-    // Ring value label at top
-    ctx.font = '9px Segoe UI, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(String(ringLevels[ring - 1]), cx, cy - r - 2);
   }
 
   // Axis lines
@@ -546,11 +632,11 @@ function drawRadar(canvasId, attrs) {
     ctx.stroke();
   }
 
-  // Data polygon fill
+  // Data polygon fill (center = MIN_VAL)
   ctx.beginPath();
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-    const r = (values[i] / MAX_VAL) * maxR;
+    const r = Math.max(0, (values[i] - MIN_VAL) / (MAX_VAL - MIN_VAL)) * maxR;
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
@@ -565,7 +651,7 @@ function drawRadar(canvasId, attrs) {
   // Data points
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-    const r = (values[i] / MAX_VAL) * maxR;
+    const r = Math.max(0, (values[i] - MIN_VAL) / (MAX_VAL - MIN_VAL)) * maxR;
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
     ctx.beginPath();
@@ -577,22 +663,18 @@ function drawRadar(canvasId, attrs) {
     ctx.stroke();
   }
 
-  // Labels: "LABEL\nVAL" outside each axis
+  // Labels: attribute name only (no numeric value)
   ctx.textAlign = 'center';
   for (let i = 0; i < n; i++) {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-    const labelR = maxR + 26;
+    const labelR = maxR + 24;
     const lx = cx + labelR * Math.cos(angle);
     const ly = cy + labelR * Math.sin(angle);
 
     ctx.font = 'bold 11px "Segoe UI", sans-serif';
     ctx.fillStyle = '#eaeaea';
     ctx.textBaseline = 'middle';
-    ctx.fillText(labels[i], lx, ly - 6);
-
-    ctx.font = 'bold 12px "Segoe UI", sans-serif';
-    ctx.fillStyle = '#e74c3c';
-    ctx.fillText(String(values[i]), lx, ly + 8);
+    ctx.fillText(labels[i], lx, ly);
   }
 }
 
@@ -618,23 +700,23 @@ function renderStatRow(label, value, col) {
   if (col && SPECIAL_ATTRS[col]) {
     const { max } = SPECIAL_ATTRS[col];
     const pct = Math.max(0, Math.min(100, (v / max) * 100));
-    const barColor = v >= max * 0.75 ? '#27ae60' : v >= max * 0.5 ? '#f39c12' : '#e74c3c';
-    const colorClass = v >= max * 0.75 ? 'stat-green' : v >= max * 0.5 ? 'stat-yellow' : 'stat-red';
+    const barColor = v >= max * 0.75 ? '#a8ff00' : v >= max * 0.5 ? '#e59f01' : '#d33d35';
+    const textColor = statTextColor(barColor);
     return `<div class="stat-row">
       <span class="stat-name">${label}</span>
-      <span class="stat-value ${colorClass}">${v}</span>
+      <span class="stat-value" style="background:${barColor};color:${textColor}">${v}</span>
       <div class="stat-bar-container">
         <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
       </div>
     </div>`;
   }
   // Normal stat: scale bar from STAT_MIN to STAT_MAX
-  const colorClass = statColorClass(value);
   const barColor = statColor(value);
+  const textColor = statTextColor(barColor);
   const pct = Math.max(0, Math.min(100, ((v - STAT_MIN) / (STAT_MAX - STAT_MIN)) * 100));
   return `<div class="stat-row">
     <span class="stat-name">${label}</span>
-    <span class="stat-value ${colorClass}">${value || '–'}</span>
+    <span class="stat-value" style="background:${barColor};color:${textColor}">${value || '–'}</span>
     <div class="stat-bar-container">
       <div class="stat-bar" style="width:${pct}%;background:${barColor}"></div>
     </div>
@@ -813,16 +895,35 @@ function renderAppearanceRow(label, value, imgPath, imageKey) {
   </div>`;
 }
 
-function renderFaceData(appearance, player) {
+function renderFaceData(appearance, player, facePlayerName) {
   if (!appearance && !player) {
     return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
 
-  const navButtons = APPEARANCE_SECTIONS.map((section, i) =>
+  // Check if the player has a scanned face (Id_Face ≠ 0)
+  const idFace = appearance ? (appearance['Id_Face'] || '0') : '0';
+  const hasScannedFace = idFace !== '0' && idFace !== '';
+
+  // When player has a scanned face: hide Cara and Peinado sections,
+  // show a notice, and only render Físico, Forma de vestir, Movimiento.
+  const sectionsToShow = hasScannedFace
+    ? APPEARANCE_SECTIONS.slice(2)
+    : APPEARANCE_SECTIONS;
+
+  const scannedNoticeHtml = hasScannedFace
+    ? `<div class="scanned-face-notice">
+        <span class="scanned-face-icon">📋</span>
+        ${facePlayerName
+          ? `Usa la cara base de: <strong>${facePlayerName}</strong>`
+          : `Usa la cara base de un jugador.`}
+      </div>`
+    : '';
+
+  const navButtons = sectionsToShow.map((section, i) =>
     `<button class="appearance-section-btn${i === 0 ? ' active' : ''}" onclick="switchAppearanceSection(${i})">${section.title}</button>`
   ).join('');
 
-  const sectionsHtml = APPEARANCE_SECTIONS.map((section, i) => {
+  const sectionsHtml = sectionsToShow.map((section, i) => {
     const subsectionsHtml = section.subsections.map(sub => {
       const fieldsHtml = sub.fields
         .map(field => renderAppearanceField(field, appearance, player))
@@ -840,7 +941,8 @@ function renderFaceData(appearance, player) {
     </div>`;
   }).join('');
 
-  return `<div class="appearance-section-nav">${navButtons}</div>
+  return `${scannedNoticeHtml}
+<div class="appearance-section-nav">${navButtons}</div>
 <div class="appearance-section-panels">${sectionsHtml}</div>`;
 }
 
@@ -866,8 +968,80 @@ function switchTab(tabId) {
 
 // ─── Main render ─────────────────────────────────────────────────────────────
 
-function renderPlayerPage(player, team, appearance, typeLabel) {
-  const ovrClass = overallColor(player['OverallStats'] || '');
+function renderPositionPitch(player) {
+  const rawPos = player['POS'] || '';
+  const posIdx = parseInt(rawPos, 10);
+  const primaryPos = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
+    ? PES_POSITIONS[posIdx] : rawPos;
+
+  const markers = [];
+
+  PES_POSITIONS.forEach(pos => {
+    const coords = POSITION_FIELD_COORDS[pos];
+    if (!coords) return;
+
+    const val = parseInt(player[pos], 10);
+    const color = positionGroupColor(pos);
+    const isPrimary = pos === primaryPos;
+
+    let bgStyle, borderStyle, textColor, zIdx;
+
+    if (isNaN(val)) {
+      // No rating data – show very faintly
+      bgStyle = 'background:rgba(0,0,0,0.25)';
+      borderStyle = `border-color:rgba(255,255,255,0.12)`;
+      textColor = 'rgba(255,255,255,0.25)';
+      zIdx = 1;
+    } else if (val === 0) {
+      // Grade C – transparent fill, visible border and text
+      bgStyle = 'background:transparent';
+      borderStyle = `border-color:${color}`;
+      textColor = color;
+      zIdx = 3;
+    } else if (val === 1) {
+      // Grade B – medium opacity fill
+      bgStyle = `background:${hexToRgba(color, 0.40)}`;
+      borderStyle = `border-color:${color}`;
+      textColor = color;
+      zIdx = 4;
+    } else {
+      // Grade A – fully filled
+      bgStyle = `background:${color}`;
+      borderStyle = `border-color:${color}`;
+      textColor = '#111';
+      zIdx = 5;
+    }
+
+    if (isPrimary && !isNaN(val)) zIdx = 10;
+
+    markers.push(`
+      <div class="field-pos-marker" style="${bgStyle};${borderStyle};color:${textColor};z-index:${zIdx}${isPrimary && !isNaN(val) ? ';box-shadow:0 0 6px rgba(0,0,0,0.5)' : ''};left:${coords.left}%;top:${coords.top}%">
+        <span class="field-pos-label">${pos}</span>
+      </div>`);
+  });
+
+  if (!markers.length) return '';
+
+  return `
+    <div class="player-section" style="margin-bottom:0">
+      <div class="player-section-title">Posiciones en el campo</div>
+      <div class="position-field-wrap">
+        <div class="position-field">
+          <div class="position-field-line pf-halfway"></div>
+          <div class="position-field-line pf-penalty-bottom"></div>
+          <div class="position-field-line pf-goal-bottom"></div>
+          <div class="position-field-line pf-penalty-top"></div>
+          <div class="position-field-line pf-goal-top"></div>
+          <div class="position-field-center-circle"></div>
+          ${markers.join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName) {
+  const ovrColor = statColor(player['OverallStats'] || '');
+  const ovrTextColor = statTextColor(ovrColor);
   const ovr = player['OverallStats'] || '–';
 
   const rawPos = player['POS'] || '';
@@ -886,24 +1060,19 @@ function renderPlayerPage(player, team, appearance, typeLabel) {
   else footDisplay = footVal || '–';
 
   const statsHtml = `
-    <div class="profile-stats-layout">
-      <div class="profile-stats-left">
-        <div class="stats-section-title">Valoraciones por posición</div>
-        ${renderPositionGrid(player)}
-        <div class="radar-card" style="margin-top:20px">
-          <h3>Radar de atributos</h3>
-          <canvas id="radar-canvas" width="260" height="260"></canvas>
-        </div>
-      </div>
-      <div class="profile-stats-right">
-        ${renderHabilidades(player)}
-        ${renderEstiloDeJuego(player)}
-        ${renderHabilidadesJugador(player)}
-        ${renderEstilosJuegoCOM(player)}
-      </div>
+    <div class="stats-section">
+      ${renderHabilidades(player)}
+    </div>
+    <div class="stats-section">
+      ${renderEstiloDeJuego(player)}
+      ${renderHabilidadesJugador(player)}
+      ${renderEstilosJuegoCOM(player)}
+    </div>
+    <div class="stats-section">
+      ${renderPositionPitch(player)}
     </div>`;
 
-  const appearanceHtml = renderFaceData(appearance, player);
+  const appearanceHtml = renderFaceData(appearance, player, facePlayerName);
 
   const content = document.getElementById('player-content');
   content.innerHTML = `
@@ -920,31 +1089,37 @@ function renderPlayerPage(player, team, appearance, typeLabel) {
         <div class="profile-header-info">
           <div class="profile-name">${player['Name'] || 'Jugador desconocido'}</div>
           <div class="profile-badges">
-            <span class="position-badge">${posDisplay || '–'}</span>
-            <span class="overall-badge ${ovrClass}">${ovr}</span>
+            <span class="position-badge" style="color:${positionGroupColor(pesPosition)};border-color:${positionGroupColor(pesPosition)};background:${positionGroupColor(pesPosition)}18">${posDisplay || '–'}</span>
+            <span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
           </div>
           <div class="profile-meta-row">
             <img src="${flagSrc(player['Country'])}"
               onerror="this.onerror=null;this.src='img/flags/default.png'"
               alt="" class="profile-flag">
-            <span>${player['Country'] || '–'}</span>
+            <span>${nationalityName(player['Country'])}</span>
           </div>
           <div class="profile-meta-row">
-            <img class="team-crest-sm"
-              src="img/teams/${team.id}.png"
-              onerror="this.onerror=null;this.src='img/teams/default.png'"
-              alt="${team.displayName}">
-            <span>${team.displayName}</span>
+            <a href="team.html?id=${team.id}" class="team-crest-link">
+              <img class="team-crest-sm"
+                src="img/teams/${team.id}.png"
+                onerror="this.onerror=null;this.src='img/teams/default.png'"
+                alt="${team.displayName}">
+              <span>${team.displayName}</span>
+            </a>
           </div>
           <div class="profile-meta-row">
             <span>${typeLabel}</span>
           </div>
+          ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
           <div class="profile-quick-stats">
             <div class="quick-stat"><span class="qs-label">Altura</span><span class="qs-val">${player['Height'] || '–'} cm</span></div>
             <div class="quick-stat"><span class="qs-label">Peso</span><span class="qs-val">${player['Weight'] || '–'} kg</span></div>
             <div class="quick-stat"><span class="qs-label">Edad</span><span class="qs-val">${player['Age'] || '–'}</span></div>
             <div class="quick-stat"><span class="qs-label">Pie</span><span class="qs-val">${footDisplay}</span></div>
           </div>
+        </div>
+        <div class="profile-radar-wrap">
+          <canvas id="radar-canvas" width="220" height="220"></canvas>
         </div>
       </div>
 
@@ -1000,12 +1175,14 @@ async function boot() {
     return;
   }
 
-  // Load all global CSV files in parallel
-  const [playersText, teamsText, squadsText, appearancesText] = await Promise.all([
+  // Load all global CSV files in parallel (including optional override files)
+  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, corregidosText] = await Promise.all([
     fetchText('database/All players exported.csv'),
     fetchText('database/All teams exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All appeaarances exported.csv'),
+    fetchText('database/players_original.csv'),
+    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!playersText || !teamsText) {
@@ -1018,11 +1195,38 @@ async function boot() {
   const { rows: appearanceRows } = appearancesText ? parseCSV(appearancesText) : { rows: [] };
   const { rows: squadRows } = squadsText ? parseCSV(squadsText) : { rows: [] };
 
+  // Build corrected overall map from medias_corregidas.csv
+  const corregidosMap = {};
+  if (corregidosText) {
+    const { rows: corregidosRows } = parseCSV(corregidosText);
+    corregidosRows.forEach(r => {
+      const id = r['Id'] || r['id'] || r['player_id'] || '';
+      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+      if (id && ovr) corregidosMap[id] = ovr;
+    });
+  }
+
+  // Build original players map (id → name) for face ID lookups
+  const originalPlayersMap = {};
+  if (originalPlayersText) {
+    const { rows: origRows } = parseCSV(originalPlayersText);
+    origRows.forEach(r => {
+      const id = r['Id'] || '';
+      const name = r['Name'] || '';
+      if (id) originalPlayersMap[id] = name;
+    });
+  }
+
   // Find the player
   const player = playerRows.find(p => p['Id'] === playerId);
   if (!player) {
     showError(`Jugador con ID "${playerId}" no encontrado en la base de datos.`);
     return;
+  }
+
+  // Override overall from medias_corregidas.csv if available
+  if (corregidosMap[playerId]) {
+    player['OverallStats'] = corregidosMap[playerId];
   }
 
   // Find the team
@@ -1047,7 +1251,40 @@ async function boot() {
   });
   const appearance = appearanceMap[playerId] || null;
 
-  renderPlayerPage(player, team, appearance, typeLabel);
+  // Determine face player name (for face_id handling)
+  let facePlayerName = null;
+  if (appearance) {
+    const idFace = appearance['Id_Face'] || '0';
+    if (idFace !== '0') {
+      facePlayerName = originalPlayersMap[idFace] || null;
+      if (!facePlayerName) {
+        const facePlayer = playerRows.find(p => p['Id'] === idFace);
+        if (facePlayer) facePlayerName = facePlayer['Name'] || null;
+      }
+    }
+  }
+
+  // Check if player also plays for a national team (type '2')
+  const teamTypeMap = {};
+  teamRows.forEach(t => { teamTypeMap[t['Id']] = t['Type'] || '0'; });
+  const currentTeamType = teamTypeMap[teamId] || '0';
+  let playsForNational = false;
+  if (currentTeamType !== '2') {
+    for (const squadRow of squadRows) {
+      const sqTeamId = squadRow['Id'];
+      if (sqTeamId === teamId) continue;
+      if ((teamTypeMap[sqTeamId] || '0') !== '2') continue;
+      for (let i = 1; i <= 32; i++) {
+        if (squadRow[`Player ${i}`] === playerId) {
+          playsForNational = true;
+          break;
+        }
+      }
+      if (playsForNational) break;
+    }
+  }
+
+  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
