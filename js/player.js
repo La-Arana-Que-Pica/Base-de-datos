@@ -20,6 +20,17 @@ function handleMinifaceError(img, playerId) {
   }
 }
 
+// Profile miniface (outside card): hides the element instead of falling back to default
+function handleProfileMinifaceError(img, playerId) {
+  if (!img.dataset.ddsTried) {
+    img.dataset.ddsTried = '1';
+    img.src = 'img/players/player_' + playerId + '.dds';
+  } else {
+    img.onerror = null;
+    img.style.display = 'none';
+  }
+}
+
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
   if (lines.length < 2) return { headers: [], rows: [] };
@@ -986,32 +997,32 @@ function renderFaceData(appearance, player, facePlayerName, isScanned) {
     return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
 
-  // Scanned player: real face captured from scan — no face/hair data to show
-  if (isScanned) {
-    return `<div class="scanned-face-notice">
-        <span class="scanned-face-icon">🎯</span>
-        Este jugador está escaneado en el juego.
-      </div>`;
-  }
-
   // Check if the player has a scanned face (Id_Face ≠ 0)
   const idFace = appearance ? (appearance['Id_Face'] || '0') : '0';
   const hasScannedFace = idFace !== '0';
 
-  // When player has a scanned face: hide Cara and Peinado sections,
-  // show a notice, and only render Físico, Forma de vestir, Movimiento.
-  const sectionsToShow = hasScannedFace
+  // Determine which sections to show:
+  // - Scanned player (in-game scan) or player using another's face: skip Cara and Peinado
+  // - Normal player: show all sections
+  const sectionsToShow = (isScanned || hasScannedFace)
     ? APPEARANCE_SECTIONS.slice(2)
     : APPEARANCE_SECTIONS;
 
-  const scannedNoticeHtml = hasScannedFace
-    ? `<div class="scanned-face-notice">
+  // Build notice HTML
+  let noticeHtml = '';
+  if (isScanned) {
+    noticeHtml = `<div class="scanned-face-notice">
+        <span class="scanned-face-icon">🎯</span>
+        Este jugador está escaneado en el juego.
+      </div>`;
+  } else if (hasScannedFace) {
+    noticeHtml = `<div class="scanned-face-notice">
         <span class="scanned-face-icon">📋</span>
         ${facePlayerName
           ? `Usa la cara base de: <strong>${facePlayerName}</strong>`
           : `Usa la cara base de un jugador.`}
-      </div>`
-    : '';
+      </div>`;
+  }
 
   const navButtons = sectionsToShow.map((section, i) =>
     `<button class="appearance-section-btn${i === 0 ? ' active' : ''}" onclick="switchAppearanceSection(${i})">${section.title}</button>`
@@ -1035,7 +1046,7 @@ function renderFaceData(appearance, player, facePlayerName, isScanned) {
     </div>`;
   }).join('');
 
-  return `${scannedNoticeHtml}
+  return `${noticeHtml}
 <div class="appearance-section-nav">${navButtons}</div>
 <div class="appearance-section-panels">${sectionsHtml}</div>`;
 }
@@ -1133,9 +1144,8 @@ function renderPositionPitch(player) {
     </div>`;
 }
 
-function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName, isScanned) {
+function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName, isScanned, dorsal, hasMiniface) {
   const ovrColor = statColor(player['OverallStats'] || '');
-  const ovrTextColor = statTextColor(ovrColor);
   const ovr = player['OverallStats'] || '–';
 
   const rawPos = player['POS'] || '';
@@ -1153,6 +1163,21 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   else if (footVal === 'False') footDisplay = 'Derecho';
   else footDisplay = footVal || '–';
 
+  // Position pitch rendered in header (removed from stats tab)
+  const positionPitchHtml = renderPositionPitch(player);
+
+  // Miniface: shown outside player card only if found in players_original.csv
+  const minifaceHtml = hasMiniface
+    ? `<img class="profile-miniface"
+        src="img/players/${player['Id']}.png"
+        onerror="handleProfileMinifaceError(this,'${player['Id']}')"
+        alt="${player['Name']}">`
+    : '';
+
+  const dorsalHtml = dorsal
+    ? `<span class="player-info-card-dorsal">#${dorsal}</span>`
+    : '';
+
   const statsHtml = `
     <div class="stats-compact-layout">
       <div class="stats-compact-left">
@@ -1162,7 +1187,6 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
         ${renderEstiloDeJuego(player)}
         ${renderHabilidadesJugador(player)}
         ${renderEstilosJuegoCOM(player)}
-        ${renderPositionPitch(player)}
       </div>
     </div>`;
 
@@ -1174,48 +1198,72 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
     <div class="player-profile-page">
 
-      <!-- Header card -->
-      <div class="profile-header-card">
-        <img class="profile-photo"
-          src="img/players/${player['Id']}.png"
-          onerror="handleMinifaceError(this,'${player['Id']}')"
-          alt="${player['Name']}">
-        <div class="profile-header-info">
-          <div class="profile-name">${player['Name'] || 'Jugador desconocido'}</div>
-          <div class="profile-badges">
-            <span class="position-badge" style="color:${positionGroupColor(pesPosition)};border-color:${positionGroupColor(pesPosition)};background:${positionGroupColor(pesPosition)}18">${posDisplay || '–'}</span>
-            <span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
-          </div>
-          <div class="profile-meta-row">
-            <img src="${flagSrc(player['Country'])}"
-              onerror="this.onerror=null;this.src='img/flags/default.png'"
-              alt="" class="profile-flag">
-            <span>${nationalityName(player['Country'])}</span>
-          </div>
-          <div class="profile-meta-row">
-            <a href="team.html?id=${team.id}" class="team-crest-link">
-              <img class="team-crest-sm"
-                src="img/teams/${team.id}.png"
-                onerror="this.onerror=null;this.src='img/teams/default.png'"
-                alt="${team.displayName}">
-              <span>${team.displayName}</span>
-            </a>
-          </div>
-          <div class="profile-meta-row">
-            <span>${typeLabel}</span>
-          </div>
-          ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
-          ${facePlayerName ? `<div class="profile-miniface-note">🎭 Miniface: <strong>${facePlayerName}</strong></div>` : ''}
-          <div class="profile-quick-stats">
-            <div class="quick-stat"><span class="qs-label">Altura</span><span class="qs-val">${player['Height'] || '–'} cm</span></div>
-            <div class="quick-stat"><span class="qs-label">Peso</span><span class="qs-val">${player['Weight'] || '–'} kg</span></div>
-            <div class="quick-stat"><span class="qs-label">Edad</span><span class="qs-val">${player['Age'] || '–'}</span></div>
-            <div class="quick-stat"><span class="qs-label">Pie</span><span class="qs-val">${footDisplay}</span></div>
+      <!-- Header: three cards side by side -->
+      <div class="player-profile-header">
+
+        <!-- Column 1: Player info card with miniface above -->
+        <div class="player-header-info-col">
+          ${minifaceHtml}
+          <div class="player-header-card player-info-card${hasMiniface ? ' has-miniface' : ''}">
+            <div class="player-info-card-top" style="background:linear-gradient(135deg,${ovrColor}33 0%,${ovrColor}11 100%)">
+              <div class="player-info-card-ovr-block">
+                <span class="player-info-card-ovr" style="color:${ovrColor}">${ovr}</span>
+                <span class="player-info-card-pos" style="color:${positionGroupColor(pesPosition)}">${posDisplay || '–'}</span>
+              </div>
+              <div class="player-info-card-badge-col">
+                <img class="player-info-card-flag"
+                  src="${flagSrc(player['Country'])}"
+                  onerror="this.onerror=null;this.src='img/flags/default.png'" alt="">
+                <img class="player-info-card-crest"
+                  src="img/teams/${team.id}.png"
+                  onerror="this.onerror=null;this.src='img/teams/default.png'"
+                  alt="${team.displayName}">
+                ${dorsalHtml}
+              </div>
+            </div>
+            <div class="player-info-card-body">
+              <div class="player-info-card-name">${player['Name'] || 'Jugador desconocido'}</div>
+              <div class="player-info-card-meta">
+                <img src="${flagSrc(player['Country'])}"
+                  onerror="this.onerror=null;this.src='img/flags/default.png'"
+                  alt="" class="player-info-card-flag-sm">
+                <span class="player-info-card-nationality">${nationalityName(player['Country'])}</span>
+              </div>
+              <div class="player-info-card-meta">
+                <a href="team.html?id=${team.id}" class="team-crest-link">
+                  <img class="team-crest-sm"
+                    src="img/teams/${team.id}.png"
+                    onerror="this.onerror=null;this.src='img/teams/default.png'"
+                    alt="${team.displayName}">
+                  <span>${team.displayName}</span>
+                </a>
+              </div>
+              ${typeLabel ? `<div class="player-info-card-type">${typeLabel}</div>` : ''}
+              ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
+              ${facePlayerName ? `<div class="profile-miniface-note">🎭 Miniface: <strong>${facePlayerName}</strong></div>` : ''}
+              <div class="profile-quick-stats">
+                <div class="quick-stat"><span class="qs-label">Edad</span><span class="qs-val">${player['Age'] || '–'}</span></div>
+                <div class="quick-stat"><span class="qs-label">Altura</span><span class="qs-val">${player['Height'] || '–'} cm</span></div>
+                <div class="quick-stat"><span class="qs-label">Peso</span><span class="qs-val">${player['Weight'] || '–'} kg</span></div>
+                <div class="quick-stat"><span class="qs-label">Pie</span><span class="qs-val">${footDisplay}</span></div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="profile-radar-wrap">
-          <canvas id="radar-canvas" width="220" height="220"></canvas>
+
+        <!-- Column 2: Radar chart card -->
+        <div class="player-header-card player-radar-card">
+          <div class="player-header-card-title">Estadísticas</div>
+          <div class="player-header-radar-wrap">
+            <canvas id="radar-canvas" width="240" height="240"></canvas>
+          </div>
         </div>
+
+        <!-- Column 3: Secondary positions pitch card -->
+        <div class="player-header-card player-positions-card">
+          ${positionPitchHtml}
+        </div>
+
       </div>
 
       <!-- Tabs -->
@@ -1400,7 +1448,23 @@ async function boot() {
     }
   }
 
-  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName, isScanned);
+  // Find the player's jersey number (dorsal) in the selected team's squad
+  let dorsal = null;
+  const teamSquadRow = squadRows.find(r => r['Id'] === teamId);
+  if (teamSquadRow) {
+    for (let i = 1; i <= 32; i++) {
+      if (teamSquadRow[`Player ${i}`] === playerId) {
+        const shirtNum = teamSquadRow[`Shirt number ${i}`];
+        if (shirtNum && shirtNum !== '0') dorsal = shirtNum;
+        break;
+      }
+    }
+  }
+
+  // Show miniface only if the player's ID is found in players_original.csv
+  const hasMiniface = Object.prototype.hasOwnProperty.call(originalPlayersMap, playerId);
+
+  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName, isScanned, dorsal, hasMiniface);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
