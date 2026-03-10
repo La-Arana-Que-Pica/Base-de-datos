@@ -833,13 +833,14 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText, formationsText, coachsText, leaguesText] = await Promise.all([
+  const [teamsText, playersText, squadsText, formationsText, coachsText, leaguesText, corregidosText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All formations exported.csv'),
     fetchText('database/All coachs exported.csv'),
     fetchText('database/All leagues exported.csv'),
+    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -874,6 +875,21 @@ async function boot() {
     if (pid) playerMap[pid] = normalizePlayerRow(row);
   });
 
+  // Build corrected overall map from medias_corregidas.csv
+  const corregidosMap = {};
+  if (corregidosText) {
+    const { rows: corregidosRows } = parseCSV(corregidosText);
+    corregidosRows.forEach(r => {
+      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+      const tid = r['TeamId'] || r['team_id'] || '';
+      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+      if (pid && ovr) {
+        if (tid) corregidosMap[tid + '_' + pid] = ovr;
+        if (!tid) corregidosMap[pid] = ovr;
+      }
+    });
+  }
+
   // Find this team's squad
   const squadRow = squadRows.find(s => s['Id'] === teamId);
   const players = [];
@@ -887,6 +903,9 @@ async function boot() {
       if (player) {
         const shirtNum = squadRow[`Shirt number ${i}`];
         const playerWithShirt = { ...player, _shirtNumber: shirtNum && shirtNum !== '0' ? parseInt(shirtNum, 10) || null : null };
+        // Apply corrected overall if available (team-specific key takes precedence)
+        const corregidosOvr = corregidosMap[teamId + '_' + pid] || corregidosMap[pid];
+        if (corregidosOvr) playerWithShirt.Overall = corregidosOvr;
         players.push(playerWithShirt);
         squadSlots[i - 1] = playerWithShirt;  // 0-indexed (slot i → index i-1)
       }
