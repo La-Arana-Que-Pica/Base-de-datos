@@ -382,7 +382,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
             <div class="pitch-player-photo-wrap">
               <img src="img/players/${pid}.png"
                 onerror="handleMinifaceError(this,'${pid}')"
-                class="pitch-player-photo" alt="${shortName}">${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
+                class="pitch-player-photo" alt="${shortName}">
             </div>
           </div>
           <div class="pitch-player-bar">
@@ -391,6 +391,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
               <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
             </span>
             <span class="pitch-player-name">${shortName}</span>
+            ${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
           </div>
         </a>`);
     }
@@ -448,10 +449,11 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
   addSquadAssignment('Capitán', 'Capitan');
   addSquadAssignment('Tiro libre corto', 'TiroCorto');
   addSquadAssignment('Tiro libre largo', 'TiroLargo');
+  addSquadAssignment('Segundo cobrador', 'Cabeceador1');
   addSquadAssignment('Córner derecho', 'EsquinaDerecho');
   addSquadAssignment('Córner izquierdo', 'EsquinaIzquierdo');
   addSquadAssignment('Penal', 'Penalti');
-  addHeaderAssignment('Remate de cabeza 1', 'Cabeceador1');
+  addHeaderAssignment('Remate de cabeza 1', 'SegundoCobrador');
   addHeaderAssignment('Remate de cabeza 2', 'Cabeceador2');
   addHeaderAssignment('Remate de cabeza 3', 'Cabeceador3');
 
