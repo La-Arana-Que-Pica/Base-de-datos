@@ -491,7 +491,36 @@ async function boot() {
 
   DB.loaded = true;
   buildSidebar();
-  showAllPlayers();
+  restoreNavState();
+}
+
+// ─── Navigation state (session) ──────────────────────────────────────────────
+
+const NAV_STATE_KEY = 'pes_nav_state';
+
+function saveNavState(state) {
+  try { sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function loadNavState() {
+  try { return JSON.parse(sessionStorage.getItem(NAV_STATE_KEY) || 'null'); } catch(e) { return null; }
+}
+
+function restoreNavState() {
+  const state = loadNavState();
+  if (!state || !state.view) { showAllPlayers(); return; }
+  switch (state.view) {
+    case 'leagues': showLeaguesView(); break;
+    case 'leagueTeams': if (state.leagueId) showLeagueTeamsView(state.leagueId); else showLeaguesView(); break;
+    case 'teams': showTeamsView(); break;
+    case 'players':
+      if (state.filters) {
+        Object.assign(_advFilters, state.filters);
+      }
+      showAllPlayers();
+      break;
+    default: showAllPlayers(); break;
+  }
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -551,7 +580,11 @@ function filterAllPlayers(query) {
 
 // ─── Leagues grid view ────────────────────────────────────────────────────────
 
+let _leaguesForGrid = [];
+
 function showLeaguesView() {
+  saveNavState({ view: 'leagues' });
+  _leaguesForGrid = DB.leagues.slice();
   hideAllViews();
   const view = document.getElementById('leagues-view');
   view.classList.add('active');
@@ -573,13 +606,41 @@ function showLeaguesView() {
     <div class="view-header">
       <div>
         <div class="view-title">Ligas</div>
-        <div class="view-subtitle">${DB.leagues.length} ligas disponibles</div>
+        <div class="view-subtitle" id="leagues-grid-subtitle">${DB.leagues.length} ligas disponibles</div>
       </div>
     </div>
-    <div class="grid-cards">${cardsHtml}</div>`;
+    <div class="grid-search-wrap">
+      <input type="text" class="grid-search-input" id="leagues-search-input"
+        placeholder="Buscar liga..." autocomplete="off"
+        oninput="filterLeaguesGrid(this.value)">
+    </div>
+    <div class="grid-cards" id="leagues-grid-cards">${cardsHtml}</div>`;
+}
+
+function filterLeaguesGrid(query) {
+  const q = query.toLowerCase().trim();
+  const container = document.getElementById('leagues-grid-cards');
+  const subtitle = document.getElementById('leagues-grid-subtitle');
+  if (!container) return;
+  const matches = q ? _leaguesForGrid.filter(l => (l.name || '').toLowerCase().includes(q)) : _leaguesForGrid;
+  const cardsHtml = matches.map(league => {
+    const teamCount = league.teamIds.length;
+    return `
+      <div class="grid-card" onclick="window.location.href='league.html?id=${encodeURIComponent(league.id)}'">
+        <img class="grid-card-img"
+          src="img/leagues/${league.id}.png"
+          onerror="this.onerror=null;this.src='img/leagues/default.png'"
+          alt="${league.name}">
+        <div class="grid-card-name">${league.name}</div>
+        <div class="grid-card-sub">${teamCount} equipo${teamCount !== 1 ? 's' : ''}</div>
+      </div>`;
+  }).join('');
+  container.innerHTML = cardsHtml;
+  if (subtitle) subtitle.textContent = `${matches.length} liga${matches.length !== 1 ? 's' : ''} encontrada${matches.length !== 1 ? 's' : ''}`;
 }
 
 function showLeagueTeamsView(leagueId) {
+  saveNavState({ view: 'leagueTeams', leagueId });
   const league = DB.leagues.find(l => l.id === leagueId);
   if (!league) return;
 
@@ -617,11 +678,15 @@ function showLeagueTeamsView(leagueId) {
 
 // ─── Teams grid view ──────────────────────────────────────────────────────────
 
+let _teamsForGrid = [];
+
 function showTeamsView() {
+  saveNavState({ view: 'teams' });
   // Only show teams that belong to a league
   const teamsInLeagues = new Set();
   DB.leagues.forEach(l => l.teamIds.forEach(id => teamsInLeagues.add(id)));
   const filteredTeams = DB.teams.filter(t => teamsInLeagues.has(t.id));
+  _teamsForGrid = filteredTeams;
 
   hideAllViews();
   const view = document.getElementById('teams-grid-view');
@@ -647,10 +712,40 @@ function showTeamsView() {
     <div class="view-header">
       <div>
         <div class="view-title">Equipos</div>
-        <div class="view-subtitle">${filteredTeams.length} equipos con liga asignada</div>
+        <div class="view-subtitle" id="teams-grid-subtitle">${filteredTeams.length} equipos con liga asignada</div>
       </div>
     </div>
-    <div class="grid-cards">${cardsHtml}</div>`;
+    <div class="grid-search-wrap">
+      <input type="text" class="grid-search-input" id="teams-search-input"
+        placeholder="Buscar equipo..." autocomplete="off"
+        oninput="filterTeamsGrid(this.value)">
+    </div>
+    <div class="grid-cards" id="teams-grid-cards">${cardsHtml}</div>`;
+}
+
+function filterTeamsGrid(query) {
+  const q = query.toLowerCase().trim();
+  const container = document.getElementById('teams-grid-cards');
+  const subtitle = document.getElementById('teams-grid-subtitle');
+  if (!container) return;
+  const matches = q ? _teamsForGrid.filter(t => (t.displayName || '').toLowerCase().includes(q)) : _teamsForGrid;
+  const cardsHtml = matches.map(team => {
+    const avg = teamAvgOvr(team);
+    const avgHtml = avg !== null
+      ? `<div class="grid-card-ovr"><span class="team-avg-badge" style="background:${statColor(avg)};color:${statTextColor(statColor(avg))}">${avg}</span></div>`
+      : '';
+    return `
+    <div class="grid-card" onclick="selectTeam('${team.id}')">
+      <img class="grid-card-img"
+        src="img/teams/${team.id}.png"
+        onerror="this.onerror=null;this.src='img/teams/default.png'"
+        alt="${team.displayName}">
+      <div class="grid-card-name">${team.displayName}</div>
+      ${avgHtml}
+    </div>`;
+  }).join('');
+  container.innerHTML = cardsHtml;
+  if (subtitle) subtitle.textContent = `${matches.length} equipo${matches.length !== 1 ? 's' : ''} encontrado${matches.length !== 1 ? 's' : ''}`;
 }
 
 
@@ -1227,6 +1322,7 @@ function toggleFilterPanel() {
 }
 
 function showAllPlayers() {
+  saveNavState({ view: 'players', filters: { ..._advFilters } });
   // Tear down any existing observer before rebuilding the view
   if (_allPlayersObserver) {
     _allPlayersObserver.disconnect();

@@ -518,7 +518,7 @@ const APPEARANCE_SECTIONS = [
         fields: [
           { col: 'Boots',              label: 'Calzado',                       imageKey: 'boots', imagePath: 'img/boots' },
           { col: 'Wrist taping',       label: 'Vendaje',                       enum: { '0': 'No', '1': 'Derecha', '2': 'Izquierda', '3': 'Ambos' } },
-          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' } },
+          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' }, conditionalLabel: { value: '10', label: 'Kit Color' } },
           { col: 'Ankle Taping',       label: 'Vendaje tobillo',               enum: { '0': 'No', '1': 'Sí' } },
           { col: 'Player Gloves',      label: 'Guantes',                       enum: { '0': 'No', '1': 'Para invierno' } },
           { col: 'Colour',             label: 'Color de guantes',              conditionalDash: { col: 'Player Gloves', value: '0' } },
@@ -537,23 +537,23 @@ const APPEARANCE_SECTIONS = [
       {
         title: 'Drible',
         fields: [
-          { col: 'Drib. Hunching', label: 'Encorvadura', source: 'player' },
-          { col: 'Drib. Arm Move.',label: 'Mov. de brazo', source: 'player' },
+          { col: 'Drib. Hunching', label: 'Encorvadura', source: 'player', noPlus: true },
+          { col: 'Drib. Arm Move.',label: 'Mov. de brazo', source: 'player', noPlus: true },
         ],
       },
       {
         title: 'Animación de carrera',
         fields: [
-          { col: 'Run. Hunching', label: 'Encorvadura', source: 'player' },
-          { col: 'Run. Arm Move.',label: 'Mov. de brazo', source: 'player' },
+          { col: 'Run. Hunching', label: 'Encorvadura', source: 'player', noPlus: true },
+          { col: 'Run. Arm Move.',label: 'Mov. de brazo', source: 'player', noPlus: true },
         ],
       },
       {
         title: 'Animación de disparo',
         fields: [
-          { col: 'Corner Kicks', label: 'Tiro de esquina', source: 'player' },
-          { col: 'Free Kicks',   label: 'Tiro libre',      source: 'player' },
-          { col: 'Penalty Kick', label: 'Penal',           source: 'player' },
+          { col: 'Corner Kicks', label: 'Tiro de esquina', source: 'player', noPlus: true },
+          { col: 'Free Kicks',   label: 'Tiro libre',      source: 'player', noPlus: true },
+          { col: 'Penalty Kick', label: 'Penal',           source: 'player', noPlus: true },
         ],
       },
       {
@@ -893,7 +893,7 @@ function renderAppearanceRow(label, value, imgPath, imageKey) {
   </div>`;
 }
 
-function renderFaceData(appearance, player) {
+function renderFaceData(appearance, player, facePlayerName) {
   if (!appearance && !player) {
     return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
@@ -910,8 +910,10 @@ function renderFaceData(appearance, player) {
 
   const scannedNoticeHtml = hasScannedFace
     ? `<div class="scanned-face-notice">
-        <span class="scanned-face-icon">✅</span>
-        Este jugador tiene una cara escaneada.
+        <span class="scanned-face-icon">📋</span>
+        ${facePlayerName
+          ? `Usa la cara base de: <strong>${facePlayerName}</strong>`
+          : `Usa la cara base de un jugador.`}
       </div>`
     : '';
 
@@ -1035,7 +1037,7 @@ function renderPositionPitch(player) {
     </div>`;
 }
 
-function renderPlayerPage(player, team, appearance, typeLabel, playsForNational) {
+function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName) {
   const ovrColor = statColor(player['OverallStats'] || '');
   const ovrTextColor = statTextColor(ovrColor);
   const ovr = player['OverallStats'] || '–';
@@ -1056,20 +1058,19 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational)
   else footDisplay = footVal || '–';
 
   const statsHtml = `
-    <div class="profile-stats-layout">
-      <div class="profile-stats-left">
-        <div class="stats-section-title">Posiciones</div>
-        ${renderPositionPitch(player)}
-      </div>
-      <div class="profile-stats-right">
-        ${renderHabilidades(player)}
-        ${renderEstiloDeJuego(player)}
-        ${renderHabilidadesJugador(player)}
-        ${renderEstilosJuegoCOM(player)}
-      </div>
+    <div class="stats-section">
+      ${renderHabilidades(player)}
+    </div>
+    <div class="stats-section">
+      ${renderEstiloDeJuego(player)}
+      ${renderHabilidadesJugador(player)}
+      ${renderEstilosJuegoCOM(player)}
+    </div>
+    <div class="stats-section">
+      ${renderPositionPitch(player)}
     </div>`;
 
-  const appearanceHtml = renderFaceData(appearance, player);
+  const appearanceHtml = renderFaceData(appearance, player, facePlayerName);
 
   const content = document.getElementById('player-content');
   content.innerHTML = `
@@ -1172,12 +1173,14 @@ async function boot() {
     return;
   }
 
-  // Load all global CSV files in parallel
-  const [playersText, teamsText, squadsText, appearancesText] = await Promise.all([
+  // Load all global CSV files in parallel (including optional override files)
+  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, corregidosText] = await Promise.all([
     fetchText('database/All players exported.csv'),
     fetchText('database/All teams exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All appeaarances exported.csv'),
+    fetchText('database/players_original.csv'),
+    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!playersText || !teamsText) {
@@ -1190,11 +1193,38 @@ async function boot() {
   const { rows: appearanceRows } = appearancesText ? parseCSV(appearancesText) : { rows: [] };
   const { rows: squadRows } = squadsText ? parseCSV(squadsText) : { rows: [] };
 
+  // Build corrected overall map from medias_corregidas.csv
+  const corregidosMap = {};
+  if (corregidosText) {
+    const { rows: corregidosRows } = parseCSV(corregidosText);
+    corregidosRows.forEach(r => {
+      const id = r['Id'] || r['id'] || r['player_id'] || '';
+      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+      if (id && ovr) corregidosMap[id] = ovr;
+    });
+  }
+
+  // Build original players map (id → name) for face ID lookups
+  const originalPlayersMap = {};
+  if (originalPlayersText) {
+    const { rows: origRows } = parseCSV(originalPlayersText);
+    origRows.forEach(r => {
+      const id = r['Id'] || '';
+      const name = r['Name'] || '';
+      if (id) originalPlayersMap[id] = name;
+    });
+  }
+
   // Find the player
   const player = playerRows.find(p => p['Id'] === playerId);
   if (!player) {
     showError(`Jugador con ID "${playerId}" no encontrado en la base de datos.`);
     return;
+  }
+
+  // Override overall from medias_corregidas.csv if available
+  if (corregidosMap[playerId]) {
+    player['OverallStats'] = corregidosMap[playerId];
   }
 
   // Find the team
@@ -1219,18 +1249,29 @@ async function boot() {
   });
   const appearance = appearanceMap[playerId] || null;
 
+  // Determine face player name (for face_id handling)
+  let facePlayerName = null;
+  if (appearance) {
+    const idFace = appearance['Id_Face'] || '0';
+    if (idFace !== '0') {
+      facePlayerName = originalPlayersMap[idFace] || null;
+      if (!facePlayerName) {
+        const facePlayer = playerRows.find(p => p['Id'] === idFace);
+        if (facePlayer) facePlayerName = facePlayer['Name'] || null;
+      }
+    }
+  }
+
   // Check if player also plays for a national team (type '2')
   const teamTypeMap = {};
   teamRows.forEach(t => { teamTypeMap[t['Id']] = t['Type'] || '0'; });
   const currentTeamType = teamTypeMap[teamId] || '0';
   let playsForNational = false;
   if (currentTeamType !== '2') {
-    // Player is on a club/special team — check if they're also on any national team squad
     for (const squadRow of squadRows) {
       const sqTeamId = squadRow['Id'];
       if (sqTeamId === teamId) continue;
       if ((teamTypeMap[sqTeamId] || '0') !== '2') continue;
-      // This is a national team squad
       for (let i = 1; i <= 32; i++) {
         if (squadRow[`Player ${i}`] === playerId) {
           playsForNational = true;
@@ -1241,7 +1282,7 @@ async function boot() {
     }
   }
 
-  renderPlayerPage(player, team, appearance, typeLabel, playsForNational);
+  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────

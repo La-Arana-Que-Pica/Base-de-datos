@@ -384,9 +384,11 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
           </div>
         </div>
         <div class="pitch-player-bar">
-          <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
+          <span class="pitch-player-ovr-block">
+            <span class="pitch-player-pos-sm" style="color:${posColor};opacity:0.65">${posDisplay}</span>
+            <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
+          </span>
           <span class="pitch-player-name">${shortName}</span>
-          <span class="pitch-player-pos-badge" style="background:${posColor};color:#111">${posDisplay}</span>
         </div>
       </a>`);
   }
@@ -671,12 +673,19 @@ function selectPlayer(playerId, teamId) {
   window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
 }
 
-function renderTeamPage(team, players, formationRow, squadSlots) {
+function renderTeamPage(team, players, formationRow, squadSlots, coachName, stadiumName, leagueName) {
   _players = players;
   _teamId = team.id;
 
   const typeLabel = TYPE_LABELS[team.type] || '';
   const safeTeamName = escapeHtml(team.displayName);
+
+  // Build extra info row
+  const extraInfoHtml = [
+    leagueName ? `<span class="team-info-item">🏆 ${escapeHtml(leagueName)}</span>` : '',
+    stadiumName ? `<span class="team-info-item">🏟️ ${escapeHtml(stadiumName)}</span>` : '',
+    coachName ? `<span class="team-info-item">👨‍💼 ${escapeHtml(coachName)}</span>` : '',
+  ].filter(Boolean).join('');
 
   // Build player card carousel
   const carouselHtml = renderPlayerCarousel(players, team.id);
@@ -695,6 +704,7 @@ function renderTeamPage(team, players, formationRow, squadSlots) {
       <div>
         <div class="view-title">${safeTeamName}</div>
         <div class="view-subtitle">${escapeHtml(typeLabel)} · ${players.length} jugadores</div>
+        ${extraInfoHtml ? `<div class="team-extra-info">${extraInfoHtml}</div>` : ''}
       </div>
     </div>
 
@@ -823,11 +833,13 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText, formationsText] = await Promise.all([
+  const [teamsText, playersText, squadsText, formationsText, coachsText, leaguesText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All formations exported.csv'),
+    fetchText('database/All coachs exported.csv'),
+    fetchText('database/All leagues exported.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -839,6 +851,8 @@ async function boot() {
   const { rows: playerRows } = parseCSV(playersText);
   const { rows: squadRows } = parseCSV(squadsText);
   const { rows: formationRows } = formationsText ? parseCSV(formationsText) : { rows: [] };
+  const { rows: coachRows } = coachsText ? parseCSV(coachsText) : { rows: [] };
+  const { rows: leagueRows } = leaguesText ? parseCSV(leaguesText) : { rows: [] };
 
   // Find the team
   const teamRow = teamRows.find(t => t['Id'] === teamId);
@@ -882,7 +896,25 @@ async function boot() {
   // Find this team's formation data
   const formationRow = formationRows.find(f => f['Id'] === teamId) || null;
 
-  renderTeamPage(team, players, formationRow, squadSlots);
+  // Build coach map: coachId → coachName
+  const coachsMap = {};
+  coachRows.forEach(row => {
+    const cid = row['Id'];
+    if (cid) coachsMap[cid] = row['Name'] || '';
+  });
+
+  const coachId = teamRow['Coach'];
+  const coachName = coachId ? (coachsMap[coachId] || null) : null;
+  const stadiumName = teamRow['StadiumName'] || null;
+
+  // Find the league this team belongs to
+  const teamLeague = leagueRows.find(l => {
+    const ids = (l['team_ids'] || '').split(',').map(s => s.trim());
+    return ids.includes(teamId);
+  });
+  const leagueName = teamLeague ? (teamLeague['league_name'] || null) : null;
+
+  renderTeamPage(team, players, formationRow, squadSlots, coachName, stadiumName, leagueName);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
