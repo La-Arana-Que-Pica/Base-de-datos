@@ -1196,13 +1196,21 @@ async function boot() {
   const { rows: squadRows } = squadsText ? parseCSV(squadsText) : { rows: [] };
 
   // Build corrected overall map from medias_corregidas.csv
+  // Keys: "teamId_playerId" for per-team precision, and plain "playerId" as a fallback.
+  // When multiple teams have different overrides for the same player, the team-specific key
+  // is preferred at lookup time; the plain-playerId fallback stores the last-seen value.
   const corregidosMap = {};
   if (corregidosText) {
     const { rows: corregidosRows } = parseCSV(corregidosText);
     corregidosRows.forEach(r => {
-      const id = r['Id'] || r['id'] || r['player_id'] || '';
+      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+      const tid = r['TeamId'] || r['team_id'] || '';
       const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
-      if (id && ovr) corregidosMap[id] = ovr;
+      if (pid && ovr) {
+        if (tid) corregidosMap[tid + '_' + pid] = ovr;
+        // Fallback key (used when no TeamId column is present or as a last resort)
+        if (!tid) corregidosMap[pid] = ovr;
+      }
     });
   }
 
@@ -1224,9 +1232,10 @@ async function boot() {
     return;
   }
 
-  // Override overall from medias_corregidas.csv if available
-  if (corregidosMap[playerId]) {
-    player['OverallStats'] = corregidosMap[playerId];
+  // Override overall from medias_corregidas.csv if available (team-specific key takes precedence)
+  const corregidosOvr = corregidosMap[teamId + '_' + playerId] || corregidosMap[playerId];
+  if (corregidosOvr) {
+    player['OverallStats'] = corregidosOvr;
   }
 
   // Find the team
