@@ -1166,14 +1166,6 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   // Position pitch rendered in header (removed from stats tab)
   const positionPitchHtml = renderPositionPitch(player);
 
-  // Miniface: shown outside player card only if found in players_original.csv
-  const minifaceHtml = hasMiniface
-    ? `<img class="profile-miniface"
-        src="img/players/${player['Id']}.png"
-        onerror="handleProfileMinifaceError(this,'${player['Id']}')"
-        alt="${player['Name']}">`
-    : '';
-
   const dorsalHtml = dorsal
     ? `<span class="player-info-card-dorsal">#${dorsal}</span>`
     : '';
@@ -1201,10 +1193,9 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
       <!-- Header: three cards side by side -->
       <div class="player-profile-header">
 
-        <!-- Column 1: Player info card with miniface above -->
+        <!-- Column 1: Player info card -->
         <div class="player-header-info-col">
-          ${minifaceHtml}
-          <div class="player-header-card player-info-card${hasMiniface ? ' has-miniface' : ''}">
+          <div class="player-header-card player-info-card">
             <div class="player-info-card-top" style="background:linear-gradient(135deg,${ovrColor}33 0%,${ovrColor}11 100%)">
               <div class="player-info-card-ovr-block">
                 <span class="player-info-card-ovr" style="color:${ovrColor}">${ovr}</span>
@@ -1221,31 +1212,22 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
                 ${dorsalHtml}
               </div>
             </div>
+            <div class="player-info-card-photo-wrap">
+              <img class="player-info-card-photo"
+                src="img/players/${player['Id']}.png"
+                onerror="handleMinifaceError(this,'${player['Id']}')"
+                alt="${player['Name'] || ''}">
+            </div>
             <div class="player-info-card-body">
-              <div class="player-info-card-name">${player['Name'] || 'Jugador desconocido'}</div>
-              <div class="player-info-card-meta">
-                <img src="${flagSrc(player['Country'])}"
-                  onerror="this.onerror=null;this.src='img/flags/default.png'"
-                  alt="" class="player-info-card-flag-sm">
-                <span class="player-info-card-nationality">${nationalityName(player['Country'])}</span>
-              </div>
-              <div class="player-info-card-meta">
-                <a href="team.html?id=${team.id}" class="team-crest-link">
-                  <img class="team-crest-sm"
-                    src="img/teams/${team.id}.png"
-                    onerror="this.onerror=null;this.src='img/teams/default.png'"
-                    alt="${team.displayName}">
-                  <span>${team.displayName}</span>
-                </a>
-              </div>
+              <div class="player-info-card-name" title="${player['Name'] || ''}">${player['Name'] || 'Jugador desconocido'}</div>
               ${typeLabel ? `<div class="player-info-card-type">${typeLabel}</div>` : ''}
               ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
               ${facePlayerName ? `<div class="profile-miniface-note">🎭 Miniface: <strong>${facePlayerName}</strong></div>` : ''}
-              <div class="profile-quick-stats">
-                <div class="quick-stat"><span class="qs-label">Edad</span><span class="qs-val">${player['Age'] || '–'}</span></div>
-                <div class="quick-stat"><span class="qs-label">Altura</span><span class="qs-val">${player['Height'] || '–'} cm</span></div>
-                <div class="quick-stat"><span class="qs-label">Peso</span><span class="qs-val">${player['Weight'] || '–'} kg</span></div>
-                <div class="quick-stat"><span class="qs-label">Pie</span><span class="qs-val">${footDisplay}</span></div>
+              <div class="player-card-stats player-info-card-stats">
+                <div class="pcs"><span class="pcs-val">${player['Age'] || '–'}</span><span class="pcs-key">Edad</span></div>
+                <div class="pcs"><span class="pcs-val">${player['Height'] || '–'} cm</span><span class="pcs-key">Alt</span></div>
+                <div class="pcs"><span class="pcs-val">${player['Weight'] || '–'} kg</span><span class="pcs-key">Peso</span></div>
+                <div class="pcs"><span class="pcs-val">${footDisplay}</span><span class="pcs-key">Pie</span></div>
               </div>
             </div>
           </div>
