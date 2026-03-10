@@ -981,14 +981,22 @@ function renderAppearanceRow(label, value, imgPath, imageKey) {
   </div>`;
 }
 
-function renderFaceData(appearance, player, facePlayerName) {
+function renderFaceData(appearance, player, facePlayerName, isScanned) {
   if (!appearance && !player) {
     return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
 
+  // Scanned player: real face captured from scan — no face/hair data to show
+  if (isScanned) {
+    return `<div class="scanned-face-notice">
+        <span class="scanned-face-icon">🎯</span>
+        Este jugador está escaneado en el juego.
+      </div>`;
+  }
+
   // Check if the player has a scanned face (Id_Face ≠ 0)
   const idFace = appearance ? (appearance['Id_Face'] || '0') : '0';
-  const hasScannedFace = idFace !== '0' && idFace !== '';
+  const hasScannedFace = idFace !== '0';
 
   // When player has a scanned face: hide Cara and Peinado sections,
   // show a notice, and only render Físico, Forma de vestir, Movimiento.
@@ -1125,7 +1133,7 @@ function renderPositionPitch(player) {
     </div>`;
 }
 
-function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName) {
+function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName, isScanned) {
   const ovrColor = statColor(player['OverallStats'] || '');
   const ovrTextColor = statTextColor(ovrColor);
   const ovr = player['OverallStats'] || '–';
@@ -1158,7 +1166,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
       </div>
     </div>`;
 
-  const appearanceHtml = renderFaceData(appearance, player, facePlayerName);
+  const appearanceHtml = renderFaceData(appearance, player, facePlayerName, isScanned);
 
   const content = document.getElementById('player-content');
   content.innerHTML = `
@@ -1197,6 +1205,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
             <span>${typeLabel}</span>
           </div>
           ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
+          ${facePlayerName ? `<div class="profile-miniface-note">🎭 Miniface: <strong>${facePlayerName}</strong></div>` : ''}
           <div class="profile-quick-stats">
             <div class="quick-stat"><span class="qs-label">Altura</span><span class="qs-val">${player['Height'] || '–'} cm</span></div>
             <div class="quick-stat"><span class="qs-label">Peso</span><span class="qs-val">${player['Weight'] || '–'} kg</span></div>
@@ -1262,13 +1271,14 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel (including optional override files)
-  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, corregidosText] = await Promise.all([
+  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, corregidosText, scannedPlayersText] = await Promise.all([
     fetchText('database/All players exported.csv'),
     fetchText('database/All teams exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All appeaarances exported.csv'),
     fetchText('database/players_original.csv'),
     fetchText('database/medias_corregidas.csv'),
+    fetchText('database/scanned_players.csv'),
   ]);
 
   if (!playersText || !teamsText) {
@@ -1311,6 +1321,16 @@ async function boot() {
     });
   }
 
+  // Build scanned players set
+  const scannedPlayerIds = new Set();
+  if (scannedPlayersText) {
+    const { rows: scannedRows } = parseCSV(scannedPlayersText);
+    scannedRows.forEach(r => {
+      const id = r['Id'] || '';
+      if (id) scannedPlayerIds.add(id);
+    });
+  }
+
   // Find the player
   const player = playerRows.find(p => p['Id'] === playerId);
   if (!player) {
@@ -1346,18 +1366,19 @@ async function boot() {
   });
   const appearance = appearanceMap[playerId] || null;
 
-  // Determine face player name (for face_id handling)
-  let facePlayerName = null;
-  if (appearance) {
-    const idFace = appearance['Id_Face'] || '0';
-    if (idFace !== '0') {
-      facePlayerName = originalPlayersMap[idFace] || null;
-      if (!facePlayerName) {
-        const facePlayer = playerRows.find(p => p['Id'] === idFace);
-        if (facePlayer) facePlayerName = facePlayer['Name'] || null;
-      }
-    }
+  // Determine face player name — resolved for every player:
+  // If Id_Face is set (non-zero), that original player's face is used;
+  // otherwise the player's own ID is looked up in the originals map.
+  const idFace = appearance ? (appearance['Id_Face'] || '0') : '0';
+  const faceSourceId = idFace !== '0' ? idFace : playerId;
+  let facePlayerName = originalPlayersMap[faceSourceId] || null;
+  if (!facePlayerName) {
+    const facePlayer = playerRows.find(p => p['Id'] === faceSourceId);
+    if (facePlayer) facePlayerName = facePlayer['Name'] || null;
   }
+
+  // Determine if player is scanned in the game
+  const isScanned = scannedPlayerIds.has(playerId);
 
   // Check if player also plays for a national team (type '2')
   const teamTypeMap = {};
@@ -1379,7 +1400,7 @@ async function boot() {
     }
   }
 
-  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName);
+  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName, isScanned);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────

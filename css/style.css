@@ -1192,6 +1192,13 @@ body {
   margin-top: 4px;
 }
 
+.profile-miniface-note {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
 .national-team-badge {
   margin-left: 6px;
   font-size: 0.82rem;
@@ -2213,7 +2220,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   width: 62px;
   z-index: 10;
   text-decoration: none;
