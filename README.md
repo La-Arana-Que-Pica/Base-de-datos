@@ -98,7 +98,7 @@ Este script lista todos los jugadores registrados en los CSV cargados e indica c
 
 ## Archivo `medias_corregidas.csv`
 
-El archivo `database/medias_corregidas.csv` permite corregir manualmente la valoración general (**OVR**) de jugadores específicos, sobrescribiendo el valor exportado. Es semicolumnas (`;`) y debe tener exactamente las siguientes columnas:
+El archivo `database/medias_corregidas.csv` permite corregir manualmente la valoración general (**OVR**) de jugadores específicos, sobrescribiendo el valor exportado. Está delimitado por punto y coma (`;`) y debe tener exactamente las siguientes columnas:
 
 ```csv
 TeamId;PlayerId;OverallStats
@@ -110,7 +110,7 @@ TeamId;PlayerId;OverallStats
 |----------------|---------|-----------------------------------------------|
 | `TeamId`       | número  | ID del equipo al que pertenece el jugador      |
 | `PlayerId`     | número  | ID del jugador (campo `Id` en `_players.csv`) |
-| `OverallStats` | número  | Valoración general corregida (0–99)            |
+| `OverallStats` | número  | Valoración general corregida (1–99)            |
 
 Consulta `docs/medias_corregidas_ejemplo.csv` para ver un ejemplo del formato completo.
 
