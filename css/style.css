@@ -2296,25 +2296,25 @@ body {
 }
 
 .pitch-player-ovr {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: 800;
-  padding: 2px 3px;
+  padding: 1px 3px;
   flex-shrink: 0;
-  line-height: 1.4;
+  line-height: 1.2;
   display: block;
 }
 
 .pitch-player-name {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   color: #fff;
   font-weight: 600;
-  padding: 2px 3px 2px 2px;
+  padding: 1px 3px 1px 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
-  line-height: 1.5;
+  line-height: 1.2;
 }
 
 .pitch-player-pos-badge {
