@@ -87,6 +87,7 @@ const NATIONALITY_NAMES = {
   '7':   'China',        '10':  'Indonesia',   '11':  'Irán',
   '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
   '15':  'Corea del Norte', '16': 'Corea del Sur', '17': 'Kuwait',
+<<<<<<< HEAD
   '21':  'Malasia', '34':  'Siria', 
   '19':  'Líbano',       '26':  'Omán',         '30':  'Qatar',
   '31':  'Arabia Saudita', '36': 'Tailandia',   '37':  'Emiratos Árabes Unidos',
@@ -95,6 +96,14 @@ const NATIONALITY_NAMES = {
   '55':  'Congo DR',     '56':  'Costa de Marfil', '58': 'Egipto',
   '62':  'Gabón',
   '59':  'Guinea Ecuatorial',      '63':  'Gambia',       '64':  'Ghana',
+=======
+  '19':  'Líbano',       '26':  'Omán',         '30':  'Qatar',
+  '31':  'Arabia Saudita', '36': 'Tailandia',   '37':  'Emiratos Árabes Unidos',
+  '44':  'Argelia',      '45':  'Angola',       '48':  'Burkina Faso',
+  '50':  'Camerún',      '51':  'Cabo Verde',   '52':  'Benín',
+  '55':  'Congo DR',     '56':  'Costa de Marfil', '58': 'Egipto',
+  '59':  'Andorra',      '63':  'Gambia',       '64':  'Ghana',
+>>>>>>> abd1eff6bbc43078504bbb135cde39121babad4c
   '65':  'Guinea',       '66':  'Guinea-Bisáu', '70':  'Libia',
   '73':  'Malí',         '76':  'Marruecos',    '77':  'Mozambique',
   '79':  'Níger',        '80':  'Nigeria',      '83':  'Senegal',
@@ -102,7 +111,11 @@ const NATIONALITY_NAMES = {
   '94':  'Zambia',       '95':  'Zimbabue',     '110': 'Canadá',
   '112': 'Costa Rica',   '115': 'Rep. Dominicana', '120': 'Haití',
   '121': 'Honduras',     '122': 'Jamaica',      '124': 'México',
+<<<<<<< HEAD
   '128': 'Panamá',       '133': 'Trinidad y Tobago',    '135': 'Estados Unidos',
+=======
+  '128': 'Panamá',       '133': 'Filipinas',    '135': 'Estados Unidos',
+>>>>>>> abd1eff6bbc43078504bbb135cde39121babad4c
   '139': 'Surinam',      '144': 'Argentina',    '145': 'Bolivia',
   '146': 'Brasil',       '147': 'Chile',        '148': 'Colombia',
   '149': 'Ecuador',      '150': 'Paraguay',     '151': 'Perú',
