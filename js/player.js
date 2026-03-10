@@ -226,6 +226,80 @@ function positionGroupColor(pesPos) {
   return '#8b949e';
 }
 
+// ─── Boot mapping (boot ID → { pesNumber, brand }) ───────────────────────────
+
+const BOOT_MAPPING = {
+  // Adidas
+  '0':    { pesNumber: 47, brand: 'Adidas' },
+  '1053': { pesNumber: 1,  brand: 'Adidas' },
+  '1052': { pesNumber: 2,  brand: 'Adidas' },
+  '1051': { pesNumber: 3,  brand: 'Adidas' },
+  '1063': { pesNumber: 4,  brand: 'Adidas' },
+  '1064': { pesNumber: 5,  brand: 'Adidas' },
+  '1062': { pesNumber: 6,  brand: 'Adidas' },
+  '1061': { pesNumber: 7,  brand: 'Adidas' },
+  '1073': { pesNumber: 8,  brand: 'Adidas' },
+  '1072': { pesNumber: 9,  brand: 'Adidas' },
+  '1071': { pesNumber: 10, brand: 'Adidas' },
+  // Joma
+  '6011': { pesNumber: 11, brand: 'Joma' },
+  '6021': { pesNumber: 12, brand: 'Joma' },
+  // Mizuno
+  '5013': { pesNumber: 13, brand: 'Mizuno' },
+  '5012': { pesNumber: 14, brand: 'Mizuno' },
+  '5011': { pesNumber: 15, brand: 'Mizuno' },
+  '5032': { pesNumber: 16, brand: 'Mizuno' },
+  '5033': { pesNumber: 17, brand: 'Mizuno' },
+  '5031': { pesNumber: 18, brand: 'Mizuno' },
+  // New Balance
+  '7012': { pesNumber: 19, brand: 'New Balance' },
+  '7011': { pesNumber: 20, brand: 'New Balance' },
+  '7022': { pesNumber: 21, brand: 'New Balance' },
+  '7021': { pesNumber: 22, brand: 'New Balance' },
+  // Nike
+  '2013': { pesNumber: 23, brand: 'Nike' },
+  '2012': { pesNumber: 24, brand: 'Nike' },
+  '2011': { pesNumber: 25, brand: 'Nike' },
+  '2024': { pesNumber: 26, brand: 'Nike' },
+  '2023': { pesNumber: 27, brand: 'Nike' },
+  '2021': { pesNumber: 28, brand: 'Nike' },
+  '2022': { pesNumber: 29, brand: 'Nike' },
+  '2053': { pesNumber: 30, brand: 'Nike' },
+  '2052': { pesNumber: 31, brand: 'Nike' },
+  '2051': { pesNumber: 32, brand: 'Nike' },
+  '2063': { pesNumber: 33, brand: 'Nike' },
+  '2062': { pesNumber: 34, brand: 'Nike' },
+  '2061': { pesNumber: 35, brand: 'Nike' },
+  // Puma
+  '3043': { pesNumber: 36, brand: 'Puma' },
+  '3042': { pesNumber: 37, brand: 'Puma' },
+  '3041': { pesNumber: 38, brand: 'Puma' },
+  '3053': { pesNumber: 39, brand: 'Puma' },
+  '3052': { pesNumber: 40, brand: 'Puma' },
+  '3051': { pesNumber: 41, brand: 'Puma' },
+  // Umbro
+  '4012': { pesNumber: 42, brand: 'Umbro' },
+  '4011': { pesNumber: 43, brand: 'Umbro' },
+  '4032': { pesNumber: 44, brand: 'Umbro' },
+  '4031': { pesNumber: 45, brand: 'Umbro' },
+  // PES
+  '61': { pesNumber: 46, brand: 'PES' },
+  '62': { pesNumber: 47, brand: 'PES' },
+  '63': { pesNumber: 48, brand: 'PES' },
+  '64': { pesNumber: 49, brand: 'PES' },
+  '65': { pesNumber: 50, brand: 'PES' },
+  '66': { pesNumber: 51, brand: 'PES' },
+  '71': { pesNumber: 52, brand: 'PES' },
+  '72': { pesNumber: 53, brand: 'PES' },
+  '73': { pesNumber: 54, brand: 'PES' },
+  '81': { pesNumber: 55, brand: 'PES' },
+  '82': { pesNumber: 56, brand: 'PES' },
+  '83': { pesNumber: 57, brand: 'PES' },
+  '84': { pesNumber: 58, brand: 'PES' },
+  '51': { pesNumber: 59, brand: 'PES' },
+  '52': { pesNumber: 60, brand: 'PES' },
+};
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
@@ -463,17 +537,17 @@ const APPEARANCE_SECTIONS = [
       {
         title: 'Delante',
         fields: [
-          { col: 'Font - Style',          label: 'Estilo',        enum: { '0': '-', '1': 'Arriba', '2': 'Abajo', '3': 'Hacia atrás' } },
-          { col: 'Font - Parted',         label: 'Con raya',      enum: { '0': '-', '1': 'No', '2': 'Izquierda 2', '3': 'Izquierda 1', '4': 'Centro', '5': 'Derecha 1', '6': 'Derecha 2' } },
-          { col: 'Font - Hairline',       label: 'A raíz',        enum: { '0': '-', '1': 'Tipo 1', '2': 'Tipo 2', '3': 'Tipo 3' } },
-          { col: 'Font - Forehead Width', label: 'Ancho de frente', enum: { '0': '-', '1': 'Estrecha', '2': 'Normal', '3': 'Amplia' } },
+          { col: 'Font - Style',          label: 'Estilo',        enum: { '0': '-', '1': 'Arriba', '2': 'Abajo', '3': 'Hacia atrás' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
+          { col: 'Font - Parted',         label: 'Con raya',      enum: { '0': '-', '1': 'No', '2': 'Izquierda 2', '3': 'Izquierda 1', '4': 'Centro', '5': 'Derecha 1', '6': 'Derecha 2' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
+          { col: 'Font - Hairline',       label: 'A raíz',        enum: { '0': '-', '1': 'Tipo 1', '2': 'Tipo 2', '3': 'Tipo 3' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
+          { col: 'Font - Forehead Width', label: 'Ancho de frente', enum: { '0': '-', '1': 'Estrecha', '2': 'Normal', '3': 'Amplia' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
         ],
       },
       {
         title: 'Lateral / Atrás',
         fields: [
-          { col: 'Side/Back - Style',   label: 'Estilo',    enum: { '0': '-', '1': 'Normal', '2': 'Menos volumen', '3': 'Menos lateral', '4': 'Recortado' } },
-          { col: 'Side/Back - Cropped', label: 'Recortado', showImageIf: true, imageKey: 'hair_cropped' },
+          { col: 'Side/Back - Style',   label: 'Estilo',    enum: { '0': '-', '1': 'Normal', '2': 'Menos volumen', '3': 'Menos lateral', '4': 'Recortado' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
+          { col: 'Side/Back - Cropped', label: 'Recortado', showImageIf: true, imageKey: 'hair_cropped', conditionalDash: { col: 'Overall - Style', value: '7' } },
         ],
       },
       {
@@ -518,9 +592,9 @@ const APPEARANCE_SECTIONS = [
       {
         title: null,
         fields: [
-          { col: 'Boots',              label: 'Calzado',                       imageKey: 'boots', imagePath: 'img/boots' },
+          { col: 'Boots',              label: 'Calzado',                       imageKey: 'boots', imagePath: 'img/boots', bootDisplay: true },
           { col: 'Wrist taping',       label: 'Vendaje',                       enum: { '0': 'No', '1': 'Derecha', '2': 'Izquierda', '3': 'Ambos' } },
-          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' }, conditionalLabel: { value: '10', label: 'Kit Color' } },
+          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' }, enum: { '1': 'Color del Kit', '2': 'Blanco', '3': 'Negro', '4': 'Beige', '9': 'Beige', '10': 'Blanco' } },
           { col: 'Ankle Taping',       label: 'Vendaje tobillo',               enum: { '0': 'No', '1': 'Sí' } },
           { col: 'Player Gloves',      label: 'Guantes',                       enum: { '0': 'No', '1': 'Para invierno' } },
           { col: 'Colour',             label: 'Color de guantes',              conditionalDash: { col: 'Player Gloves', value: '0' } },
@@ -849,6 +923,16 @@ function renderAppearanceField(field, appearance, player) {
     const translated = field.enum[rawVal];
     const label = translated !== undefined ? translated : displayVal;
     return renderAppearanceRow(field.label, label, null, null);
+  }
+
+  // imageKey with bootDisplay: show boot image using boot ID, display brand + PES number
+  if (field.imageKey && field.bootDisplay && rawVal) {
+    const imgPath = appearanceImagePath(field.imageKey, rawVal);
+    const bootInfo = BOOT_MAPPING[rawVal];
+    const displayText = bootInfo
+      ? `${bootInfo.brand} ${bootInfo.pesNumber}`
+      : rawVal;
+    return renderAppearanceRow(field.label, displayText, imgPath, field.imageKey);
   }
 
   // imageKey: always show image for the field when value is present
