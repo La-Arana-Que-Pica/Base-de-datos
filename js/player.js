@@ -1060,16 +1060,16 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   else footDisplay = footVal || '–';
 
   const statsHtml = `
-    <div class="stats-section">
-      ${renderHabilidades(player)}
-    </div>
-    <div class="stats-section">
-      ${renderEstiloDeJuego(player)}
-      ${renderHabilidadesJugador(player)}
-      ${renderEstilosJuegoCOM(player)}
-    </div>
-    <div class="stats-section">
-      ${renderPositionPitch(player)}
+    <div class="stats-compact-layout">
+      <div class="stats-compact-left">
+        ${renderHabilidades(player)}
+      </div>
+      <div class="stats-compact-right">
+        ${renderEstiloDeJuego(player)}
+        ${renderHabilidadesJugador(player)}
+        ${renderEstilosJuegoCOM(player)}
+        ${renderPositionPitch(player)}
+      </div>
     </div>`;
 
   const appearanceHtml = renderFaceData(appearance, player, facePlayerName);

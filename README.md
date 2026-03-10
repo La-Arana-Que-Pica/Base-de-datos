@@ -48,7 +48,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-teams-index.ps1
 
 > Si agregas un nuevo equipo, crea su carpeta dentro de `database/teams`, copia sus 5 CSV y vuelve a generar `index.json`.
 
-## Imágenes de jugadores
+## Imágenes de jugadores (minifacetas)
 
 Las fotos de los jugadores se almacenan en `img/players/` con el ID numérico del jugador como nombre de archivo:
 
@@ -75,7 +75,8 @@ img/
 
 - El nombre del archivo es el valor del campo `Id` del CSV `_players.csv`, seguido de `.png`.
 - Si el archivo no existe, la interfaz muestra automáticamente `img/players/default.png` como reserva.
-- Tamaño recomendado: **100 × 120 px**, formato PNG.
+- Tamaño recomendado: **128 × 128 px**, formato PNG con canal alfa (RGBA).
+- La interfaz también busca el archivo alternativo `player_{Id}.dds` si el `.png` no existe.
 
 **Para agregar imágenes de jugadores:**
 
@@ -85,6 +86,8 @@ img/
 
 No se requiere regenerar ningún índice; la interfaz detecta las imágenes automáticamente mediante el atributo `onerror` en los elementos `<img>`.
 
+Consulta `docs/formato-minifacetas.md` para ver la especificación completa y ejemplos.
+
 **Verificar imágenes faltantes:**
 
 ```bash
@@ -92,6 +95,24 @@ node scripts/check-player-images.js
 ```
 
 Este script lista todos los jugadores registrados en los CSV cargados e indica cuáles tienen imagen disponible en `img/players/` y cuáles utilizarán la imagen de reserva.
+
+## Archivo `medias_corregidas.csv`
+
+El archivo `database/medias_corregidas.csv` permite corregir manualmente la valoración general (**OVR**) de jugadores específicos, sobrescribiendo el valor exportado. Es semicolumnas (`;`) y debe tener exactamente las siguientes columnas:
+
+```csv
+TeamId;PlayerId;OverallStats
+4071;36768;72
+4071;38891;62
+```
+
+| Columna        | Tipo    | Descripción                                   |
+|----------------|---------|-----------------------------------------------|
+| `TeamId`       | número  | ID del equipo al que pertenece el jugador      |
+| `PlayerId`     | número  | ID del jugador (campo `Id` en `_players.csv`) |
+| `OverallStats` | número  | Valoración general corregida (0–99)            |
+
+Consulta `docs/medias_corregidas_ejemplo.csv` para ver un ejemplo del formato completo.
 
 ## Indexación y búsqueda
 
