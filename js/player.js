@@ -992,7 +992,7 @@ function renderAppearanceRow(label, value, imgPath, imageKey) {
   </div>`;
 }
 
-function renderFaceData(appearance, player, facePlayerName, isScanned) {
+function renderFaceData(appearance, player, baseCopyPlayerName, isScanned) {
   if (!appearance && !player) {
     return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
@@ -1018,8 +1018,8 @@ function renderFaceData(appearance, player, facePlayerName, isScanned) {
   } else if (hasScannedFace) {
     noticeHtml = `<div class="scanned-face-notice">
         <span class="scanned-face-icon">📋</span>
-        ${facePlayerName
-          ? `Usa la cara base de: <strong>${facePlayerName}</strong>`
+        ${baseCopyPlayerName
+          ? `Usa la cara base de: <strong>${baseCopyPlayerName}</strong>`
           : `Usa la cara base de un jugador.`}
       </div>`;
   }
@@ -1144,7 +1144,7 @@ function renderPositionPitch(player) {
     </div>`;
 }
 
-function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName, isScanned, dorsal, hasMiniface) {
+function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal) {
   const ovrColor = statColor(player['OverallStats'] || '');
   const ovr = player['OverallStats'] || '–';
 
@@ -1182,7 +1182,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
       </div>
     </div>`;
 
-  const appearanceHtml = renderFaceData(appearance, player, facePlayerName, isScanned);
+  const appearanceHtml = renderFaceData(appearance, player, baseCopyPlayerName, isScanned);
 
   const content = document.getElementById('player-content');
   content.innerHTML = `
@@ -1222,7 +1222,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
               <div class="player-info-card-name" title="${player['Name'] || ''}">${player['Name'] || 'Jugador desconocido'}</div>
               ${typeLabel ? `<div class="player-info-card-type">${typeLabel}</div>` : ''}
               ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
-              ${facePlayerName ? `<div class="profile-miniface-note">🎭 Miniface: <strong>${facePlayerName}</strong></div>` : ''}
+              ${minifacePlayerName ? `<div class="profile-miniface-note">🎭 Miniface: <strong>${minifacePlayerName}</strong></div>` : ''}
               <div class="player-card-stats player-info-card-stats">
                 <div class="pcs"><span class="pcs-val">${player['Age'] || '–'}</span><span class="pcs-key">Edad</span></div>
                 <div class="pcs"><span class="pcs-val">${player['Height'] || '–'} cm</span><span class="pcs-key">Alt</span></div>
@@ -1396,15 +1396,18 @@ async function boot() {
   });
   const appearance = appearanceMap[playerId] || null;
 
-  // Determine face player name — resolved for every player:
-  // If Id_Face is set (non-zero), that original player's face is used;
-  // otherwise the player's own ID is looked up in the originals map.
+  // Miniface: always determined from the player's own ID in players_original.csv.
+  const minifacePlayerName = originalPlayersMap[playerId] || null;
+
+  // Base copy: only when Id_Face is set (non-zero), look up that player's name.
   const idFace = appearance ? (appearance['Id_Face'] || '0') : '0';
-  const faceSourceId = idFace !== '0' ? idFace : playerId;
-  let facePlayerName = originalPlayersMap[faceSourceId] || null;
-  if (!facePlayerName) {
-    const facePlayer = playerRows.find(p => p['Id'] === faceSourceId);
-    if (facePlayer) facePlayerName = facePlayer['Name'] || null;
+  let baseCopyPlayerName = null;
+  if (idFace !== '0') {
+    baseCopyPlayerName = originalPlayersMap[idFace] || null;
+    if (!baseCopyPlayerName) {
+      const facePlayer = playerRows.find(p => p['Id'] === idFace);
+      if (facePlayer) baseCopyPlayerName = facePlayer['Name'] || null;
+    }
   }
 
   // Determine if player is scanned in the game
@@ -1443,10 +1446,7 @@ async function boot() {
     }
   }
 
-  // Show miniface only if the player's ID is found in players_original.csv
-  const hasMiniface = Object.prototype.hasOwnProperty.call(originalPlayersMap, playerId);
-
-  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName, isScanned, dorsal, hasMiniface);
+  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
