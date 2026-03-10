@@ -151,16 +151,16 @@ const POSITION_GROUPS = [
 
 // Tactics labels and value maps
 const FORMATION_TACTIC_FIELDS = [
-  { col: 'EstiloAtaque F1',   label: 'Estilo de ataque',   values: { '0': 'Pelotazo', '1': 'Pase corto', '2': 'Contragolpe', '3': 'Por las bandas', '4': 'Posesión' } },
-  { col: 'Creacion F1',       label: 'Creación',           values: { '0': 'Saque de meta', '1': 'Pase corto', '2': 'Pase largo', '3': 'Ataque total' } },
-  { col: 'ZonaAtaque F1',     label: 'Zona de ataque',     values: { '0': 'Por las bandas', '1': 'Central', '2': 'Mixto' } },
-  { col: 'NumAtaq F1',        label: 'Nº atacantes',       values: {} },
-  { col: 'EstiloDefensa F1',  label: 'Estilo defensivo',   values: { '0': 'Caer atrás', '1': 'Corte básico', '2': 'Presión', '3': 'Presión agresiva' } },
-  { col: 'ZonaContencion F1', label: 'Zona de contención', values: { '0': 'Media', '1': 'Alta', '2': 'Baja' } },
-  { col: 'Presion F1',        label: 'Presión',            values: { '0': 'Sin presión', '1': 'Moderada', '2': 'Agresiva' } },
-  { col: 'LineaDefensiva F1', label: 'Línea defensiva',    values: {} },
-  { col: 'CierreFilas F1',    label: 'Compacidad',         values: {} },
-  { col: 'NumDef F1',         label: 'Nº defensores',      values: {} },
+  { col: 'EstiloAtaque F1',   label: 'Estilos de ataque',              values: { '0': 'Contraataque', '1': 'Juego de posesión' } },
+  { col: 'Creacion F1',       label: 'Creación',                       values: { '0': 'Pase largo', '1': 'Pase corto' } },
+  { col: 'ZonaAtaque F1',     label: 'Zona de ataque',                 values: { '0': 'Por las bandas', '1': 'Centro' } },
+  { col: 'Colocacion F1',     label: 'Posicionamiento',                values: { '0': 'Mantener formación', '1': 'Flexible' } },
+  { col: 'ZonaApoyo F1',      label: 'Zona de apoyo',                  values: {} },
+  { col: 'EstiloDefensa F1',  label: 'Estilos de defensa',             values: { '0': 'Presión en la frontal', '1': 'Defensa total' } },
+  { col: 'ZonaContencion F1', label: 'Zona de contención',             values: { '0': 'Centro', '1': 'Por las bandas' } },
+  { col: 'Presion F1',        label: 'Presión',                        values: { '0': 'Agresivo', '1': 'Conservador' } },
+  { col: 'LineaDefensiva F1', label: 'Línea defensiva',                values: {} },
+  { col: 'CierreFilas F1',    label: 'Distancia al jugador con balón', values: {} },
 ];
 
 // Helper: "J. Álvarez" format
@@ -473,7 +473,8 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       ${assignmentRows.length ? `<div class="formation-tactic-block"><div class="formation-block-title">Asignaciones</div>${assignmentRows.join('')}</div>` : ''}
     </div>` : '';
 
-  const isFluid = formationRow['Fluida F1'] === 'True' || formationRow['Fluida F1'] === '1';
+  const fluidaVal = parseInt(formationRow['Fluida F1'], 10);
+  const isFluid = !isNaN(fluidaVal) && fluidaVal !== 0;
 
   if (!isFluid) {
     return `
