@@ -227,6 +227,8 @@ function positionGroupColor(pesPos) {
 }
 
 // ─── Boot mapping (boot ID → { pesNumber, brand }) ───────────────────────────
+// PES numbers are as defined in the game. Note that boot ID 0 and PES boot 62
+// intentionally share PES number 47 per the official game equivalence table.
 
 const BOOT_MAPPING = {
   // Adidas
