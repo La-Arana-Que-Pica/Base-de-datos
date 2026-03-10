@@ -2186,11 +2186,14 @@ body {
 }
 
 .pitch-player-pos-sm {
-  font-size: 0.5rem;
+  font-size: 0.45rem;
   font-weight: 800;
   text-shadow: 0 1px 3px rgba(0,0,0,0.9);
   white-space: nowrap;
-  line-height: 1;
+  line-height: 1.2;
+  display: block;
+  text-align: center;
+  padding: 1px 3px 0;
 }
 
 .pitch-player-photo-wrap {
@@ -2236,12 +2239,20 @@ body {
   width: 62px;
 }
 
+.pitch-player-ovr-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .pitch-player-ovr {
   font-size: 0.55rem;
   font-weight: 800;
   padding: 2px 3px;
   flex-shrink: 0;
-  line-height: 1.5;
+  line-height: 1.4;
+  display: block;
 }
 
 .pitch-player-name {
@@ -2455,6 +2466,25 @@ body {
   display: flex;
   flex-direction: column;
   cursor: pointer;
+}
+
+/* Responsive player cards: shrink on small screens */
+@media (max-width: 640px) {
+  .player-card {
+    width: calc(50vw - 28px);
+    min-width: 120px;
+    max-width: 155px;
+  }
+  .player-card-photo-wrap {
+    height: 75px;
+  }
+  .player-card-photo {
+    width: 66px;
+    height: 75px;
+  }
+  .player-card-ovr {
+    font-size: 1.5rem;
+  }
 }
 
 .player-card:hover {
@@ -2704,4 +2734,49 @@ body {
   background: transparent;
   border: 2px solid var(--color-text-muted);
 }
+
+/* ── Team extra info (league, stadium, manager) ── */
+.team-extra-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 6px;
+}
+
+.team-info-item {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* ── Grid search box ── */
+.grid-search-wrap {
+  margin-bottom: 12px;
+}
+
+.grid-search-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 8px 12px;
+  background: var(--color-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.grid-search-input:focus {
+  border-color: var(--color-highlight);
+}
+
+/* ── Player stats sections ── */
+.stats-section {
+  margin-bottom: 24px;
+}
+
+.stats-section:last-child {
+  margin-bottom: 0;
+}
+
 
