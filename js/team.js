@@ -420,7 +420,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     const raw = formationRow[tf.col];
     if (raw === undefined || raw === '') return '';
     const translated = tf.values[raw];
-    const display = translated !== undefined ? `${translated} (${raw})` : raw;
+    const display = translated !== undefined ? translated : raw;
     return `<div class="tactic-row"><span class="tactic-label">${escapeHtml(tf.label)}</span><span class="tactic-value">${escapeHtml(display)}</span></div>`;
   }).filter(Boolean).join('');
 
@@ -436,23 +436,11 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
   };
 
-  // For header roles: the value is a 0-based index into the starting-11 formation array
-  // (so value 10 means the 11th player in the formation, i.e. startingSquadIndices[10])
+  // For header roles: the value is a 0-based direct squad slot index
   const addHeaderAssignment = (label, colName) => {
     const rawIdx = parseInt(formationRow[colName], 10);
-    if (isNaN(rawIdx) || rawIdx < 0) return;
-    let p = null;
-    if (rawIdx <= 10) {
-      // 0-based formation-slot index → look up through the starting-11 squad-index array
-      const squadIdx = startingSquadIndices[rawIdx];
-      if (!isNaN(squadIdx) && squadIdx >= 0 && squadIdx < squadSlots.length) {
-        p = squadSlots[squadIdx];
-      }
-    }
-    if (!p && rawIdx < squadSlots.length) {
-      // Fallback: direct squad index
-      p = squadSlots[rawIdx];
-    }
+    if (isNaN(rawIdx) || rawIdx < 0 || rawIdx >= squadSlots.length) return;
+    const p = squadSlots[rawIdx];
     if (!p) return;
     assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
   };
