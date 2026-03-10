@@ -381,12 +381,13 @@ async function boot() {
   showLoading('Cargando base de datos...');
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText, appearancesText, leaguesText] = await Promise.all([
+  const [teamsText, playersText, squadsText, appearancesText, leaguesText, corregidosText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All appeaarances exported.csv'),
     fetchText('database/All leagues exported.csv'),
+    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -451,6 +452,21 @@ async function boot() {
     playerMap[playerId] = normalizePlayerRow(playerRow);
   });
 
+  // Build corrected overall map from medias_corregidas.csv
+  const corregidosMap = {};
+  if (corregidosText) {
+    const corregidosRows = parseCSV(corregidosText);
+    corregidosRows.forEach(r => {
+      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+      const tid = r['TeamId'] || r['team_id'] || '';
+      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+      if (pid && ovr) {
+        if (tid) corregidosMap[tid + '_' + pid] = ovr;
+        if (!tid) corregidosMap[pid] = ovr;
+      }
+    });
+  }
+
   // Assign players to teams using squad data
   squadRows.forEach(squadRow => {
     const teamId = squadRow['Id'];
@@ -462,6 +478,9 @@ async function boot() {
       const player = playerMap[playerId];
       if (!player) continue;
       const p = { ...player, _team: team };
+      // Apply corrected overall if available (team-specific key takes precedence)
+      const corregidosOvr = corregidosMap[teamId + '_' + playerId] || corregidosMap[playerId];
+      if (corregidosOvr) p.Overall = corregidosOvr;
       team.players.push(p);
       DB.players.push(p);
       indexPlayerForSearch(p);
