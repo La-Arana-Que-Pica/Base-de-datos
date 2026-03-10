@@ -1102,49 +1102,54 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
   margin-bottom: 20px;
 }
 
-/* Column 1: info col – stacks miniface above card */
+/* Column 1: info col – fills height like the other two cards */
 .player-header-info-col {
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 
-/* Miniface: outside the player card, floating above it */
-.profile-miniface {
-  width: 110px;
-  height: 125px;
-  object-fit: cover;
-  object-position: top center;
-  border-radius: 8px;
-  border: 3px solid var(--color-card);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65);
-  position: relative;
-  z-index: 2;
-  margin-bottom: -32px;
+.player-header-info-col .player-header-card {
+  flex: 1;
 }
 
 /* Shared card base for all three header columns */
 .player-header-card {
-  background: var(--color-card);
+  background: linear-gradient(160deg, #1d2433 0%, #141921 100%);
   border: 1px solid var(--color-border);
   border-radius: 12px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-/* Player info card */
-.player-info-card.has-miniface {
-  padding-top: 40px; /* room for overlapping miniface */
+/* Player info card: photo inside the card between top and body */
+.player-info-card-photo-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.15);
+  height: 130px;
+  overflow: hidden;
+}
+
+.player-info-card-photo {
+  width: 110px;
+  height: 130px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
 }
 
 .player-info-card-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 14px 16px 10px;
+  padding: 10px 12px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
@@ -1152,18 +1157,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: 1px;
 }
 
 .player-info-card-ovr {
-  font-size: 2.6rem;
+  font-size: 2rem;
   font-weight: 900;
   line-height: 1;
   letter-spacing: -1px;
 }
 
 .player-info-card-pos {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1178,14 +1183,14 @@ body {
 }
 
 .player-info-card-flag {
-  width: 28px;
-  height: 20px;
+  width: 26px;
+  height: 18px;
   object-fit: contain;
 }
 
 .player-info-card-crest {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
 }
 
@@ -1198,18 +1203,23 @@ body {
 }
 
 .player-info-card-body {
-  padding: 12px 16px 16px;
+  padding: 10px 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
+  flex: 1;
 }
 
 .player-info-card-name {
-  font-size: 1.15rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-text);
   line-height: 1.2;
   margin-bottom: 2px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .player-info-card-meta {
@@ -1238,6 +1248,11 @@ body {
   font-weight: 500;
 }
 
+/* 4-stat grid inside the info card (Age / Height / Weight / Foot) */
+.player-info-card .player-info-card-stats {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 /* Radar card */
 .player-radar-card {
   overflow: hidden;
@@ -1264,11 +1279,16 @@ body {
 
 /* Positions card */
 .player-positions-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
 
 .player-positions-card .player-section {
   margin-bottom: 0;
+  width: 100%;
 }
 
 /* Legacy: keep old .profile-header-card hidden behind new layout */
