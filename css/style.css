@@ -2084,6 +2084,36 @@ body {
   margin-bottom: 24px;
 }
 
+/* Fluid formation tab buttons */
+.formation-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.formation-tab-btn {
+  padding: 5px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.formation-tab-btn:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.formation-tab-btn.active {
+  background: var(--color-highlight);
+  border-color: var(--color-highlight);
+  color: #fff;
+}
+
 .formation-section-title {
   font-size: 0.72rem;
   font-weight: 700;
