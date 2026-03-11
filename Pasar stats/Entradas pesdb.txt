@@ -1,0 +1,585 @@
+Authentic
+Player Name:	Lamine Yamal
+Squad Number:	10
+Team Name:	FC Barcelona
+League:	Spanish League
+Nationality:	Spain
+Region:	Europe
+Height:	180
+Weight:	72
+Age:	18
+Foot:	Left foot
+Maximum Level:	29
+Rating:	A
+Position:	RWF
+
+Overall Rating:	87
+ 	 
+Offensive Awareness:	72
+Ball Control:	80
+Dribbling:	87
+Tight Possession:	82
+Low Pass:	75
+Lofted Pass:	76
+Finishing:	75
+Heading:	50
+Set Piece Taking:	65
+Curl:	80
+Defensive Awareness:	44
+Tackling:	48
+Aggression:	57
+Defensive Engagement:	63
+GK Awareness:	40
+GK Catching:	40
+GK Parrying:	40
+GK Reflexes:	40
+GK Reach:	40
+Speed:	85
+Acceleration:	86
+Kicking Power:	72
+Jumping:	58
+Physical Contact:	60
+Balance:	77
+Stamina:	73
+Weak Foot Usage:	Occasionally
+Weak Foot Accuracy:	High
+Form:	Unwavering
+Injury Resistance:	Medium
+Playing Style
+Roaming Flank
+Player Skills
+Scissors Feint
+Double Touch
+Flip Flap
+Marseille Turn
+Cut Behind & Turn
+Sole Control
+Long-Range Curler
+Through Passing
+Pinpoint Crossing
+Outside Curler
+AI Playing Styles
+Trickster
+Mazing Run
+Speeding Bullet
+Incisive Run
+Early Cross
+
+
+Standard
+Player Name:	Rodri
+Squad Number:	16
+Team Name:	Manchester B
+League:	English League
+Nationality:	Spain
+Region:	Europe
+Height:	190
+Weight:	82
+Age:	29
+Foot:	Right foot
+Maximum Level:	23
+Rating:	A
+Position:	DMF
+
+Overall Rating:	84
+ 	 
+Offensive Awareness:	60
+Ball Control:	77
+Dribbling:	70
+Tight Possession:	82
+Low Pass:	79
+Lofted Pass:	76
+Finishing:	66
+Heading:	73
+Set Piece Taking:	58
+Curl:	60
+Defensive Awareness:	79
+Tackling:	77
+Aggression:	80
+Defensive Engagement:	82
+GK Awareness:	40
+GK Catching:	40
+GK Parrying:	40
+GK Reflexes:	40
+GK Reach:	40
+Speed:	61
+Acceleration:	59
+Kicking Power:	81
+Jumping:	65
+Physical Contact:	77
+Balance:	56
+Stamina:	78
+Weak Foot Usage:	Rarely
+Weak Foot Accuracy:	High
+Form:	Unwavering
+Injury Resistance:	Medium
+Playing Style
+Anchor Man
+Player Skills
+Sole Control
+Rising Shot
+Long Range Shooting
+One-touch Pass
+Through Passing
+Low Lofted Pass
+Man Marking
+Interception
+Aerial Superiority
+Fighting Spirit
+AI Playing Styles
+Long Ball Expert
+Long Ranger
+
+
+Standard
+Player Name:	Jude Bellingham
+Squad Number:	5
+Team Name:	Madrid Chamartin B
+League:	Spanish League
+Nationality:	England
+Region:	Europe
+Height:	186
+Weight:	75
+Age:	22
+Foot:	Right foot
+Maximum Level:	28
+Rating:	C
+Position:	AMF
+
+Overall Rating:	84
+ 	 
+Offensive Awareness:	75
+Ball Control:	79
+Dribbling:	74
+Tight Possession:	77
+Low Pass:	77
+Lofted Pass:	72
+Finishing:	77
+Heading:	67
+Set Piece Taking:	58
+Curl:	63
+Defensive Awareness:	63
+Tackling:	69
+Aggression:	74
+Defensive Engagement:	72
+GK Awareness:	40
+GK Catching:	40
+GK Parrying:	40
+GK Reflexes:	40
+GK Reach:	40
+Speed:	75
+Acceleration:	68
+Kicking Power:	74
+Jumping:	67
+Physical Contact:	72
+Balance:	76
+Stamina:	80
+Weak Foot Usage:	Occasionally
+Weak Foot Accuracy:	Very High
+Form:	Unwavering
+Injury Resistance:	High
+Playing Style
+Hole Player
+Player Skills
+Double Touch
+Flip Flap
+Cut Behind & Turn
+Sole Control
+Rising Shot
+Acrobatic Finishing
+First-time Shot
+One-touch Pass
+Outside Curler
+Fighting Spirit
+AI Playing Styles
+Trickster
+Mazing Run
+Incisive Run
+Long Ranger
+Share this player
+Permalink:	
+https://pesdb.net/efootball/?id=132933
+Forum code:	
+[url=https://pesdb.net/efootball/?id=132933]Jude Bellingham[/url]
+Facebook:	
+Twitter:	
+
+
+
+Standard
+Player Name:	William Saliba
+Squad Number:	2
+Team Name:	Arsenal FC
+League:	English League
+Nationality:	France
+Region:	Europe
+Height:	192
+Weight:	85
+Age:	24
+Foot:	Right foot
+Maximum Level:	21
+Rating:	A
+Position:	CB
+
+Overall Rating:	83
+ 	 
+Offensive Awareness:	50
+Ball Control:	69
+Dribbling:	61
+Tight Possession:	72
+Low Pass:	71
+Lofted Pass:	65
+Finishing:	53
+Heading:	69
+Set Piece Taking:	58
+Curl:	60
+Defensive Awareness:	79
+Tackling:	78
+Aggression:	75
+Defensive Engagement:	78
+GK Awareness:	40
+GK Catching:	40
+GK Parrying:	40
+GK Reflexes:	40
+GK Reach:	40
+Speed:	78
+Acceleration:	69
+Kicking Power:	62
+Jumping:	66
+Physical Contact:	79
+Balance:	60
+Stamina:	77
+Weak Foot Usage:	Rarely
+Weak Foot Accuracy:	Medium
+Form:	Unwavering
+Injury Resistance:	High
+Playing Style
+Build Up
+Player Skills
+Heading
+Weighted Pass
+Man Marking
+Interception
+Blocker
+Aerial Superiority
+Acrobatic Clearance
+AI Playing Styles
+Long Ball Expert
+
+Standard
+Player Name:	Gianluigi Donnarumma
+Squad Number:	25
+Team Name:	Manchester B
+League:	English League
+Nationality:	Italy
+Region:	Europe
+Height:	196
+Weight:	90
+Age:	26
+Foot:	Right foot
+Maximum Level:	21
+Rating:	A
+Position:	GK
+
+Overall Rating:	83
+ 	 
+Offensive Awareness:	40
+Ball Control:	58
+Dribbling:	46
+Tight Possession:	51
+Low Pass:	58
+Lofted Pass:	60
+Finishing:	40
+Heading:	47
+Set Piece Taking:	58
+Curl:	49
+Defensive Awareness:	48
+Tackling:	47
+Aggression:	46
+Defensive Engagement:	62
+GK Awareness:	73
+GK Catching:	71
+GK Parrying:	74
+GK Reflexes:	82
+GK Reach:	82
+Speed:	55
+Acceleration:	56
+Kicking Power:	74
+Jumping:	68
+Physical Contact:	73
+Balance:	52
+Stamina:	58
+Weak Foot Usage:	Rarely
+Weak Foot Accuracy:	Medium
+Form:	Standard
+Injury Resistance:	High
+Playing Style
+Offensive Goalkeeper
+Player Skills
+GK Low Punt
+GK Long Throw
+GK Penalty Saver
+Captaincy
+AI Playing Styles
+-
+
+Standard
+Player Name:	Virgil van Dijk
+Squad Number:	4
+Team Name:	Liverpool R
+League:	English League
+Nationality:	Netherlands
+Region:	Europe
+Height:	195
+Weight:	92
+Age:	34
+Foot:	Right foot
+Maximum Level:	20
+Rating:	A
+Position:	CB
+
+Overall Rating:	83
+ 	 
+Offensive Awareness:	47
+Ball Control:	61
+Dribbling:	56
+Tight Possession:	59
+Low Pass:	61
+Lofted Pass:	68
+Finishing:	46
+Heading:	80
+Set Piece Taking:	62
+Curl:	59
+Defensive Awareness:	79
+Tackling:	78
+Aggression:	74
+Defensive Engagement:	77
+GK Awareness:	40
+GK Catching:	40
+GK Parrying:	40
+GK Reflexes:	40
+GK Reach:	40
+Speed:	74
+Acceleration:	60
+Kicking Power:	71
+Jumping:	78
+Physical Contact:	84
+Balance:	53
+Stamina:	68
+Weak Foot Usage:	Occasionally
+Weak Foot Accuracy:	High
+Form:	Unwavering
+Injury Resistance:	Low
+Playing Style
+Build Up
+Player Skills
+Heading
+Weighted Pass
+Low Lofted Pass
+Man Marking
+Interception
+Blocker
+Aerial Superiority
+Sliding Tackle
+Acrobatic Clearance
+Captaincy
+AI Playing Styles
+Long Ball Expert
+
+Standard
+Player Name:	Vitinha
+Squad Number:	17
+Team Name:	Paris Saint-Germain
+League:	Ligue 1 McDonald's
+Nationality:	Portugal
+Region:	Europe
+Height:	172
+Weight:	64
+Age:	25
+Foot:	Right foot
+Maximum Level:	31
+Rating:	B
+Position:	CMF
+
+Overall Rating:	82
+ 	 
+Offensive Awareness:	69
+Ball Control:	81
+Dribbling:	79
+Tight Possession:	83
+Low Pass:	81
+Lofted Pass:	78
+Finishing:	67
+Heading:	52
+Set Piece Taking:	71
+Curl:	75
+Defensive Awareness:	68
+Tackling:	66
+Aggression:	65
+Defensive Engagement:	70
+GK Awareness:	40
+GK Catching:	40
+GK Parrying:	40
+GK Reflexes:	40
+GK Reach:	40
+Speed:	65
+Acceleration:	72
+Kicking Power:	73
+Jumping:	58
+Physical Contact:	54
+Balance:	80
+Stamina:	80
+Weak Foot Usage:	Rarely
+Weak Foot Accuracy:	Medium
+Form:	Unwavering
+Injury Resistance:	High
+Playing Style
+Orchestrator
+Player Skills
+Double Touch
+Sole Control
+Long-Range Curler
+Dipping Shot
+One-touch Pass
+Through Passing
+Weighted Pass
+Outside Curler
+Interception
+Captaincy
+AI Playing Styles
+Trickster
+Mazing Run
+Long Ball Expert
+Long Ranger
+
+Standard
+Player Name:	Éder Militão
+Squad Number:	3
+Team Name:	Madrid Chamartin B
+League:	Spanish League
+Nationality:	Brazil
+Region:	South America
+Height:	186
+Weight:	78
+Age:	27
+Foot:	Right foot
+Maximum Level:	21
+Rating:	C
+Position:	CB
+
+Overall Rating:	82
+ 	 
+Offensive Awareness:	53
+Ball Control:	63
+Dribbling:	62
+Tight Possession:	65
+Low Pass:	65
+Lofted Pass:	68
+Finishing:	48
+Heading:	77
+Set Piece Taking:	58
+Curl:	50
+Defensive Awareness:	74
+Tackling:	76
+Aggression:	79
+Defensive Engagement:	76
+GK Awareness:	40
+GK Catching:	40
+GK Parrying:	40
+GK Reflexes:	40
+GK Reach:	40
+Speed:	81
+Acceleration:	76
+Kicking Power:	61
+Jumping:	81
+Physical Contact:	71
+Balance:	60
+Stamina:	77
+Weak Foot Usage:	Rarely
+Weak Foot Accuracy:	Medium
+Form:	Unwavering
+Injury Resistance:	Low
+Playing Style
+Build Up
+Player Skills
+Heading
+Interception
+Blocker
+Aerial Superiority
+Sliding Tackle
+Acrobatic Clearance
+Fighting Spirit
+AI Playing Styles
+Long Ball Expert
+
+Standard
+Player Name:	Martin Ødegaard
+Squad Number:	8
+Team Name:	Arsenal FC
+League:	English League
+Nationality:	Norway
+Region:	Europe
+Height:	178
+Weight:	69
+Age:	27
+Foot:	Left foot
+Maximum Level:	28
+Rating:	C
+Position:	AMF
+
+Overall Rating:	82
+ 	 
+Offensive Awareness:	73
+Ball Control:	82
+Dribbling:	79
+Tight Possession:	77
+Low Pass:	82
+Lofted Pass:	75
+Finishing:	68
+Heading:	52
+Set Piece Taking:	73
+Curl:	80
+Defensive Awareness:	60
+Tackling:	62
+Aggression:	69
+Defensive Engagement:	67
+GK Awareness:	40
+GK Catching:	40
+GK Parrying:	40
+GK Reflexes:	40
+GK Reach:	40
+Speed:	64
+Acceleration:	67
+Kicking Power:	75
+Jumping:	55
+Physical Contact:	58
+Balance:	75
+Stamina:	78
+Weak Foot Usage:	Almost Never
+Weak Foot Accuracy:	Medium
+Form:	Unwavering
+Injury Resistance:	Low
+Playing Style
+Creative Playmaker
+Player Skills
+Marseille Turn
+Sombrero
+Cut Behind & Turn
+Long Range Shooting
+First-time Shot
+Through Passing
+Pinpoint Crossing
+Outside Curler
+No Look Pass
+Captaincy
+AI Playing Styles
+Trickster
+Long Ball Expert
+Share this player
+Permalink:	
+https://pesdb.net/efootball/?id=103404
+Forum code:	
+[url=https://pesdb.net/efootball/?id=103404]Martin Ødegaard[/url]
+Facebook:	
+Twitter:	
+
