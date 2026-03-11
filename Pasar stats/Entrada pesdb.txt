@@ -1,0 +1,66 @@
+Authentic
+Player Name:	Lamine Yamal
+Squad Number:	10
+Team Name:	FC Barcelona
+League:	Spanish League
+Nationality:	Spain
+Region:	Europe
+Height:	180
+Weight:	72
+Age:	18
+Foot:	Left foot
+Maximum Level:	29
+Rating:	A
+Position:	RWF
+
+Overall Rating:	87
+ 	 
+Offensive Awareness:	72
+Ball Control:	80
+Dribbling:	87
+Tight Possession:	82
+Low Pass:	75
+Lofted Pass:	76
+Finishing:	75
+Heading:	50
+Set Piece Taking:	65
+Curl:	80
+Defensive Awareness:	44
+Tackling:	48
+Aggression:	57
+Defensive Engagement:	63
+GK Awareness:	40
+GK Catching:	40
+GK Parrying:	40
+GK Reflexes:	40
+GK Reach:	40
+Speed:	85
+Acceleration:	86
+Kicking Power:	72
+Jumping:	58
+Physical Contact:	60
+Balance:	77
+Stamina:	73
+Weak Foot Usage:	Occasionally
+Weak Foot Accuracy:	High
+Form:	Unwavering
+Injury Resistance:	Medium
+Playing Style
+Roaming Flank
+Player Skills
+Scissors Feint
+Double Touch
+Flip Flap
+Marseille Turn
+Cut Behind & Turn
+Sole Control
+Long-Range Curler
+Through Passing
+Pinpoint Crossing
+Outside Curler
+AI Playing Styles
+Trickster
+Mazing Run
+Speeding Bullet
+Incisive Run
+Early Cross
