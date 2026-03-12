@@ -188,12 +188,66 @@ def _lookup_inj(raw: str) -> int | None:
 # ---------------------------------------------------------------------------
 # Detección y parseo del formato de entrada
 # ---------------------------------------------------------------------------
+
+# Columnas de edición que se deben marcar como True al actualizar stats
+EDIT_FLAG_COLS = [
+    "Edit_Name",
+    "Edit_Basics",
+    "Edit_Position",
+    "Edit_Positions",
+    "Edit_Abilities",
+    "Edit_PlayerSkills",
+    "Edit_PlayingStyle",
+    "Edit_COMPlayingStyles",
+    "Edit_Movements",
+]
+
+# Mapeo: eFootball (inglés) → nombre de columna en el CSV
+# eFootball comparte los mismos nombres de stats que pesdb; se agregan
+# los alias propios de eFootball para mayor robustez.
+# Nota: Tight Possession, Aggression y Defensive Engagement no tienen equivalente en PES.
+EFOOTBALL_TO_CSV = {
+    "offensive awareness":  "Attacking Prowess",
+    "ball control":         "Ball Control",
+    "dribbling":            "Dribbling",
+    "low pass":             "Low Pass",
+    "lofted pass":          "Lofted Pass",
+    "finishing":            "Finishing",
+    "set piece taking":     "Place Kicking",
+    "curl":                 "Controlled Spin",
+    "heading":              "Header",
+    "defensive awareness":  "Defensive Prowess",
+    "tackling":             "Ball Winning",
+    "kicking power":        "Kicking Power",
+    "speed":                "Speed",
+    "acceleration":         "Explosive Power",
+    "balance":              "Body Control",
+    "physical contact":     "Physical Contact",
+    "jumping":              "Jump",
+    "gk awareness":         "Goalkeeping",
+    "gk catching":          "Catching",
+    "gk parrying":          "Clearing",
+    "gk reflexes":          "Reflexes",
+    "gk reach":             "Coverage",
+    "stamina":              "Stamina",
+}
+
+_RE_EFOOTBALL = re.compile(
+    r"(?i)(efootball|Tight Possession|Defensive Engagement|Overall Rating)"
+)
+_RE_PESDB = re.compile(
+    r"(?i)(Offensive Awareness|Ball Control|Dribbling|Defensive Awareness)"
+)
+
+
+def _is_efootball_format(text: str) -> bool:
+    """Detecta si el texto proviene de eFootball."""
+    return bool(_RE_EFOOTBALL.search(text))
+
+
 def _is_pesdb_format(text: str) -> bool:
     """Detecta si el texto proviene de pesdb (formato clave: valor en inglés)."""
-    return bool(re.search(
-        r"(?i)(Offensive Awareness|Ball Control|Dribbling|Defensive Awareness)",
-        text,
-    ))
+    return bool(_RE_PESDB.search(text))
 
 
 def _parse_pesdb(text: str) -> dict:
@@ -303,8 +357,63 @@ def _parse_pesmaster_es(text: str) -> dict:
     return result
 
 
+def _parse_efootball(text: str) -> dict:
+    """
+    Parsea texto de eFootball (inglés).
+    Usa el mapeo EFOOTBALL_TO_CSV (que incluye nombres propios de eFootball
+    además de los de pesdb) y delega el resto al parser de pesdb.
+    Devuelve {csv_column: valor_str, ...}.
+    """
+    result = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        m = re.match(r"^(.+?)\s*:\s*(.+)$", line)
+        if not m:
+            continue
+        key_raw = m.group(1).strip()
+        val_raw = m.group(2).strip()
+        key_low = key_raw.lower()
+
+        # Primero intentar con el mapeo específico de eFootball
+        if key_low in EFOOTBALL_TO_CSV:
+            csv_col = EFOOTBALL_TO_CSV[key_low]
+            if csv_col:
+                result[csv_col] = val_raw
+            continue
+
+        # Caer en el mapeo de pesdb para stats compartidos
+        csv_col = PESDB_TO_CSV.get(key_low)
+        if csv_col:
+            result[csv_col] = val_raw
+            continue
+
+        # Campos no numéricos (idénticos a pesdb)
+        if key_low == "weak foot usage":
+            v = _lookup_wf_usage(val_raw)
+            if v is not None:
+                result["Weak Foot Usage"] = str(v)
+        elif key_low == "weak foot accuracy":
+            v = _lookup_wf_acc(val_raw)
+            if v is not None:
+                result["Weak Foot Acc."] = str(v)
+        elif key_low == "form":
+            v = _lookup_form(val_raw)
+            if v is not None:
+                result["Form"] = str(v)
+        elif key_low == "injury resistance":
+            v = _lookup_inj(val_raw)
+            if v is not None:
+                result["Injury Resistance"] = str(v)
+
+    return result
+
+
 def parse_stat_text(text: str) -> dict:
     """Detecta el formato del texto y lo parsea."""
+    if _is_efootball_format(text):
+        return _parse_efootball(text)
     if _is_pesdb_format(text):
         return _parse_pesdb(text)
     return _parse_pesmaster_es(text)
@@ -378,6 +487,7 @@ def apply_changes(players_csv: str, changes: list) -> int:
     Aplica los cambios preparados al CSV.
     changes = [{"player_id": int, "stats": {col: val, ...}}, ...]
     Nunca modifica la columna POS.
+    Establece Edit_Name → Edit_Movements = True para cada jugador actualizado.
     Devuelve el número de jugadores actualizados.
     """
     ensure_backup(players_csv)
@@ -395,6 +505,10 @@ def apply_changes(players_csv: str, changes: list) -> int:
                     continue
                 if col in row:
                     row[col] = val
+            # Marcar flags de edición
+            for flag in EDIT_FLAG_COLS:
+                if flag in row:
+                    row[flag] = "True"
             updated += 1
 
     save_csv_raw(players_csv, headers, rows)
@@ -498,7 +612,7 @@ class App(tk.Tk):
         frm_paste_hdr = ttk.Frame(frm_right)
         frm_paste_hdr.grid(row=0, column=0, sticky="ew", pady=(0, 4))
 
-        ttk.Label(frm_paste_hdr, text="Pegá el texto de PES MASTER o pesdb:").pack(
+        ttk.Label(frm_paste_hdr, text="Pegá el texto de eFootball, PES MASTER o pesdb:").pack(
             side="left"
         )
         self.lbl_pegado = ttk.Label(
@@ -675,7 +789,7 @@ class App(tk.Tk):
             messagebox.showwarning(
                 "Sin datos",
                 "No se encontraron stats reconocibles en el texto pegado.\n"
-                "Verificá que sea texto de PES MASTER (español) o pesdb (inglés).",
+                "Verificá que sea texto de eFootball, PES MASTER (español) o pesdb (inglés).",
             )
             return
 
