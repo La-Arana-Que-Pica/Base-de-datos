@@ -43,7 +43,7 @@ PASTE_LABEL_DURATION_MS = 3000  # ms que se muestra el indicador "Pegado ✓"
 PLAYERS_CSV_CANDIDATES = [
     os.path.join(SCRIPT_DIR, "all_players_full.csv"),
     os.path.join(DB_DIR, "all_players_full.csv"),
-    os.path.join(DB_DIR, "All players exported.csv"),
+    os.path.join(DB_DIR, "players_original.csv"),
 ]
 
 SQUADS_CSV_CANDIDATES = [
@@ -75,58 +75,58 @@ def _norm(s: str) -> str:
 # Mapeo: pesdb (inglés) → nombre de columna en el CSV
 # ---------------------------------------------------------------------------
 PESDB_TO_CSV = {
-    "offensive awareness":  "Attacking Prowess",
-    "ball control":         "Ball Control",
+    "offensive awareness":  "OffensiveAwareness",
+    "ball control":         "BallControl",
     "dribbling":            "Dribbling",
-    "low pass":             "Low Pass",
-    "lofted pass":          "Lofted Pass",
+    "low pass":             "LowPass",
+    "lofted pass":          "LoftedPass",
     "finishing":            "Finishing",
-    "set piece taking":     "Place Kicking",
-    "curl":                 "Controlled Spin",
-    "heading":              "Header",
-    "defensive awareness":  "Defensive Prowess",
-    "tackling":             "Ball Winning",
-    "kicking power":        "Kicking Power",
+    "set piece taking":     "PlaceKicking",
+    "curl":                 "Curl",
+    "heading":              "Heading",
+    "defensive awareness":  "DefensiveAwareness",
+    "tackling":             "BallWinning",
+    "kicking power":        "KickingPower",
     "speed":                "Speed",
-    "acceleration":         "Explosive Power",
-    "balance":              "Body Control",
-    "physical contact":     "Physical Contact",
+    "acceleration":         "Acceleration",
+    "balance":              "Balance",
+    "physical contact":     "PhysicalContact",
     "jumping":              "Jump",
-    "gk awareness":         "Goalkeeping",
-    "gk catching":          "Catching",
-    "gk parrying":          "Clearing",
-    "gk reflexes":          "Reflexes",
-    "gk reach":             "Coverage",
+    "gk awareness":         "GKAwareness",
+    "gk catching":          "GKCatching",
+    "gk parrying":          "GKClearing",
+    "gk reflexes":          "GKReflexes",
+    "gk reach":             "GKReach",
     "stamina":              "Stamina",
     # Tight Possession, Aggression, Defensive Engagement → no tienen equivalente en PES
 }
 
 # ---------------------------------------------------------------------------
-# Mapeo: PES MASTER (español) → nombre de columna en el CSV
+# Mapeo: PES MASTER / eFootball (español) → nombre de columna en el CSV
 # ---------------------------------------------------------------------------
 ES_TO_CSV = {
-    _norm("Actitud ofensiva"):   "Attacking Prowess",
-    _norm("Control de balon"):   "Ball Control",
+    _norm("Actitud ofensiva"):   "OffensiveAwareness",
+    _norm("Control de balón"):   "BallControl",
     _norm("Regate"):             "Dribbling",
-    _norm("Pase raso"):          "Low Pass",
-    _norm("Pase bombeado"):      "Lofted Pass",
+    _norm("Pase raso"):          "LowPass",
+    _norm("Pase bombeado"):      "LoftedPass",
     _norm("Finalizacion"):       "Finishing",
-    _norm("Balon parado"):       "Place Kicking",
-    _norm("Efecto"):             "Controlled Spin",
-    _norm("Cabeceo"):            "Header",
-    _norm("Actitud defensiva"):  "Defensive Prowess",
-    _norm("Entrada"):            "Ball Winning",
-    _norm("Potencia de tiro"):   "Kicking Power",
+    _norm("Balon parado"):       "PlaceKicking",
+    _norm("Efecto"):             "Curl",
+    _norm("Cabeceo"):            "Heading",
+    _norm("Actitud defensiva"):  "DefensiveAwareness",
+    _norm("Entrada"):            "BallWinning",
+    _norm("Potencia de tiro"):   "KickingPower",
     _norm("Velocidad"):          "Speed",
-    _norm("Aceleracion"):        "Explosive Power",
-    _norm("Equilibrio"):         "Body Control",
-    _norm("Contacto fisico"):    "Physical Contact",
+    _norm("Aceleracion"):        "Acceleration",
+    _norm("Equilibrio"):         "Balance",
+    _norm("Contacto fisico"):    "PhysicalContact",
     _norm("Salto"):              "Jump",
-    _norm("Actitud de portero"): "Goalkeeping",
-    _norm("Atajar"):             "Catching",
-    _norm("Desviar"):            "Clearing",
-    _norm("Reflejos"):           "Reflexes",
-    _norm("Cobertura"):          "Coverage",
+    _norm("Actitud de portero"): "GKAwareness",
+    _norm("Atajar"):             "GKCatching",
+    _norm("Desviar"):            "GKClearing",
+    _norm("Reflejos"):           "GKReflexes",
+    _norm("Cobertura"):          "GKReach",
     _norm("Resistencia"):        "Stamina",
     # Conservación del balón, Agresividad, Compromiso defensivo → no tienen equiv.
 }
@@ -222,11 +222,11 @@ def _parse_pesdb(text: str) -> dict:
         if key_low == "weak foot usage":
             v = _lookup_wf_usage(val_raw)
             if v is not None:
-                result["Weak Foot Usage"] = str(v)
+                result["WeakFootUsage"] = str(v)
         elif key_low == "weak foot accuracy":
             v = _lookup_wf_acc(val_raw)
             if v is not None:
-                result["Weak Foot Acc."] = str(v)
+                result["WeakFootAcc"] = str(v)
         elif key_low == "form":
             v = _lookup_form(val_raw)
             if v is not None:
@@ -234,7 +234,7 @@ def _parse_pesdb(text: str) -> dict:
         elif key_low == "injury resistance":
             v = _lookup_inj(val_raw)
             if v is not None:
-                result["Injury Resistance"] = str(v)
+                result["InjuryResistance"] = str(v)
 
     return result
 
@@ -286,11 +286,11 @@ def _parse_pesmaster_es(text: str) -> dict:
     if wf_use:
         v = _lookup_wf_usage(wf_use)
         if v is not None:
-            result["Weak Foot Usage"] = str(v)
+            result["WeakFootUsage"] = str(v)
     if wf_acc:
         v = _lookup_wf_acc(wf_acc)
         if v is not None:
-            result["Weak Foot Acc."] = str(v)
+            result["WeakFootAcc"] = str(v)
     if form:
         v = _lookup_form(form)
         if v is not None:
@@ -298,7 +298,7 @@ def _parse_pesmaster_es(text: str) -> dict:
     if inj:
         v = _lookup_inj(inj)
         if v is not None:
-            result["Injury Resistance"] = str(v)
+            result["InjuryResistance"] = str(v)
 
     return result
 
@@ -373,11 +373,22 @@ def get_team_name(teams_path: str, team_id: int) -> str:
     return ""
 
 
+# ---------------------------------------------------------------------------
+# Columnas de edición que deben marcarse como True al modificar un jugador
+# ---------------------------------------------------------------------------
+EDIT_FLAGS = [
+    "EditName", "EditBasics", "EditPosition", "EditPositions",
+    "EditAbilities", "EditPlayerSkills", "EditPlayingStyle",
+    "EditCOMPlayingStyles", "EditMovements",
+]
+
+
 def apply_changes(players_csv: str, changes: list) -> int:
     """
     Aplica los cambios preparados al CSV.
     changes = [{"player_id": int, "stats": {col: val, ...}}, ...]
     Nunca modifica la columna POS.
+    Marca las columnas EditName → EditMovements como True.
     Devuelve el número de jugadores actualizados.
     """
     ensure_backup(players_csv)
@@ -395,6 +406,10 @@ def apply_changes(players_csv: str, changes: list) -> int:
                     continue
                 if col in row:
                     row[col] = val
+            # Marcar flags de edición
+            for flag in EDIT_FLAGS:
+                if flag in row:
+                    row[flag] = "True"
             updated += 1
 
     save_csv_raw(players_csv, headers, rows)
