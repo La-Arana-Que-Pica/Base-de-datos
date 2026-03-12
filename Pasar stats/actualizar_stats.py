@@ -143,7 +143,8 @@ WF_USAGE_ES = {
 }
 
 WF_ACC_EN = {
-    "very low": 1, "low": 2, "high": 3, "very high": 4,
+    # pesdb uses "low"=2; eFootball uses "medium"=2 (both are Spanish "Mediano")
+    "very low": 1, "low": 2, "medium": 2, "high": 3, "very high": 4,
 }
 WF_ACC_ES = {
     _norm("Algo bajo"): 1, _norm("Mediano"): 2,
@@ -151,7 +152,7 @@ WF_ACC_ES = {
 }
 
 FORM_EN = {
-    "inconsistent": 4, "normal": 5, "unwavering": 6, "average": 5,
+    "inconsistent": 4, "normal": 5, "standard": 5, "unwavering": 6, "average": 5,
 }
 FORM_ES = {
     _norm("Inconsistente"): 4, _norm("Normal"): 5, _norm("Constante"): 6,
