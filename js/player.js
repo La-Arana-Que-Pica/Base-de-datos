@@ -20,6 +20,17 @@ function handleMinifaceError(img, playerId) {
   }
 }
 
+// Profile miniface (outside card): hides the element instead of falling back to default
+function handleProfileMinifaceError(img, playerId) {
+  if (!img.dataset.ddsTried) {
+    img.dataset.ddsTried = '1';
+    img.src = 'img/players/player_' + playerId + '.dds';
+  } else {
+    img.onerror = null;
+    img.style.display = 'none';
+  }
+}
+
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
   if (lines.length < 2) return { headers: [], rows: [] };
@@ -225,6 +236,82 @@ function positionGroupColor(pesPos) {
   if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
   return '#8b949e';
 }
+
+// ─── Boot mapping (boot ID → { pesNumber, brand }) ───────────────────────────
+// PES numbers are as defined in the game. Note that boot ID 0 and PES boot 62
+// intentionally share PES number 47 per the official game equivalence table.
+
+const BOOT_MAPPING = {
+  // Adidas
+  '0':    { pesNumber: 47, brand: 'Adidas' },
+  '1053': { pesNumber: 1,  brand: 'Adidas' },
+  '1052': { pesNumber: 2,  brand: 'Adidas' },
+  '1051': { pesNumber: 3,  brand: 'Adidas' },
+  '1063': { pesNumber: 4,  brand: 'Adidas' },
+  '1064': { pesNumber: 5,  brand: 'Adidas' },
+  '1062': { pesNumber: 6,  brand: 'Adidas' },
+  '1061': { pesNumber: 7,  brand: 'Adidas' },
+  '1073': { pesNumber: 8,  brand: 'Adidas' },
+  '1072': { pesNumber: 9,  brand: 'Adidas' },
+  '1071': { pesNumber: 10, brand: 'Adidas' },
+  // Joma
+  '6011': { pesNumber: 11, brand: 'Joma' },
+  '6021': { pesNumber: 12, brand: 'Joma' },
+  // Mizuno
+  '5013': { pesNumber: 13, brand: 'Mizuno' },
+  '5012': { pesNumber: 14, brand: 'Mizuno' },
+  '5011': { pesNumber: 15, brand: 'Mizuno' },
+  '5032': { pesNumber: 16, brand: 'Mizuno' },
+  '5033': { pesNumber: 17, brand: 'Mizuno' },
+  '5031': { pesNumber: 18, brand: 'Mizuno' },
+  // New Balance
+  '7012': { pesNumber: 19, brand: 'New Balance' },
+  '7011': { pesNumber: 20, brand: 'New Balance' },
+  '7022': { pesNumber: 21, brand: 'New Balance' },
+  '7021': { pesNumber: 22, brand: 'New Balance' },
+  // Nike
+  '2013': { pesNumber: 23, brand: 'Nike' },
+  '2012': { pesNumber: 24, brand: 'Nike' },
+  '2011': { pesNumber: 25, brand: 'Nike' },
+  '2024': { pesNumber: 26, brand: 'Nike' },
+  '2023': { pesNumber: 27, brand: 'Nike' },
+  '2021': { pesNumber: 28, brand: 'Nike' },
+  '2022': { pesNumber: 29, brand: 'Nike' },
+  '2053': { pesNumber: 30, brand: 'Nike' },
+  '2052': { pesNumber: 31, brand: 'Nike' },
+  '2051': { pesNumber: 32, brand: 'Nike' },
+  '2063': { pesNumber: 33, brand: 'Nike' },
+  '2062': { pesNumber: 34, brand: 'Nike' },
+  '2061': { pesNumber: 35, brand: 'Nike' },
+  // Puma
+  '3043': { pesNumber: 36, brand: 'Puma' },
+  '3042': { pesNumber: 37, brand: 'Puma' },
+  '3041': { pesNumber: 38, brand: 'Puma' },
+  '3053': { pesNumber: 39, brand: 'Puma' },
+  '3052': { pesNumber: 40, brand: 'Puma' },
+  '3051': { pesNumber: 41, brand: 'Puma' },
+  // Umbro
+  '4012': { pesNumber: 42, brand: 'Umbro' },
+  '4011': { pesNumber: 43, brand: 'Umbro' },
+  '4032': { pesNumber: 44, brand: 'Umbro' },
+  '4031': { pesNumber: 45, brand: 'Umbro' },
+  // PES
+  '61': { pesNumber: 46, brand: 'PES' },
+  '62': { pesNumber: 47, brand: 'PES' },
+  '63': { pesNumber: 48, brand: 'PES' },
+  '64': { pesNumber: 49, brand: 'PES' },
+  '65': { pesNumber: 50, brand: 'PES' },
+  '66': { pesNumber: 51, brand: 'PES' },
+  '71': { pesNumber: 52, brand: 'PES' },
+  '72': { pesNumber: 53, brand: 'PES' },
+  '73': { pesNumber: 54, brand: 'PES' },
+  '81': { pesNumber: 55, brand: 'PES' },
+  '82': { pesNumber: 56, brand: 'PES' },
+  '83': { pesNumber: 57, brand: 'PES' },
+  '84': { pesNumber: 58, brand: 'PES' },
+  '51': { pesNumber: 59, brand: 'PES' },
+  '52': { pesNumber: 60, brand: 'PES' },
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -463,17 +550,17 @@ const APPEARANCE_SECTIONS = [
       {
         title: 'Delante',
         fields: [
-          { col: 'Font - Style',          label: 'Estilo',        enum: { '0': '-', '1': 'Arriba', '2': 'Abajo', '3': 'Hacia atrás' } },
-          { col: 'Font - Parted',         label: 'Con raya',      enum: { '0': '-', '1': 'No', '2': 'Izquierda 2', '3': 'Izquierda 1', '4': 'Centro', '5': 'Derecha 1', '6': 'Derecha 2' } },
-          { col: 'Font - Hairline',       label: 'A raíz',        enum: { '0': '-', '1': 'Tipo 1', '2': 'Tipo 2', '3': 'Tipo 3' } },
-          { col: 'Font - Forehead Width', label: 'Ancho de frente', enum: { '0': '-', '1': 'Estrecha', '2': 'Normal', '3': 'Amplia' } },
+          { col: 'Font - Style',          label: 'Estilo',        enum: { '0': '-', '1': 'Arriba', '2': 'Abajo', '3': 'Hacia atrás' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
+          { col: 'Font - Parted',         label: 'Con raya',      enum: { '0': '-', '1': 'No', '2': 'Izquierda 2', '3': 'Izquierda 1', '4': 'Centro', '5': 'Derecha 1', '6': 'Derecha 2' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
+          { col: 'Font - Hairline',       label: 'A raíz',        enum: { '0': '-', '1': 'Tipo 1', '2': 'Tipo 2', '3': 'Tipo 3' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
+          { col: 'Font - Forehead Width', label: 'Ancho de frente', enum: { '0': '-', '1': 'Estrecha', '2': 'Normal', '3': 'Amplia' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
         ],
       },
       {
         title: 'Lateral / Atrás',
         fields: [
-          { col: 'Side/Back - Style',   label: 'Estilo',    enum: { '0': '-', '1': 'Normal', '2': 'Menos volumen', '3': 'Menos lateral', '4': 'Recortado' } },
-          { col: 'Side/Back - Cropped', label: 'Recortado', showImageIf: true, imageKey: 'hair_cropped' },
+          { col: 'Side/Back - Style',   label: 'Estilo',    enum: { '0': '-', '1': 'Normal', '2': 'Menos volumen', '3': 'Menos lateral', '4': 'Recortado' }, conditionalDash: { col: 'Overall - Style', value: '7' } },
+          { col: 'Side/Back - Cropped', label: 'Recortado', showImageIf: true, imageKey: 'hair_cropped', conditionalDash: { col: 'Overall - Style', value: '7' } },
         ],
       },
       {
@@ -518,9 +605,9 @@ const APPEARANCE_SECTIONS = [
       {
         title: null,
         fields: [
-          { col: 'Boots',              label: 'Calzado',                       imageKey: 'boots', imagePath: 'img/boots' },
+          { col: 'Boots',              label: 'Calzado',                       imageKey: 'boots', imagePath: 'img/boots', bootDisplay: true },
           { col: 'Wrist taping',       label: 'Vendaje',                       enum: { '0': 'No', '1': 'Derecha', '2': 'Izquierda', '3': 'Ambos' } },
-          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' }, conditionalLabel: { value: '10', label: 'Kit Color' } },
+          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' }, enum: { '1': 'Color del Kit', '2': 'Blanco', '3': 'Negro', '4': 'Beige', '9': 'Beige', '10': 'Blanco' } },
           { col: 'Ankle Taping',       label: 'Vendaje tobillo',               enum: { '0': 'No', '1': 'Sí' } },
           { col: 'Player Gloves',      label: 'Guantes',                       enum: { '0': 'No', '1': 'Para invierno' } },
           { col: 'Colour',             label: 'Color de guantes',              conditionalDash: { col: 'Player Gloves', value: '0' } },
@@ -851,6 +938,16 @@ function renderAppearanceField(field, appearance, player) {
     return renderAppearanceRow(field.label, label, null, null);
   }
 
+  // imageKey with bootDisplay: show boot image using boot ID, display brand + PES number
+  if (field.imageKey && field.bootDisplay && rawVal) {
+    const imgPath = appearanceImagePath(field.imageKey, rawVal);
+    const bootInfo = BOOT_MAPPING[rawVal];
+    const displayText = bootInfo
+      ? `${bootInfo.brand} ${bootInfo.pesNumber}`
+      : rawVal;
+    return renderAppearanceRow(field.label, displayText, imgPath, field.imageKey);
+  }
+
   // imageKey: always show image for the field when value is present
   if (field.imageKey && rawVal) {
     const imgPath = appearanceImagePath(field.imageKey, rawVal);
@@ -895,29 +992,37 @@ function renderAppearanceRow(label, value, imgPath, imageKey) {
   </div>`;
 }
 
-function renderFaceData(appearance, player, facePlayerName) {
+function renderFaceData(appearance, player, baseCopyPlayerName, isScanned) {
   if (!appearance && !player) {
     return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
   }
 
   // Check if the player has a scanned face (Id_Face ≠ 0)
   const idFace = appearance ? (appearance['Id_Face'] || '0') : '0';
-  const hasScannedFace = idFace !== '0' && idFace !== '';
+  const hasScannedFace = idFace !== '0';
 
-  // When player has a scanned face: hide Cara and Peinado sections,
-  // show a notice, and only render Físico, Forma de vestir, Movimiento.
-  const sectionsToShow = hasScannedFace
+  // Determine which sections to show:
+  // - Scanned player (in-game scan) or player using another's face: skip Cara and Peinado
+  // - Normal player: show all sections
+  const sectionsToShow = (isScanned || hasScannedFace)
     ? APPEARANCE_SECTIONS.slice(2)
     : APPEARANCE_SECTIONS;
 
-  const scannedNoticeHtml = hasScannedFace
-    ? `<div class="scanned-face-notice">
+  // Build notice HTML
+  let noticeHtml = '';
+  if (isScanned) {
+    noticeHtml = `<div class="scanned-face-notice">
+        <span class="scanned-face-icon">🎯</span>
+        Este jugador está escaneado en el juego.
+      </div>`;
+  } else if (hasScannedFace) {
+    noticeHtml = `<div class="scanned-face-notice">
         <span class="scanned-face-icon">📋</span>
-        ${facePlayerName
-          ? `Usa la cara base de: <strong>${facePlayerName}</strong>`
+        ${baseCopyPlayerName
+          ? `Usa la cara base de: <strong>${baseCopyPlayerName}</strong>`
           : `Usa la cara base de un jugador.`}
-      </div>`
-    : '';
+      </div>`;
+  }
 
   const navButtons = sectionsToShow.map((section, i) =>
     `<button class="appearance-section-btn${i === 0 ? ' active' : ''}" onclick="switchAppearanceSection(${i})">${section.title}</button>`
@@ -941,7 +1046,7 @@ function renderFaceData(appearance, player, facePlayerName) {
     </div>`;
   }).join('');
 
-  return `${scannedNoticeHtml}
+  return `${noticeHtml}
 <div class="appearance-section-nav">${navButtons}</div>
 <div class="appearance-section-panels">${sectionsHtml}</div>`;
 }
@@ -1039,9 +1144,8 @@ function renderPositionPitch(player) {
     </div>`;
 }
 
-function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName) {
+function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal) {
   const ovrColor = statColor(player['OverallStats'] || '');
-  const ovrTextColor = statTextColor(ovrColor);
   const ovr = player['OverallStats'] || '–';
 
   const rawPos = player['POS'] || '';
@@ -1059,20 +1163,26 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   else if (footVal === 'False') footDisplay = 'Derecho';
   else footDisplay = footVal || '–';
 
+  // Position pitch rendered in header (removed from stats tab)
+  const positionPitchHtml = renderPositionPitch(player);
+
+  const dorsalHtml = dorsal
+    ? `<span class="player-info-card-dorsal">#${dorsal}</span>`
+    : '';
+
   const statsHtml = `
-    <div class="stats-section">
-      ${renderHabilidades(player)}
-    </div>
-    <div class="stats-section">
-      ${renderEstiloDeJuego(player)}
-      ${renderHabilidadesJugador(player)}
-      ${renderEstilosJuegoCOM(player)}
-    </div>
-    <div class="stats-section">
-      ${renderPositionPitch(player)}
+    <div class="stats-compact-layout">
+      <div class="stats-compact-left">
+        ${renderHabilidades(player)}
+      </div>
+      <div class="stats-compact-right">
+        ${renderEstiloDeJuego(player)}
+        ${renderHabilidadesJugador(player)}
+        ${renderEstilosJuegoCOM(player)}
+      </div>
     </div>`;
 
-  const appearanceHtml = renderFaceData(appearance, player, facePlayerName);
+  const appearanceHtml = renderFaceData(appearance, player, baseCopyPlayerName, isScanned);
 
   const content = document.getElementById('player-content');
   content.innerHTML = `
@@ -1080,47 +1190,62 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
     <div class="player-profile-page">
 
-      <!-- Header card -->
-      <div class="profile-header-card">
-        <img class="profile-photo"
-          src="img/players/${player['Id']}.png"
-          onerror="handleMinifaceError(this,'${player['Id']}')"
-          alt="${player['Name']}">
-        <div class="profile-header-info">
-          <div class="profile-name">${player['Name'] || 'Jugador desconocido'}</div>
-          <div class="profile-badges">
-            <span class="position-badge" style="color:${positionGroupColor(pesPosition)};border-color:${positionGroupColor(pesPosition)};background:${positionGroupColor(pesPosition)}18">${posDisplay || '–'}</span>
-            <span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
-          </div>
-          <div class="profile-meta-row">
-            <img src="${flagSrc(player['Country'])}"
-              onerror="this.onerror=null;this.src='img/flags/default.png'"
-              alt="" class="profile-flag">
-            <span>${nationalityName(player['Country'])}</span>
-          </div>
-          <div class="profile-meta-row">
-            <a href="team.html?id=${team.id}" class="team-crest-link">
-              <img class="team-crest-sm"
-                src="img/teams/${team.id}.png"
-                onerror="this.onerror=null;this.src='img/teams/default.png'"
-                alt="${team.displayName}">
-              <span>${team.displayName}</span>
-            </a>
-          </div>
-          <div class="profile-meta-row">
-            <span>${typeLabel}</span>
-          </div>
-          ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
-          <div class="profile-quick-stats">
-            <div class="quick-stat"><span class="qs-label">Altura</span><span class="qs-val">${player['Height'] || '–'} cm</span></div>
-            <div class="quick-stat"><span class="qs-label">Peso</span><span class="qs-val">${player['Weight'] || '–'} kg</span></div>
-            <div class="quick-stat"><span class="qs-label">Edad</span><span class="qs-val">${player['Age'] || '–'}</span></div>
-            <div class="quick-stat"><span class="qs-label">Pie</span><span class="qs-val">${footDisplay}</span></div>
+      <!-- Header: three cards side by side -->
+      <div class="player-profile-header">
+
+        <!-- Column 1: Player info card -->
+        <div class="player-header-info-col">
+          <div class="player-header-card player-info-card">
+            <div class="player-info-card-top" style="background:linear-gradient(135deg,${ovrColor}33 0%,${ovrColor}11 100%)">
+              <div class="player-info-card-ovr-block">
+                <span class="player-info-card-ovr" style="color:${ovrColor}">${ovr}</span>
+                <span class="player-info-card-pos" style="color:${positionGroupColor(pesPosition)}">${posDisplay || '–'}</span>
+              </div>
+              <div class="player-info-card-badge-col">
+                <img class="player-info-card-flag"
+                  src="${flagSrc(player['Country'])}"
+                  onerror="this.onerror=null;this.src='img/flags/default.png'" alt="">
+                <img class="player-info-card-crest"
+                  src="img/teams/${team.id}.png"
+                  onerror="this.onerror=null;this.src='img/teams/default.png'"
+                  alt="${team.displayName}">
+                ${dorsalHtml}
+              </div>
+            </div>
+            <div class="player-info-card-photo-wrap">
+              <img class="player-info-card-photo"
+                src="img/players/${player['Id']}.png"
+                onerror="handleMinifaceError(this,'${player['Id']}')"
+                alt="${player['Name'] || ''}">
+            </div>
+            <div class="player-info-card-body">
+              <div class="player-info-card-name" title="${player['Name'] || ''}">${player['Name'] || 'Jugador desconocido'}</div>
+              ${typeLabel ? `<div class="player-info-card-type">${typeLabel}</div>` : ''}
+              ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
+              ${minifacePlayerName ? `<div class="profile-miniface-note">🎭 Miniface: <strong>${minifacePlayerName}</strong></div>` : ''}
+              <div class="player-card-stats player-info-card-stats">
+                <div class="pcs"><span class="pcs-val">${player['Age'] || '–'}</span><span class="pcs-key">Edad</span></div>
+                <div class="pcs"><span class="pcs-val">${player['Height'] || '–'} cm</span><span class="pcs-key">Alt</span></div>
+                <div class="pcs"><span class="pcs-val">${player['Weight'] || '–'} kg</span><span class="pcs-key">Peso</span></div>
+                <div class="pcs"><span class="pcs-val">${footDisplay}</span><span class="pcs-key">Pie</span></div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="profile-radar-wrap">
-          <canvas id="radar-canvas" width="220" height="220"></canvas>
+
+        <!-- Column 2: Radar chart card -->
+        <div class="player-header-card player-radar-card">
+          <div class="player-header-card-title">Estadísticas</div>
+          <div class="player-header-radar-wrap">
+            <canvas id="radar-canvas" width="240" height="240"></canvas>
+          </div>
         </div>
+
+        <!-- Column 3: Secondary positions pitch card -->
+        <div class="player-header-card player-positions-card">
+          ${positionPitchHtml}
+        </div>
+
       </div>
 
       <!-- Tabs -->
@@ -1176,13 +1301,14 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel (including optional override files)
-  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, corregidosText] = await Promise.all([
+  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, corregidosText, scannedPlayersText] = await Promise.all([
     fetchText('database/All players exported.csv'),
     fetchText('database/All teams exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All appeaarances exported.csv'),
     fetchText('database/players_original.csv'),
     fetchText('database/medias_corregidas.csv'),
+    fetchText('database/scanned_players.csv'),
   ]);
 
   if (!playersText || !teamsText) {
@@ -1196,13 +1322,21 @@ async function boot() {
   const { rows: squadRows } = squadsText ? parseCSV(squadsText) : { rows: [] };
 
   // Build corrected overall map from medias_corregidas.csv
+  // Keys: "teamId_playerId" for per-team precision, and plain "playerId" as a fallback.
+  // When multiple teams have different overrides for the same player, the team-specific key
+  // is preferred at lookup time; the plain-playerId fallback stores the last-seen value.
   const corregidosMap = {};
   if (corregidosText) {
     const { rows: corregidosRows } = parseCSV(corregidosText);
     corregidosRows.forEach(r => {
-      const id = r['Id'] || r['id'] || r['player_id'] || '';
+      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+      const tid = r['TeamId'] || r['team_id'] || '';
       const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
-      if (id && ovr) corregidosMap[id] = ovr;
+      if (pid && ovr) {
+        if (tid) corregidosMap[tid + '_' + pid] = ovr;
+        // Fallback key (used when no TeamId column is present or as a last resort)
+        if (!tid) corregidosMap[pid] = ovr;
+      }
     });
   }
 
@@ -1217,6 +1351,16 @@ async function boot() {
     });
   }
 
+  // Build scanned players set
+  const scannedPlayerIds = new Set();
+  if (scannedPlayersText) {
+    const { rows: scannedRows } = parseCSV(scannedPlayersText);
+    scannedRows.forEach(r => {
+      const id = r['Id'] || '';
+      if (id) scannedPlayerIds.add(id);
+    });
+  }
+
   // Find the player
   const player = playerRows.find(p => p['Id'] === playerId);
   if (!player) {
@@ -1224,9 +1368,10 @@ async function boot() {
     return;
   }
 
-  // Override overall from medias_corregidas.csv if available
-  if (corregidosMap[playerId]) {
-    player['OverallStats'] = corregidosMap[playerId];
+  // Override overall from medias_corregidas.csv if available (team-specific key takes precedence)
+  const corregidosOvr = corregidosMap[teamId + '_' + playerId] || corregidosMap[playerId];
+  if (corregidosOvr) {
+    player['OverallStats'] = corregidosOvr;
   }
 
   // Find the team
@@ -1251,18 +1396,22 @@ async function boot() {
   });
   const appearance = appearanceMap[playerId] || null;
 
-  // Determine face player name (for face_id handling)
-  let facePlayerName = null;
-  if (appearance) {
-    const idFace = appearance['Id_Face'] || '0';
-    if (idFace !== '0') {
-      facePlayerName = originalPlayersMap[idFace] || null;
-      if (!facePlayerName) {
-        const facePlayer = playerRows.find(p => p['Id'] === idFace);
-        if (facePlayer) facePlayerName = facePlayer['Name'] || null;
-      }
+  // Miniface: always determined from the player's own ID in players_original.csv.
+  const minifacePlayerName = originalPlayersMap[playerId] || null;
+
+  // Base copy: only when Id_Face is set (non-zero), look up that player's name.
+  const idFace = appearance ? (appearance['Id_Face'] || '0') : '0';
+  let baseCopyPlayerName = null;
+  if (idFace !== '0') {
+    baseCopyPlayerName = originalPlayersMap[idFace] || null;
+    if (!baseCopyPlayerName) {
+      const facePlayer = playerRows.find(p => p['Id'] === idFace);
+      if (facePlayer) baseCopyPlayerName = facePlayer['Name'] || null;
     }
   }
+
+  // Determine if player is scanned in the game
+  const isScanned = scannedPlayerIds.has(playerId);
 
   // Check if player also plays for a national team (type '2')
   const teamTypeMap = {};
@@ -1284,7 +1433,20 @@ async function boot() {
     }
   }
 
-  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, facePlayerName);
+  // Find the player's jersey number (dorsal) in the selected team's squad
+  let dorsal = null;
+  const teamSquadRow = squadRows.find(r => r['Id'] === teamId);
+  if (teamSquadRow) {
+    for (let i = 1; i <= 32; i++) {
+      if (teamSquadRow[`Player ${i}`] === playerId) {
+        const shirtNum = teamSquadRow[`Shirt number ${i}`];
+        if (shirtNum && shirtNum !== '0') dorsal = shirtNum;
+        break;
+      }
+    }
+  }
+
+  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────

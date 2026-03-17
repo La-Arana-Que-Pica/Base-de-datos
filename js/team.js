@@ -151,16 +151,16 @@ const POSITION_GROUPS = [
 
 // Tactics labels and value maps
 const FORMATION_TACTIC_FIELDS = [
-  { col: 'EstiloAtaque F1',   label: 'Estilo de ataque',   values: { '0': 'Pelotazo', '1': 'Pase corto', '2': 'Contragolpe', '3': 'Por las bandas', '4': 'Posesión' } },
-  { col: 'Creacion F1',       label: 'Creación',           values: { '0': 'Saque de meta', '1': 'Pase corto', '2': 'Pase largo', '3': 'Ataque total' } },
-  { col: 'ZonaAtaque F1',     label: 'Zona de ataque',     values: { '0': 'Por las bandas', '1': 'Central', '2': 'Mixto' } },
-  { col: 'NumAtaq F1',        label: 'Nº atacantes',       values: {} },
-  { col: 'EstiloDefensa F1',  label: 'Estilo defensivo',   values: { '0': 'Caer atrás', '1': 'Corte básico', '2': 'Presión', '3': 'Presión agresiva' } },
-  { col: 'ZonaContencion F1', label: 'Zona de contención', values: { '0': 'Media', '1': 'Alta', '2': 'Baja' } },
-  { col: 'Presion F1',        label: 'Presión',            values: { '0': 'Sin presión', '1': 'Moderada', '2': 'Agresiva' } },
-  { col: 'LineaDefensiva F1', label: 'Línea defensiva',    values: {} },
-  { col: 'CierreFilas F1',    label: 'Compacidad',         values: {} },
-  { col: 'NumDef F1',         label: 'Nº defensores',      values: {} },
+  { col: 'EstiloAtaque F1',   label: 'Estilos de ataque',              values: { '0': 'Contraataque', '1': 'Juego de posesión' } },
+  { col: 'Creacion F1',       label: 'Creación',                       values: { '0': 'Pase largo', '1': 'Pase corto' } },
+  { col: 'ZonaAtaque F1',     label: 'Zona de ataque',                 values: { '0': 'Por las bandas', '1': 'Centro' } },
+  { col: 'Colocacion F1',     label: 'Posicionamiento',                values: { '0': 'Mantener formación', '1': 'Flexible' } },
+  { col: 'ZonaApoyo F1',      label: 'Zona de apoyo',                  values: {} },
+  { col: 'EstiloDefensa F1',  label: 'Estilos de defensa',             values: { '0': 'Presión en la frontal', '1': 'Defensa total' } },
+  { col: 'ZonaContencion F1', label: 'Zona de contención',             values: { '0': 'Centro', '1': 'Por las bandas' } },
+  { col: 'Presion F1',        label: 'Presión',                        values: { '0': 'Agresivo', '1': 'Conservador' } },
+  { col: 'LineaDefensiva F1', label: 'Línea defensiva',                values: {} },
+  { col: 'CierreFilas F1',    label: 'Distancia al jugador con balón', values: {} },
 ];
 
 // Helper: "J. Álvarez" format
@@ -333,7 +333,6 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
   if (!formationRow || !squadSlots || !players.length) return '';
 
   const captainRawIdx = parseInt(formationRow['Capitan'], 10);
-  const tokens = [];
 
   // Build the starting-11 squad-index array for formation-slot lookups
   const startingSquadIndices = [];
@@ -342,65 +341,87 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     startingSquadIndices.push(parseInt(raw, 10));
   }
 
-  for (let i = 1; i <= 11; i++) {
-    const squadIdx = startingSquadIndices[i - 1];
-    // Indice Jugador is 0-based into the 32-slot squad array
-    if (isNaN(squadIdx) || squadIdx < 0 || squadIdx >= squadSlots.length) continue;
-    const player = squadSlots[squadIdx];
-    if (!player) continue;
+  // Build player tokens for a given column suffix (e.g. 'F1', 'F1 Con Balon', 'F1 Sin Balon')
+  function buildPitchTokens(suffix) {
+    const tokens = [];
+    for (let i = 1; i <= 11; i++) {
+      const squadIdx = startingSquadIndices[i - 1];
+      // Indice Jugador is 0-based into the 32-slot squad array
+      if (isNaN(squadIdx) || squadIdx < 0 || squadIdx >= squadSlots.length) continue;
+      const player = squadSlots[squadIdx];
+      if (!player) continue;
 
-    const xDepth = parseFloat(formationRow[`Ubicacion X${i} F1`]) || 0;
-    const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} F1`]) || 52;
+      const xDepth = parseFloat(formationRow[`Ubicacion X${i} ${suffix}`]) || 0;
+      const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} ${suffix}`]) || 52;
 
-    // Map to CSS percentage positions on a full pitch (630×670):
-    //   left: 5 + (yWidth / 104) * 90%  (0=left touchline → 5%, 52=center → 50%, 104=right → 95%)
-    //   top:  7 + (1 - xDepth / 52) * 86%  (xDepth=52=midfield → 7%, xDepth=0=own goal → 93%)
-    const leftPct = 5 + (yWidth / 104) * 90;
-    const topPct  = 7 + (1 - xDepth / 52) * 86;
+      // Map to CSS percentage positions on a full pitch (630×670):
+      //   left: 5 + (yWidth / 104) * 90%  (0=left touchline → 5%, 52=center → 50%, 104=right → 95%)
+      //   top:  7 + (1 - xDepth / 52) * 86%  (xDepth=52=midfield → 7%, xDepth=0=own goal → 93%)
+      const leftPct = 5 + (yWidth / 104) * 90;
+      const topPct  = 7 + (1 - xDepth / 52) * 86;
 
-    const shortName = escapeHtml(formatShortName(player.Name || ''));
-    const pid = escapeHtml(player.ID);
-    const tid = escapeHtml(teamId || '');
+      const shortName = escapeHtml(formatShortName(player.Name || ''));
+      const pid = escapeHtml(player.ID);
+      const tid = escapeHtml(teamId || '');
 
-    // Use the formation position (Posicion i F1) rather than the player's natural position
-    const posRawVal = parseInt(formationRow[`Posicion ${i} F1`], 10);
-    const formationPos = (!isNaN(posRawVal) && posRawVal >= 0 && posRawVal < PES_POSITIONS.length)
-      ? PES_POSITIONS[posRawVal] : (player.Position || '');
-    const posDisplay = escapeHtml(translatePosition(formationPos));
-    const posColor = positionGroupColor(formationPos);
+      // Use the formation position rather than the player's natural position
+      const posRawVal = parseInt(formationRow[`Posicion ${i} ${suffix}`], 10);
+      const formationPos = (!isNaN(posRawVal) && posRawVal >= 0 && posRawVal < PES_POSITIONS.length)
+        ? PES_POSITIONS[posRawVal] : (player.Position || '');
+      const posDisplay = escapeHtml(translatePosition(formationPos));
+      const posColor = positionGroupColor(formationPos);
 
-    const ovr = escapeHtml(player.Overall || '–');
-    const ovrColor = statColor(player.Overall || '');
-    const ovrTextColor = statTextColor(ovrColor);
-    const isCapitan = !isNaN(captainRawIdx) && squadIdx === captainRawIdx;
+      const ovr = escapeHtml(player.Overall || '–');
+      const ovrColor = statColor(player.Overall || '');
+      const ovrTextColor = statTextColor(ovrColor);
+      const isCapitan = !isNaN(captainRawIdx) && squadIdx === captainRawIdx;
 
-    tokens.push(`
-      <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
-        <div class="pitch-player-top">
-          <div class="pitch-player-photo-wrap">
-            <img src="img/players/${pid}.png"
-              onerror="handleMinifaceError(this,'${pid}')"
-              class="pitch-player-photo" alt="${shortName}">${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
+      tokens.push(`
+        <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
+          <div class="pitch-player-top">
+            <div class="pitch-player-photo-wrap">
+              <img src="img/players/${pid}.png"
+                onerror="handleMinifaceError(this,'${pid}')"
+                class="pitch-player-photo" alt="${shortName}">
+            </div>
           </div>
-        </div>
-        <div class="pitch-player-bar">
-          <span class="pitch-player-ovr-block">
-            <span class="pitch-player-pos-sm" style="color:${posColor};opacity:0.65">${posDisplay}</span>
-            <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
-          </span>
-          <span class="pitch-player-name">${shortName}</span>
-        </div>
-      </a>`);
+          <div class="pitch-player-bar">
+            <span class="pitch-player-ovr-block">
+              <span class="pitch-player-pos-sm" style="color:${posColor};opacity:0.65">${posDisplay}</span>
+              <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
+            </span>
+            <span class="pitch-player-name">${shortName}</span>
+            ${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
+          </div>
+        </a>`);
+    }
+    return tokens;
   }
 
-  if (!tokens.length) return '';
+  // Build pitch field HTML for a given suffix
+  function buildPitchField(suffix) {
+    const tokens = buildPitchTokens(suffix);
+    return `
+      <div class="pitch-field">
+        <div class="pf-mark pf-halfway"></div>
+        <div class="pf-mark pf-center-circle"></div>
+        <div class="pf-mark pf-penalty-top"></div>
+        <div class="pf-mark pf-goal-top"></div>
+        <div class="pf-mark pf-penalty-bottom"></div>
+        <div class="pf-mark pf-goal-bottom"></div>
+        ${tokens.join('')}
+      </div>`;
+  }
+
+  const defaultTokens = buildPitchTokens('F1');
+  if (!defaultTokens.length) return '';
 
   // Build tactics section
   const tacticsRows = FORMATION_TACTIC_FIELDS.map(tf => {
     const raw = formationRow[tf.col];
     if (raw === undefined || raw === '') return '';
     const translated = tf.values[raw];
-    const display = translated !== undefined ? `${translated} (${raw})` : raw;
+    const display = translated !== undefined ? translated : raw;
     return `<div class="tactic-row"><span class="tactic-label">${escapeHtml(tf.label)}</span><span class="tactic-value">${escapeHtml(display)}</span></div>`;
   }).filter(Boolean).join('');
 
@@ -416,36 +437,25 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
   };
 
-  // For header roles: the value is a 0-based index into the starting-11 formation array
-  // (so value 10 means the 11th player in the formation, i.e. startingSquadIndices[10])
+  // For header roles: the value is a 0-based direct squad slot index
   const addHeaderAssignment = (label, colName) => {
     const rawIdx = parseInt(formationRow[colName], 10);
-    if (isNaN(rawIdx) || rawIdx < 0) return;
-    let p = null;
-    if (rawIdx <= 10) {
-      // 0-based formation-slot index → look up through the starting-11 squad-index array
-      const squadIdx = startingSquadIndices[rawIdx];
-      if (!isNaN(squadIdx) && squadIdx >= 0 && squadIdx < squadSlots.length) {
-        p = squadSlots[squadIdx];
-      }
-    }
-    if (!p && rawIdx < squadSlots.length) {
-      // Fallback: direct squad index
-      p = squadSlots[rawIdx];
-    }
+    if (isNaN(rawIdx) || rawIdx < 0 || rawIdx >= squadSlots.length) return;
+    const p = squadSlots[rawIdx];
     if (!p) return;
     assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
   };
 
   addSquadAssignment('Capitán', 'Capitan');
-  addSquadAssignment('Tiro libre corto', 'TiroCorto');
   addSquadAssignment('Tiro libre largo', 'TiroLargo');
-  addSquadAssignment('Córner derecho', 'EsquinaDerecho');
-  addSquadAssignment('Córner izquierdo', 'EsquinaIzquierdo');
-  addSquadAssignment('Penal', 'Penalti');
-  addHeaderAssignment('Remate de cabeza 1', 'Cabeceador1');
-  addHeaderAssignment('Remate de cabeza 2', 'Cabeceador2');
-  addHeaderAssignment('Remate de cabeza 3', 'Cabeceador3');
+  addSquadAssignment('Tiro libre corto', 'TiroCorto');
+  addSquadAssignment('Tirador 2', 'Cabeceador1');
+  addSquadAssignment('Tiro de esq. izq.', 'EsquinaIzquierdo');
+  addSquadAssignment('Tiro de esq. der.', 'EsquinaDerecho');
+  addSquadAssignment('Penaltis', 'Penalti');
+  addHeaderAssignment('Jugador ofensivo 1', 'SegundoCobrador');
+  addHeaderAssignment('Jugador ofensivo 2', 'Cabeceador2');
+  addHeaderAssignment('Jugador ofensivo 3', 'Cabeceador3');
 
   const infoHtml = (tacticsRows || assignmentRows.length) ? `
     <div class="formation-info-columns">
@@ -453,20 +463,46 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       ${assignmentRows.length ? `<div class="formation-tactic-block"><div class="formation-block-title">Asignaciones</div>${assignmentRows.join('')}</div>` : ''}
     </div>` : '';
 
+  const fluidaVal = parseInt(formationRow['Fluida F1'], 10);
+  const isFluid = !isNaN(fluidaVal) && fluidaVal !== 0;
+
+  if (!isFluid) {
+    return `
+      <div class="formation-section">
+        <div class="formation-section-title">Formación inicial</div>
+        <div class="formation-layout">
+          <div class="pitch-container">
+            ${buildPitchField('F1')}
+          </div>
+          ${infoHtml}
+        </div>
+      </div>`;
+  }
+
+  // Fluid formation: three tabs (General / Con Balón / Sin Balón)
   return `
     <div class="formation-section">
+      <div class="formation-tabs">
+        <button class="formation-tab-btn active" data-variant="F1">General</button>
+        <button class="formation-tab-btn" data-variant="F1 Con Balon">Con Balón</button>
+        <button class="formation-tab-btn" data-variant="F1 Sin Balon">Sin Balón</button>
+      </div>
       <div class="formation-section-title">Formación inicial</div>
-      <div class="formation-layout">
+      <div class="formation-layout" data-variant="F1">
         <div class="pitch-container">
-          <div class="pitch-field">
-            <div class="pf-mark pf-halfway"></div>
-            <div class="pf-mark pf-center-circle"></div>
-            <div class="pf-mark pf-penalty-top"></div>
-            <div class="pf-mark pf-goal-top"></div>
-            <div class="pf-mark pf-penalty-bottom"></div>
-            <div class="pf-mark pf-goal-bottom"></div>
-            ${tokens.join('')}
-          </div>
+          ${buildPitchField('F1')}
+        </div>
+        ${infoHtml}
+      </div>
+      <div class="formation-layout" data-variant="F1 Con Balon" style="display:none">
+        <div class="pitch-container">
+          ${buildPitchField('F1 Con Balon')}
+        </div>
+        ${infoHtml}
+      </div>
+      <div class="formation-layout" data-variant="F1 Sin Balon" style="display:none">
+        <div class="pitch-container">
+          ${buildPitchField('F1 Sin Balon')}
         </div>
         ${infoHtml}
       </div>
@@ -718,6 +754,21 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
   // Attach back button handler via DOM (avoids inline onclick)
   document.getElementById('btn-back').addEventListener('click', goBack);
 
+  // Formation tab switching (fluid formation)
+  const formationSection = content.querySelector('.formation-section');
+  if (formationSection) {
+    formationSection.addEventListener('click', e => {
+      const btn = e.target.closest('.formation-tab-btn');
+      if (!btn) return;
+      const variant = btn.dataset.variant;
+      formationSection.querySelectorAll('.formation-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      formationSection.querySelectorAll('.formation-layout').forEach(l => {
+        l.style.display = l.dataset.variant === variant ? '' : 'none';
+      });
+    });
+  }
+
   // Initialise the player card carousel navigation
   initPlayerCarousel();
 
@@ -833,13 +884,14 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText, formationsText, coachsText, leaguesText] = await Promise.all([
+  const [teamsText, playersText, squadsText, formationsText, coachsText, leaguesText, corregidosText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All formations exported.csv'),
     fetchText('database/All coachs exported.csv'),
     fetchText('database/All leagues exported.csv'),
+    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -874,6 +926,21 @@ async function boot() {
     if (pid) playerMap[pid] = normalizePlayerRow(row);
   });
 
+  // Build corrected overall map from medias_corregidas.csv
+  const corregidosMap = {};
+  if (corregidosText) {
+    const { rows: corregidosRows } = parseCSV(corregidosText);
+    corregidosRows.forEach(r => {
+      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+      const tid = r['TeamId'] || r['team_id'] || '';
+      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+      if (pid && ovr) {
+        if (tid) corregidosMap[tid + '_' + pid] = ovr;
+        if (!tid) corregidosMap[pid] = ovr;
+      }
+    });
+  }
+
   // Find this team's squad
   const squadRow = squadRows.find(s => s['Id'] === teamId);
   const players = [];
@@ -887,6 +954,9 @@ async function boot() {
       if (player) {
         const shirtNum = squadRow[`Shirt number ${i}`];
         const playerWithShirt = { ...player, _shirtNumber: shirtNum && shirtNum !== '0' ? parseInt(shirtNum, 10) || null : null };
+        // Apply corrected overall if available (team-specific key takes precedence)
+        const corregidosOvr = corregidosMap[teamId + '_' + pid] || corregidosMap[pid];
+        if (corregidosOvr) playerWithShirt.Overall = corregidosOvr;
         players.push(playerWithShirt);
         squadSlots[i - 1] = playerWithShirt;  // 0-indexed (slot i → index i-1)
       }

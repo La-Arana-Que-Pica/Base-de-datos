@@ -182,11 +182,12 @@ async function boot() {
     return;
   }
 
-  const [teamsText, playersText, squadsText, leaguesText] = await Promise.all([
+  const [teamsText, playersText, squadsText, leaguesText, corregidosText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All leagues exported.csv'),
+    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText || !leaguesText) {
@@ -219,6 +220,21 @@ async function boot() {
     if (pid) playerMap[pid] = row;
   });
 
+  // Build corrected overall map from medias_corregidas.csv
+  const corregidosMap = {};
+  if (corregidosText) {
+    const { rows: corregidosRows } = parseCSV(corregidosText);
+    corregidosRows.forEach(r => {
+      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+      const tid = r['TeamId'] || r['team_id'] || '';
+      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+      if (pid && ovr) {
+        if (tid) corregidosMap[tid + '_' + pid] = ovr;
+        if (!tid) corregidosMap[pid] = ovr;
+      }
+    });
+  }
+
   // Build squad map (teamId → player list)
   const squadMap = {};
   squadRows.forEach(squadRow => {
@@ -229,7 +245,15 @@ async function boot() {
       const pid = squadRow[`Player ${i}`];
       if (!pid || pid === '0') continue;
       const p = playerMap[pid];
-      if (p) players.push(p);
+      if (p) {
+        // Apply corrected overall if available (team-specific key takes precedence)
+        const corregidosOvr = corregidosMap[tid + '_' + pid] || corregidosMap[pid];
+        if (corregidosOvr) {
+          players.push({ ...p, OverallStats: corregidosOvr });
+        } else {
+          players.push(p);
+        }
+      }
     }
     squadMap[tid] = players;
   });

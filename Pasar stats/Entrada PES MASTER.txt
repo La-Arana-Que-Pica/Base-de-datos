@@ -1,0 +1,146 @@
+87
+Lamine Yamal
+Spanish League
+FC Barcelona
+|
+National Teams Europe
+Spain
+Estatisticas de Lamine Yamal en eFootball
+Lamine Yamal es un Delantero de 18 años que tiene una valoración global de 87 en eFootball. Lamine Yamal juega en el FC Barcelona y Spain.
+
+87
+
+eFootball
+Comparar
+Progression
+
+DIS
+PAS
+FZA
+DEF
+REG
+VEL
+EI
+87
+SD
+86
+DC
+82
+ED
+87
+II
+86
+MCD
+69
+MC
+79
+MP
+85
+ID
+86
+LI
+78
+CT
+64
+LD
+78
+PT
+42
+Nacionalidad	España
+Equipo	FC Barcelona
+Liga	Spanish League
+Posición	ED Extremo derecho
+Edad	18
+Pierna buena	Derecha
+Altura (cm)	180
+Peso	72
+Cara	si
+Condición	A
+Price	
+390.000
+ID	162114
+Max level	32
+Suggest correct Max Level
+Habilidad 
+73Ataque
+72	
+Actitud ofensiva
+75	
+Finalización
+72	
+Potencia de tiro
+82Regate
+80	
+Control de balón
+87	
+Regate
+82	
+Conservación del balón
+77	
+Equilibrio
+53Defensa
+50	
+Cabeceo
+58	
+Salto
+44	
+Actitud defensiva
+48	
+Entrada
+63	
+Compromiso defensivo
+57	
+Agresividad
+74Pases
+75	
+Pase raso
+76	
+Pase bombeado
+65	
+Balón parado
+80	
+Efecto
+76Complexión
+85	
+Velocidad
+86	
+Aceleración
+60	
+Contacto físico
+73	
+Resistencia
+40Portero
+40	
+Actitud de portero
+40	
+Atajar (PT)
+40	
+Desviar (PT)
+40	
+Reflejos (PT)
+40	
+Cobertura (PT)
+Características
+Uso pierna mala	Occasionally
+Prec. pierna mala	Alto
+Regularidad	Constante
+Resist. a lesiones	Mediano
+Estilo de juego
+Ala móvil
+Habilidades
+Bicicleta
+Croqueta
+Elástica
+Marsellesa
+Amago por detrás y giro
+Control con la suela
+Disparo lejano con rosca
+Pase en profundidad
+Pase cruzado
+Centro con rosca
+Estilos de juego IA
+Mago del balón
+Desborde en zigzag
+Misil con el balón
+Llegador
+Centro largo

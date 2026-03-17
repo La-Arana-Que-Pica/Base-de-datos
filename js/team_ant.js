@@ -436,14 +436,14 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
   };
 
   addSquadAssignment('Capitán', 'Capitan');
-  addSquadAssignment('Tiro libre corto', 'TiroCorto');
   addSquadAssignment('Tiro libre largo', 'TiroLargo');
-  addSquadAssignment('Córner derecho', 'EsquinaDerecho');
-  addSquadAssignment('Córner izquierdo', 'EsquinaIzquierdo');
-  addSquadAssignment('Penal', 'Penalti');
-  addHeaderAssignment('Remate de cabeza 1', 'Cabeceador1');
-  addHeaderAssignment('Remate de cabeza 2', 'Cabeceador2');
-  addHeaderAssignment('Remate de cabeza 3', 'Cabeceador3');
+  addSquadAssignment('Tiro libre corto', 'TiroCorto');
+  addSquadAssignment('Tiro de esq. izq.', 'EsquinaIzquierdo');
+  addSquadAssignment('Tiro de esq. der.', 'EsquinaDerecho');
+  addSquadAssignment('Penaltis', 'Penalti');
+  addHeaderAssignment('Jugador ofensivo 1', 'Cabeceador1');
+  addHeaderAssignment('Jugador ofensivo 2', 'Cabeceador2');
+  addHeaderAssignment('Jugador ofensivo 3', 'Cabeceador3');
 
   const infoHtml = (tacticsRows || assignmentRows.length) ? `
     <div class="formation-info-columns">

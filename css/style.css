@@ -1097,52 +1097,203 @@ body {
   gap: 20px;
 }
 
-/* Profile header card */
-.profile-header-card {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  gap: 28px;
-  align-items: flex-start;
-  flex-wrap: wrap;
+/* ── Player profile header: 3-column layout ── */
+.player-profile-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 20px;
 }
 
-.profile-photo {
-  width: 140px;
-  height: 155px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-.profile-header-info {
+/* Column 1: info col – fills height like the other two cards */
+.player-header-info-col {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  flex: 1;
-  min-width: 200px;
 }
 
-.profile-radar-wrap {
+.player-header-info-col .player-header-card {
+  flex: 1;
+}
+
+/* Shared card base for all three header columns */
+.player-header-card {
+  background: linear-gradient(160deg, #1d2433 0%, #141921 100%);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Player info card: photo inside the card between top and body */
+.player-info-card-photo-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.15);
+  height: 130px;
+  overflow: hidden;
+}
+
+.player-info-card-photo {
+  width: 110px;
+  height: 130px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.player-info-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.player-info-card-ovr-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.player-info-card-ovr {
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.player-info-card-pos {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.player-info-card-badge-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.player-info-card-flag {
+  width: 26px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.player-info-card-crest {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.player-info-card-dorsal {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--color-text-muted);
+  letter-spacing: 0px;
+  text-align: center;
+}
+
+.player-info-card-body {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.player-info-card-name {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.2;
+  margin-bottom: 2px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-info-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.player-info-card-flag-sm {
+  width: 22px;
+  height: 15px;
+  object-fit: contain;
+  border-radius: 1px;
+}
+
+.player-info-card-nationality {
+  color: var(--color-text-muted);
+  font-size: 0.83rem;
+}
+
+.player-info-card-type {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* 4-stat grid inside the info card (Age / Height / Weight / Foot) */
+.player-info-card .player-info-card-stats {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Radar card */
+.player-radar-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.player-header-card-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--color-text-muted);
+  padding: 12px 16px 0;
+}
+
+.player-header-radar-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  padding: 8px 8px 12px;
+  flex: 1;
 }
 
-.profile-name {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--color-text);
-  line-height: 1.1;
-}
-
-.profile-badges {
+/* Positions card */
+.player-positions-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.player-positions-card .player-section {
+  margin-bottom: 0;
+  width: 100%;
+}
+
+/* Legacy: keep old .profile-header-card hidden behind new layout */
+.profile-header-card {
+  display: none;
 }
 
 .profile-meta-row {
@@ -1188,6 +1339,13 @@ body {
 .national-team-note {
   font-size: 0.82rem;
   color: #5dade2;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.profile-miniface-note {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
   font-weight: 500;
   margin-top: 4px;
 }
@@ -1738,6 +1896,12 @@ body {
   }
 }
 
+@media (max-width: 1100px) {
+  .stats-compact-layout {
+    grid-template-columns: 1fr 220px;
+  }
+}
+
 @media (max-width: 768px) {
   #sidebar {
     width: 100%;
@@ -1786,14 +1950,18 @@ body {
     gap: 16px;
   }
 
-  .profile-radar-wrap canvas {
-    width: 180px !important;
-    height: 180px !important;
+  .player-profile-header {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
   }
 
-  .profile-photo {
-    width: 110px;
-    height: 120px;
+  .player-header-info-col {
+    grid-column: 1 / -1;
+  }
+
+  .player-radar-card canvas {
+    width: 200px !important;
+    height: 200px !important;
   }
 
   .profile-stats-layout {
@@ -1808,8 +1976,23 @@ body {
     order: 1;
   }
 
+  .stats-compact-layout {
+    grid-template-columns: 1fr;
+  }
+
   .face-data-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ── Player profile header: single-column on small screens ── */
+@media (max-width: 540px) {
+  .player-profile-header {
+    grid-template-columns: 1fr;
+  }
+
+  .player-header-info-col {
+    grid-column: 1;
   }
 }
 
@@ -1831,6 +2014,15 @@ body {
 
 .sidebar-nav-header:hover {
   background: var(--color-highlight-dim);
+}
+
+.sidebar-nav-header.active {
+  background: var(--color-highlight-dim);
+  border-left: 3px solid var(--color-highlight);
+}
+
+.sidebar-nav-header.active .sidebar-nav-title {
+  color: var(--color-highlight);
 }
 
 .sidebar-nav-title {
@@ -2065,6 +2257,36 @@ body {
   margin-bottom: 24px;
 }
 
+/* Fluid formation tab buttons */
+.formation-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.formation-tab-btn {
+  padding: 5px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.formation-tab-btn:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.formation-tab-btn.active {
+  background: var(--color-highlight);
+  border-color: var(--color-highlight);
+  color: #fff;
+}
+
 .formation-section-title {
   font-size: 0.72rem;
   font-weight: 700;
@@ -2164,7 +2386,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   width: 62px;
   z-index: 10;
   text-decoration: none;
@@ -2190,10 +2412,10 @@ body {
   font-weight: 800;
   text-shadow: 0 1px 3px rgba(0,0,0,0.9);
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1.1;
   display: block;
   text-align: center;
-  padding: 1px 3px 0;
+  padding: 0px 3px 0;
 }
 
 .pitch-player-photo-wrap {
@@ -2212,8 +2434,8 @@ body {
 
 .pitch-captain-badge {
   position: absolute;
-  top: -4px;
-  right: -5px;
+  top: 0;
+  right: 0;
   background: #f9d901;
   color: #111;
   font-size: 0.45rem;
@@ -2234,9 +2456,10 @@ body {
   align-items: center;
   background: rgba(0,0,0,0.72);
   border-radius: 3px;
-  overflow: hidden;
+  overflow: visible;
   gap: 0;
   width: 62px;
+  position: relative;
 }
 
 .pitch-player-ovr-block {
@@ -2247,25 +2470,25 @@ body {
 }
 
 .pitch-player-ovr {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: 800;
-  padding: 2px 3px;
+  padding: 0px 3px;
   flex-shrink: 0;
-  line-height: 1.4;
+  line-height: 1.1;
   display: block;
 }
 
 .pitch-player-name {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   color: #fff;
   font-weight: 600;
-  padding: 2px 3px 2px 2px;
+  padding: 0px 3px 0px 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
-  line-height: 1.5;
+  line-height: 1.1;
 }
 
 .pitch-player-pos-badge {
@@ -2779,4 +3002,21 @@ body {
   margin-bottom: 0;
 }
 
+/* ── Compact 2-column stats layout ── */
+.stats-compact-layout {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 16px;
+  align-items: start;
+}
+
+.stats-compact-left {
+  min-width: 0;
+}
+
+.stats-compact-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 

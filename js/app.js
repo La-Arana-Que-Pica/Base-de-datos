@@ -381,12 +381,13 @@ async function boot() {
   showLoading('Cargando base de datos...');
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText, appearancesText, leaguesText] = await Promise.all([
+  const [teamsText, playersText, squadsText, appearancesText, leaguesText, corregidosText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All appeaarances exported.csv'),
     fetchText('database/All leagues exported.csv'),
+    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -451,6 +452,21 @@ async function boot() {
     playerMap[playerId] = normalizePlayerRow(playerRow);
   });
 
+  // Build corrected overall map from medias_corregidas.csv
+  const corregidosMap = {};
+  if (corregidosText) {
+    const corregidosRows = parseCSV(corregidosText);
+    corregidosRows.forEach(r => {
+      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+      const tid = r['TeamId'] || r['team_id'] || '';
+      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+      if (pid && ovr) {
+        if (tid) corregidosMap[tid + '_' + pid] = ovr;
+        if (!tid) corregidosMap[pid] = ovr;
+      }
+    });
+  }
+
   // Assign players to teams using squad data
   squadRows.forEach(squadRow => {
     const teamId = squadRow['Id'];
@@ -462,6 +478,9 @@ async function boot() {
       const player = playerMap[playerId];
       if (!player) continue;
       const p = { ...player, _team: team };
+      // Apply corrected overall if available (team-specific key takes precedence)
+      const corregidosOvr = corregidosMap[teamId + '_' + playerId] || corregidosMap[playerId];
+      if (corregidosOvr) p.Overall = corregidosOvr;
       team.players.push(p);
       DB.players.push(p);
       indexPlayerForSearch(p);
@@ -512,9 +531,21 @@ function restoreNavState() {
   const state = loadNavState();
   if (!state || !state.view) { showAllPlayers(); return; }
   switch (state.view) {
-    case 'leagues': showLeaguesView(); break;
+    case 'leagues':
+      showLeaguesView();
+      if (state.query) {
+        const input = document.getElementById('leagues-search-input');
+        if (input) { input.value = state.query; filterLeaguesGrid(state.query); }
+      }
+      break;
     case 'leagueTeams': if (state.leagueId) showLeagueTeamsView(state.leagueId); else showLeaguesView(); break;
-    case 'teams': showTeamsView(); break;
+    case 'teams':
+      showTeamsView();
+      if (state.query) {
+        const input = document.getElementById('teams-search-input');
+        if (input) { input.value = state.query; filterTeamsGrid(state.query); }
+      }
+      break;
     case 'players':
       if (state.filters) {
         Object.assign(_advFilters, state.filters);
@@ -533,21 +564,21 @@ function buildSidebar() {
   const html = `
     <!-- ── LIGAS ── -->
     <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" onclick="showLeaguesView()">
+      <div class="sidebar-nav-header" id="nav-header-ligas" onclick="showLeaguesView()">
         <span class="sidebar-nav-title">Ligas</span>
       </div>
     </div>
 
     <!-- ── EQUIPOS ── -->
     <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" onclick="showTeamsView()">
+      <div class="sidebar-nav-header" id="nav-header-equipos" onclick="showTeamsView()">
         <span class="sidebar-nav-title">Equipos</span>
       </div>
     </div>
 
     <!-- ── JUGADORES ── -->
     <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" onclick="showAllPlayersFromSidebar()">
+      <div class="sidebar-nav-header" id="nav-header-jugadores" onclick="showAllPlayersFromSidebar()">
         <span class="sidebar-nav-title">Jugadores</span>
       </div>
       <div class="sidebar-nav-body" id="nav-jugadores" style="display:none">
@@ -561,6 +592,24 @@ function buildSidebar() {
     </div>`;
 
   sidebar.innerHTML = html;
+}
+
+function _setActiveSidebarNav(viewName) {
+  ['nav-header-ligas', 'nav-header-equipos', 'nav-header-jugadores'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const map = {
+    leagues: 'nav-header-ligas',
+    leagueTeams: 'nav-header-ligas',
+    teams: 'nav-header-equipos',
+    players: 'nav-header-jugadores',
+  };
+  const targetId = map[viewName];
+  if (targetId) {
+    const el = document.getElementById(targetId);
+    if (el) el.classList.add('active');
+  }
 }
 
 function showAllPlayersFromSidebar() {
@@ -586,6 +635,7 @@ let _leaguesForGrid = [];
 
 function showLeaguesView() {
   saveNavState({ view: 'leagues' });
+  _setActiveSidebarNav('leagues');
   _leaguesForGrid = DB.leagues.slice();
   hideAllViews();
   const view = document.getElementById('leagues-view');
@@ -624,6 +674,7 @@ function filterLeaguesGrid(query) {
   const container = document.getElementById('leagues-grid-cards');
   const subtitle = document.getElementById('leagues-grid-subtitle');
   if (!container) return;
+  saveNavState({ view: 'leagues', query });
   const matches = q ? _leaguesForGrid.filter(l => (l.name || '').toLowerCase().includes(q)) : _leaguesForGrid;
   const cardsHtml = matches.map(league => {
     const teamCount = league.teamIds.length;
@@ -643,6 +694,7 @@ function filterLeaguesGrid(query) {
 
 function showLeagueTeamsView(leagueId) {
   saveNavState({ view: 'leagueTeams', leagueId });
+  _setActiveSidebarNav('leagueTeams');
   const league = DB.leagues.find(l => l.id === leagueId);
   if (!league) return;
 
@@ -684,6 +736,7 @@ let _teamsForGrid = [];
 
 function showTeamsView() {
   saveNavState({ view: 'teams' });
+  _setActiveSidebarNav('teams');
   // Only show teams that belong to a league
   const teamsInLeagues = new Set();
   DB.leagues.forEach(l => l.teamIds.forEach(id => teamsInLeagues.add(id)));
@@ -730,6 +783,7 @@ function filterTeamsGrid(query) {
   const container = document.getElementById('teams-grid-cards');
   const subtitle = document.getElementById('teams-grid-subtitle');
   if (!container) return;
+  saveNavState({ view: 'teams', query });
   const matches = q ? _teamsForGrid.filter(t => (t.displayName || '').toLowerCase().includes(q)) : _teamsForGrid;
   const cardsHtml = matches.map(team => {
     const avg = teamAvgOvr(team);
@@ -1325,6 +1379,7 @@ function toggleFilterPanel() {
 
 function showAllPlayers() {
   saveNavState({ view: 'players', filters: { ..._advFilters } });
+  _setActiveSidebarNav('players');
   // Tear down any existing observer before rebuilding the view
   if (_allPlayersObserver) {
     _allPlayersObserver.disconnect();
