@@ -2725,6 +2725,18 @@ body {
   .player-card-ovr {
     font-size: 1.5rem;
   }
+  .player-card-footer {
+    padding: 6px 6px 8px;
+  }
+  .player-card-stats {
+    gap: 2px;
+  }
+  .pcs-val {
+    font-size: 0.68rem;
+  }
+  .pcs-key {
+    font-size: 0.45rem;
+  }
 }
 
 .player-card:hover {
