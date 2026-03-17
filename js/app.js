@@ -634,6 +634,7 @@ function showLeaguesView() {
       <div class="grid-card" onclick="window.location.href='league.html?id=${encodeURIComponent(league.id)}'">
         <img class="grid-card-img"
           src="img/leagues/${league.id}.png"
+          loading="lazy"
           onerror="this.onerror=null;this.src='img/leagues/default.png'"
           alt="${league.name}">
         <div class="grid-card-name">${league.name}</div>
@@ -669,6 +670,7 @@ function filterLeaguesGrid(query) {
       <div class="grid-card" onclick="window.location.href='league.html?id=${encodeURIComponent(league.id)}'">
         <img class="grid-card-img"
           src="img/leagues/${league.id}.png"
+          loading="lazy"
           onerror="this.onerror=null;this.src='img/leagues/default.png'"
           alt="${league.name}">
         <div class="grid-card-name">${league.name}</div>
@@ -697,6 +699,7 @@ function showLeagueTeamsView(leagueId) {
     <div class="grid-card" onclick="selectTeam('${team.id}')">
       <img class="grid-card-img"
         src="img/teams/${team.id}.png"
+        loading="lazy"
         onerror="this.onerror=null;this.src='img/teams/default.png'"
         alt="${team.displayName}">
       <div class="grid-card-name">${team.displayName}</div>
@@ -743,6 +746,7 @@ function showTeamsView() {
     <div class="grid-card" onclick="selectTeam('${team.id}')">
       <img class="grid-card-img"
         src="img/teams/${team.id}.png"
+        loading="lazy"
         onerror="this.onerror=null;this.src='img/teams/default.png'"
         alt="${team.displayName}">
       <div class="grid-card-name">${team.displayName}</div>
@@ -781,6 +785,7 @@ function filterTeamsGrid(query) {
     <div class="grid-card" onclick="selectTeam('${team.id}')">
       <img class="grid-card-img"
         src="img/teams/${team.id}.png"
+        loading="lazy"
         onerror="this.onerror=null;this.src='img/teams/default.png'"
         alt="${team.displayName}">
       <div class="grid-card-name">${team.displayName}</div>
@@ -825,11 +830,12 @@ function showHome() {
   hideAllViews();
   document.getElementById('home-view').classList.add('active');
 
+  const teamsInLeaguesSet = _getTeamsInLeagues();
   const leagueCount = DB.leagues.length;
   document.getElementById('stat-leagues').textContent = leagueCount;
-  document.getElementById('stat-teams').textContent = DB.teams.length;
-  // Count unique players
-  const uniqueIds = new Set(DB.players.map(p => p.ID));
+  document.getElementById('stat-teams').textContent = DB.teams.filter(t => teamsInLeaguesSet.has(t.id)).length;
+  // Count unique players from teams that have a league assigned
+  const uniqueIds = new Set(DB.players.filter(p => teamsInLeaguesSet.has(p._team.id)).map(p => p.ID));
   document.getElementById('stat-players').textContent = uniqueIds.size;
 
   // Populate featured leagues + teams section
@@ -854,6 +860,7 @@ function showHome() {
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       return `<a class="home-team-crest" href="team.html?id=${t.id.replace(/"/g, '&quot;')}" title="${safeTName}">
         <img src="img/teams/${t.id}.png"
+          loading="lazy"
           onerror="this.onerror=null;this.src='img/teams/default.png'"
           alt="${safeTName}">
       </a>`;
@@ -861,6 +868,7 @@ function showHome() {
     return `<div class="home-league-block">
       <div class="home-league-header" data-league-id="${l.id.replace(/"/g, '&quot;')}">
         <img src="img/leagues/${l.id}.png"
+          loading="lazy"
           onerror="this.onerror=null;this.src='img/leagues/default.png'"
           alt="${safeName}">
         <span>${safeName}</span>
@@ -1546,6 +1554,7 @@ function renderPlayerRow(player, team) {
     <td>
       <img class="player-row-photo"
         src="img/players/${player.ID}.png"
+        loading="lazy"
         onerror="handleMinifaceError(this,'${player.ID}')"
         alt="${player.Name}">
     </td>
@@ -1553,6 +1562,7 @@ function renderPlayerRow(player, team) {
       <a href="team.html?id=${team.id}" onclick="event.stopPropagation()">
         <img class="player-row-team-crest"
           src="img/teams/${team.id}.png"
+          loading="lazy"
           onerror="this.onerror=null;this.src='img/teams/default.png'"
           alt="${team.displayName}"
           title="${team.displayName}">
@@ -1855,10 +1865,12 @@ function runSearch(query) {
 
   // Deduplicate by player ID: prefer club/special-team entries over national team entries
   const clubPlayerIds = new Set(DB.players.filter(p => p._team.type !== '2').map(p => p.ID));
+  const teamsInLeagues = _getTeamsInLeagues();
   const seenIds = new Set();
   const results = rawResults.filter(p => {
     if (p._team.type === '2' && clubPlayerIds.has(p.ID)) return false;
     if (seenIds.has(p.ID)) return false;
+    if (!teamsInLeagues.has(p._team.id)) return false;
     seenIds.add(p.ID);
     return true;
   });
