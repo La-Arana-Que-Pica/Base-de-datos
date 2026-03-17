@@ -11,13 +11,8 @@
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 function handleMinifaceError(img, playerId) {
-  if (!img.dataset.ddsTried) {
-    img.dataset.ddsTried = '1';
-    img.src = 'img/players/player_' + playerId + '.dds';
-  } else {
-    img.onerror = null;
-    img.src = 'img/players/default.png';
-  }
+  img.onerror = null;
+  img.src = 'img/players/default.webp';
 }
 
 function parseCSV(text) {
@@ -118,8 +113,8 @@ function renderLeaguePage(league, teams) {
     return `
       <div class="grid-card" onclick="window.location.href='team.html?id=${encodeURIComponent(t.id)}'">
         <img class="grid-card-img"
-          src="img/teams/${escapeHtml(t.id)}.png"
-          onerror="this.onerror=null;this.src='img/teams/default.png'"
+          src="img/teams/${escapeHtml(t.id)}.webp"
+          onerror="this.onerror=null;this.src='img/teams/default.webp'"
           alt="${escapeHtml(t.displayName)}">
         <div class="grid-card-name">${escapeHtml(t.displayName)}</div>
         ${avgHtml}
@@ -131,8 +126,8 @@ function renderLeaguePage(league, teams) {
 
     <div class="view-header">
       <img class="grid-card-img" style="width:56px;height:56px;object-fit:contain"
-        src="img/leagues/${escapeHtml(league.id)}.png"
-        onerror="this.onerror=null;this.src='img/leagues/default.png'"
+        src="img/leagues/${escapeHtml(league.id)}.webp"
+        onerror="this.onerror=null;this.src='img/leagues/default.webp'"
         alt="${escapeHtml(league.name)}">
       <div>
         <div class="view-title">${escapeHtml(league.name)}</div>
