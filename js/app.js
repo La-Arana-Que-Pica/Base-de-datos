@@ -581,14 +581,6 @@ function buildSidebar() {
       <div class="sidebar-nav-header" id="nav-header-jugadores" onclick="showAllPlayersFromSidebar()">
         <span class="sidebar-nav-title">Jugadores</span>
       </div>
-      <div class="sidebar-nav-body" id="nav-jugadores" style="display:none">
-        <div class="sidebar-filter-wrap">
-          <input type="text" class="sidebar-filter-input"
-            placeholder="Buscar jugadores..."
-            oninput="filterAllPlayers(this.value)"
-            autocomplete="off">
-        </div>
-      </div>
     </div>`;
 
   sidebar.innerHTML = html;
@@ -613,11 +605,6 @@ function _setActiveSidebarNav(viewName) {
 }
 
 function showAllPlayersFromSidebar() {
-  const body = document.getElementById('nav-jugadores');
-  if (body) {
-    const isOpen = body.style.display !== 'none';
-    body.style.display = isOpen ? 'none' : '';
-  }
   showAllPlayers();
 }
 
@@ -903,6 +890,7 @@ const ALL_PLAYERS_PAGE_SIZE = 50;
 let _allPlayersList = [];      // sorted, filtered, deduplicated player array
 let _allPlayersOffset = 0;     // how many have been rendered so far
 let _allPlayersObserver = null; // IntersectionObserver watching the sentinel
+let _showSpecialPlayers = false; // whether to include type-1 (special) team players
 
 // Advanced filter state
 const _advFilters = {
@@ -940,12 +928,22 @@ const ROLE_POSITIONS = {
   'FWD': ['LWF', 'RWF', 'SS', 'CF'],
 };
 
+/** Returns the set of team IDs that are assigned to at least one league. */
+function _getTeamsInLeagues() {
+  const s = new Set();
+  if (DB.leagues) DB.leagues.forEach(l => l.teamIds.forEach(id => s.add(id)));
+  return s;
+}
+
 /**
  * Build (or rebuild) the sorted, deduplicated players array with active filters.
  * Players who appear in both a club team and a national team are shown only
  * under their club team (national team duplicate entries are skipped).
  */
 function _prepareAllPlayersList() {
+  // Build set of team IDs that belong to a league
+  const teamsInLeagues = _getTeamsInLeagues();
+
   // Collect all player IDs that have a club/special team entry
   const clubPlayerIds = new Set(
     DB.players.filter(p => p._team.type !== '2').map(p => p.ID)
@@ -959,6 +957,14 @@ function _prepareAllPlayersList() {
     seen.add(p.ID);
     return true;
   });
+
+  // Always hide players from teams that have no league assigned
+  unique = unique.filter(p => teamsInLeagues.has(p._team.id));
+
+  // Hide type-1 (special) team players unless the toggle is active
+  if (!_showSpecialPlayers) {
+    unique = unique.filter(p => p._team.type !== '1');
+  }
 
   // Apply advanced filters
   const f = _advFilters;
@@ -1109,20 +1115,23 @@ function _appendNextBatch() {
 }
 
 function _buildFilterPanel() {
-  // Collect unique sorted nationalities from all (deduplicated) players
+  const teamsInLeagues = _getTeamsInLeagues();
+
+  // Collect unique sorted nationalities from players actually visible (in a league)
   const clubPlayerIds = new Set(DB.players.filter(p => p._team.type !== '2').map(p => p.ID));
   const seen = new Set();
   const basePlayers = DB.players.filter(p => {
     if (p._team.type === '2' && clubPlayerIds.has(p.ID)) return false;
     if (seen.has(p.ID)) return false;
     seen.add(p.ID);
-    return true;
+    // Only include players whose team is assigned to a league
+    return teamsInLeagues.has(p._team.id);
   });
 
   const nationalities = [...new Set(basePlayers.map(p => p.Nationality || '').filter(Boolean))]
     .sort((a, b) => nationalityName(a).localeCompare(nationalityName(b), 'es'));
   const clubTeams = DB.teams
-    .filter(t => t.type !== '2' && t.players.length > 0)
+    .filter(t => t.type !== '2' && t.players.length > 0 && teamsInLeagues.has(t.id))
     .sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'));
 
   const f = _advFilters;
@@ -1377,6 +1386,37 @@ function toggleFilterPanel() {
   if (btn) btn.textContent = isVisible ? '⚙ Filtros avanzados' : '⚙ Ocultar filtros';
 }
 
+function toggleSpecialPlayers() {
+  _showSpecialPlayers = !_showSpecialPlayers;
+  const btn = document.getElementById('btn-toggle-special');
+  if (btn) btn.classList.toggle('active', _showSpecialPlayers);
+
+  if (_allPlayersObserver) {
+    _allPlayersObserver.disconnect();
+    _allPlayersObserver = null;
+  }
+  _prepareAllPlayersList();
+  const total = _allPlayersList.length;
+  const subtitle = document.getElementById('all-players-subtitle');
+  if (subtitle) subtitle.textContent = `${total} jugadores · ordenados por valoración`;
+  const tbody = document.getElementById('all-players-tbody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    const old = document.getElementById('all-players-sentinel');
+    if (old) old.remove();
+    tbody.insertAdjacentHTML('afterend', '<div id="all-players-sentinel" class="infinite-scroll-sentinel"><div class="spinner"></div></div>');
+    _appendNextBatch();
+    const sentinel = document.getElementById('all-players-sentinel');
+    if (sentinel && _allPlayersOffset < total) {
+      _allPlayersObserver = new IntersectionObserver(
+        (entries) => { if (entries[0].isIntersecting) _appendNextBatch(); },
+        { rootMargin: '200px' }
+      );
+      _allPlayersObserver.observe(sentinel);
+    }
+  }
+}
+
 function showAllPlayers() {
   saveNavState({ view: 'players', filters: { ..._advFilters } });
   _setActiveSidebarNav('players');
@@ -1402,7 +1442,10 @@ function showAllPlayers() {
         <div class="view-title">Todos los jugadores</div>
         <div class="view-subtitle" id="all-players-subtitle">${total} jugadores · ordenados por valoración</div>
       </div>
-      <button id="btn-toggle-filters" class="adv-filter-toggle" onclick="toggleFilterPanel()">⚙ Filtros avanzados</button>
+      <div class="view-header-actions">
+        <button id="btn-toggle-special" class="adv-filter-toggle${_showSpecialPlayers ? ' active' : ''}" onclick="toggleSpecialPlayers()">★ Jugadores especiales</button>
+        <button id="btn-toggle-filters" class="adv-filter-toggle" onclick="toggleFilterPanel()">⚙ Filtros avanzados</button>
+      </div>
     </div>
     ${_buildFilterPanel()}
     <table class="players-table">
