@@ -11,13 +11,8 @@
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 function handleMinifaceError(img, playerId) {
-  if (!img.dataset.ddsTried) {
-    img.dataset.ddsTried = '1';
-    img.src = 'img/players/player_' + playerId + '.dds';
-  } else {
-    img.onerror = null;
-    img.src = 'img/players/default.png';
-  }
+  img.onerror = null;
+  img.src = 'img/players/default.webp';
 }
 
 function parseCSV(text) {
@@ -49,8 +44,8 @@ async function fetchText(url) {
 }
 
 function flagSrc(countryId) {
-  if (!countryId) return 'img/flags/default.png';
-  return `img/flags/${countryId}.png`;
+  if (!countryId) return 'img/flags/default.webp';
+  return `img/flags/${countryId}.webp`;
 }
 
 function escapeHtml(str) {
@@ -380,7 +375,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
         <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
           <div class="pitch-player-top">
             <div class="pitch-player-photo-wrap">
-              <img src="img/players/${pid}.png"
+              <img src="img/players/${pid}.webp"
                 onerror="handleMinifaceError(this,'${pid}')"
                 class="pitch-player-photo" alt="${shortName}">
             </div>
@@ -538,13 +533,13 @@ function renderPlayerCard(player, teamId) {
         </div>
         <div class="player-card-badge-col">
           <img class="player-card-flag" src="${flagSrc(player.Nationality)}"
-            onerror="this.onerror=null;this.src='img/flags/default.png'" alt="">
-          <img class="player-card-crest" src="img/teams/${tid}.png"
-            onerror="this.onerror=null;this.src='img/teams/default.png'" alt="">
+            onerror="this.onerror=null;this.src='img/flags/default.webp'" alt="">
+          <img class="player-card-crest" src="img/teams/${tid}.webp"
+            onerror="this.onerror=null;this.src='img/teams/default.webp'" alt="">
         </div>
       </div>
       <div class="player-card-photo-wrap">
-        <img class="player-card-photo" src="img/players/${pid}.png"
+        <img class="player-card-photo" src="img/players/${pid}.webp"
           onerror="handleMinifaceError(this,'${pid}')" alt="${safeName}">
       </div>
       <div class="player-card-footer">
@@ -683,7 +678,7 @@ function renderPlayerRow(player, teamId) {
     <td class="shirt-number-cell">${shirtNum}</td>
     <td>
       <img class="player-row-photo"
-        src="img/players/${escapeHtml(player.ID)}.png"
+        src="img/players/${escapeHtml(player.ID)}.webp"
         onerror="handleMinifaceError(this,'${escapeHtml(player.ID)}')"
         alt="${safeName}">
     </td>
@@ -691,7 +686,7 @@ function renderPlayerRow(player, teamId) {
     <td>
       <img class="player-flag"
         src="${flagSrc(player.Nationality)}"
-        onerror="this.onerror=null;this.src='img/flags/default.png'"
+        onerror="this.onerror=null;this.src='img/flags/default.webp'"
         alt="">
     </td>
     <td><span class="position-badge" style="color:${positionGroupColor(player.Position)};border-color:${positionGroupColor(player.Position)};background:${positionGroupColor(player.Position)}18">${escapeHtml(posDisplay) || '–'}</span></td>
@@ -734,8 +729,8 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
     <button class="back-btn" id="btn-back">◀ Volver</button>
 
     <div class="view-header">
-      <img class="team-crest" src="img/teams/${escapeHtml(team.id)}.png"
-        onerror="this.onerror=null;this.src='img/teams/default.png'"
+      <img class="team-crest" src="img/teams/${escapeHtml(team.id)}.webp"
+        onerror="this.onerror=null;this.src='img/teams/default.webp'"
         alt="${safeTeamName}">
       <div>
         <div class="view-title">${safeTeamName}</div>

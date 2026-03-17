@@ -13,13 +13,8 @@
 // ─── Image helpers ────────────────────────────────────────────────────────────
 
 function handleMinifaceError(img, playerId) {
-  if (!img.dataset.ddsTried) {
-    img.dataset.ddsTried = '1';
-    img.src = 'img/players/player_' + playerId + '.dds';
-  } else {
-    img.onerror = null;
-    img.src = 'img/players/default.png';
-  }
+  img.onerror = null;
+  img.src = 'img/players/default.webp';
 }
 
 // ─── In-memory indexes ────────────────────────────────────────────────────────
@@ -325,8 +320,8 @@ async function fetchText(url) {
  * Convert a country_id to a flag image filename.
  */
 function flagSrc(countryId) {
-  if (!countryId) return 'img/flags/default.png';
-  return `img/flags/${countryId}.png`;
+  if (!countryId) return 'img/flags/default.webp';
+  return `img/flags/${countryId}.webp`;
 }
 
 /**
@@ -633,9 +628,9 @@ function showLeaguesView() {
     return `
       <div class="grid-card" onclick="window.location.href='league.html?id=${encodeURIComponent(league.id)}'">
         <img class="grid-card-img"
-          src="img/leagues/${league.id}.png"
+          src="img/leagues/${league.id}.webp"
           loading="lazy"
-          onerror="this.onerror=null;this.src='img/leagues/default.png'"
+          onerror="this.onerror=null;this.src='img/leagues/default.webp'"
           alt="${league.name}">
         <div class="grid-card-name">${league.name}</div>
         <div class="grid-card-sub">${teamCount} equipo${teamCount !== 1 ? 's' : ''}</div>
@@ -669,9 +664,9 @@ function filterLeaguesGrid(query) {
     return `
       <div class="grid-card" onclick="window.location.href='league.html?id=${encodeURIComponent(league.id)}'">
         <img class="grid-card-img"
-          src="img/leagues/${league.id}.png"
+          src="img/leagues/${league.id}.webp"
           loading="lazy"
-          onerror="this.onerror=null;this.src='img/leagues/default.png'"
+          onerror="this.onerror=null;this.src='img/leagues/default.webp'"
           alt="${league.name}">
         <div class="grid-card-name">${league.name}</div>
         <div class="grid-card-sub">${teamCount} equipo${teamCount !== 1 ? 's' : ''}</div>
@@ -698,9 +693,9 @@ function showLeagueTeamsView(leagueId) {
   const cardsHtml = leagueTeams.map(team => `
     <div class="grid-card" onclick="selectTeam('${team.id}')">
       <img class="grid-card-img"
-        src="img/teams/${team.id}.png"
+        src="img/teams/${team.id}.webp"
         loading="lazy"
-        onerror="this.onerror=null;this.src='img/teams/default.png'"
+        onerror="this.onerror=null;this.src='img/teams/default.webp'"
         alt="${team.displayName}">
       <div class="grid-card-name">${team.displayName}</div>
     </div>`).join('');
@@ -708,8 +703,8 @@ function showLeagueTeamsView(leagueId) {
   view.innerHTML = `
     <div class="view-header">
       <img class="grid-card-img" style="width:48px;height:48px;object-fit:contain"
-        src="img/leagues/${leagueId}.png"
-        onerror="this.onerror=null;this.src='img/leagues/default.png'"
+        src="img/leagues/${leagueId}.webp"
+        onerror="this.onerror=null;this.src='img/leagues/default.webp'"
         alt="${league.name}">
       <div>
         <div class="view-title">${league.name}</div>
@@ -745,9 +740,9 @@ function showTeamsView() {
     return `
     <div class="grid-card" onclick="selectTeam('${team.id}')">
       <img class="grid-card-img"
-        src="img/teams/${team.id}.png"
+        src="img/teams/${team.id}.webp"
         loading="lazy"
-        onerror="this.onerror=null;this.src='img/teams/default.png'"
+        onerror="this.onerror=null;this.src='img/teams/default.webp'"
         alt="${team.displayName}">
       <div class="grid-card-name">${team.displayName}</div>
       ${avgHtml}
@@ -784,9 +779,9 @@ function filterTeamsGrid(query) {
     return `
     <div class="grid-card" onclick="selectTeam('${team.id}')">
       <img class="grid-card-img"
-        src="img/teams/${team.id}.png"
+        src="img/teams/${team.id}.webp"
         loading="lazy"
-        onerror="this.onerror=null;this.src='img/teams/default.png'"
+        onerror="this.onerror=null;this.src='img/teams/default.webp'"
         alt="${team.displayName}">
       <div class="grid-card-name">${team.displayName}</div>
       ${avgHtml}
@@ -859,17 +854,17 @@ function showHome() {
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       return `<a class="home-team-crest" href="team.html?id=${t.id.replace(/"/g, '&quot;')}" title="${safeTName}">
-        <img src="img/teams/${t.id}.png"
+        <img src="img/teams/${t.id}.webp"
           loading="lazy"
-          onerror="this.onerror=null;this.src='img/teams/default.png'"
+          onerror="this.onerror=null;this.src='img/teams/default.webp'"
           alt="${safeTName}">
       </a>`;
     }).join('');
     return `<div class="home-league-block">
       <div class="home-league-header" data-league-id="${l.id.replace(/"/g, '&quot;')}">
-        <img src="img/leagues/${l.id}.png"
+        <img src="img/leagues/${l.id}.webp"
           loading="lazy"
-          onerror="this.onerror=null;this.src='img/leagues/default.png'"
+          onerror="this.onerror=null;this.src='img/leagues/default.webp'"
           alt="${safeName}">
         <span>${safeName}</span>
         <span class="home-league-count">${leagueTeams.length} equipos</span>
@@ -1508,8 +1503,8 @@ function renderPlayersList(team) {
   view.innerHTML = `
     <div class="view-header">
       <a href="team.html?id=${team.id}">
-        <img class="team-crest" src="img/teams/${team.id}.png"
-          onerror="this.onerror=null;this.src='img/teams/default.png'"
+        <img class="team-crest" src="img/teams/${team.id}.webp"
+          onerror="this.onerror=null;this.src='img/teams/default.webp'"
           alt="${team.displayName}" title="Ver página del equipo">
       </a>
       <div>
@@ -1553,7 +1548,7 @@ function renderPlayerRow(player, team) {
   return `<tr onclick="selectPlayer('${player.ID}', '${team.id}')">
     <td>
       <img class="player-row-photo"
-        src="img/players/${player.ID}.png"
+        src="img/players/${player.ID}.webp"
         loading="lazy"
         onerror="handleMinifaceError(this,'${player.ID}')"
         alt="${player.Name}">
@@ -1561,9 +1556,9 @@ function renderPlayerRow(player, team) {
     <td class="team-crest-cell">
       <a href="team.html?id=${team.id}" onclick="event.stopPropagation()">
         <img class="player-row-team-crest"
-          src="img/teams/${team.id}.png"
+          src="img/teams/${team.id}.webp"
           loading="lazy"
-          onerror="this.onerror=null;this.src='img/teams/default.png'"
+          onerror="this.onerror=null;this.src='img/teams/default.webp'"
           alt="${team.displayName}"
           title="${team.displayName}">
       </a>
@@ -1572,7 +1567,7 @@ function renderPlayerRow(player, team) {
     <td>
       <img class="player-flag"
         src="${flagSrc(player.Nationality)}"
-        onerror="this.onerror=null;this.src='img/flags/default.png'"
+        onerror="this.onerror=null;this.src='img/flags/default.webp'"
         alt="">
     </td>
     <td><span class="position-badge" style="color:${positionGroupColor(player.Position)};border-color:${positionGroupColor(player.Position)};background:${positionGroupColor(player.Position)}18">${posDisplay || '–'}</span></td>
@@ -1673,7 +1668,7 @@ function renderPlayerProfile(player, team) {
         <div class="player-photo-container">
           <img class="player-photo"
             id="profile-photo"
-            src="img/players/${player.ID}.png"
+            src="img/players/${player.ID}.webp"
             onerror="handleMinifaceError(this,'${player.ID}')"
             alt="${player.Name}">
         </div>
@@ -1681,7 +1676,7 @@ function renderPlayerProfile(player, team) {
           <div class="player-info-row">
             <span class="info-label">Nacionalidad</span>
             <img src="${flagSrc(player.Nationality)}"
-              onerror="this.onerror=null;this.src='img/flags/default.png'"
+              onerror="this.onerror=null;this.src='img/flags/default.webp'"
               alt="">
             <span>${player.Nationality || '–'}</span>
           </div>
@@ -1689,8 +1684,8 @@ function renderPlayerProfile(player, team) {
             <span class="info-label">Equipo</span>
             <a href="team.html?id=${team.id}" class="team-crest-link">
               <img class="team-crest-sm"
-                src="img/teams/${team.id}.png"
-                onerror="this.onerror=null;this.src='img/teams/default.png'"
+                src="img/teams/${team.id}.webp"
+                onerror="this.onerror=null;this.src='img/teams/default.webp'"
                 alt="${team.displayName}">
               <span>${team.displayName}</span>
             </a>

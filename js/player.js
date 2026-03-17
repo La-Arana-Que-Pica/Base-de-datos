@@ -11,24 +11,14 @@
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 function handleMinifaceError(img, playerId) {
-  if (!img.dataset.ddsTried) {
-    img.dataset.ddsTried = '1';
-    img.src = 'img/players/player_' + playerId + '.dds';
-  } else {
-    img.onerror = null;
-    img.src = 'img/players/default.png';
-  }
+  img.onerror = null;
+  img.src = 'img/players/default.webp';
 }
 
 // Profile miniface (outside card): hides the element instead of falling back to default
 function handleProfileMinifaceError(img, playerId) {
-  if (!img.dataset.ddsTried) {
-    img.dataset.ddsTried = '1';
-    img.src = 'img/players/player_' + playerId + '.dds';
-  } else {
-    img.onerror = null;
-    img.style.display = 'none';
-  }
+  img.onerror = null;
+  img.style.display = 'none';
 }
 
 function parseCSV(text) {
@@ -69,8 +59,8 @@ async function fetchText(url) {
 }
 
 function flagSrc(countryId) {
-  if (!countryId) return 'img/flags/default.png';
-  return `img/flags/${countryId}.png`;
+  if (!countryId) return 'img/flags/default.webp';
+  return `img/flags/${countryId}.webp`;
 }
 
 function statColorClass(value) {
@@ -417,7 +407,7 @@ const COM_PLAYING_STYLES = [
 
 // ─── Appearance section/subsection definitions ────────────────────────────────
 
-// Fields with image: path is img/appearance/{imageKey}/{value}.png
+// Fields with image: path is img/appearance/{imageKey}/{value}.webp
 // Fields with enum: numeric/bool value → Spanish label
 // Fields with source:'player': read from the players CSV row, not appearances
 // Fields with conditionalDash: show '-' when another col matches a value
@@ -881,9 +871,9 @@ function renderEstilosJuegoCOM(player) {
 }
 
 function appearanceImagePath(imageKey, value) {
-  if (imageKey === 'boots') return `img/boots/${value}.png`;
-  if (imageKey === 'gloves') return `img/appearance/gloves/${value}.png`;
-  return `img/appearance/${imageKey}/${value}.png`;
+  if (imageKey === 'boots') return `img/boots/${value}.webp`;
+  if (imageKey === 'gloves') return `img/appearance/gloves/${value}.webp`;
+  return `img/appearance/${imageKey}/${value}.webp`;
 }
 
 function renderAppearanceField(field, appearance, player) {
@@ -974,7 +964,7 @@ function renderAppearanceField(field, appearance, player) {
 function renderAppearanceRow(label, value, imgPath, imageKey) {
   let valueHtml;
   if (imgPath) {
-    const fallback = `img/appearance/placeholder.png`;
+    const fallback = `img/appearance/placeholder.webp`;
     valueHtml = `<span class="face-data-value face-data-with-img">
       <img class="appearance-thumb" src="${imgPath}"
         onerror="this.onerror=null;this.src='${fallback}'"
@@ -1204,17 +1194,17 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
               <div class="player-info-card-badge-col">
                 <img class="player-info-card-flag"
                   src="${flagSrc(player['Country'])}"
-                  onerror="this.onerror=null;this.src='img/flags/default.png'" alt="">
+                  onerror="this.onerror=null;this.src='img/flags/default.webp'" alt="">
                 <img class="player-info-card-crest"
-                  src="img/teams/${team.id}.png"
-                  onerror="this.onerror=null;this.src='img/teams/default.png'"
+                  src="img/teams/${team.id}.webp"
+                  onerror="this.onerror=null;this.src='img/teams/default.webp'"
                   alt="${team.displayName}">
                 ${dorsalHtml}
               </div>
             </div>
             <div class="player-info-card-photo-wrap">
               <img class="player-info-card-photo"
-                src="img/players/${player['Id']}.png"
+                src="img/players/${player['Id']}.webp"
                 onerror="handleMinifaceError(this,'${player['Id']}')"
                 alt="${player['Name'] || ''}">
             </div>
