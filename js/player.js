@@ -954,13 +954,13 @@ function renderAppearanceField(field, appearance, player) {
     return renderAppearanceRow(field.label, label, null, null);
   }
 
-  // imageKey with bootDisplay: show equipment image using ID, display brand + PES number (boots) or index (gloves)
+  // imageKey with bootDisplay: show equipment image using ID, display 2-digit PES number
   if (field.imageKey && field.bootDisplay && rawVal) {
     const imgPath = appearanceImagePath(field.imageKey, rawVal);
     const info = getEquipmentData(field.imageKey, rawVal);
     let displayText;
     if (info) {
-      displayText = info.brand ? `${info.brand} ${info.pesNumber}` : String(info.pesNumber);
+      displayText = String(info.pesNumber).padStart(2, '0');
     } else {
       displayText = rawVal;
     }
