@@ -538,6 +538,23 @@ body {
   border-color: var(--color-highlight);
 }
 
+.adv-filter-toggle.active {
+  background: var(--color-highlight);
+  color: #fff;
+  border-color: var(--color-highlight);
+}
+
+.view-header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.view-header-actions .adv-filter-toggle {
+  margin-left: 0;
+}
+
 .adv-filter-panel {
   background: var(--color-card);
   border: 1px solid var(--color-border);
@@ -2708,6 +2725,18 @@ body {
   .player-card-ovr {
     font-size: 1.5rem;
   }
+  .player-card-footer {
+    padding: 6px 6px 8px;
+  }
+  .player-card-stats {
+    gap: 2px;
+  }
+  .pcs-val {
+    font-size: 0.68rem;
+  }
+  .pcs-key {
+    font-size: 0.45rem;
+  }
 }
 
 .player-card:hover {
@@ -3019,4 +3048,5 @@ body {
   flex-direction: column;
   gap: 12px;
 }
+
 
