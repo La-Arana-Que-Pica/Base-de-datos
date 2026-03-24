@@ -2427,7 +2427,8 @@ body {
   width: 52px;
   height: 52px;
   flex-shrink: 0;
-  margin-bottom: -2px;
+  margin-bottom: 0;
+  background: #1a1a1e;
   z-index: 1;
 }
 
@@ -2438,11 +2439,11 @@ body {
   display: block;
 }
 
-/* Captain indicator: white circle with dark "C", bottom-left of face */
+/* Captain indicator: white circle with dark "C", top-right of face */
 .pitch-captain-badge {
   position: absolute;
-  left: 0;
-  bottom: 0;
+  right: 0;
+  top: 0;
   background: #fff;
   color: #111;
   font-size: 0.5rem;
@@ -2472,7 +2473,7 @@ body {
 }
 
 .pitch-badge-pos {
-  font-size: 0.52rem;
+  font-size: 0.62rem;
   font-weight: 800;
   white-space: nowrap;
   line-height: 1.4;
@@ -2480,7 +2481,7 @@ body {
 }
 
 .pitch-badge-ovr {
-  font-size: 0.52rem;
+  font-size: 0.62rem;
   font-weight: 800;
   white-space: nowrap;
   line-height: 1.4;
@@ -2489,9 +2490,9 @@ body {
 
 /* Player name: below badge, white, single line, scrolls if too long */
 .pitch-player-name {
-  font-size: 0.5rem;
+  font-size: 0.58rem;
   color: #fff;
-  font-weight: 400;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   max-width: 52px;
