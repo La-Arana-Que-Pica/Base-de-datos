@@ -3031,22 +3031,99 @@ body {
   margin-bottom: 0;
 }
 
-/* ── Compact 2-column stats layout ── */
-.stats-compact-layout {
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 16px;
-  align-items: start;
-}
-
-.stats-compact-left {
-  min-width: 0;
-}
-
-.stats-compact-right {
+/* ── Pagination ── */
+.pagination {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 0 8px;
+  flex-wrap: wrap;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.page-btn {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s, border-color 0.15s;
+  min-width: 36px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--color-surface);
+  border-color: var(--color-highlight);
+}
+
+.page-btn.active {
+  background: var(--color-highlight);
+  color: #fff;
+  border-color: var(--color-highlight);
+  cursor: default;
+}
+
+.page-btn:disabled:not(.active) {
+  color: var(--color-text-muted);
+  opacity: 0.45;
+  cursor: default;
+}
+
+.page-nav {
+  padding: 6px 14px;
+}
+
+.page-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* ── Responsive table wrapper ── */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+}
+
+.table-responsive .players-table {
+  border-radius: 0;
+  border: none;
+}
+
+@media (max-width: 640px) {
+  .page-nav {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .page-btn {
+    min-width: 30px;
+    padding: 5px 8px;
+    font-size: 0.8rem;
+  }
+
+  .players-table th,
+  .players-table td {
+    padding: 8px 8px;
+    font-size: 0.82rem;
+  }
 }
 
 
