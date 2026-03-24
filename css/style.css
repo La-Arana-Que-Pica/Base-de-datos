@@ -2420,6 +2420,7 @@ body {
 
 .pitch-player:hover {
   transform: translate(-50%, -50%) scale(1.1);
+  z-index: 9999 !important;
 }
 
 .pitch-player-photo-wrap {
@@ -2428,7 +2429,7 @@ body {
   height: 52px;
   flex-shrink: 0;
   margin-bottom: 0;
-  background: #1a1a1e;
+  background: transparent;
   z-index: 1;
 }
 
@@ -2486,6 +2487,7 @@ body {
   white-space: nowrap;
   line-height: 1.4;
   font-family: sans-serif;
+  color: #fff;
 }
 
 /* Player name: below badge, white, single line, scrolls if too long */
