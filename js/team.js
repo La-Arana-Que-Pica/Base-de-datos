@@ -134,14 +134,11 @@ function translatePosition(pesPos) {
 }
 
 function positionGroupColor(pesPos) {
-  if (pesPos === 'GK') return '#e6c800';
-  if (pesPos === 'CB') return '#5aaee0';
-  if (['LB', 'RB'].includes(pesPos)) return '#2567c8';
-  if (pesPos === 'DMF') return '#1a6020';
-  if (['CMF', 'LMF', 'RMF'].includes(pesPos)) return '#38a838';
-  if (pesPos === 'AMF') return '#8b11a8';
-  if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#a01010';
-  return '#555555';
+  if (pesPos === 'GK') return '#f9d901';
+  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
+  if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
+  if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
+  return '#8b949e';
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -389,13 +386,13 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
             <img src="img/players/${pid}.webp"
               onerror="handleMinifaceError(this,'${pid}')"
               class="pitch-player-photo" alt="${shortName}">
+            ${isCapitan ? '<div class="pitch-captain-badge">C</div>' : ''}
           </div>
-          ${isCapitan ? '<div class="pitch-captain-badge">C</div>' : ''}
-          <div class="pitch-player-badge" style="background:${badgeColor}">
-            <span class="pitch-badge-pos">${posDisplay}</span>
-            <span class="pitch-badge-ovr">${ovr}</span>
+          <div class="pitch-player-badge">
+            <span class="pitch-badge-pos" style="color:${badgeColor}">${posDisplay}</span>
+            <span class="pitch-badge-ovr" style="color:${badgeColor}">${ovr}</span>
           </div>
-          <div class="pitch-player-name">${shortName}</div>
+          <div class="pitch-player-name"><span>${shortName}</span></div>
         </a>`);
     }
     return tokens;
@@ -798,6 +795,16 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
 
   // Initialise the player card carousel navigation
   initPlayerCarousel();
+
+  // Apply marquee scroll to pitch player names that overflow their container
+  content.querySelectorAll('.pitch-player-name').forEach(el => {
+    const span = el.querySelector('span');
+    if (!span) return;
+    if (el.scrollWidth > el.clientWidth) {
+      span.textContent = span.textContent + '\u00A0\u00A0\u00A0\u00A0' + span.textContent;
+      el.classList.add('scrolling');
+    }
+  });
 
   // Update page title
   document.title = `${team.displayName} – Base de datos PES`;

@@ -2412,7 +2412,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 0;
-  width: 54px;
+  width: 62px;
   text-decoration: none;
   cursor: pointer;
   transition: transform 0.15s;
@@ -2424,10 +2424,10 @@ body {
 
 .pitch-player-photo-wrap {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   flex-shrink: 0;
-  margin-bottom: -4px;
+  margin-bottom: -2px;
   z-index: 1;
 }
 
@@ -2438,17 +2438,17 @@ body {
   display: block;
 }
 
-/* Captain indicator: circle with "C", to the right of the face */
+/* Captain indicator: white circle with dark "C", bottom-left of face */
 .pitch-captain-badge {
   position: absolute;
-  right: -14px;
-  top: 2px;
-  background: #444;
-  color: #fff;
-  font-size: 0.48rem;
+  left: 0;
+  bottom: 0;
+  background: #fff;
+  color: #111;
+  font-size: 0.5rem;
   font-weight: 900;
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2457,50 +2457,61 @@ body {
   z-index: 2;
 }
 
-/* Badge: flat horizontal rectangle with position + rating */
+/* Badge: flat horizontal rectangle, dark background, square corners */
 .pitch-player-badge {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 44px;
+  width: 52px;
   box-sizing: border-box;
   padding: 1px 4px;
-  border-radius: 2px;
+  border-radius: 0;
+  background: #1a1a1e;
   gap: 3px;
   z-index: 0;
 }
 
 .pitch-badge-pos {
-  font-size: 0.5rem;
-  font-weight: 700;
-  color: #fff;
+  font-size: 0.52rem;
+  font-weight: 800;
   white-space: nowrap;
   line-height: 1.4;
   font-family: sans-serif;
 }
 
 .pitch-badge-ovr {
-  font-size: 0.58rem;
+  font-size: 0.52rem;
   font-weight: 800;
-  color: #fff;
   white-space: nowrap;
   line-height: 1.4;
   font-family: sans-serif;
 }
 
-/* Player name: below badge, white, single line, hard cut */
+/* Player name: below badge, white, single line, scrolls if too long */
 .pitch-player-name {
   font-size: 0.5rem;
   color: #fff;
   font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: clip;
-  max-width: 54px;
+  max-width: 52px;
   text-align: center;
   margin-top: 1px;
   line-height: 1.2;
   font-family: sans-serif;
+}
+
+.pitch-player-name span {
+  display: inline-block;
+}
+
+.pitch-player-name.scrolling span {
+  animation: pitch-name-marquee 6s linear infinite;
+}
+
+@keyframes pitch-name-marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 /* Formation label: bottom-left of the pitch */
