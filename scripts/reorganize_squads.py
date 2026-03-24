@@ -289,6 +289,11 @@ def apply_reorder_all() -> tuple[str, str, int, list[str]]:
 
         formation_row = fm_rows[fm_idx]
         formation_indices = get_formation_indices(formation_row)
+
+        # Skip teams that are already correctly sorted
+        if formation_indices == list(range(32)):
+            continue
+
         new_players, new_shirts, new_indices = build_reorder_plan(squad_row, formation_indices)
         old_to_new = build_old_to_new_map(formation_indices)
 
@@ -306,8 +311,11 @@ def apply_reorder_all() -> tuple[str, str, int, list[str]]:
 
         processed += 1
 
-    save_csv(SQUADS_FILE, sq_headers, sq_rows)
-    save_csv(FORMATIONS_FILE, fm_headers, fm_rows)
+    if processed:
+        # Only write when at least one team was actually modified; teams that
+        # were skipped (already sorted or missing formation) need no file save.
+        save_csv(SQUADS_FILE, sq_headers, sq_rows)
+        save_csv(FORMATIONS_FILE, fm_headers, fm_rows)
 
     return str(sq_bak), str(fm_bak), processed, skipped
 
