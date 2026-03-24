@@ -83,6 +83,15 @@ function statTextColor(hexColor) {
   return ['#e5dc00', '#a8ff00', '#62ff51', '#00ff87'].includes(hexColor) ? '#111' : '#fff';
 }
 
+function contrastTextColor(hexColor) {
+  const h = hexColor.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? '#111' : '#fff';
+}
+
 function overallColor(value) {
   const v = parseInt(value, 10);
   if (isNaN(v)) return 'stat-range-1';
@@ -368,25 +377,23 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
 
       const ovr = escapeHtml(player.Overall || '–');
       const ovrColor = statColor(player.Overall || '');
-      const ovrTextColor = statTextColor(ovrColor);
       const isCapitan = !isNaN(captainRawIdx) && squadIdx === captainRawIdx;
+      const posBadgeTextColor = contrastTextColor(posColor);
 
       tokens.push(`
         <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
-          <div class="pitch-player-top">
-            <div class="pitch-player-photo-wrap">
-              <img src="img/players/${pid}.webp"
-                onerror="handleMinifaceError(this,'${pid}')"
-                class="pitch-player-photo" alt="${shortName}">
-            </div>
-          </div>
-          <div class="pitch-player-bar">
-            <span class="pitch-player-ovr-block">
-              <span class="pitch-player-pos-sm" style="color:${posColor};opacity:0.65">${posDisplay}</span>
-              <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
-            </span>
-            <span class="pitch-player-name">${shortName}</span>
+          <div class="pitch-player-photo-wrap">
+            <img src="img/players/${pid}.webp"
+              onerror="handleMinifaceError(this,'${pid}')"
+              class="pitch-player-photo" alt="${shortName}">
             ${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
+          </div>
+          <div class="pitch-player-card">
+            <span class="pitch-player-ovr" style="color:${ovrColor}">${ovr}</span>
+            <div class="pitch-player-foot">
+              <span class="pitch-player-pos-badge" style="background:${posColor};color:${posBadgeTextColor}">${posDisplay}</span>
+              <span class="pitch-player-name">${shortName}</span>
+            </div>
           </div>
         </a>`);
     }
