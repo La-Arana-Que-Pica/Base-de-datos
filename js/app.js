@@ -515,11 +515,11 @@ async function boot() {
 const NAV_STATE_KEY = 'pes_nav_state';
 
 function saveNavState(state) {
-  try { sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify(state)); } catch(e) {}
+  try { localStorage.setItem(NAV_STATE_KEY, JSON.stringify(state)); } catch(e) {}
 }
 
 function loadNavState() {
-  try { return JSON.parse(sessionStorage.getItem(NAV_STATE_KEY) || 'null'); } catch(e) { return null; }
+  try { return JSON.parse(localStorage.getItem(NAV_STATE_KEY) || 'null'); } catch(e) { return null; }
 }
 
 function restoreNavState() {
@@ -540,12 +540,15 @@ function restoreNavState() {
         const input = document.getElementById('teams-search-input');
         if (input) { input.value = state.query; filterTeamsGrid(state.query); }
       }
+      if (state.page > 1) goToTeamsPage(state.page, false);
       break;
     case 'players':
       if (state.filters) {
         Object.assign(_advFilters, state.filters);
       }
-      showAllPlayers();
+      if (state.specialPlayers !== undefined) _showSpecialPlayers = state.specialPlayers;
+      if (state.page) _allPlayersPage = state.page;
+      showAllPlayers(false);
       break;
     default: showAllPlayers(); break;
   }
@@ -717,7 +720,10 @@ function showLeagueTeamsView(leagueId) {
 
 // ─── Teams grid view ──────────────────────────────────────────────────────────
 
+const TEAMS_PAGE_SIZE = 60;
 let _teamsForGrid = [];
+let _teamsFilteredList = [];
+let _teamsGridPage = 1;
 
 function showTeamsView() {
   saveNavState({ view: 'teams' });
@@ -727,27 +733,12 @@ function showTeamsView() {
   DB.leagues.forEach(l => l.teamIds.forEach(id => teamsInLeagues.add(id)));
   const filteredTeams = DB.teams.filter(t => teamsInLeagues.has(t.id));
   _teamsForGrid = filteredTeams;
+  _teamsFilteredList = filteredTeams;
+  _teamsGridPage = 1;
 
   hideAllViews();
   const view = document.getElementById('teams-grid-view');
   view.classList.add('active');
-
-  const cardsHtml = filteredTeams.map(team => {
-    const avg = teamAvgOvr(team);
-    const avgHtml = avg !== null
-      ? `<div class="grid-card-ovr"><span class="team-avg-badge" style="background:${statColor(avg)};color:${statTextColor(statColor(avg))}">${avg}</span></div>`
-      : '';
-    return `
-    <div class="grid-card" onclick="selectTeam('${team.id}')">
-      <img class="grid-card-img"
-        src="img/teams/${team.id}.webp"
-        loading="lazy"
-        onerror="this.onerror=null;this.src='img/teams/default.webp'"
-        alt="${team.displayName}">
-      <div class="grid-card-name">${team.displayName}</div>
-      ${avgHtml}
-    </div>`;
-  }).join('');
 
   view.innerHTML = `
     <div class="view-header">
@@ -761,17 +752,23 @@ function showTeamsView() {
         placeholder="Buscar equipo..." autocomplete="off"
         oninput="filterTeamsGrid(this.value)">
     </div>
-    <div class="grid-cards" id="teams-grid-cards">${cardsHtml}</div>`;
+    <div class="grid-cards" id="teams-grid-cards"></div>
+    <div id="teams-grid-pagination"></div>`;
+
+  _renderTeamsGridPage();
 }
 
-function filterTeamsGrid(query) {
-  const q = query.toLowerCase().trim();
+function _renderTeamsGridPage() {
   const container = document.getElementById('teams-grid-cards');
+  const paginationEl = document.getElementById('teams-grid-pagination');
   const subtitle = document.getElementById('teams-grid-subtitle');
   if (!container) return;
-  saveNavState({ view: 'teams', query });
-  const matches = q ? _teamsForGrid.filter(t => (t.displayName || '').toLowerCase().includes(q)) : _teamsForGrid;
-  const cardsHtml = matches.map(team => {
+
+  const total = _teamsFilteredList.length;
+  const start = (_teamsGridPage - 1) * TEAMS_PAGE_SIZE;
+  const pageTeams = _teamsFilteredList.slice(start, start + TEAMS_PAGE_SIZE);
+
+  const cardsHtml = pageTeams.map(team => {
     const avg = teamAvgOvr(team);
     const avgHtml = avg !== null
       ? `<div class="grid-card-ovr"><span class="team-avg-badge" style="background:${statColor(avg)};color:${statTextColor(statColor(avg))}">${avg}</span></div>`
@@ -787,8 +784,47 @@ function filterTeamsGrid(query) {
       ${avgHtml}
     </div>`;
   }).join('');
+
   container.innerHTML = cardsHtml;
-  if (subtitle) subtitle.textContent = `${matches.length} equipo${matches.length !== 1 ? 's' : ''} encontrado${matches.length !== 1 ? 's' : ''}`;
+
+  if (paginationEl) {
+    paginationEl.innerHTML = _buildPaginationControls(total, _teamsGridPage, TEAMS_PAGE_SIZE, 'goToTeamsPage');
+  }
+
+  if (subtitle) {
+    const totalPages = Math.ceil(total / TEAMS_PAGE_SIZE) || 1;
+    if (total === _teamsForGrid.length) {
+      subtitle.textContent = `${total} equipos con liga asignada · página ${_teamsGridPage} de ${totalPages}`;
+    } else {
+      subtitle.textContent = `${total} equipo${total !== 1 ? 's' : ''} encontrado${total !== 1 ? 's' : ''} · página ${_teamsGridPage} de ${totalPages}`;
+    }
+  }
+}
+
+/**
+ * Navigate to the given page in the teams grid.
+ * @param {number} page             - 1-based target page
+ * @param {boolean} [scrollToTop=true]
+ */
+function goToTeamsPage(page, scrollToTop) {
+  const totalPages = Math.ceil(_teamsFilteredList.length / TEAMS_PAGE_SIZE) || 1;
+  _teamsGridPage = Math.max(1, Math.min(page, totalPages));
+  const query = (document.getElementById('teams-search-input') || {}).value || '';
+  saveNavState({ view: 'teams', query, page: _teamsGridPage });
+  _renderTeamsGridPage();
+  if (scrollToTop !== false) {
+    const view = document.getElementById('teams-grid-view');
+    if (view) view.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function filterTeamsGrid(query) {
+  const q = query.toLowerCase().trim();
+  if (!document.getElementById('teams-grid-cards')) return;
+  _teamsFilteredList = q ? _teamsForGrid.filter(t => (t.displayName || '').toLowerCase().includes(q)) : _teamsForGrid;
+  _teamsGridPage = 1;
+  saveNavState({ view: 'teams', query, page: 1 });
+  _renderTeamsGridPage();
 }
 
 
@@ -885,14 +921,13 @@ function goHome() {
   if (DB.loaded) showHome();
 }
 
-// ─── All-players default view (infinite scroll) ───────────────────────────────
+// ─── All-players default view (pagination) ───────────────────────────────────
 
-const ALL_PLAYERS_PAGE_SIZE = 50;
+const PLAYERS_PAGE_SIZE = 60;
 
-// State for the infinite-scroll all-players view
+// State for the paginated all-players view
 let _allPlayersList = [];      // sorted, filtered, deduplicated player array
-let _allPlayersOffset = 0;     // how many have been rendered so far
-let _allPlayersObserver = null; // IntersectionObserver watching the sentinel
+let _allPlayersPage = 1;       // current page (1-based)
 let _showSpecialPlayers = false; // whether to include type-1 (special) team players
 
 // Advanced filter state
@@ -1080,40 +1115,82 @@ function _prepareAllPlayersList() {
 
   unique.sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
   _allPlayersList = unique;
-  _allPlayersOffset = 0;
 }
 
 /**
- * Append the next batch of player rows to the table body and advance the
- * sentinel; disconnect the observer when all rows have been rendered.
+ * Build pagination controls HTML.
+ * @param {number} total      - total number of items
+ * @param {number} currentPage - 1-based current page
+ * @param {number} pageSize   - items per page
+ * @param {string} onPageFn   - name of the JS function to call with a page number
  */
-function _appendNextBatch() {
-  const tbody = document.getElementById('all-players-tbody');
-  const sentinel = document.getElementById('all-players-sentinel');
-  if (!tbody || !sentinel) return;
+function _buildPaginationControls(total, currentPage, pageSize, onPageFn) {
+  const totalPages = Math.ceil(total / pageSize);
+  if (totalPages <= 1) return '';
 
-  const batch = _allPlayersList.slice(_allPlayersOffset, _allPlayersOffset + ALL_PLAYERS_PAGE_SIZE);
-  if (!batch.length) {
-    // No more players – remove sentinel and stop observing
-    sentinel.remove();
-    if (_allPlayersObserver) {
-      _allPlayersObserver.disconnect();
-      _allPlayersObserver = null;
-    }
-    return;
+  const WINDOW = 2;
+  const pages = [];
+
+  pages.push(1);
+  if (currentPage - WINDOW > 2) pages.push('…');
+  for (let p = Math.max(2, currentPage - WINDOW); p <= Math.min(totalPages - 1, currentPage + WINDOW); p++) {
+    pages.push(p);
+  }
+  if (currentPage + WINDOW < totalPages - 1) pages.push('…');
+  if (totalPages > 1) pages.push(totalPages);
+
+  const pageButtons = pages.map(p => {
+    if (p === '…') return `<span class="page-ellipsis">…</span>`;
+    return `<button class="page-btn${p === currentPage ? ' active' : ''}" onclick="${onPageFn}(${p})" ${p === currentPage ? 'disabled' : ''}>${p}</button>`;
+  }).join('');
+
+  return `
+    <div class="pagination">
+      <button class="page-btn page-nav" onclick="${onPageFn}(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹ Anterior</button>
+      <div class="page-numbers">${pageButtons}</div>
+      <button class="page-btn page-nav" onclick="${onPageFn}(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Siguiente ›</button>
+    </div>`;
+}
+
+/**
+ * Render the current page of all-players into the table body and update
+ * the pagination controls and subtitle.
+ */
+function _renderPlayersPage() {
+  const tbody = document.getElementById('all-players-tbody');
+  const paginationEl = document.getElementById('all-players-pagination');
+  if (!tbody) return;
+
+  const total = _allPlayersList.length;
+  const start = (_allPlayersPage - 1) * PLAYERS_PAGE_SIZE;
+  const pagePlayers = _allPlayersList.slice(start, start + PLAYERS_PAGE_SIZE);
+
+  tbody.innerHTML = pagePlayers.map(p => renderPlayerRow(p, p._team)).join('');
+
+  if (paginationEl) {
+    paginationEl.innerHTML = _buildPaginationControls(total, _allPlayersPage, PLAYERS_PAGE_SIZE, 'goToPlayersPage');
   }
 
-  const rowsHtml = batch.map(p => renderPlayerRow(p, p._team)).join('');
-  tbody.insertAdjacentHTML('beforeend', rowsHtml);
-  _allPlayersOffset += batch.length;
+  const subtitle = document.getElementById('all-players-subtitle');
+  if (subtitle) {
+    const totalPages = Math.ceil(total / PLAYERS_PAGE_SIZE) || 1;
+    subtitle.textContent = `${total} jugadores · página ${_allPlayersPage} de ${totalPages}`;
+  }
+}
 
-  // If all players have now been rendered, clean up
-  if (_allPlayersOffset >= _allPlayersList.length) {
-    sentinel.remove();
-    if (_allPlayersObserver) {
-      _allPlayersObserver.disconnect();
-      _allPlayersObserver = null;
-    }
+/**
+ * Navigate to the given page in the all-players view.
+ * @param {number} page         - 1-based target page
+ * @param {boolean} [scrollToTop=true]
+ */
+function goToPlayersPage(page, scrollToTop) {
+  const totalPages = Math.ceil(_allPlayersList.length / PLAYERS_PAGE_SIZE) || 1;
+  _allPlayersPage = Math.max(1, Math.min(page, totalPages));
+  saveNavState({ view: 'players', filters: { ..._advFilters }, specialPlayers: _showSpecialPlayers, page: _allPlayersPage });
+  _renderPlayersPage();
+  if (scrollToTop !== false) {
+    const view = document.getElementById('players-view');
+    if (view) view.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
 
@@ -1331,38 +1408,10 @@ function onAdvFilterChange() {
   _advFilters.skill        = (document.getElementById('flt-skill')          || {}).value || '';
   _advFilters.comStyle     = (document.getElementById('flt-com-style')      || {}).value || '';
 
-  // Tear down existing observer
-  if (_allPlayersObserver) {
-    _allPlayersObserver.disconnect();
-    _allPlayersObserver = null;
-  }
-
   _prepareAllPlayersList();
-  const total = _allPlayersList.length;
-
-  // Update subtitle
-  const subtitle = document.getElementById('all-players-subtitle');
-  if (subtitle) subtitle.textContent = `${total} jugadores encontrados`;
-
-  // Reset and re-render tbody
-  const tbody = document.getElementById('all-players-tbody');
-  if (tbody) {
-    tbody.innerHTML = '';
-    // Re-add sentinel
-    const old = document.getElementById('all-players-sentinel');
-    if (old) old.remove();
-    tbody.insertAdjacentHTML('afterend', '<div id="all-players-sentinel" class="infinite-scroll-sentinel"><div class="spinner"></div></div>');
-    _appendNextBatch();
-
-    const sentinel = document.getElementById('all-players-sentinel');
-    if (sentinel && _allPlayersOffset < total) {
-      _allPlayersObserver = new IntersectionObserver(
-        (entries) => { if (entries[0].isIntersecting) _appendNextBatch(); },
-        { rootMargin: '200px' }
-      );
-      _allPlayersObserver.observe(sentinel);
-    }
-  }
+  _allPlayersPage = 1;
+  saveNavState({ view: 'players', filters: { ..._advFilters }, specialPlayers: _showSpecialPlayers, page: 1 });
+  _renderPlayersPage();
 }
 
 function resetAdvancedFilters() {
@@ -1393,57 +1442,32 @@ function toggleSpecialPlayers() {
   _showSpecialPlayers = !_showSpecialPlayers;
   const btn = document.getElementById('btn-toggle-special');
   if (btn) btn.classList.toggle('active', _showSpecialPlayers);
-
-  if (_allPlayersObserver) {
-    _allPlayersObserver.disconnect();
-    _allPlayersObserver = null;
-  }
   _prepareAllPlayersList();
-  const total = _allPlayersList.length;
-  const subtitle = document.getElementById('all-players-subtitle');
-  if (subtitle) subtitle.textContent = `${total} jugadores · ordenados por valoración`;
-  const tbody = document.getElementById('all-players-tbody');
-  if (tbody) {
-    tbody.innerHTML = '';
-    const old = document.getElementById('all-players-sentinel');
-    if (old) old.remove();
-    tbody.insertAdjacentHTML('afterend', '<div id="all-players-sentinel" class="infinite-scroll-sentinel"><div class="spinner"></div></div>');
-    _appendNextBatch();
-    const sentinel = document.getElementById('all-players-sentinel');
-    if (sentinel && _allPlayersOffset < total) {
-      _allPlayersObserver = new IntersectionObserver(
-        (entries) => { if (entries[0].isIntersecting) _appendNextBatch(); },
-        { rootMargin: '200px' }
-      );
-      _allPlayersObserver.observe(sentinel);
-    }
-  }
+  _allPlayersPage = 1;
+  saveNavState({ view: 'players', filters: { ..._advFilters }, specialPlayers: _showSpecialPlayers, page: 1 });
+  _renderPlayersPage();
 }
 
-function showAllPlayers() {
-  saveNavState({ view: 'players', filters: { ..._advFilters } });
+function showAllPlayers(resetPage) {
+  saveNavState({ view: 'players', filters: { ..._advFilters }, specialPlayers: _showSpecialPlayers, page: _allPlayersPage });
   _setActiveSidebarNav('players');
-  // Tear down any existing observer before rebuilding the view
-  if (_allPlayersObserver) {
-    _allPlayersObserver.disconnect();
-    _allPlayersObserver = null;
-  }
 
   hideAllViews();
   const view = document.getElementById('players-view');
   view.classList.add('active');
 
+  if (resetPage !== false) _allPlayersPage = 1;
   _prepareAllPlayersList();
   const total = _allPlayersList.length;
 
   const hasActiveFilters = Object.values(_advFilters).some(v => v !== '');
 
-  // Render initial skeleton (header + filter panel + empty tbody + sentinel)
+  // Render skeleton: header + filter panel + table + pagination placeholder
   view.innerHTML = `
     <div class="view-header">
       <div>
         <div class="view-title">Todos los jugadores</div>
-        <div class="view-subtitle" id="all-players-subtitle">${total} jugadores · ordenados por valoración</div>
+        <div class="view-subtitle" id="all-players-subtitle">${total} jugadores · página 1 de ${Math.ceil(total / PLAYERS_PAGE_SIZE) || 1}</div>
       </div>
       <div class="view-header-actions">
         <button id="btn-toggle-special" class="adv-filter-toggle${_showSpecialPlayers ? ' active' : ''}" onclick="toggleSpecialPlayers()">★ Jugadores especiales</button>
@@ -1451,37 +1475,25 @@ function showAllPlayers() {
       </div>
     </div>
     ${_buildFilterPanel()}
-    <table class="players-table">
-      <thead>
-        <tr>
-          <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
-          <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
-        </tr>
-      </thead>
-      <tbody id="all-players-tbody"></tbody>
-    </table>
-    <div id="all-players-sentinel" class="infinite-scroll-sentinel">
-      <div class="spinner"></div>
-    </div>`;
+    <div class="table-responsive">
+      <table class="players-table">
+        <thead>
+          <tr>
+            <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
+            <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
+          </tr>
+        </thead>
+        <tbody id="all-players-tbody"></tbody>
+      </table>
+    </div>
+    <div id="all-players-pagination"></div>`;
 
   // Hide the filter panel by default unless filters are active
   const filterPanel = document.getElementById('adv-filter-panel');
   if (filterPanel && !hasActiveFilters) filterPanel.style.display = 'none';
 
-  // Render the first batch immediately
-  _appendNextBatch();
-
-  // Set up IntersectionObserver to load more when sentinel becomes visible
-  const sentinel = document.getElementById('all-players-sentinel');
-  if (sentinel && _allPlayersOffset < total) {
-    _allPlayersObserver = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) _appendNextBatch();
-      },
-      { rootMargin: '200px' }
-    );
-    _allPlayersObserver.observe(sentinel);
-  }
+  // Render the first page
+  _renderPlayersPage();
 }
 
 // ─── Team / Players view ──────────────────────────────────────────────────────
