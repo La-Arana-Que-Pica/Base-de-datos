@@ -138,6 +138,16 @@ def get_formation_indices(formation_row: dict) -> list[int]:
     return indices
 
 
+def has_duplicate_formation_indices(formation_indices: list[int], total_players: int) -> bool:
+    """Return True if any active formation slot index is duplicated.
+
+    Only the first *total_players* slots are considered active.  An index is
+    only checked if it falls within the valid squad range (0–31).
+    """
+    active = [idx for idx in formation_indices[:total_players] if 0 <= idx < 32]
+    return len(active) != len(set(active))
+
+
 def build_reorder_plan(
     squad_row: dict,
     formation_indices: list[int],
@@ -217,6 +227,13 @@ def apply_reorder(team_id: str) -> tuple[str, str]:
     sq_bak, fm_bak = ensure_backups()
 
     formation_indices = get_formation_indices(formation_row)
+    total = int(squad_row.get("Total Players", 0) or 0)
+    if has_duplicate_formation_indices(formation_indices, total):
+        raise ValueError(
+            f"Team ID {team_id!r} has a corrupted formation with duplicate "
+            "player indices. The team will not be processed."
+        )
+
     new_players, new_shirts, new_indices = build_reorder_plan(squad_row, formation_indices)
     old_to_new = build_old_to_new_map(formation_indices)
 
@@ -290,6 +307,12 @@ def apply_reorder_all() -> tuple[str, str, int, list[str]]:
         formation_row = fm_rows[fm_idx]
         formation_indices = get_formation_indices(formation_row)
 
+        # Skip teams with corrupted formations (duplicate player indices)
+        total = int(squad_row.get("Total Players", 0) or 0)
+        if has_duplicate_formation_indices(formation_indices, total):
+            skipped.append(team_id)
+            continue
+
         # Skip teams that are already correctly sorted
         if formation_indices == list(range(32)):
             continue
@@ -341,6 +364,11 @@ def build_preview_rows(team_id: str) -> list[dict]:
 
     total = int(squad_row.get("Total Players", 0))
     formation_indices = get_formation_indices(formation_row)
+    if has_duplicate_formation_indices(formation_indices, total):
+        raise ValueError(
+            f"Team ID {team_id!r} has a corrupted formation with duplicate "
+            "player indices. The team cannot be previewed or processed."
+        )
 
     old_players = [int(squad_row.get(f"Player {i}", 0)) for i in range(1, 33)]
     old_shirts = [int(squad_row.get(f"Shirt number {i}", 0)) for i in range(1, 33)]
@@ -732,7 +760,7 @@ class App(tk.Tk):
 
         detail = f"Equipos procesados: {processed}"
         if skipped:
-            detail += f"\nEquipos sin formación (omitidos): {len(skipped)}"
+            detail += f"\nEquipos omitidos (sin formación o formación corrupta): {len(skipped)}"
 
         messagebox.showinfo(
             "Todos los equipos procesados",
