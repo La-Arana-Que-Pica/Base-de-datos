@@ -134,11 +134,14 @@ function translatePosition(pesPos) {
 }
 
 function positionGroupColor(pesPos) {
-  if (pesPos === 'GK') return '#f9d901';
-  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
-  if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
-  if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
-  return '#8b949e';
+  if (pesPos === 'GK') return '#e6c800';
+  if (pesPos === 'CB') return '#5aaee0';
+  if (['LB', 'RB'].includes(pesPos)) return '#2567c8';
+  if (pesPos === 'DMF') return '#1a6020';
+  if (['CMF', 'LMF', 'RMF'].includes(pesPos)) return '#38a838';
+  if (pesPos === 'AMF') return '#8b11a8';
+  if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#a01010';
+  return '#555555';
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -358,11 +361,13 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       const xDepth = parseFloat(formationRow[`Ubicacion X${i} ${suffix}`]) || 0;
       const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} ${suffix}`]) || 52;
 
-      // Map to CSS percentage positions on a full pitch (630×670):
+      // Map to CSS percentage positions on a full pitch:
       //   left: 5 + (yWidth / 104) * 90%  (0=left touchline → 5%, 52=center → 50%, 104=right → 95%)
       //   top:  7 + (1 - xDepth / 52) * 86%  (xDepth=52=midfield → 7%, xDepth=0=own goal → 93%)
       const leftPct = 5 + (yWidth / 104) * 90;
       const topPct  = 7 + (1 - xDepth / 52) * 86;
+      // Lower on screen (higher topPct) = higher z-index so they appear on top
+      const zIdx = Math.round(topPct);
 
       const shortName = escapeHtml(formatShortName(player.Name || ''));
       const pid = escapeHtml(player.ID);
@@ -373,28 +378,24 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       const formationPos = (!isNaN(posRawVal) && posRawVal >= 0 && posRawVal < PES_POSITIONS.length)
         ? PES_POSITIONS[posRawVal] : (player.Position || '');
       const posDisplay = escapeHtml(translatePosition(formationPos));
-      const posColor = positionGroupColor(formationPos);
+      const badgeColor = positionGroupColor(formationPos);
 
       const ovr = escapeHtml(player.Overall || '–');
-      const ovrColor = statColor(player.Overall || '');
       const isCapitan = !isNaN(captainRawIdx) && squadIdx === captainRawIdx;
-      const posBadgeTextColor = contrastTextColor(posColor);
 
       tokens.push(`
-        <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
+        <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%;z-index:${zIdx}">
           <div class="pitch-player-photo-wrap">
             <img src="img/players/${pid}.webp"
               onerror="handleMinifaceError(this,'${pid}')"
               class="pitch-player-photo" alt="${shortName}">
-            ${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
           </div>
-          <div class="pitch-player-card">
-            <span class="pitch-player-ovr" style="color:${ovrColor}">${ovr}</span>
-            <div class="pitch-player-foot">
-              <span class="pitch-player-pos-badge" style="background:${posColor};color:${posBadgeTextColor}">${posDisplay}</span>
-              <span class="pitch-player-name">${shortName}</span>
-            </div>
+          ${isCapitan ? '<div class="pitch-captain-badge">C</div>' : ''}
+          <div class="pitch-player-badge" style="background:${badgeColor}">
+            <span class="pitch-badge-pos">${posDisplay}</span>
+            <span class="pitch-badge-ovr">${ovr}</span>
           </div>
+          <div class="pitch-player-name">${shortName}</div>
         </a>`);
     }
     return tokens;
@@ -403,6 +404,29 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
   // Build pitch field HTML for a given suffix
   function buildPitchField(suffix) {
     const tokens = buildPitchTokens(suffix);
+
+    // Compute formation label (e.g. "4-2-3-1") from player depths, excluding GK
+    const formLabel = (() => {
+      const xs = [];
+      for (let i = 1; i <= 11; i++) {
+        const posRaw = parseInt(formationRow[`Posicion ${i} ${suffix}`], 10);
+        const pos = (!isNaN(posRaw) && posRaw >= 0 && posRaw < PES_POSITIONS.length) ? PES_POSITIONS[posRaw] : '';
+        if (pos === 'GK') continue;
+        const x = parseFloat(formationRow[`Ubicacion X${i} ${suffix}`]) || 0;
+        xs.push(x);
+      }
+      xs.sort((a, b) => a - b);
+      if (!xs.length) return '';
+      const groups = [];
+      let count = 1;
+      for (let j = 1; j < xs.length; j++) {
+        if (xs[j] - xs[j - 1] > 5) { groups.push(count); count = 1; }
+        else count++;
+      }
+      groups.push(count);
+      return groups.join('-');
+    })();
+
     return `
       <div class="pitch-field">
         <div class="pf-mark pf-halfway"></div>
@@ -412,6 +436,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
         <div class="pf-mark pf-penalty-bottom"></div>
         <div class="pf-mark pf-goal-bottom"></div>
         ${tokens.join('')}
+        ${formLabel ? `<div class="pitch-formation-label">${escapeHtml(formLabel)}</div>` : ''}
       </div>`;
   }
 
