@@ -390,7 +390,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
           </div>
           <div class="pitch-player-badge">
             <span class="pitch-badge-pos" style="color:${badgeColor}">${posDisplay}</span>
-            <span class="pitch-badge-ovr" style="color:${badgeColor}">${ovr}</span>
+            <span class="pitch-badge-ovr">${ovr}</span>
           </div>
           <div class="pitch-player-name"><span>${shortName}</span></div>
         </a>`);
