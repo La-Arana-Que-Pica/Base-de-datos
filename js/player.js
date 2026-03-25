@@ -680,12 +680,25 @@ function computeRadarAttributes(player) {
     if (!vals.length) return 0;
     return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
   };
+  const posIdx = parseInt(player['POS'], 10);
+  const isGK = posIdx === 0;
+  if (isGK) {
+    return {
+      PAS: avg('Low Pass', 'Lofted Pass', 'Controlled Spin', 'Place Kicking'),
+      TIR: avg('Finishing', 'Attacking Prowess'),
+      FIS: avg('Physical Contact'),
+      DEF: avg('Defensive Prowess'),
+      VEL: avg('Speed'),
+      DRI: avg('Dribbling', 'Ball Control'),
+      POR: avg('Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'),
+    };
+  }
   return {
     PAS: avg('Low Pass', 'Lofted Pass', 'Controlled Spin', 'Place Kicking'),
     TIR: avg('Finishing', 'Attacking Prowess'),
-    FIS: avg('Physical Contact'),
+    FIS: avg('Physical Contact', 'Stamina'),
     DEF: avg('Defensive Prowess'),
-    VEL: avg('Speed'),
+    RIT: avg('Speed', 'Explosive Power'),
     DRI: avg('Dribbling', 'Ball Control'),
     POR: avg('Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'),
   };

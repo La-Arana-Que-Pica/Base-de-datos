@@ -1480,7 +1480,7 @@ function showAllPlayers(resetPage) {
         <thead>
           <tr>
             <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
-            <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
+            <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
           </tr>
         </thead>
         <tbody id="all-players-tbody"></tbody>
@@ -1533,7 +1533,7 @@ function renderPlayersList(team) {
           <th>Nac</th>
           <th>Pos</th>
           <th>OVR</th>
-          <th>VEL</th>
+          <th>RIT</th>
           <th>DRI</th>
           <th>TIR</th>
           <th>PAS</th>
@@ -1584,7 +1584,7 @@ function renderPlayerRow(player, team) {
     </td>
     <td><span class="position-badge" style="color:${positionGroupColor(player.Position)};border-color:${positionGroupColor(player.Position)};background:${positionGroupColor(player.Position)}18">${posDisplay || '–'}</span></td>
     <td><span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span></td>
-    <td>${radarAttrs.VEL}</td>
+    <td>${radarAttrs.RIT}</td>
     <td>${radarAttrs.DRI}</td>
     <td>${radarAttrs.TIR}</td>
     <td>${radarAttrs.PAS}</td>
@@ -1608,13 +1608,14 @@ function computeRadarAttributes(player) {
     if (!vals.length) return 0;
     return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
   };
+  const isGK = (player.Position || '') === 'GK';
 
   return {
     PAS: avg('Low Pass', 'Lofted Pass', 'Controlled Spin', 'Place Kicking'),
     TIR: avg('Finishing', 'Attacking Prowess'),
-    FIS: avg('Physical Contact'),
+    FIS: isGK ? avg('Physical Contact') : avg('Physical Contact', 'Stamina'),
     DEF: avg('Defensive Prowess'),
-    VEL: avg('Speed'),
+    RIT: isGK ? avg('Speed') : avg('Speed', 'Explosive Power'),
     DRI: avg('Dribbling', 'Ball Control'),
   };
 }
@@ -1905,7 +1906,7 @@ function runSearch(query) {
       <thead>
         <tr>
           <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
-          <th>OVR</th><th>VEL</th><th>DRI</th><th>TIR</th>
+          <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th>
           <th>PAS</th><th>FIS</th><th>DEF</th>
         </tr>
       </thead>
