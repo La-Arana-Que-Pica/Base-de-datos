@@ -204,6 +204,8 @@ function computeRadarAttributes(player) {
     REG: avg('Ball Control', 'Dribbling', 'Body Control'),
     DEF: avg('Header', 'Jump', 'Defensive Prowess', 'Ball Winning'),
     PAS: avg('Low Pass', 'Lofted Pass', 'Place Kicking', 'Controlled Spin'),
+    RIT: avg('Speed', 'Explosive Power'),
+    FIS: avg('Physical Contact', 'Stamina'),
     COM: avg('Speed', 'Explosive Power', 'Physical Contact', 'Stamina'),
     POR: avg('Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'),
   };
@@ -227,6 +229,8 @@ const SORT_COLS = {
   'REG':  p => computeRadarAttributes(p).REG,
   'DEF':  p => computeRadarAttributes(p).DEF,
   'PAS':  p => computeRadarAttributes(p).PAS,
+  'RIT':  p => computeRadarAttributes(p).RIT,
+  'FIS':  p => computeRadarAttributes(p).FIS,
   'COM':  p => computeRadarAttributes(p).COM,
   'POR':  p => computeRadarAttributes(p).POR,
 };
@@ -550,8 +554,13 @@ function renderPlayerCard(player, teamId) {
   const regColor = statColor(radarAttrs.REG);
   const defColor = statColor(radarAttrs.DEF);
   const pasColor = statColor(radarAttrs.PAS);
-  const comColor = statColor(radarAttrs.COM);
-  const porColor = statColor(radarAttrs.POR);
+  const isGK = (player.Position || '') === 'GK';
+  const stat5Color = isGK ? statColor(radarAttrs.COM) : statColor(radarAttrs.RIT);
+  const stat6Color = isGK ? statColor(radarAttrs.POR) : statColor(radarAttrs.FIS);
+  const stat5Val   = isGK ? radarAttrs.COM : radarAttrs.RIT;
+  const stat6Val   = isGK ? radarAttrs.POR : radarAttrs.FIS;
+  const stat5Key   = isGK ? 'COM' : 'RIT';
+  const stat6Key   = isGK ? 'POR' : 'FIS';
 
   return `
     <a class="player-card" href="player.html?id=${pid}&team=${tid}">
@@ -578,8 +587,8 @@ function renderPlayerCard(player, teamId) {
           <div class="pcs"><span class="pcs-val" style="color:${regColor}">${radarAttrs.REG}</span><span class="pcs-key">REG</span></div>
           <div class="pcs"><span class="pcs-val" style="color:${defColor}">${radarAttrs.DEF}</span><span class="pcs-key">DEF</span></div>
           <div class="pcs"><span class="pcs-val" style="color:${pasColor}">${radarAttrs.PAS}</span><span class="pcs-key">PAS</span></div>
-          <div class="pcs"><span class="pcs-val" style="color:${comColor}">${radarAttrs.COM}</span><span class="pcs-key">COM</span></div>
-          <div class="pcs"><span class="pcs-val" style="color:${porColor}">${radarAttrs.POR}</span><span class="pcs-key">POR</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${stat5Color}">${stat5Val}</span><span class="pcs-key">${stat5Key}</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${stat6Color}">${stat6Val}</span><span class="pcs-key">${stat6Key}</span></div>
         </div>
       </div>
     </a>`;
@@ -724,8 +733,8 @@ function renderPlayerRow(player, teamId) {
     <td>${radarAttrs.REG}</td>
     <td>${radarAttrs.DEF}</td>
     <td>${radarAttrs.PAS}</td>
-    <td>${radarAttrs.COM}</td>
-    <td>${radarAttrs.POR}</td>
+    <td>${(player.Position || '') === 'GK' ? radarAttrs.COM : radarAttrs.RIT}</td>
+    <td>${(player.Position || '') === 'GK' ? radarAttrs.POR : radarAttrs.FIS}</td>
   </tr>`;
 }
 
@@ -857,8 +866,8 @@ function renderPositionGroups(players, teamId) {
               <th>REG</th>
               <th>DEF</th>
               <th>PAS</th>
-              <th>COM</th>
-              <th>POR</th>
+              <th>RIT/COM</th>
+              <th>FIS/POR</th>
             </tr>
           </thead>
           <tbody>${rowsHtml}</tbody>
@@ -881,7 +890,7 @@ function renderPositionGroups(players, teamId) {
             <tr>
               <th class="shirt-number-cell">#</th>
               <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
-              <th>OVR</th><th>ATQ</th><th>REG</th><th>DEF</th><th>PAS</th><th>COM</th><th>POR</th>
+              <th>OVR</th><th>ATQ</th><th>REG</th><th>DEF</th><th>PAS</th><th>RIT/COM</th><th>FIS/POR</th>
             </tr>
           </thead>
           <tbody>${uncategorized.map(p => renderPlayerRow(p, teamId)).join('')}</tbody>
