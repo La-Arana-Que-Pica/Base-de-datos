@@ -17,14 +17,14 @@ The formation file is also updated so that visual positions remain identical:
     EsquinaIzquierdo, Penalti, Cabeceador1, Cabeceador2, Cabeceador3,
     SegundoCobrador) are remapped to the new squad slot indices.
 
-Both CSV files are backed up (with a timestamp) before any modification.
+A single backup is created before any modification.  If a backup already
+exists it is reused and no new backup is written.  Both the single-team and
+all-teams apply paths share this one backup.
 """
 
 import csv
-import os
 import shutil
 import tkinter as tk
-from datetime import datetime
 from pathlib import Path
 from tkinter import messagebox, ttk
 
@@ -36,6 +36,11 @@ DB_DIR = SCRIPT_DIR.parent / "database"
 SQUADS_FILE = DB_DIR / "All squads exported.csv"
 FORMATIONS_FILE = DB_DIR / "All formations exported.csv"
 BACKUP_DIR = DB_DIR / "backups"
+
+# Stable backup paths — a single backup pair is kept; no new backup is created
+# if these files already exist.
+SQUADS_BACKUP = BACKUP_DIR / "All squads exported_backup.csv"
+FORMATIONS_BACKUP = BACKUP_DIR / "All formations exported_backup.csv"
 
 CSV_DELIMITER = ";"
 CSV_ENCODING = "utf-8-sig"   # handles BOM present in these files
@@ -103,15 +108,18 @@ def find_row_by_id(rows: list[dict], team_id: str) -> dict | None:
 # Backup helpers
 # ---------------------------------------------------------------------------
 
-def create_backups(team_id: str) -> tuple[Path, Path]:
-    """Copy both CSV files into BACKUP_DIR with a timestamp suffix."""
+def ensure_backups() -> tuple[Path, Path]:
+    """Copy both CSV files into BACKUP_DIR only if the backups do not yet exist.
+
+    Returns the (squads_backup_path, formations_backup_path) regardless of
+    whether the files were newly created or were already present.
+    """
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    squads_bak = BACKUP_DIR / f"All squads exported_{stamp}_team{team_id}.csv"
-    formations_bak = BACKUP_DIR / f"All formations exported_{stamp}_team{team_id}.csv"
-    shutil.copy2(SQUADS_FILE, squads_bak)
-    shutil.copy2(FORMATIONS_FILE, formations_bak)
-    return squads_bak, formations_bak
+    if not SQUADS_BACKUP.exists():
+        shutil.copy2(SQUADS_FILE, SQUADS_BACKUP)
+    if not FORMATIONS_BACKUP.exists():
+        shutil.copy2(FORMATIONS_FILE, FORMATIONS_BACKUP)
+    return SQUADS_BACKUP, FORMATIONS_BACKUP
 
 
 # ---------------------------------------------------------------------------
@@ -128,6 +136,16 @@ def get_formation_indices(formation_row: dict) -> list[int]:
         except (ValueError, TypeError):
             indices.append(i - 1)
     return indices
+
+
+def has_duplicate_formation_indices(formation_indices: list[int], total_players: int) -> bool:
+    """Return True if any active formation slot index is duplicated.
+
+    Only the first *total_players* slots are considered active.  An index is
+    only checked if it falls within the valid squad range (0–31).
+    """
+    active = [idx for idx in formation_indices[:total_players] if 0 <= idx < 32]
+    return len(active) != len(set(active))
 
 
 def build_reorder_plan(
@@ -205,10 +223,17 @@ def apply_reorder(team_id: str) -> tuple[str, str]:
     if formation_row is None:
         raise ValueError(f"Team ID {team_id!r} not found in formations file.")
 
-    # Create backups before touching anything
-    sq_bak, fm_bak = create_backups(team_id)
+    # Create a single backup before touching anything (skipped if already exists)
+    sq_bak, fm_bak = ensure_backups()
 
     formation_indices = get_formation_indices(formation_row)
+    total = int(squad_row.get("Total Players", 0) or 0)
+    if has_duplicate_formation_indices(formation_indices, total):
+        raise ValueError(
+            f"Team ID {team_id!r} has a corrupted formation with duplicate "
+            "player indices. The team will not be processed."
+        )
+
     new_players, new_shirts, new_indices = build_reorder_plan(squad_row, formation_indices)
     old_to_new = build_old_to_new_map(formation_indices)
 
@@ -242,6 +267,82 @@ def apply_reorder(team_id: str) -> tuple[str, str]:
     return str(sq_bak), str(fm_bak)
 
 
+def apply_reorder_all() -> tuple[str, str, int, list[str]]:
+    """
+    Load both CSV files, reorder the squad for ALL teams, and save once.
+
+    A single backup is created before any modification (skipped if it already
+    exists).  The per-team reorder logic is identical to apply_reorder.
+
+    Returns (squads_backup_path, formations_backup_path, processed_count,
+    skipped_team_ids) where skipped_team_ids lists teams whose formation row
+    could not be found.
+    """
+    sq_headers, sq_rows = load_csv(SQUADS_FILE)
+    fm_headers, fm_rows = load_csv(FORMATIONS_FILE)
+
+    # Create a single backup before touching anything (skipped if already exists)
+    sq_bak, fm_bak = ensure_backups()
+
+    # Build a lookup map: team_id → (list-index, formation_row)
+    fm_index: dict[str, int] = {}
+    for i, row in enumerate(fm_rows):
+        first_val = next(iter(row.values()), None)
+        if first_val is not None:
+            fm_index[first_val] = i
+
+    processed = 0
+    skipped: list[str] = []
+
+    for sq_idx, squad_row in enumerate(sq_rows):
+        team_id = next(iter(squad_row.values()), None)
+        if team_id is None:
+            continue
+
+        fm_idx = fm_index.get(team_id)
+        if fm_idx is None:
+            skipped.append(team_id)
+            continue
+
+        formation_row = fm_rows[fm_idx]
+        formation_indices = get_formation_indices(formation_row)
+
+        # Skip teams with corrupted formations (duplicate player indices)
+        total = int(squad_row.get("Total Players", 0) or 0)
+        if has_duplicate_formation_indices(formation_indices, total):
+            skipped.append(team_id)
+            continue
+
+        # Skip teams that are already correctly sorted
+        if formation_indices == list(range(32)):
+            continue
+
+        new_players, new_shirts, new_indices = build_reorder_plan(squad_row, formation_indices)
+        old_to_new = build_old_to_new_map(formation_indices)
+
+        # Update squad row in-place
+        for i in range(32):
+            squad_row[f"Player {i + 1}"] = str(new_players[i])
+            squad_row[f"Shirt number {i + 1}"] = str(new_shirts[i])
+        sq_rows[sq_idx] = squad_row
+
+        # Update formation row: Indice Jugador → sequential, remap special cols
+        updated_fm_row = remap_special_assignments(formation_row, old_to_new)
+        for i, idx in enumerate(new_indices):
+            updated_fm_row[f"Indice Jugador {i + 1}"] = str(idx)
+        fm_rows[fm_idx] = updated_fm_row
+
+        processed += 1
+
+    if processed:
+        # Only write when at least one team was actually modified; teams that
+        # were skipped (already sorted or missing formation) need no file save.
+        save_csv(SQUADS_FILE, sq_headers, sq_rows)
+        save_csv(FORMATIONS_FILE, fm_headers, fm_rows)
+
+    return str(sq_bak), str(fm_bak), processed, skipped
+
+
 # ---------------------------------------------------------------------------
 # Preview builder
 # ---------------------------------------------------------------------------
@@ -263,6 +364,11 @@ def build_preview_rows(team_id: str) -> list[dict]:
 
     total = int(squad_row.get("Total Players", 0))
     formation_indices = get_formation_indices(formation_row)
+    if has_duplicate_formation_indices(formation_indices, total):
+        raise ValueError(
+            f"Team ID {team_id!r} has a corrupted formation with duplicate "
+            "player indices. The team cannot be previewed or processed."
+        )
 
     old_players = [int(squad_row.get(f"Player {i}", 0)) for i in range(1, 33)]
     old_shirts = [int(squad_row.get(f"Shirt number {i}", 0)) for i in range(1, 33)]
@@ -344,7 +450,8 @@ class App(tk.Tk):
         ).pack()
         tk.Label(
             header,
-            text="Reordena los jugadores de una plantilla según el orden de la formación",
+            text="Reordena los jugadores de una plantilla según el orden de la formación · "
+                 "Aplica a todos los equipos de una sola vez",
             font=("Helvetica", 10),
             fg="#a6adc8",
             bg="#313244",
@@ -422,6 +529,21 @@ class App(tk.Tk):
             cursor="hand2",
         )
         self._clear_btn.grid(row=0, column=4)
+
+        self._apply_all_btn = tk.Button(
+            frame,
+            text="⚡  Aplicar a todos",
+            command=self._on_apply_all,
+            font=("Helvetica", 10, "bold"),
+            bg="#fab387",
+            fg="#1e1e2e",
+            activebackground="#f9e2af",
+            relief="flat",
+            padx=14,
+            pady=5,
+            cursor="hand2",
+        )
+        self._apply_all_btn.grid(row=0, column=5, padx=(8, 0))
 
     def _build_preview_area(self) -> None:
         outer = tk.Frame(self, bg="#1e1e2e")
@@ -603,9 +725,9 @@ class App(tk.Tk):
         messagebox.showinfo(
             "Cambios aplicados",
             f"Reordenamiento aplicado correctamente para el equipo {team_id}.\n\n"
-            f"Copias de seguridad guardadas en:\n  {sq_bak}\n  {fm_bak}",
+            f"Copia de seguridad en:\n  {sq_bak}\n  {fm_bak}",
         )
-        self._set_status(f"✔ Equipo {team_id} reordenado. Copias de seguridad creadas.")
+        self._set_status(f"✔ Equipo {team_id} reordenado. Copia de seguridad disponible.")
         self._apply_btn.config(state="disabled")
 
     def _on_clear(self) -> None:
@@ -614,6 +736,43 @@ class App(tk.Tk):
         self._apply_btn.config(state="disabled")
         self._summary_var.set("Introduce un ID de equipo y pulsa «Cargar equipo».")
         self._set_status("Listo.")
+
+    def _on_apply_all(self) -> None:
+        confirm = messagebox.askyesno(
+            "Confirmar cambios — todos los equipos",
+            "¿Aplicar el reordenamiento a TODOS los equipos?\n\n"
+            "Se creará una copia de seguridad si aún no existe.",
+        )
+        if not confirm:
+            return
+
+        self._apply_all_btn.config(state="disabled")
+        self._set_status("Procesando todos los equipos…")
+        self.update_idletasks()
+
+        try:
+            sq_bak, fm_bak, processed, skipped = apply_reorder_all()
+        except Exception as exc:  # noqa: BLE001
+            messagebox.showerror("Error inesperado", str(exc))
+            self._set_status(f"Error inesperado: {exc}")
+            self._apply_all_btn.config(state="normal")
+            return
+
+        detail = f"Equipos procesados: {processed}"
+        if skipped:
+            detail += f"\nEquipos omitidos (sin formación o formación corrupta): {len(skipped)}"
+
+        messagebox.showinfo(
+            "Todos los equipos procesados",
+            f"Reordenamiento completado.\n\n"
+            f"{detail}\n\n"
+            f"Copia de seguridad en:\n  {sq_bak}\n  {fm_bak}",
+        )
+        self._set_status(
+            f"✔ {processed} equipo(s) reordenado(s). "
+            + (f"{len(skipped)} omitido(s)." if skipped else "")
+        )
+        self._apply_all_btn.config(state="normal")
 
     def _restore_backup(self) -> None:
         """Let the user pick a backup pair to restore."""
@@ -717,13 +876,15 @@ class App(tk.Tk):
     def _show_about(self) -> None:
         messagebox.showinfo(
             "Acerca de",
-            "Reorganizar Plantillas v1.0\n\n"
+            "Reorganizar Plantillas v2.0\n\n"
             "Lee el orden de los jugadores en la formación y reordena\n"
             "la plantilla (All squads exported.csv) para que coincida.\n\n"
             "También actualiza el archivo de formaciones para que las\n"
             "posiciones en el campo permanezcan idénticas.\n\n"
-            "Se crea una copia de seguridad automáticamente antes de\n"
-            "cualquier modificación.",
+            "Usa «Aplicar a todos» para procesar todos los equipos de\n"
+            "una sola vez.\n\n"
+            "Se crea una única copia de seguridad antes de la primera\n"
+            "modificación. Si ya existe, no se crea otra.",
         )
 
     # ------------------------------------------------------------------

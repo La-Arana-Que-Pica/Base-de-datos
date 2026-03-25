@@ -303,6 +303,32 @@ const BOOT_MAPPING = {
   '52': { pesNumber: 60, brand: 'PES' },
 };
 
+// ─── Gloves mapping (gloves ID → { pesNumber }) ───────────────────────────────
+// IDs match the CSV values; pesNumber is the internal index shown to the user.
+// ID 1 is stored as '1' in the CSV but the image file is named '001.webp'.
+
+const GLOVES_MAPPING = {
+  '101': { pesNumber: 1  },
+  '102': { pesNumber: 2  },
+  '901': { pesNumber: 3  },
+  '201': { pesNumber: 4  },
+  '211': { pesNumber: 5  },
+  '311': { pesNumber: 6  },
+  '301': { pesNumber: 7  },
+  '601': { pesNumber: 8  },
+  '701': { pesNumber: 9  },
+  '801': { pesNumber: 10 },
+  '1':   { pesNumber: 11 },
+};
+
+// ─── Equipment mapping helper ─────────────────────────────────────────────────
+
+function getEquipmentData(type, id) {
+  if (type === 'boots')  return BOOT_MAPPING[id];
+  if (type === 'gloves') return GLOVES_MAPPING[id];
+  return null;
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
@@ -601,7 +627,7 @@ const APPEARANCE_SECTIONS = [
           { col: 'Ankle Taping',       label: 'Vendaje tobillo',               enum: { '0': 'No', '1': 'Sí' } },
           { col: 'Player Gloves',      label: 'Guantes',                       enum: { '0': 'No', '1': 'Para invierno' } },
           { col: 'Colour',             label: 'Color de guantes',              conditionalDash: { col: 'Player Gloves', value: '0' } },
-          { col: 'Gloves',             label: 'Guantes portero',               imageKey: 'gloves', gkOnly: true },
+          { col: 'Gloves',             label: 'Guantes portero',               imageKey: 'gloves', bootDisplay: true, zeroLabel: 'Guantes por defecto', gkOnly: true },
           { col: 'Undershorts',        label: 'Calentadores',                  enum: { '0': 'V: No / I: No', '1': 'V: No / I: Largo', '2': 'V: Corto / I: Corto', '3': 'V: Corto / I: Largo' } },
           { col: 'Shirttail',          label: 'Estilo de la camiseta',         enum: { '0': 'Dentro', '1': 'Fuera' } },
           { col: 'Sock Length',        label: 'Largo de las calcetas',         enum: { '0': 'Normal', '1': 'Corto', '2': 'Largo' } },
@@ -654,12 +680,25 @@ function computeRadarAttributes(player) {
     if (!vals.length) return 0;
     return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
   };
+  const posIdx = parseInt(player['POS'], 10);
+  const isGK = posIdx === 0;
+  if (isGK) {
+    return {
+      PAS: avg('Low Pass', 'Lofted Pass', 'Controlled Spin', 'Place Kicking'),
+      TIR: avg('Finishing', 'Attacking Prowess'),
+      FIS: avg('Physical Contact'),
+      DEF: avg('Defensive Prowess'),
+      VEL: avg('Speed'),
+      DRI: avg('Dribbling', 'Ball Control'),
+      POR: avg('Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'),
+    };
+  }
   return {
     PAS: avg('Low Pass', 'Lofted Pass', 'Controlled Spin', 'Place Kicking'),
     TIR: avg('Finishing', 'Attacking Prowess'),
-    FIS: avg('Physical Contact'),
+    FIS: avg('Physical Contact', 'Stamina'),
     DEF: avg('Defensive Prowess'),
-    VEL: avg('Speed'),
+    RIT: avg('Speed', 'Explosive Power'),
     DRI: avg('Dribbling', 'Ball Control'),
     POR: avg('Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'),
   };
@@ -871,8 +910,8 @@ function renderEstilosJuegoCOM(player) {
 }
 
 function appearanceImagePath(imageKey, value) {
-  if (imageKey === 'boots') return `img/boots/${value}.webp`;
-  if (imageKey === 'gloves') return `img/appearance/gloves/${value}.webp`;
+  if (imageKey === 'boots')  return `img/boots/${value}.webp`;
+  if (imageKey === 'gloves') return `img/gloves/${String(value).padStart(3, '0')}.webp`;
   return `img/appearance/${imageKey}/${value}.webp`;
 }
 
@@ -928,13 +967,16 @@ function renderAppearanceField(field, appearance, player) {
     return renderAppearanceRow(field.label, label, null, null);
   }
 
-  // imageKey with bootDisplay: show boot image using boot ID, display brand + PES number
+  // imageKey with bootDisplay: show equipment image using ID, display 2-digit PES number
   if (field.imageKey && field.bootDisplay && rawVal) {
     const imgPath = appearanceImagePath(field.imageKey, rawVal);
-    const bootInfo = BOOT_MAPPING[rawVal];
-    const displayText = bootInfo
-      ? `${bootInfo.brand} ${bootInfo.pesNumber}`
-      : rawVal;
+    const info = getEquipmentData(field.imageKey, rawVal);
+    let displayText;
+    if (info) {
+      displayText = String(info.pesNumber).padStart(2, '0');
+    } else {
+      displayText = rawVal;
+    }
     return renderAppearanceRow(field.label, displayText, imgPath, field.imageKey);
   }
 

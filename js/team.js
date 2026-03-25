@@ -83,6 +83,15 @@ function statTextColor(hexColor) {
   return ['#e5dc00', '#a8ff00', '#62ff51', '#00ff87'].includes(hexColor) ? '#111' : '#fff';
 }
 
+function contrastTextColor(hexColor) {
+  const h = hexColor.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? '#111' : '#fff';
+}
+
 function overallColor(value) {
   const v = parseInt(value, 10);
   if (isNaN(v)) return 'stat-range-1';
@@ -195,6 +204,8 @@ function computeRadarAttributes(player) {
     REG: avg('Ball Control', 'Dribbling', 'Body Control'),
     DEF: avg('Header', 'Jump', 'Defensive Prowess', 'Ball Winning'),
     PAS: avg('Low Pass', 'Lofted Pass', 'Place Kicking', 'Controlled Spin'),
+    RIT: avg('Speed', 'Explosive Power'),
+    FIS: avg('Physical Contact', 'Stamina'),
     COM: avg('Speed', 'Explosive Power', 'Physical Contact', 'Stamina'),
     POR: avg('Goalkeeping', 'Catching', 'Clearing', 'Reflexes', 'Coverage'),
   };
@@ -218,6 +229,8 @@ const SORT_COLS = {
   'REG':  p => computeRadarAttributes(p).REG,
   'DEF':  p => computeRadarAttributes(p).DEF,
   'PAS':  p => computeRadarAttributes(p).PAS,
+  'RIT':  p => computeRadarAttributes(p).RIT,
+  'FIS':  p => computeRadarAttributes(p).FIS,
   'COM':  p => computeRadarAttributes(p).COM,
   'POR':  p => computeRadarAttributes(p).POR,
 };
@@ -349,11 +362,13 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       const xDepth = parseFloat(formationRow[`Ubicacion X${i} ${suffix}`]) || 0;
       const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} ${suffix}`]) || 52;
 
-      // Map to CSS percentage positions on a full pitch (630×670):
+      // Map to CSS percentage positions on a full pitch:
       //   left: 5 + (yWidth / 104) * 90%  (0=left touchline → 5%, 52=center → 50%, 104=right → 95%)
       //   top:  7 + (1 - xDepth / 52) * 86%  (xDepth=52=midfield → 7%, xDepth=0=own goal → 93%)
       const leftPct = 5 + (yWidth / 104) * 90;
       const topPct  = 7 + (1 - xDepth / 52) * 86;
+      // Lower on screen (higher topPct) = higher z-index so they appear on top
+      const zIdx = Math.round(topPct);
 
       const shortName = escapeHtml(formatShortName(player.Name || ''));
       const pid = escapeHtml(player.ID);
@@ -364,30 +379,24 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       const formationPos = (!isNaN(posRawVal) && posRawVal >= 0 && posRawVal < PES_POSITIONS.length)
         ? PES_POSITIONS[posRawVal] : (player.Position || '');
       const posDisplay = escapeHtml(translatePosition(formationPos));
-      const posColor = positionGroupColor(formationPos);
+      const badgeColor = positionGroupColor(formationPos);
 
       const ovr = escapeHtml(player.Overall || '–');
-      const ovrColor = statColor(player.Overall || '');
-      const ovrTextColor = statTextColor(ovrColor);
       const isCapitan = !isNaN(captainRawIdx) && squadIdx === captainRawIdx;
 
       tokens.push(`
-        <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%">
-          <div class="pitch-player-top">
-            <div class="pitch-player-photo-wrap">
-              <img src="img/players/${pid}.webp"
-                onerror="handleMinifaceError(this,'${pid}')"
-                class="pitch-player-photo" alt="${shortName}">
-            </div>
+        <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%;z-index:${zIdx}">
+          <div class="pitch-player-photo-wrap">
+            <img src="img/players/${pid}.webp"
+              onerror="handleMinifaceError(this,'${pid}')"
+              class="pitch-player-photo" alt="${shortName}">
+            ${isCapitan ? '<div class="pitch-captain-badge">C</div>' : ''}
           </div>
-          <div class="pitch-player-bar">
-            <span class="pitch-player-ovr-block">
-              <span class="pitch-player-pos-sm" style="color:${posColor};opacity:0.65">${posDisplay}</span>
-              <span class="pitch-player-ovr" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span>
-            </span>
-            <span class="pitch-player-name">${shortName}</span>
-            ${isCapitan ? '<span class="pitch-captain-badge">C</span>' : ''}
+          <div class="pitch-player-badge">
+            <span class="pitch-badge-pos" style="color:${badgeColor}">${posDisplay}</span>
+            <span class="pitch-badge-ovr">${ovr}</span>
           </div>
+          <div class="pitch-player-name"><span>${shortName}</span></div>
         </a>`);
     }
     return tokens;
@@ -396,6 +405,29 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
   // Build pitch field HTML for a given suffix
   function buildPitchField(suffix) {
     const tokens = buildPitchTokens(suffix);
+
+    // Compute formation label (e.g. "4-2-3-1") from player depths, excluding GK
+    const formLabel = (() => {
+      const xs = [];
+      for (let i = 1; i <= 11; i++) {
+        const posRaw = parseInt(formationRow[`Posicion ${i} ${suffix}`], 10);
+        const pos = (!isNaN(posRaw) && posRaw >= 0 && posRaw < PES_POSITIONS.length) ? PES_POSITIONS[posRaw] : '';
+        if (pos === 'GK') continue;
+        const x = parseFloat(formationRow[`Ubicacion X${i} ${suffix}`]) || 0;
+        xs.push(x);
+      }
+      xs.sort((a, b) => a - b);
+      if (!xs.length) return '';
+      const groups = [];
+      let count = 1;
+      for (let j = 1; j < xs.length; j++) {
+        if (xs[j] - xs[j - 1] > 5) { groups.push(count); count = 1; }
+        else count++;
+      }
+      groups.push(count);
+      return groups.join('-');
+    })();
+
     return `
       <div class="pitch-field">
         <div class="pf-mark pf-halfway"></div>
@@ -405,6 +437,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
         <div class="pf-mark pf-penalty-bottom"></div>
         <div class="pf-mark pf-goal-bottom"></div>
         ${tokens.join('')}
+        ${formLabel ? `<div class="pitch-formation-label">${escapeHtml(formLabel)}</div>` : ''}
       </div>`;
   }
 
@@ -521,8 +554,13 @@ function renderPlayerCard(player, teamId) {
   const regColor = statColor(radarAttrs.REG);
   const defColor = statColor(radarAttrs.DEF);
   const pasColor = statColor(radarAttrs.PAS);
-  const comColor = statColor(radarAttrs.COM);
-  const porColor = statColor(radarAttrs.POR);
+  const isGK = (player.Position || '') === 'GK';
+  const stat5Color = isGK ? statColor(radarAttrs.COM) : statColor(radarAttrs.RIT);
+  const stat6Color = isGK ? statColor(radarAttrs.POR) : statColor(radarAttrs.FIS);
+  const stat5Val   = isGK ? radarAttrs.COM : radarAttrs.RIT;
+  const stat6Val   = isGK ? radarAttrs.POR : radarAttrs.FIS;
+  const stat5Key   = isGK ? 'COM' : 'RIT';
+  const stat6Key   = isGK ? 'POR' : 'FIS';
 
   return `
     <a class="player-card" href="player.html?id=${pid}&team=${tid}">
@@ -549,8 +587,8 @@ function renderPlayerCard(player, teamId) {
           <div class="pcs"><span class="pcs-val" style="color:${regColor}">${radarAttrs.REG}</span><span class="pcs-key">REG</span></div>
           <div class="pcs"><span class="pcs-val" style="color:${defColor}">${radarAttrs.DEF}</span><span class="pcs-key">DEF</span></div>
           <div class="pcs"><span class="pcs-val" style="color:${pasColor}">${radarAttrs.PAS}</span><span class="pcs-key">PAS</span></div>
-          <div class="pcs"><span class="pcs-val" style="color:${comColor}">${radarAttrs.COM}</span><span class="pcs-key">COM</span></div>
-          <div class="pcs"><span class="pcs-val" style="color:${porColor}">${radarAttrs.POR}</span><span class="pcs-key">POR</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${stat5Color}">${stat5Val}</span><span class="pcs-key">${stat5Key}</span></div>
+          <div class="pcs"><span class="pcs-val" style="color:${stat6Color}">${stat6Val}</span><span class="pcs-key">${stat6Key}</span></div>
         </div>
       </div>
     </a>`;
@@ -695,8 +733,8 @@ function renderPlayerRow(player, teamId) {
     <td>${radarAttrs.REG}</td>
     <td>${radarAttrs.DEF}</td>
     <td>${radarAttrs.PAS}</td>
-    <td>${radarAttrs.COM}</td>
-    <td>${radarAttrs.POR}</td>
+    <td>${(player.Position || '') === 'GK' ? radarAttrs.COM : radarAttrs.RIT}</td>
+    <td>${(player.Position || '') === 'GK' ? radarAttrs.POR : radarAttrs.FIS}</td>
   </tr>`;
 }
 
@@ -767,6 +805,16 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
   // Initialise the player card carousel navigation
   initPlayerCarousel();
 
+  // Apply marquee scroll to pitch player names that overflow their container
+  content.querySelectorAll('.pitch-player-name').forEach(el => {
+    const span = el.querySelector('span');
+    if (!span) return;
+    if (el.scrollWidth > el.clientWidth) {
+      span.textContent = span.textContent + '\u00A0\u00A0\u00A0\u00A0' + span.textContent;
+      el.classList.add('scrolling');
+    }
+  });
+
   // Update page title
   document.title = `${team.displayName} – Base de datos PES`;
 }
@@ -818,8 +866,8 @@ function renderPositionGroups(players, teamId) {
               <th>REG</th>
               <th>DEF</th>
               <th>PAS</th>
-              <th>COM</th>
-              <th>POR</th>
+              <th>RIT/COM</th>
+              <th>FIS/POR</th>
             </tr>
           </thead>
           <tbody>${rowsHtml}</tbody>
@@ -842,7 +890,7 @@ function renderPositionGroups(players, teamId) {
             <tr>
               <th class="shirt-number-cell">#</th>
               <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
-              <th>OVR</th><th>ATQ</th><th>REG</th><th>DEF</th><th>PAS</th><th>COM</th><th>POR</th>
+              <th>OVR</th><th>ATQ</th><th>REG</th><th>DEF</th><th>PAS</th><th>RIT/COM</th><th>FIS/POR</th>
             </tr>
           </thead>
           <tbody>${uncategorized.map(p => renderPlayerRow(p, teamId)).join('')}</tbody>
