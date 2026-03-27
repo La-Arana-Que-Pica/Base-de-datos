@@ -510,32 +510,106 @@ async function boot() {
   restoreNavState();
 }
 
-// ─── Navigation state (session) ──────────────────────────────────────────────
+// ─── Navigation state (URL + localStorage fallback) ──────────────────────────
 
 const NAV_STATE_KEY = 'pes_nav_state';
 
+/**
+ * Build a URL string from a nav state object.
+ * Pagination is expressed as `offset` (items skipped), e.g. offset=60 for page 2.
+ */
+function _stateToUrl(state) {
+  if (!state || !state.view) return window.location.pathname;
+  const params = new URLSearchParams();
+  params.set('view', state.view);
+  if (state.leagueId) params.set('leagueId', state.leagueId);
+  if (state.query) params.set('q', state.query);
+  if (state.page && state.page > 1) {
+    // Store as byte offset so it matches the sofifa-style ?offset=60
+    const pageSize = state.view === 'teams' ? TEAMS_PAGE_SIZE : PLAYERS_PAGE_SIZE;
+    params.set('offset', (state.page - 1) * pageSize);
+  }
+  if (state.filters) {
+    Object.entries(state.filters).forEach(([k, v]) => {
+      if (v !== '') params.set('f_' + k, v);
+    });
+  }
+  if (state.specialPlayers) params.set('special', '1');
+  return window.location.pathname + '?' + params.toString();
+}
+
+/**
+ * Parse the current URL query string into a nav state object.
+ * Returns null when no `view` param is present.
+ */
+function _urlToState() {
+  const params = new URLSearchParams(window.location.search);
+  const view = params.get('view');
+  if (!view) return null;
+  const state = { view };
+  const leagueId = params.get('leagueId');
+  if (leagueId) state.leagueId = leagueId;
+  const q = params.get('q');
+  if (q) state.query = q;
+  const offset = parseInt(params.get('offset'), 10);
+  if (!isNaN(offset) && offset >= 0) {
+    const pageSize = view === 'teams' ? TEAMS_PAGE_SIZE : PLAYERS_PAGE_SIZE;
+    state.page = Math.floor(offset / pageSize) + 1;
+  }
+  const filters = {};
+  params.forEach((v, k) => {
+    if (k.startsWith('f_')) filters[k.slice(2)] = v;
+  });
+  if (Object.keys(filters).length) state.filters = filters;
+  if (params.get('special') === '1') state.specialPlayers = true;
+  return state;
+}
+
+// Track which view was last pushed so we use replaceState for same-view changes
+let _lastPushedView = null;
+
 function saveNavState(state) {
+  // Always keep localStorage in sync as a fallback
   try { localStorage.setItem(NAV_STATE_KEY, JSON.stringify(state)); } catch(e) {}
+
+  // Update the browser URL
+  const url = _stateToUrl(state);
+  const viewChanged = state.view !== _lastPushedView;
+  if (viewChanged) {
+    history.pushState(state, '', url);
+    _lastPushedView = state.view;
+  } else {
+    history.replaceState(state, '', url);
+  }
 }
 
 function loadNavState() {
+  // Prefer URL state over localStorage
+  const urlState = _urlToState();
+  if (urlState) return urlState;
   try { return JSON.parse(localStorage.getItem(NAV_STATE_KEY) || 'null'); } catch(e) { return null; }
 }
 
-function restoreNavState() {
-  const state = loadNavState();
+/**
+ * Apply a nav state object (e.g. from URL or popstate event) to the UI.
+ * Does NOT call saveNavState to avoid extra history entries.
+ */
+function _applyNavState(state) {
   if (!state || !state.view) { showAllPlayers(); return; }
   switch (state.view) {
     case 'leagues':
-      showLeaguesView();
+      _showLeaguesViewInternal();
       if (state.query) {
         const input = document.getElementById('leagues-search-input');
         if (input) { input.value = state.query; filterLeaguesGrid(state.query); }
       }
       break;
-    case 'leagueTeams': if (state.leagueId) showLeagueTeamsView(state.leagueId); else showLeaguesView(); break;
+    case 'leagueTeams':
+      if (state.leagueId) _showLeagueTeamsViewInternal(state.leagueId);
+      else _showLeaguesViewInternal();
+      break;
     case 'teams':
-      showTeamsView();
+      _showTeamsViewInternal();
       if (state.query) {
         const input = document.getElementById('teams-search-input');
         if (input) { input.value = state.query; filterTeamsGrid(state.query); }
@@ -543,15 +617,22 @@ function restoreNavState() {
       if (state.page > 1) goToTeamsPage(state.page, false);
       break;
     case 'players':
-      if (state.filters) {
-        Object.assign(_advFilters, state.filters);
-      }
+      if (state.filters) Object.assign(_advFilters, state.filters);
       if (state.specialPlayers !== undefined) _showSpecialPlayers = state.specialPlayers;
       if (state.page) _allPlayersPage = state.page;
-      showAllPlayers(false);
+      _showAllPlayersInternal(false);
       break;
     default: showAllPlayers(); break;
   }
+}
+
+function restoreNavState() {
+  _lastPushedView = null; // reset so first nav uses pushState
+  const state = loadNavState();
+  if (!state || !state.view) { showAllPlayers(); return; }
+  // Seed _lastPushedView to avoid a spurious pushState on first render
+  _lastPushedView = state.view;
+  _applyNavState(state);
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -618,8 +699,8 @@ function filterAllPlayers(query) {
 
 let _leaguesForGrid = [];
 
-function showLeaguesView() {
-  saveNavState({ view: 'leagues' });
+/** Internal: render the leagues grid without saving nav state. */
+function _showLeaguesViewInternal() {
   _setActiveSidebarNav('leagues');
   _leaguesForGrid = DB.leagues.slice();
   hideAllViews();
@@ -655,6 +736,11 @@ function showLeaguesView() {
     <div class="grid-cards" id="leagues-grid-cards">${cardsHtml}</div>`;
 }
 
+function showLeaguesView() {
+  saveNavState({ view: 'leagues' });
+  _showLeaguesViewInternal();
+}
+
 function filterLeaguesGrid(query) {
   const q = query.toLowerCase().trim();
   const container = document.getElementById('leagues-grid-cards');
@@ -681,6 +767,11 @@ function filterLeaguesGrid(query) {
 
 function showLeagueTeamsView(leagueId) {
   saveNavState({ view: 'leagueTeams', leagueId });
+  _showLeagueTeamsViewInternal(leagueId);
+}
+
+/** Internal: render a league's teams without saving nav state. */
+function _showLeagueTeamsViewInternal(leagueId) {
   _setActiveSidebarNav('leagueTeams');
   const league = DB.leagues.find(l => l.id === leagueId);
   if (!league) return;
@@ -725,8 +816,8 @@ let _teamsForGrid = [];
 let _teamsFilteredList = [];
 let _teamsGridPage = 1;
 
-function showTeamsView() {
-  saveNavState({ view: 'teams' });
+/** Internal: render teams grid without saving nav state. */
+function _showTeamsViewInternal() {
   _setActiveSidebarNav('teams');
   // Only show teams that belong to a league
   const teamsInLeagues = new Set();
@@ -756,6 +847,11 @@ function showTeamsView() {
     <div id="teams-grid-pagination"></div>`;
 
   _renderTeamsGridPage();
+}
+
+function showTeamsView() {
+  saveNavState({ view: 'teams' });
+  _showTeamsViewInternal();
 }
 
 function _renderTeamsGridPage() {
@@ -1448,8 +1544,8 @@ function toggleSpecialPlayers() {
   _renderPlayersPage();
 }
 
-function showAllPlayers(resetPage) {
-  saveNavState({ view: 'players', filters: { ..._advFilters }, specialPlayers: _showSpecialPlayers, page: _allPlayersPage });
+/** Internal: render all-players view without saving nav state. */
+function _showAllPlayersInternal(resetPage) {
   _setActiveSidebarNav('players');
 
   hideAllViews();
@@ -1494,6 +1590,11 @@ function showAllPlayers(resetPage) {
 
   // Render the first page
   _renderPlayersPage();
+}
+
+function showAllPlayers(resetPage) {
+  saveNavState({ view: 'players', filters: { ..._advFilters }, specialPlayers: _showSpecialPlayers, page: _allPlayersPage });
+  _showAllPlayersInternal(resetPage);
 }
 
 // ─── Team / Players view ──────────────────────────────────────────────────────
@@ -1922,6 +2023,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (searchInput) {
     searchInput.addEventListener('input', onSearchInput);
   }
+
+  // Handle browser back/forward navigation
+  window.addEventListener('popstate', (event) => {
+    if (!DB.loaded) return;
+    const state = (event.state && event.state.view) ? event.state : _urlToState();
+    // Update _lastPushedView to prevent duplicate pushState on the restored view
+    if (state) _lastPushedView = state.view;
+    _applyNavState(state || { view: 'players' });
+  });
 
   // Boot the indexer
   boot().catch(err => {
