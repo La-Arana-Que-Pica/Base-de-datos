@@ -255,7 +255,7 @@ def infer_player_style(attrs: Dict[str, int], regpos: str, is_gk: bool) -> str:
         rushing = attrs.get("Rushing Out (Tendency)", 0)
         kicking = attrs.get("Kicking", 0)
         throwing = attrs.get("Throwing", 0)
-        if rushing >= 75 and (kicking >= 75 or throwing >= 75):
+        if rushing >= 68 and (kicking >= 68 or throwing >= 68):
             return "Offensive Goalkeeper"
         return "Defensive Goalkeeper"
     drib = attrs.get("Dribbling", 0)
@@ -270,64 +270,82 @@ def infer_player_style(attrs: Dict[str, int], regpos: str, is_gk: bool) -> str:
     positioning = attrs.get("Positioning", 0)
     tackling = attrs.get("Tackling", 0)
     stamina = attrs.get("Stamina", 0)
+    work_rate = attrs.get("Work Rate", 0)
+    off_ball = attrs.get("Off the Ball", 0)
     if regpos == "WF":
-        if drib >= 85 and flair >= 80 and (vision >= 80 or passing >= 80):
-            return "Creative Playmaker"
-        if pace >= 85 and accel >= 85:
+        # Prolific Winger is the most common WF style in the reference database
+        if pace >= 76 and accel >= 73:
             return "Prolific Winger"
-        if fin >= 80 and positioning >= 70:
+        if drib >= 74 and flair >= 68:
+            return "Creative Playmaker"
+        if fin >= 72 and positioning >= 66:
             return "Goal Poacher"
-        return "Creative Playmaker"
+        return "Prolific Winger"
     if regpos == "CF":
-        if heading >= 80 and strg >= 80:
+        if heading >= 76 and strg >= 73:
             return "Target Man"
-        if fin >= 85:
+        if fin >= 72 and off_ball >= 66:
             return "Fox in the Box"
-        return "Target Man"
+        return "Fox in the Box"
     if regpos == "AMF":
-        if vision >= 85 and passing >= 85:
+        if vision >= 76 and passing >= 74:
             return "Classic No. 10"
+        if drib >= 72 and flair >= 66:
+            return "Creative Playmaker"
+        return "Creative Playmaker"
+    if regpos == "SS":
+        if pace >= 74 and off_ball >= 70:
+            return "Fox in the Box"
         return "Creative Playmaker"
     if regpos == "CMF":
-        if stamina >= 80 and tackling >= 70 and positioning >= 70:
+        # Box-to-Box is the most common CMF style in the reference database
+        if stamina >= 72 and work_rate >= 68:
             return "Box-to-Box"
-        return "Creative Playmaker" if vision >= 80 or passing >= 80 else "Box-to-Box"
+        if vision >= 72 and passing >= 70:
+            return "Classic No. 10"
+        return "Box-to-Box"
     if regpos == "DMF":
-        if tackling >= 80 and positioning >= 75:
+        if tackling >= 72 and positioning >= 68:
             return "The Destroyer"
         return "Anchor Man"
-    if regpos in ("LB","RB","SB"):
-        if pace >= 80 and drib >= 70:
+    if regpos in ("LB", "RB", "SB"):
+        # Offensive Full-Back is dominant in the reference database (~80% of LB/RB)
+        if pace >= 68 and drib >= 60:
             return "Offensive Full-Back"
         return "Defensive Full-Back"
+    if regpos in ("LMF", "RMF"):
+        if pace >= 72 and accel >= 70:
+            return "Prolific Winger"
+        return "Creative Playmaker"
     if regpos == "CB":
-        if tackling >= 80 and positioning >= 80:
+        # The Destroyer is the most common explicit style for CBs in the reference database
+        if tackling >= 72 and positioning >= 68:
             return "The Destroyer"
-        return "Anchor Man"
+        return "Build Up"
     return "Creative Playmaker"
 
 # ============== Combos y atributos (CAMPO) ==============
 def combos_field(attrs: Dict[str, int]) -> Dict[str, float]:
     g = lambda k: attrs.get(k, 0)
     return {
-        "Attacking Prowess": 0.4*g("Off the Ball") + 0.2*g("Anticipation") + 0.2*g("Decisions") + 0.2*g("Finishing"),
-        "Ball Control": 0.5*g("First Touch") + 0.3*g("Technique") + 0.2*g("Balance"),
-        "Dribbling": 0.7*g("Dribbling") + 0.2*g("Agility") + 0.1*g("Flair"),
-        "Low Pass": 0.6*g("Passing") + 0.3*g("Vision") + 0.1*g("Decisions"),
-        "Lofted Pass": 0.6*g("Crossing") + 0.3*g("Passing") + 0.1*g("Technique"),
-        "Finishing": 0.7*g("Finishing") + 0.3*g("Composure"),
-        "Place Kicking": 0.7*g("Free Kick Taking") + 0.3*g("Technique"),
-        "Swerve": 0.4*g("Free Kick Taking") + 0.4*g("Technique") + 0.2*g("Flair"),
-        "Header": 0.7*g("Heading") + 0.3*g("Jumping Reach"),
-        "Defence Prowess": 0.4*g("Positioning") + 0.3*g("Anticipation") + 0.2*g("Decisions") + 0.1*g("Tackling"),
-        "Ball Winning": 0.5*g("Tackling") + 0.25*g("Aggression") + 0.25*g("Work Rate"),
-        "Kicking Power": 0.6*g("Long Shots") + 0.2*g("Strength") + 0.2*g("Technique"),
+        "Attacking Prowess": 0.35*g("Off the Ball") + 0.25*g("Anticipation") + 0.25*g("Finishing") + 0.15*g("Decisions"),
+        "Ball Control": 0.45*g("First Touch") + 0.35*g("Technique") + 0.20*g("Balance"),
+        "Dribbling": 0.60*g("Dribbling") + 0.25*g("Agility") + 0.15*g("Flair"),
+        "Low Pass": 0.55*g("Passing") + 0.30*g("Vision") + 0.15*g("Technique"),
+        "Lofted Pass": 0.50*g("Crossing") + 0.30*g("Passing") + 0.20*g("Technique"),
+        "Finishing": 0.65*g("Finishing") + 0.25*g("Composure") + 0.10*g("Technique"),
+        "Place Kicking": 0.65*g("Free Kick Taking") + 0.35*g("Technique"),
+        "Swerve": 0.40*g("Free Kick Taking") + 0.35*g("Technique") + 0.25*g("Flair"),
+        "Header": 0.65*g("Heading") + 0.35*g("Jumping Reach"),
+        "Defence Prowess": 0.35*g("Positioning") + 0.30*g("Anticipation") + 0.20*g("Tackling") + 0.15*g("Decisions"),
+        "Ball Winning": 0.50*g("Tackling") + 0.30*g("Aggression") + 0.20*g("Anticipation"),
+        "Kicking Power": 0.55*g("Long Shots") + 0.25*g("Strength") + 0.20*g("Technique"),
         "Speed": g("Pace"),
-        "Explosive Power": 0.6*g("Acceleration") + 0.4*g("Agility"),
-        "Body Control": 0.5*g("Balance") + 0.3*g("Agility") + 0.2*g("Strength"),
-        "Physical Contact": 0.6*g("Strength") + 0.4*g("Bravery"),
-        "Jump": 0.7*g("Jumping Reach") + 0.3*g("Balance"),
-        "Stamina": 0.7*g("Stamina") + 0.3*g("Natural Fitness"),
+        "Explosive Power": 0.60*g("Acceleration") + 0.40*g("Agility"),
+        "Body Control": 0.45*g("Balance") + 0.35*g("Agility") + 0.20*g("Strength"),
+        "Physical Contact": 0.65*g("Strength") + 0.35*g("Bravery"),
+        "Jump": 0.70*g("Jumping Reach") + 0.30*g("Strength"),
+        "Stamina": 0.65*g("Stamina") + 0.25*g("Natural Fitness") + 0.10*g("Work Rate"),
     }
 
 # ============== Conversión ESPECÍFICA PARA ARQUEROS (no 40s planos) ==============
@@ -364,8 +382,44 @@ def combos_gk(attrs: Dict[str, int]) -> Dict[str, float]:
     out["Ball Winning"]      = 0.45*g("Tackling") + 0.30*g("Aggression") + 0.25*g("Work Rate")
     return out
 
+# ============== Ajustes de estadísticas por posición ==============
+# Multipliers that shift stats toward realistic PES profiles for each position.
+# Based on reference database stat distributions (avg Speed=74.7, Stamina=75, etc.).
+_POS_STAT_MULTS: Dict[str, Dict[str, float]] = {
+    "CB":  {"Defence Prowess": 1.08, "Ball Winning": 1.08, "Header": 1.06,
+            "Jump": 1.05, "Physical Contact": 1.05,
+            "Attacking Prowess": 0.90, "Dribbling": 0.93, "Finishing": 0.86},
+    "LB":  {"Speed": 1.04, "Explosive Power": 1.04, "Lofted Pass": 1.05,
+            "Defence Prowess": 1.04, "Ball Winning": 1.04, "Finishing": 0.88},
+    "RB":  {"Speed": 1.04, "Explosive Power": 1.04, "Lofted Pass": 1.05,
+            "Defence Prowess": 1.04, "Ball Winning": 1.04, "Finishing": 0.88},
+    "DMF": {"Defence Prowess": 1.06, "Ball Winning": 1.08, "Low Pass": 1.04,
+            "Finishing": 0.88, "Attacking Prowess": 0.90, "Dribbling": 0.92},
+    "CMF": {"Low Pass": 1.04, "Stamina": 1.04, "Body Control": 1.03},
+    "AMF": {"Attacking Prowess": 1.06, "Ball Control": 1.04, "Dribbling": 1.04,
+            "Low Pass": 1.04, "Defence Prowess": 0.88, "Ball Winning": 0.88},
+    "WF":  {"Speed": 1.06, "Explosive Power": 1.06, "Dribbling": 1.06,
+            "Attacking Prowess": 1.04, "Defence Prowess": 0.86, "Ball Winning": 0.86,
+            "Finishing": 1.03},
+    "LMF": {"Speed": 1.04, "Explosive Power": 1.04, "Dribbling": 1.04,
+            "Lofted Pass": 1.04, "Defence Prowess": 0.92},
+    "RMF": {"Speed": 1.04, "Explosive Power": 1.04, "Dribbling": 1.04,
+            "Lofted Pass": 1.04, "Defence Prowess": 0.92},
+    "CF":  {"Finishing": 1.08, "Attacking Prowess": 1.06, "Kicking Power": 1.04,
+            "Header": 1.04, "Defence Prowess": 0.85, "Ball Winning": 0.82},
+    "SS":  {"Attacking Prowess": 1.06, "Finishing": 1.05, "Explosive Power": 1.04,
+            "Defence Prowess": 0.88, "Ball Winning": 0.88},
+}
+
+def apply_position_adjustments(abilities: Dict[str, int], regpos: str) -> Dict[str, int]:
+    mults = _POS_STAT_MULTS.get(regpos, {})
+    for stat, mult in mults.items():
+        if stat in abilities:
+            abilities[stat] = max(40, min(99, int(round(abilities[stat] * mult))))
+    return abilities
+
 # ============== Skills y COM ==============
-def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, float]) -> Tuple[List[str], List[str]]:
+def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, float], regpos: str = "") -> Tuple[List[str], List[str]]:
     skills = []
     coms = []
 
@@ -384,42 +438,153 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
         return out
 
     if is_gk:
-        # GK skills según atributos
-        if attrs.get("Kicking", 0) >= 68 and attrs.get("Decisions", 0) >= 58:
+        if attrs.get("Kicking", 0) >= 62 and attrs.get("Decisions", 0) >= 55:
             skills.append("Low Punt Trajectory")
-        if attrs.get("Throwing", 0) >= 68:
+        if attrs.get("Throwing", 0) >= 62:
             skills.append("GK Long Throw")
-        # COM: ninguno para GK
         return order_skills(skills), []
 
-    # Jugador de campo: reglas básicas
-    drib = attrs.get("Dribbling", 0); agi = attrs.get("Agility", 0); flair = attrs.get("Flair", 0)
-    ft = attrs.get("First Touch", 0); pas = attrs.get("Passing", 0); vis = attrs.get("Vision", 0)
-    tech = attrs.get("Technique", 0); cross = attrs.get("Crossing", 0)
-    lshot = attrs.get("Long Shots", 0); kpow = combos.get("Kicking Power", 0)
+    # ── Position context booleans ──────────────────────────────────────────────
+    is_attacker  = regpos in ("CF", "SS", "WF")
+    is_midfielder = regpos in ("CMF", "AMF", "DMF", "LMF", "RMF")
+    is_defender  = regpos in ("CB", "LB", "RB", "SB")
+    is_wide      = regpos in ("WF", "LMF", "RMF", "LB", "RB")
 
-    if drib >= 85 and agi >= 80: skills.append("Scissors Feint")
-    if drib >= 85 and flair >= 75: skills.append("Flip Flap")
-    if ft >= 80 and agi >= 80 and tech >= 80: skills.append("Marseille Turn")
-    if flair >= 85 and tech >= 80: skills.append("Sombrero")
-    if agi >= 85 and tech >= 80: skills.append("Scotch Move")
-    if flair >= 90 and tech >= 85: skills.append("Heel Trick")
-    if ft >= 85 and pas >= 80: skills.append("One-touch Pass")
-    if vis >= 85 and pas >= 80 and tech >= 80: skills.append("Weighted Pass")
-    if cross >= 85 and vis >= 80 and tech >= 80: skills.append("Pinpoint Crossing")
-    swerve_combo = combos.get("Swerve", 0)
-    if tech >= 85 and swerve_combo >= 70: skills.append("Outside Curler")
-    if lshot >= 85 and kpow >= 70: skills.append("Long Range Drive")
-    if attrs.get("Heading", 0) >= 85 and attrs.get("Jumping Reach", 0) >= 80: skills.append("Heading")
-    if flair >= 95 and tech >= 90: skills.append("Rabona")
+    # ── Raw FM attributes ──────────────────────────────────────────────────────
+    drib     = attrs.get("Dribbling", 0)
+    agi      = attrs.get("Agility", 0)
+    flair    = attrs.get("Flair", 0)
+    ft       = attrs.get("First Touch", 0)
+    pas      = attrs.get("Passing", 0)
+    vis      = attrs.get("Vision", 0)
+    tech     = attrs.get("Technique", 0)
+    cross    = attrs.get("Crossing", 0)
+    lshot    = attrs.get("Long Shots", 0)
+    heading  = attrs.get("Heading", 0)
+    jumping  = attrs.get("Jumping Reach", 0)
+    fin      = attrs.get("Finishing", 0)
+    comp     = attrs.get("Composure", 0)
+    pace     = attrs.get("Pace", 0)
+    accel    = attrs.get("Acceleration", 0)
+    strg     = attrs.get("Strength", 0)
+    brav     = attrs.get("Bravery", 0)
+    det      = attrs.get("Determination", 0)
+    work     = attrs.get("Work Rate", 0)
+    agg      = attrs.get("Aggression", 0)
+    mark     = attrs.get("Marking", 0)
+    pos_attr = attrs.get("Positioning", 0)
+    off_ball = attrs.get("Off the Ball", 0)
+    decisions = attrs.get("Decisions", 0)
+    leadership = attrs.get("Leadership", 0)
+    stamina  = attrs.get("Stamina", 0)
+    throwing = attrs.get("Throwing", 0)
+    kpow     = combos.get("Kicking Power", 0)
+    swerve   = combos.get("Swerve", 0)
 
-    # COM styles
-    if flair >= 85 and drib >= 80: coms.append("Trickster")
-    if drib >= 85 and attrs.get("Acceleration", 0) >= 80 and agi >= 80: coms.append("Mazing Run")
-    if attrs.get("Off the Ball", 0) >= 80 and attrs.get("Decisions", 0) >= 75 and attrs.get("Acceleration", 0) >= 75: coms.append("Incisive Run")
-    if vis >= 85 and pas >= 80 and cross >= 80: coms.append("Long Ball Expert")
-    if cross >= 85 and vis >= 80: coms.append("Early Cross")
-    if attrs.get("Long Shots", 0) >= 85 and kpow >= 70: coms.append("Long Ranger")
+    # ── DRIBBLING / MOVEMENT SKILLS ───────────────────────────────────────────
+    # Fancy dribbling tricks: restrict to attacking/wide/midfield roles
+    if not is_defender and regpos not in ("DMF",):
+        drib_thr_boost = 4 if regpos in ("CF", "SS") else 0
+        if drib >= 70 + drib_thr_boost and agi >= 68:
+            skills.append("Scissors Feint")
+        if drib >= 74 + drib_thr_boost and flair >= 67:
+            skills.append("Flip Flap")
+        if ft >= 72 and agi >= 72 and tech >= 70 and regpos not in ("CF", "SS"):
+            skills.append("Marseille Turn")
+        if flair >= 84 and tech >= 80:
+            skills.append("Sombrero")
+        if agi >= 82 and tech >= 78:
+            skills.append("Scotch Move")
+        if flair >= 87 and tech >= 82:
+            skills.append("Heel Trick")
+    # Cut Behind & Turn: a movement skill – allowed for all outfield
+    if drib >= 65 and agi >= 64 and pace >= 64:
+        skills.append("Cut Behind & Turn")
+
+    # ── PASSING / CROSSING SKILLS ─────────────────────────────────────────────
+    if ft >= 75 and pas >= 73:
+        skills.append("One-touch Pass")
+    if vis >= 68 and pas >= 67 and tech >= 63:
+        skills.append("Weighted Pass")
+    # Pinpoint Crossing: easier for wide roles
+    cross_thr = 67 if is_wide else 74
+    if cross >= cross_thr and vis >= 63 and tech >= 63:
+        skills.append("Pinpoint Crossing")
+    # Low Lofted Pass: ball-playing defenders / midfielders starting plays
+    if pas >= 66 and tech >= 62 and (is_defender or regpos == "DMF"):
+        skills.append("Low Lofted Pass")
+
+    # ── SHOOTING SKILLS ───────────────────────────────────────────────────────
+    if lshot >= 67 and kpow >= 55:
+        skills.append("Long Range Drive")
+    if lshot >= 78 and tech >= 73:
+        skills.append("Knuckle Shot")
+    if tech >= 68 and flair >= 68:
+        skills.append("Outside Curler")
+    if fin >= 66 and ft >= 65 and comp >= 61:
+        skills.append("First-time Shot")
+    if fin >= 77 and agi >= 74 and flair >= 72:
+        skills.append("Acrobatic Finishing")
+    if flair >= 90 and tech >= 85:
+        skills.append("Rabona")
+
+    # ── HEADER ────────────────────────────────────────────────────────────────
+    if heading >= 68 and jumping >= 64:
+        skills.append("Heading")
+
+    # ── DEFENSIVE SKILLS ──────────────────────────────────────────────────────
+    # Man Marking: mainly defenders and holding midfielders
+    if mark >= 65 and pos_attr >= 62 and not is_attacker:
+        skills.append("Man Marking")
+    # Track Back: pressing attackers / wide midfielders
+    if work >= 74 and stamina >= 71 and (is_attacker or is_midfielder or is_wide):
+        skills.append("Track Back")
+    # Acrobatic Clear: defenders with heading and agility
+    if heading >= 66 and agi >= 63 and (is_defender or regpos == "DMF"):
+        skills.append("Acrobatic Clear")
+
+    # ── PHYSICAL / THROW SKILLS ───────────────────────────────────────────────
+    # Long Throw: wide/defensive players with a strong arm or raw power
+    if (throwing >= 66 or (strg >= 72 and lshot >= 63)) and (is_wide or is_defender):
+        skills.append("Long Throw")
+
+    # ── MENTAL / LEADERSHIP SKILLS ────────────────────────────────────────────
+    # Malicia: aggressive, physical players
+    if agg >= 63 and brav >= 60:
+        skills.append("Malicia")
+    # Fighting Spirit: driven, determined players (very common in database ~23%)
+    if det >= 74 and (brav >= 66 or work >= 70):
+        skills.append("Fighting Spirit")
+    # Captaincy
+    if leadership >= 72:
+        skills.append("Captaincy")
+    # Super-sub: explosive off-bench impact player
+    if off_ball >= 80 and accel >= 78 and (is_attacker or is_midfielder):
+        skills.append("Super-sub")
+
+    # ── COM PLAYING STYLES ────────────────────────────────────────────────────
+    # Trickster: flair dribblers
+    if flair >= 74 and drib >= 72:
+        coms.append("Trickster")
+    # Mazing Run: dynamic dribbling with burst speed
+    if drib >= 73 and accel >= 71 and agi >= 69:
+        coms.append("Mazing Run")
+    # Speeding Bullet: pace-focused players (was never assigned before)
+    if pace >= 78 and accel >= 76:
+        coms.append("Speeding Bullet")
+    # Incisive Run: smart off-ball movement into space
+    if off_ball >= 70 and decisions >= 65 and accel >= 65:
+        coms.append("Incisive Run")
+    # Long Ball Expert: accurate switching and long diagonal balls
+    if vis >= 70 and pas >= 68 and (cross >= 65 or lshot >= 62):
+        coms.append("Long Ball Expert")
+    # Early Cross: wide players who deliver early
+    cross_com_thr = 68 if is_wide else 73
+    if cross >= cross_com_thr and vis >= 64:
+        coms.append("Early Cross")
+    # Long Ranger: powerful long shots (most common COM style in database ~26%)
+    if lshot >= 72 and kpow >= 60:
+        coms.append("Long Ranger")
 
     return order_skills(skills), order_com(coms)
 
@@ -507,6 +672,10 @@ def parse_input_fm(raw: str) -> dict:
     for k, v in combos.items():
         abilities_pes[k] = fm_to_pes(v) if v > 0 else 40
 
+    # Apply position-specific stat adjustments for a more realistic profile
+    if not is_gk:
+        abilities_pes = apply_position_adjustments(abilities_pes, registered)
+
     bad_foot = left_foot if foot == "R" else right_foot
     wf_usage = wf_usage_from_bad_foot(bad_foot)
     wf_acc = wf_accuracy_from_bad_foot(
@@ -519,7 +688,7 @@ def parse_input_fm(raw: str) -> dict:
     )
 
     pstyle = infer_player_style(attrs, registered, is_gk)
-    skills, coms = infer_skills_and_com(attrs, is_gk, combos)
+    skills, coms = infer_skills_and_com(attrs, is_gk, combos, registered)
     auto_playable = "" if is_gk else build_auto_playable(tokens, registered, is_gk)
 
     data = {
