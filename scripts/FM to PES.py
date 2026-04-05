@@ -121,8 +121,18 @@ def build_playable_override(text: str) -> str:
             out.append(code)
     return ", ".join(out)
 
-# ============== Escalado FM 0–99 -> PES 40–99 ==============
-# Direct mapping: preserve FM values, only enforce PES floor of 40.
+# ============== Escalado FM 1–20 -> PES 40–99 ==============
+# FM attributes use a 1-20 scale; PES expects 40-99.
+# Mapping: FM 1 → 40, FM 10 → ~68, FM 15 → ~84, FM 20 → 99
+def scale_fm_attr(v: int) -> int:
+    """Normalize a single FM attribute (1–20) to PES range (40–99)."""
+    v = max(1, min(20, v))
+    return int(round(40.0 + (v - 1) * (59.0 / 19.0)))
+
+def scale_fm_attrs(attrs: Dict[str, int]) -> Dict[str, int]:
+    """Scale all parsed FM attributes from 1–20 to 40–99."""
+    return {k: scale_fm_attr(v) for k, v in attrs.items()}
+
 def fm_to_pes(v: float) -> int:
     return max(40, min(99, int(round(v))))
 
@@ -329,24 +339,24 @@ def infer_player_style(attrs: Dict[str, int], regpos: str, is_gk: bool) -> str:
 def combos_field(attrs: Dict[str, int]) -> Dict[str, float]:
     g = lambda k: attrs.get(k, 0)
     return {
-        "Attacking Prowess": 0.35*g("Off the Ball") + 0.25*g("Anticipation") + 0.25*g("Finishing") + 0.15*g("Decisions"),
-        "Ball Control": 0.45*g("First Touch") + 0.35*g("Technique") + 0.20*g("Balance"),
-        "Dribbling": 0.60*g("Dribbling") + 0.25*g("Agility") + 0.15*g("Flair"),
-        "Low Pass": 0.55*g("Passing") + 0.30*g("Vision") + 0.15*g("Technique"),
-        "Lofted Pass": 0.50*g("Crossing") + 0.30*g("Passing") + 0.20*g("Technique"),
-        "Finishing": 0.65*g("Finishing") + 0.25*g("Composure") + 0.10*g("Technique"),
-        "Place Kicking": 0.65*g("Free Kick Taking") + 0.35*g("Technique"),
+        "Attacking Prowess": 0.30*g("Off the Ball") + 0.25*g("Anticipation") + 0.25*g("Finishing") + 0.10*g("Decisions") + 0.10*g("Composure"),
+        "Ball Control": 0.40*g("First Touch") + 0.35*g("Technique") + 0.15*g("Balance") + 0.10*g("Dribbling"),
+        "Dribbling": 0.55*g("Dribbling") + 0.25*g("Agility") + 0.15*g("Flair") + 0.05*g("Acceleration"),
+        "Low Pass": 0.50*g("Passing") + 0.30*g("Vision") + 0.10*g("Technique") + 0.10*g("Teamwork"),
+        "Lofted Pass": 0.35*g("Crossing") + 0.25*g("Corners") + 0.25*g("Passing") + 0.15*g("Technique"),
+        "Finishing": 0.60*g("Finishing") + 0.20*g("Composure") + 0.10*g("Technique") + 0.10*g("Off the Ball"),
+        "Place Kicking": 0.45*g("Free Kick Taking") + 0.35*g("Penalty Taking") + 0.20*g("Technique"),
         "Swerve": 0.40*g("Free Kick Taking") + 0.35*g("Technique") + 0.25*g("Flair"),
         "Header": 0.65*g("Heading") + 0.35*g("Jumping Reach"),
-        "Defence Prowess": 0.35*g("Positioning") + 0.30*g("Anticipation") + 0.20*g("Tackling") + 0.15*g("Decisions"),
-        "Ball Winning": 0.50*g("Tackling") + 0.30*g("Aggression") + 0.20*g("Anticipation"),
+        "Defence Prowess": 0.30*g("Positioning") + 0.25*g("Anticipation") + 0.20*g("Tackling") + 0.15*g("Decisions") + 0.10*g("Concentration"),
+        "Ball Winning": 0.45*g("Tackling") + 0.25*g("Aggression") + 0.20*g("Anticipation") + 0.10*g("Marking"),
         "Kicking Power": 0.55*g("Long Shots") + 0.25*g("Strength") + 0.20*g("Technique"),
         "Speed": g("Pace"),
         "Explosive Power": 0.60*g("Acceleration") + 0.40*g("Agility"),
         "Body Control": 0.45*g("Balance") + 0.35*g("Agility") + 0.20*g("Strength"),
         "Physical Contact": 0.65*g("Strength") + 0.35*g("Bravery"),
         "Jump": 0.70*g("Jumping Reach") + 0.30*g("Strength"),
-        "Stamina": 0.65*g("Stamina") + 0.25*g("Natural Fitness") + 0.10*g("Work Rate"),
+        "Stamina": 0.55*g("Stamina") + 0.20*g("Natural Fitness") + 0.15*g("Work Rate") + 0.10*g("Teamwork"),
     }
 
 # ============== Conversión ESPECÍFICA PARA ARQUEROS (no 40s planos) ==============
@@ -354,11 +364,11 @@ def combos_gk(attrs: Dict[str, int]) -> Dict[str, float]:
     g = lambda k: attrs.get(k, 0)
     out = {
         # GK abilities (PES)
-        "Goalkeeping": 0.35*g("Handling") + 0.30*g("Reflexes") + 0.15*g("One on Ones") + 0.10*g("Communication") + 0.10*g("Positioning"),
-        "Catching":    0.60*g("Handling") + 0.25*g("Aerial Reach") + 0.15*g("Communication"),
-        "Clearing":    0.35*g("Punching (Tendency)") + 0.30*g("Rushing Out (Tendency)") + 0.25*g("Command of Area") + 0.10*g("Communication"),
-        "Reflexes":    0.70*g("Reflexes") + 0.20*g("One on Ones") + 0.10*g("Agility"),
-        "Coverage":    0.40*g("Positioning") + 0.20*g("Anticipation") + 0.20*g("Decisions") + 0.20*g("Communication"),
+        "Goalkeeping": 0.30*g("Handling") + 0.25*g("Reflexes") + 0.15*g("One on Ones") + 0.15*g("Communication") + 0.10*g("Positioning") + 0.05*g("Concentration"),
+        "Catching":    0.55*g("Handling") + 0.25*g("Aerial Reach") + 0.15*g("Communication") + 0.05*g("Anticipation"),
+        "Clearing":    0.30*g("Punching (Tendency)") + 0.30*g("Rushing Out (Tendency)") + 0.25*g("Command of Area") + 0.15*g("Communication"),
+        "Reflexes":    0.65*g("Reflexes") + 0.20*g("One on Ones") + 0.10*g("Agility") + 0.05*g("Anticipation"),
+        "Coverage":    0.35*g("Positioning") + 0.25*g("Anticipation") + 0.20*g("Decisions") + 0.15*g("Communication") + 0.05*g("Concentration"),
         # Físicas
         "Kicking Power": 0.60*g("Kicking") + 0.20*g("Strength") + 0.20*g("Technique"),
         "Speed":           g("Pace"),
@@ -366,20 +376,19 @@ def combos_gk(attrs: Dict[str, int]) -> Dict[str, float]:
         "Body Control":    0.50*g("Balance") + 0.30*g("Agility") + 0.20*g("Strength"),
         "Physical Contact":0.60*g("Strength") + 0.40*g("Bravery"),
         "Jump":            0.70*g("Jumping Reach") + 0.30*g("Balance"),
-        "Stamina":         0.70*g("Stamina") + 0.30*g("Natural Fitness"),
+        "Stamina":         0.65*g("Stamina") + 0.25*g("Natural Fitness") + 0.10*g("Work Rate"),
     }
     # Derivaciones de habilidades de campo desde atributos de GK (evitar relleno 40 plano)
-    # Estas fórmulas dan valores razonables para GK sin requerir Long Shots, etc.
     out["Attacking Prowess"] = 0.30*g("Off the Ball") + 0.25*g("Anticipation") + 0.25*g("Decisions") + 0.20*g("Composure")
     out["Ball Control"]      = 0.50*g("First Touch") + 0.30*g("Technique") + 0.20*g("Balance")
     out["Dribbling"]         = 0.40*g("Agility") + 0.35*g("Technique") + 0.25*g("First Touch")
     out["Low Pass"]          = 0.55*g("Passing") + 0.25*g("Vision") + 0.20*g("Decisions")
-    out["Lofted Pass"]       = 0.55*g("Passing") + 0.25*g("Technique") + 0.20*g("Kicking")
+    out["Lofted Pass"]       = 0.50*g("Passing") + 0.30*g("Technique") + 0.20*g("Kicking")
     out["Finishing"]         = 0.50*g("Composure") + 0.30*g("Decisions") + 0.20*g("Anticipation")
     out["Place Kicking"]     = 0.60*g("Technique") + 0.40*g("Free Kick Taking")
     out["Swerve"]            = 0.50*g("Technique") + 0.30*g("Free Kick Taking") + 0.20*g("Vision")
     out["Header"]            = 0.60*g("Heading") + 0.40*g("Jumping Reach")
-    out["Defence Prowess"]   = 0.50*g("Positioning") + 0.25*g("Anticipation") + 0.25*g("Decisions")
+    out["Defence Prowess"]   = 0.45*g("Positioning") + 0.30*g("Anticipation") + 0.15*g("Decisions") + 0.10*g("Concentration")
     out["Ball Winning"]      = 0.45*g("Tackling") + 0.30*g("Aggression") + 0.25*g("Work Rate")
     return out
 
@@ -465,7 +474,7 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     decisions = attrs.get("Decisions", 0)
     leadership = attrs.get("Leadership", 0)
     stamina  = attrs.get("Stamina", 0)
-    throwing = attrs.get("Throwing", 0)
+    throwing = attrs.get("Long Throws", 0)  # outfield set-piece attribute in FM
     kpow     = combos.get("Kicking Power", 0)
     swerve   = combos.get("Swerve", 0)
 
@@ -645,8 +654,15 @@ def parse_input_fm(raw: str) -> dict:
     tokens = parse_positions_line(t)
     attrs = parse_attributes_fm(t)
 
+    # Determine position using raw FM values (relative comparisons work either way)
     registered = choose_registered_position(tokens, attrs)
     is_gk = (registered == "GK")
+
+    # Scale all FM attributes from 1–20 to PES 40–99 range
+    attrs = scale_fm_attrs(attrs)
+    # Scale foot values (1–20) to the same 40–99 range for WF calculations
+    left_foot  = scale_fm_attr(left_foot)  if left_foot  else 40
+    right_foot = scale_fm_attr(right_foot) if right_foot else 40
 
     combos = combos_gk(attrs) if is_gk else combos_field(attrs)
 
