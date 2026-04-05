@@ -123,7 +123,7 @@ def build_playable_override(text: str) -> str:
 
 # ============== Escalado FM 0–99 -> PES 40–99 ==============
 def fm_to_pes(v: float) -> int:
-    return int(round(40.0 + (v * 59.0 / 99.0)))
+    return max(40, min(99, int(round(40.0 + (v * 59.0 / 99.0)))))
 
 # ============== Parsing FM básico ==============
 def find_first_multi(regex, text, flags=re.IGNORECASE | re.UNICODE | re.MULTILINE):
