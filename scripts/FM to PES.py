@@ -122,8 +122,9 @@ def build_playable_override(text: str) -> str:
     return ", ".join(out)
 
 # ============== Escalado FM 0–99 -> PES 40–99 ==============
+# Direct mapping: preserve FM values, only enforce PES floor of 40.
 def fm_to_pes(v: float) -> int:
-    return int(round(40.0 + (v * 59.0 / 99.0)))
+    return max(40, min(99, int(round(v))))
 
 # ============== Parsing FM básico ==============
 def find_first_multi(regex, text, flags=re.IGNORECASE | re.UNICODE | re.MULTILINE):
@@ -383,32 +384,19 @@ def combos_gk(attrs: Dict[str, int]) -> Dict[str, float]:
     return out
 
 # ============== Ajustes de estadísticas por posición ==============
-# Multipliers that shift stats toward realistic PES profiles for each position.
-# Based on reference database stat distributions (avg Speed=74.7, Stamina=75, etc.).
+# Only reduce stats that are unrealistic for the role (no upward boosts).
+# This maintains PES internal coherence without inflating values.
 _POS_STAT_MULTS: Dict[str, Dict[str, float]] = {
-    "CB":  {"Defence Prowess": 1.08, "Ball Winning": 1.08, "Header": 1.06,
-            "Jump": 1.05, "Physical Contact": 1.05,
-            "Attacking Prowess": 0.90, "Dribbling": 0.93, "Finishing": 0.86},
-    "LB":  {"Speed": 1.04, "Explosive Power": 1.04, "Lofted Pass": 1.05,
-            "Defence Prowess": 1.04, "Ball Winning": 1.04, "Finishing": 0.88},
-    "RB":  {"Speed": 1.04, "Explosive Power": 1.04, "Lofted Pass": 1.05,
-            "Defence Prowess": 1.04, "Ball Winning": 1.04, "Finishing": 0.88},
-    "DMF": {"Defence Prowess": 1.06, "Ball Winning": 1.08, "Low Pass": 1.04,
-            "Finishing": 0.88, "Attacking Prowess": 0.90, "Dribbling": 0.92},
-    "CMF": {"Low Pass": 1.04, "Stamina": 1.04, "Body Control": 1.03},
-    "AMF": {"Attacking Prowess": 1.06, "Ball Control": 1.04, "Dribbling": 1.04,
-            "Low Pass": 1.04, "Defence Prowess": 0.88, "Ball Winning": 0.88},
-    "WF":  {"Speed": 1.06, "Explosive Power": 1.06, "Dribbling": 1.06,
-            "Attacking Prowess": 1.04, "Defence Prowess": 0.86, "Ball Winning": 0.86,
-            "Finishing": 1.03},
-    "LMF": {"Speed": 1.04, "Explosive Power": 1.04, "Dribbling": 1.04,
-            "Lofted Pass": 1.04, "Defence Prowess": 0.92},
-    "RMF": {"Speed": 1.04, "Explosive Power": 1.04, "Dribbling": 1.04,
-            "Lofted Pass": 1.04, "Defence Prowess": 0.92},
-    "CF":  {"Finishing": 1.08, "Attacking Prowess": 1.06, "Kicking Power": 1.04,
-            "Header": 1.04, "Defence Prowess": 0.85, "Ball Winning": 0.82},
-    "SS":  {"Attacking Prowess": 1.06, "Finishing": 1.05, "Explosive Power": 1.04,
-            "Defence Prowess": 0.88, "Ball Winning": 0.88},
+    "CB":  {"Attacking Prowess": 0.90, "Dribbling": 0.93, "Finishing": 0.86},
+    "LB":  {"Finishing": 0.88},
+    "RB":  {"Finishing": 0.88},
+    "DMF": {"Finishing": 0.88, "Attacking Prowess": 0.90, "Dribbling": 0.92},
+    "AMF": {"Defence Prowess": 0.88, "Ball Winning": 0.88},
+    "WF":  {"Defence Prowess": 0.86, "Ball Winning": 0.86},
+    "LMF": {"Defence Prowess": 0.92},
+    "RMF": {"Defence Prowess": 0.92},
+    "CF":  {"Defence Prowess": 0.85, "Ball Winning": 0.82},
+    "SS":  {"Defence Prowess": 0.88, "Ball Winning": 0.88},
 }
 
 def apply_position_adjustments(abilities: Dict[str, int], regpos: str) -> Dict[str, int]:
