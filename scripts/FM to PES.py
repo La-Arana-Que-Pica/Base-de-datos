@@ -5,7 +5,7 @@ import re
 import tkinter as tk
 from tkinter import ttk, messagebox
 import unicodedata
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Optional
 
 # ============== Normalización básica ==============
 def norm(s: str) -> str:
@@ -24,7 +24,29 @@ def strip_parens(text: str) -> str:
 # ============== Reglas confirmadas ==============
 def make_shirt_name(full_name: str) -> str:
     parts = [p for p in re.split(r"\s+", full_name.strip()) if p]
-    return parts[-1].upper() if parts else ""
+    return normalize_shirt_name_ascii(parts[-1] if parts else "")
+
+def normalize_shirt_name_ascii(text: Optional[str]) -> str:
+    if text is None:
+        return ""
+    s = str(text).strip()
+    repl = {
+        "ß": "ss", "ẞ": "ss",
+        "æ": "ae", "Æ": "ae",
+        "œ": "oe", "Œ": "oe",
+        "ø": "o", "Ø": "o",
+        "ð": "d", "Ð": "d",
+        "þ": "th", "Þ": "th",
+        "ł": "l", "Ł": "l",
+        "ñ": "n", "Ñ": "n",
+    }
+    for k, v in repl.items():
+        s = s.replace(k, v)
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(ch for ch in s if unicodedata.category(ch) != "Mn")
+    s = s.encode("ascii", "ignore").decode("ascii")
+    s = re.sub(r"[^A-Za-z]", "", s)
+    return s.upper()
 
 SHIRT_NUMBER_DEFAULT = "1"
 MAP_BUILD_UP_TO_NONE = True
@@ -303,7 +325,7 @@ def infer_player_style(attrs: Dict[str, int], regpos: str, is_gk: bool) -> str:
     if regpos == "CB":
         if tackling >= 80 and positioning >= 80:
             return "The Destroyer"
-        return "Anchor Man"
+        return "-"
     return "Creative Playmaker"
 
 # ============== Combos y atributos (CAMPO) ==============
@@ -567,7 +589,7 @@ def display_registered_pos(regpos: str, regpos_raw: str, use_sb_for_side_backs: 
 def emit_exact(data: dict, use_sb_for_side_backs: bool, shirt_override: str,
                playable_override_text: str = "") -> str:
     name = data.get("name", "")
-    shirt_name = shirt_override.strip().upper() if shirt_override.strip() else make_shirt_name(name)
+    shirt_name = normalize_shirt_name_ascii(shirt_override) if shirt_override.strip() else make_shirt_name(name)
     shirt_number = SHIRT_NUMBER_DEFAULT
     nationality = data.get("nationality", "")
     player_style = canonicalize_player_style(data.get("player_style", ""))
@@ -582,6 +604,8 @@ def emit_exact(data: dict, use_sb_for_side_backs: bool, shirt_override: str,
         use_wf_for_wingers=USE_WF_FOR_WINGERS,
         treat_side_mids_as_wingers=TREAT_SIDE_MIDS_AS_WINGERS,
     )
+    if data.get("registered_pos", "") == "CB" and player_style == "Anchor Man":
+        player_style = "-"
 
     playable = build_playable_override(playable_override_text) if playable_override_text.strip() else data.get("auto_playable_positions","")
 
