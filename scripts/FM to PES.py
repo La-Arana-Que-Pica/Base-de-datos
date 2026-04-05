@@ -5,7 +5,7 @@ import re
 import tkinter as tk
 from tkinter import ttk, messagebox
 import unicodedata
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Optional
 
 # ============== Normalización básica ==============
 def norm(s: str) -> str:
@@ -26,7 +26,7 @@ def make_shirt_name(full_name: str) -> str:
     parts = [p for p in re.split(r"\s+", full_name.strip()) if p]
     return normalize_shirt_name_ascii(parts[-1] if parts else "")
 
-def normalize_shirt_name_ascii(text: str) -> str:
+def normalize_shirt_name_ascii(text: Optional[str]) -> str:
     if text is None:
         return ""
     s = str(text).strip()
