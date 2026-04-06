@@ -138,6 +138,7 @@ COM_TIERS = [
 ]
 COM_TOP_TIER = (3, 3, 78)
 MIDFIELDER_OR_WINGER_POS = ("WF", "LMF", "RMF", "AMF", "CMF", "DMF")
+WIDE_OR_ATTACKING_MID_POS = ("WF", "LMF", "RMF", "AMF")
 MIDFIELDER_COM_PROFILE_MIN = 60
 WIDE_PLAYMAKER_BOOST_PROFILE_MIN = 74
 MIDFIELDER_OR_WINGER_COM_THRESHOLD_BOOST = 2
@@ -425,25 +426,25 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
         return out
 
     if is_gk:
-        # Lógica base histórica (restaurada)
+        # Historical base logic (restored)
         long_punt_score = 0.55*attrs.get("Kicking", 0) + 0.25*attrs.get("Decisions", 0) + 0.20*attrs.get("Vision", 0)
         long_throw_score = 0.55*attrs.get("Throwing", 0) + 0.25*attrs.get("Strength", 0) + 0.20*attrs.get("Technique", 0)
         if attrs.get("Kicking", 0) >= 68 and attrs.get("Decisions", 0) >= 58:
             skills.append("Low Punt Trajectory")
         if attrs.get("Throwing", 0) >= 68:
             skills.append("GK Long Throw")
-        # Garantizar al menos 1 skill en cualquier GK
+        # Guarantee at least 1 skill for any GK
         if not skills:
             skills.append("Low Punt Trajectory" if long_punt_score >= long_throw_score else "GK Long Throw")
         return order_skills(skills), []
 
-    # Jugador de campo: reglas básicas
+    # Outfield player: base rules
     drib = attrs.get("Dribbling", 0); agi = attrs.get("Agility", 0); flair = attrs.get("Flair", 0)
     ft = attrs.get("First Touch", 0); pas = attrs.get("Passing", 0); vis = attrs.get("Vision", 0)
     tech = attrs.get("Technique", 0); cross = attrs.get("Crossing", 0)
     lshot = attrs.get("Long Shots", 0); kpow = combos.get("Kicking Power", 0)
 
-    # Lógica base histórica (restaurada)
+    # Historical base logic (restored)
     if drib >= 85 and agi >= 80: skills.append("Scissors Feint")
     if drib >= 85 and flair >= 75: skills.append("Flip Flap")
     if ft >= 80 and agi >= 80 and tech >= 80: skills.append("Marseille Turn")
@@ -459,10 +460,10 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     if attrs.get("Heading", 0) >= 85 and attrs.get("Jumping Reach", 0) >= 80: skills.append("Heading")
     if flair >= 95 and tech >= 90: skills.append("Rabona")
 
-    # Distribución equilibrada de skills (sin perder base)
-    # Perfil global para escalonar cantidad de skills/COM sin depender solo de élite:
-    # técnica/creación (0.10-0.12) pesa más para "completitud"; movilidad/lectura
-    # (0.07-0.08) y extras de rol (0.04-0.06) ajustan sin sobrepremiar especialistas.
+    # Balanced skill distribution (without losing base rules)
+    # Global profile to scale skill/COM quantity without relying only on elite level:
+    # technique/creation (0.10-0.12) weighs more for completeness; mobility/awareness
+    # (0.07-0.08) and role extras (0.04-0.06) adjust without over-rewarding specialists.
     overall_profile = (
         0.12*drib + 0.10*agi + 0.10*ft + 0.10*pas + 0.10*vis + 0.10*tech +
         0.08*attrs.get("Acceleration", 0) + 0.08*attrs.get("Off the Ball", 0) +
@@ -500,7 +501,7 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     if len(skills) > max_skills:
         skills = sorted(skills, key=lambda x: skill_scores.get(x, 0), reverse=True)[:max_skills]
 
-    # COM styles (base restaurada + balance por perfil/posición)
+    # COM styles (restored base + profile/position balancing)
     acc = attrs.get("Acceleration", 0)
     otb = attrs.get("Off the Ball", 0)
     dec = attrs.get("Decisions", 0)
@@ -517,7 +518,7 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     com_scores = {
         "Trickster": (0.45*flair + 0.35*drib + 0.20*agi),
         "Mazing Run": (0.40*drib + 0.35*acc + 0.25*agi),
-        "Speeding Bullet": (0.45*acc + 0.35*pace + 0.20*drib),
+        "Speeding Bullet": (0.45*acc + 0.35*pace_for_bullet + 0.20*drib),
         "Incisive Run": (0.40*otb + 0.30*dec + 0.30*acc),
         "Long Ball Expert": (0.40*vis + 0.35*pas + 0.25*cross),
         "Early Cross": (0.55*cross + 0.25*vis + 0.20*wr),
@@ -532,7 +533,7 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     if is_midfielder_or_winger and overall_profile >= MIDFIELDER_COM_PROFILE_MIN:
         target_com = max(target_com, 1)
         com_threshold -= MIDFIELDER_OR_WINGER_COM_THRESHOLD_BOOST
-    if regpos in MIDFIELDER_OR_WINGER_POS[:4] and overall_profile >= WIDE_PLAYMAKER_BOOST_PROFILE_MIN:
+    if regpos in WIDE_OR_ATTACKING_MID_POS and overall_profile >= WIDE_PLAYMAKER_BOOST_PROFILE_MIN:
         target_com = max(target_com, 2)
 
     for cm, score in sorted(com_scores.items(), key=lambda x: x[1], reverse=True):
