@@ -123,6 +123,42 @@ ABILITY_ORDER = [
     "Weak Foot Usage", "Weak Foot Accuracy", "Form", "Injury Tolerance",
 ]
 
+# (max_profile, target_skills, max_skills, soft_threshold)
+SKILL_TIERS = [
+    (58, 1, 2, 66),
+    (66, 2, 3, 69),
+    (74, 3, 4, 72),
+    (82, 4, 5, 74),
+    (89, 5, 6, 76),
+]
+# (target_skills, max_skills, soft_threshold) used when profile exceeds SKILL_TIERS.
+SKILL_TOP_TIER = (6, 7, 78)
+# (max_profile, target_com, max_com, com_threshold)
+COM_TIERS = [
+    (62, 0, 1, 72),
+    (76, 1, 2, 74),
+    (88, 2, 3, 76),
+]
+# (target_com, max_com, com_threshold) used when profile exceeds COM_TIERS.
+COM_TOP_TIER = (3, 3, 78)
+MIDFIELDER_OR_WINGER_POS = ("WF", "LMF", "RMF", "AMF", "CMF", "DMF")
+WIDE_OR_ATTACKING_MID_POS = ("WF", "LMF", "RMF", "AMF")
+MIDFIELDER_COM_PROFILE_MIN = 60
+WIDE_PLAYMAKER_BOOST_PROFILE_MIN = 74
+MIDFIELDER_OR_WINGER_COM_THRESHOLD_BOOST = 2
+PROFILE_WEIGHT_DRIB = 0.12
+PROFILE_WEIGHT_AGI = 0.10
+PROFILE_WEIGHT_FT = 0.10
+PROFILE_WEIGHT_PAS = 0.10
+PROFILE_WEIGHT_VIS = 0.10
+PROFILE_WEIGHT_TECH = 0.10
+PROFILE_WEIGHT_ACC = 0.08
+PROFILE_WEIGHT_OTB = 0.08
+PROFILE_WEIGHT_DEC = 0.07
+PROFILE_WEIGHT_FLAIR = 0.06
+PROFILE_WEIGHT_CROSS = 0.05
+PROFILE_WEIGHT_LSHOT = 0.04
+
 # ============== Utilidades posiciones ==============
 def normalize_pos_token(tok: str) -> str:
     t = tok.strip().lower()
@@ -387,7 +423,7 @@ def combos_gk(attrs: Dict[str, int]) -> Dict[str, float]:
     return out
 
 # ============== Skills y COM ==============
-def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, float]) -> Tuple[List[str], List[str]]:
+def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, float], regpos: str = "") -> Tuple[List[str], List[str]]:
     skills = []
     coms = []
 
@@ -406,42 +442,127 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
         return out
 
     if is_gk:
+        # Historical base logic (restored)
         long_punt_score = 0.55*attrs.get("Kicking", 0) + 0.25*attrs.get("Decisions", 0) + 0.20*attrs.get("Vision", 0)
         long_throw_score = 0.55*attrs.get("Throwing", 0) + 0.25*attrs.get("Strength", 0) + 0.20*attrs.get("Technique", 0)
-        if long_punt_score >= 62:
+        if attrs.get("Kicking", 0) >= 68 and attrs.get("Decisions", 0) >= 58:
             skills.append("Low Punt Trajectory")
-        if long_throw_score >= 62:
+        if attrs.get("Throwing", 0) >= 68:
             skills.append("GK Long Throw")
+        # Guarantee at least 1 skill for any GK
+        if not skills:
+            skills.append("Low Punt Trajectory" if long_punt_score >= long_throw_score else "GK Long Throw")
         return order_skills(skills), []
 
-    # Jugador de campo: reglas básicas
+    # Outfield player: base rules
     drib = attrs.get("Dribbling", 0); agi = attrs.get("Agility", 0); flair = attrs.get("Flair", 0)
     ft = attrs.get("First Touch", 0); pas = attrs.get("Passing", 0); vis = attrs.get("Vision", 0)
     tech = attrs.get("Technique", 0); cross = attrs.get("Crossing", 0)
     lshot = attrs.get("Long Shots", 0); kpow = combos.get("Kicking Power", 0)
 
-    if (0.45*drib + 0.30*agi + 0.25*flair) >= 76: skills.append("Scissors Feint")
-    if (0.40*drib + 0.35*flair + 0.25*tech) >= 78: skills.append("Flip Flap")
-    if (0.40*ft + 0.30*agi + 0.30*tech) >= 76: skills.append("Marseille Turn")
-    if (0.45*flair + 0.30*tech + 0.25*drib) >= 82: skills.append("Sombrero")
-    if (0.40*agi + 0.35*tech + 0.25*drib) >= 80: skills.append("Scotch Move")
-    if (0.45*flair + 0.35*tech + 0.20*ft) >= 84: skills.append("Heel Trick")
-    if (0.45*ft + 0.35*pas + 0.20*tech) >= 74: skills.append("One-touch Pass")
-    if (0.40*vis + 0.35*pas + 0.25*tech) >= 74: skills.append("Weighted Pass")
-    if (0.45*cross + 0.30*vis + 0.25*tech) >= 74: skills.append("Pinpoint Crossing")
+    # Historical base logic (restored)
+    if drib >= 85 and agi >= 80: skills.append("Scissors Feint")
+    if drib >= 85 and flair >= 75: skills.append("Flip Flap")
+    if ft >= 80 and agi >= 80 and tech >= 80: skills.append("Marseille Turn")
+    if flair >= 85 and tech >= 80: skills.append("Sombrero")
+    if agi >= 85 and tech >= 80: skills.append("Scotch Move")
+    if flair >= 90 and tech >= 85: skills.append("Heel Trick")
+    if ft >= 85 and pas >= 80: skills.append("One-touch Pass")
+    if vis >= 85 and pas >= 80 and tech >= 80: skills.append("Weighted Pass")
+    if cross >= 85 and vis >= 80 and tech >= 80: skills.append("Pinpoint Crossing")
     swerve_combo = combos.get("Swerve", 0)
-    if (0.55*tech + 0.45*swerve_combo) >= 78: skills.append("Outside Curler")
-    if (0.55*lshot + 0.45*kpow) >= 76: skills.append("Long Range Drive")
-    if (0.55*attrs.get("Heading", 0) + 0.45*attrs.get("Jumping Reach", 0)) >= 74: skills.append("Heading")
-    if (0.50*flair + 0.30*tech + 0.20*drib) >= 88: skills.append("Rabona")
+    if tech >= 85 and swerve_combo >= 70: skills.append("Outside Curler")
+    if lshot >= 85 and kpow >= 70: skills.append("Long Range Drive")
+    if attrs.get("Heading", 0) >= 85 and attrs.get("Jumping Reach", 0) >= 80: skills.append("Heading")
+    if flair >= 95 and tech >= 90: skills.append("Rabona")
 
-    # COM styles
-    if (0.45*flair + 0.35*drib + 0.20*agi) >= 77: coms.append("Trickster")
-    if (0.40*drib + 0.35*attrs.get("Acceleration", 0) + 0.25*agi) >= 76: coms.append("Mazing Run")
-    if (0.40*attrs.get("Off the Ball", 0) + 0.30*attrs.get("Decisions", 0) + 0.30*attrs.get("Acceleration", 0)) >= 74: coms.append("Incisive Run")
-    if (0.40*vis + 0.35*pas + 0.25*cross) >= 74: coms.append("Long Ball Expert")
-    if (0.55*cross + 0.25*vis + 0.20*attrs.get("Work Rate", 0)) >= 74: coms.append("Early Cross")
-    if (0.55*attrs.get("Long Shots", 0) + 0.45*kpow) >= 76: coms.append("Long Ranger")
+    # Balanced skill distribution (without losing base rules)
+    # Global profile to scale skill/COM quantity without relying only on elite level:
+    # technique/creation (0.10-0.12) weighs more for completeness; mobility/awareness
+    # (0.07-0.08) and role extras (0.04-0.06) adjust without over-rewarding specialists.
+    # Expected profile is roughly in the FM attribute band (~40-99), then tiered by
+    # SKILL_TIERS/COM_TIERS cutoffs to produce low/mid/top assignment density.
+    overall_profile = (
+        PROFILE_WEIGHT_DRIB*drib + PROFILE_WEIGHT_AGI*agi + PROFILE_WEIGHT_FT*ft +
+        PROFILE_WEIGHT_PAS*pas + PROFILE_WEIGHT_VIS*vis + PROFILE_WEIGHT_TECH*tech +
+        PROFILE_WEIGHT_ACC*attrs.get("Acceleration", 0) + PROFILE_WEIGHT_OTB*attrs.get("Off the Ball", 0) +
+        PROFILE_WEIGHT_DEC*attrs.get("Decisions", 0) + PROFILE_WEIGHT_FLAIR*flair +
+        PROFILE_WEIGHT_CROSS*cross + PROFILE_WEIGHT_LSHOT*lshot
+    )
+    target_skills, max_skills, soft_threshold = SKILL_TOP_TIER
+    for max_profile, t_sk, m_sk, thr in SKILL_TIERS:
+        if overall_profile < max_profile:
+            target_skills, max_skills, soft_threshold = t_sk, m_sk, thr
+            break
+
+    skill_scores = {
+        "Scissors Feint": (0.45*drib + 0.30*agi + 0.25*flair),
+        "Flip Flap": (0.40*drib + 0.35*flair + 0.25*tech),
+        "Marseille Turn": (0.40*ft + 0.30*agi + 0.30*tech),
+        "Sombrero": (0.45*flair + 0.30*tech + 0.25*drib),
+        "Scotch Move": (0.40*agi + 0.35*tech + 0.25*drib),
+        "Heel Trick": (0.45*flair + 0.35*tech + 0.20*ft),
+        "One-touch Pass": (0.45*ft + 0.35*pas + 0.20*tech),
+        "Weighted Pass": (0.40*vis + 0.35*pas + 0.25*tech),
+        "Pinpoint Crossing": (0.45*cross + 0.30*vis + 0.25*tech),
+        "Outside Curler": (0.55*tech + 0.45*swerve_combo),
+        "Long Range Drive": (0.55*lshot + 0.45*kpow),
+        "Heading": (0.55*attrs.get("Heading", 0) + 0.45*attrs.get("Jumping Reach", 0)),
+        "Rabona": (0.50*flair + 0.30*tech + 0.20*drib),
+    }
+    for sk, score in sorted(skill_scores.items(), key=lambda x: x[1], reverse=True):
+        if len(skills) >= target_skills:
+            break
+        if sk not in skills and score >= soft_threshold:
+            skills.append(sk)
+    if not skills:
+        best_skill = max(skill_scores.items(), key=lambda x: x[1])[0]
+        skills.append(best_skill)
+    if len(skills) > max_skills:
+        skills = sorted(skills, key=lambda x: skill_scores.get(x, 0), reverse=True)[:max_skills]
+
+    # COM styles (restored base + profile/position balancing)
+    acc = attrs.get("Acceleration", 0)
+    otb = attrs.get("Off the Ball", 0)
+    dec = attrs.get("Decisions", 0)
+    wr = attrs.get("Work Rate", 0)
+    pace_metric = max(attrs.get("Pace", 0), attrs.get("Acceleration", 0))
+    if flair >= 85 and drib >= 80: coms.append("Trickster")
+    if drib >= 85 and acc >= 80 and agi >= 80: coms.append("Mazing Run")
+    if acc >= 86 and pace_metric >= 84 and drib >= 78: coms.append("Speeding Bullet")
+    if otb >= 80 and dec >= 75 and acc >= 75: coms.append("Incisive Run")
+    if vis >= 85 and pas >= 80 and cross >= 80: coms.append("Long Ball Expert")
+    if cross >= 85 and vis >= 80: coms.append("Early Cross")
+    if attrs.get("Long Shots", 0) >= 85 and kpow >= 70: coms.append("Long Ranger")
+
+    com_scores = {
+        "Trickster": (0.45*flair + 0.35*drib + 0.20*agi),
+        "Mazing Run": (0.40*drib + 0.35*acc + 0.25*agi),
+        "Speeding Bullet": (0.45*acc + 0.35*pace_metric + 0.20*drib),
+        "Incisive Run": (0.40*otb + 0.30*dec + 0.30*acc),
+        "Long Ball Expert": (0.40*vis + 0.35*pas + 0.25*cross),
+        "Early Cross": (0.55*cross + 0.25*vis + 0.20*wr),
+        "Long Ranger": (0.55*attrs.get("Long Shots", 0) + 0.45*kpow),
+    }
+    is_midfielder_or_winger = regpos in MIDFIELDER_OR_WINGER_POS
+    target_com, max_com, com_threshold = COM_TOP_TIER
+    for max_profile, t_com, m_com, thr in COM_TIERS:
+        if overall_profile < max_profile:
+            target_com, max_com, com_threshold = t_com, m_com, thr
+            break
+    if is_midfielder_or_winger and overall_profile >= MIDFIELDER_COM_PROFILE_MIN:
+        target_com = max(target_com, 1)
+        com_threshold -= MIDFIELDER_OR_WINGER_COM_THRESHOLD_BOOST
+    if regpos in WIDE_OR_ATTACKING_MID_POS and overall_profile >= WIDE_PLAYMAKER_BOOST_PROFILE_MIN:
+        target_com = max(target_com, 2)
+
+    for cm, score in sorted(com_scores.items(), key=lambda x: x[1], reverse=True):
+        if len(coms) >= target_com:
+            break
+        if cm not in coms and score >= com_threshold:
+            coms.append(cm)
+    if len(coms) > max_com:
+        coms = sorted(coms, key=lambda x: com_scores.get(x, 0), reverse=True)[:max_com]
 
     return order_skills(skills), order_com(coms)
 
@@ -541,7 +662,7 @@ def parse_input_fm(raw: str) -> dict:
     )
 
     pstyle = infer_player_style(attrs, registered, is_gk)
-    skills, coms = infer_skills_and_com(attrs, is_gk, combos)
+    skills, coms = infer_skills_and_com(attrs, is_gk, combos, registered)
     auto_playable = "" if is_gk else build_auto_playable(tokens, registered, is_gk)
 
     data = {
