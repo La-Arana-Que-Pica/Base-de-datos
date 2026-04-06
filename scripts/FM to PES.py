@@ -137,6 +137,10 @@ COM_TIERS = [
     (88, 2, 3, 76),
 ]
 COM_TOP_TIER = (3, 3, 78)
+MIDFIELDER_OR_WINGER_POS = ("WF", "LMF", "RMF", "AMF", "CMF", "DMF")
+MIDFIELDER_COM_PROFILE_MIN = 60
+WIDE_PLAYMAKER_BOOST_PROFILE_MIN = 74
+MIDFIELDER_OR_WINGER_COM_THRESHOLD_BOOST = 2
 
 # ============== Utilidades posiciones ==============
 def normalize_pos_token(tok: str) -> str:
@@ -457,7 +461,8 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
 
     # Distribución equilibrada de skills (sin perder base)
     # Perfil global para escalonar cantidad de skills/COM sin depender solo de élite:
-    # mezcla técnica, visión/pase y movilidad/lectura para representar completitud general.
+    # técnica/creación (0.10-0.12) pesa más para "completitud"; movilidad/lectura
+    # (0.07-0.08) y extras de rol (0.04-0.06) ajustan sin sobrepremiar especialistas.
     overall_profile = (
         0.12*drib + 0.10*agi + 0.10*ft + 0.10*pas + 0.10*vis + 0.10*tech +
         0.08*attrs.get("Acceleration", 0) + 0.08*attrs.get("Off the Ball", 0) +
@@ -500,10 +505,10 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     otb = attrs.get("Off the Ball", 0)
     dec = attrs.get("Decisions", 0)
     wr = attrs.get("Work Rate", 0)
-    pace = attrs.get("Pace", 0)
+    pace_for_bullet = max(attrs.get("Pace", 0), attrs.get("Acceleration", 0))
     if flair >= 85 and drib >= 80: coms.append("Trickster")
     if drib >= 85 and acc >= 80 and agi >= 80: coms.append("Mazing Run")
-    if acc >= 86 and pace >= 84 and drib >= 78: coms.append("Speeding Bullet")
+    if acc >= 86 and pace_for_bullet >= 84 and drib >= 78: coms.append("Speeding Bullet")
     if otb >= 80 and dec >= 75 and acc >= 75: coms.append("Incisive Run")
     if vis >= 85 and pas >= 80 and cross >= 80: coms.append("Long Ball Expert")
     if cross >= 85 and vis >= 80: coms.append("Early Cross")
@@ -518,16 +523,16 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
         "Early Cross": (0.55*cross + 0.25*vis + 0.20*wr),
         "Long Ranger": (0.55*attrs.get("Long Shots", 0) + 0.45*kpow),
     }
-    is_midfielder_or_winger = regpos in ("WF", "LMF", "RMF", "AMF", "CMF", "DMF")
+    is_midfielder_or_winger = regpos in MIDFIELDER_OR_WINGER_POS
     target_com, max_com, com_threshold = COM_TOP_TIER
     for max_profile, t_com, m_com, thr in COM_TIERS:
         if overall_profile < max_profile:
             target_com, max_com, com_threshold = t_com, m_com, thr
             break
-    if is_midfielder_or_winger and overall_profile >= 60:
+    if is_midfielder_or_winger and overall_profile >= MIDFIELDER_COM_PROFILE_MIN:
         target_com = max(target_com, 1)
-        com_threshold -= 2
-    if regpos in ("WF", "LMF", "RMF", "AMF") and overall_profile >= 74:
+        com_threshold -= MIDFIELDER_OR_WINGER_COM_THRESHOLD_BOOST
+    if regpos in MIDFIELDER_OR_WINGER_POS[:4] and overall_profile >= WIDE_PLAYMAKER_BOOST_PROFILE_MIN:
         target_com = max(target_com, 2)
 
     for cm, score in sorted(com_scores.items(), key=lambda x: x[1], reverse=True):
