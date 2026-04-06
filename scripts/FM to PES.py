@@ -123,6 +123,7 @@ ABILITY_ORDER = [
     "Weak Foot Usage", "Weak Foot Accuracy", "Form", "Injury Tolerance",
 ]
 
+# (max_profile, target_skills, max_skills, soft_threshold)
 SKILL_TIERS = [
     (58, 1, 2, 66),
     (66, 2, 3, 69),
@@ -131,6 +132,7 @@ SKILL_TIERS = [
     (89, 5, 6, 76),
 ]
 SKILL_TOP_TIER = (6, 7, 78)
+# (max_profile, target_com, max_com, com_threshold)
 COM_TIERS = [
     (62, 0, 1, 72),
     (76, 1, 2, 74),
@@ -464,6 +466,8 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     # Global profile to scale skill/COM quantity without relying only on elite level:
     # technique/creation (0.10-0.12) weighs more for completeness; mobility/awareness
     # (0.07-0.08) and role extras (0.04-0.06) adjust without over-rewarding specialists.
+    # Expected profile is roughly in the FM attribute band (~40-99), then tiered by
+    # SKILL_TIERS/COM_TIERS cutoffs to produce low/mid/top assignment density.
     overall_profile = (
         0.12*drib + 0.10*agi + 0.10*ft + 0.10*pas + 0.10*vis + 0.10*tech +
         0.08*attrs.get("Acceleration", 0) + 0.08*attrs.get("Off the Ball", 0) +
@@ -506,10 +510,10 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     otb = attrs.get("Off the Ball", 0)
     dec = attrs.get("Decisions", 0)
     wr = attrs.get("Work Rate", 0)
-    pace_for_bullet = max(attrs.get("Pace", 0), attrs.get("Acceleration", 0))
+    max_pace_or_acceleration = max(attrs.get("Pace", 0), attrs.get("Acceleration", 0))
     if flair >= 85 and drib >= 80: coms.append("Trickster")
     if drib >= 85 and acc >= 80 and agi >= 80: coms.append("Mazing Run")
-    if acc >= 86 and pace_for_bullet >= 84 and drib >= 78: coms.append("Speeding Bullet")
+    if acc >= 86 and max_pace_or_acceleration >= 84 and drib >= 78: coms.append("Speeding Bullet")
     if otb >= 80 and dec >= 75 and acc >= 75: coms.append("Incisive Run")
     if vis >= 85 and pas >= 80 and cross >= 80: coms.append("Long Ball Expert")
     if cross >= 85 and vis >= 80: coms.append("Early Cross")
@@ -518,7 +522,7 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     com_scores = {
         "Trickster": (0.45*flair + 0.35*drib + 0.20*agi),
         "Mazing Run": (0.40*drib + 0.35*acc + 0.25*agi),
-        "Speeding Bullet": (0.45*acc + 0.35*pace_for_bullet + 0.20*drib),
+        "Speeding Bullet": (0.45*acc + 0.35*max_pace_or_acceleration + 0.20*drib),
         "Incisive Run": (0.40*otb + 0.30*dec + 0.30*acc),
         "Long Ball Expert": (0.40*vis + 0.35*pas + 0.25*cross),
         "Early Cross": (0.55*cross + 0.25*vis + 0.20*wr),
