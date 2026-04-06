@@ -131,6 +131,7 @@ SKILL_TIERS = [
     (82, 4, 5, 74),
     (89, 5, 6, 76),
 ]
+# (target_skills, max_skills, soft_threshold) used when profile exceeds SKILL_TIERS.
 SKILL_TOP_TIER = (6, 7, 78)
 # (max_profile, target_com, max_com, com_threshold)
 COM_TIERS = [
@@ -138,12 +139,25 @@ COM_TIERS = [
     (76, 1, 2, 74),
     (88, 2, 3, 76),
 ]
+# (target_com, max_com, com_threshold) used when profile exceeds COM_TIERS.
 COM_TOP_TIER = (3, 3, 78)
 MIDFIELDER_OR_WINGER_POS = ("WF", "LMF", "RMF", "AMF", "CMF", "DMF")
 WIDE_OR_ATTACKING_MID_POS = ("WF", "LMF", "RMF", "AMF")
 MIDFIELDER_COM_PROFILE_MIN = 60
 WIDE_PLAYMAKER_BOOST_PROFILE_MIN = 74
 MIDFIELDER_OR_WINGER_COM_THRESHOLD_BOOST = 2
+PROFILE_WEIGHT_DRIB = 0.12
+PROFILE_WEIGHT_AGI = 0.10
+PROFILE_WEIGHT_FT = 0.10
+PROFILE_WEIGHT_PAS = 0.10
+PROFILE_WEIGHT_VIS = 0.10
+PROFILE_WEIGHT_TECH = 0.10
+PROFILE_WEIGHT_ACC = 0.08
+PROFILE_WEIGHT_OTB = 0.08
+PROFILE_WEIGHT_DEC = 0.07
+PROFILE_WEIGHT_FLAIR = 0.06
+PROFILE_WEIGHT_CROSS = 0.05
+PROFILE_WEIGHT_LSHOT = 0.04
 
 # ============== Utilidades posiciones ==============
 def normalize_pos_token(tok: str) -> str:
@@ -469,9 +483,11 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     # Expected profile is roughly in the FM attribute band (~40-99), then tiered by
     # SKILL_TIERS/COM_TIERS cutoffs to produce low/mid/top assignment density.
     overall_profile = (
-        0.12*drib + 0.10*agi + 0.10*ft + 0.10*pas + 0.10*vis + 0.10*tech +
-        0.08*attrs.get("Acceleration", 0) + 0.08*attrs.get("Off the Ball", 0) +
-        0.07*attrs.get("Decisions", 0) + 0.06*flair + 0.05*cross + 0.04*lshot
+        PROFILE_WEIGHT_DRIB*drib + PROFILE_WEIGHT_AGI*agi + PROFILE_WEIGHT_FT*ft +
+        PROFILE_WEIGHT_PAS*pas + PROFILE_WEIGHT_VIS*vis + PROFILE_WEIGHT_TECH*tech +
+        PROFILE_WEIGHT_ACC*attrs.get("Acceleration", 0) + PROFILE_WEIGHT_OTB*attrs.get("Off the Ball", 0) +
+        PROFILE_WEIGHT_DEC*attrs.get("Decisions", 0) + PROFILE_WEIGHT_FLAIR*flair +
+        PROFILE_WEIGHT_CROSS*cross + PROFILE_WEIGHT_LSHOT*lshot
     )
     target_skills, max_skills, soft_threshold = SKILL_TOP_TIER
     for max_profile, t_sk, m_sk, thr in SKILL_TIERS:
@@ -510,10 +526,10 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     otb = attrs.get("Off the Ball", 0)
     dec = attrs.get("Decisions", 0)
     wr = attrs.get("Work Rate", 0)
-    max_pace_or_acceleration = max(attrs.get("Pace", 0), attrs.get("Acceleration", 0))
+    pace_metric = max(attrs.get("Pace", 0), attrs.get("Acceleration", 0))
     if flair >= 85 and drib >= 80: coms.append("Trickster")
     if drib >= 85 and acc >= 80 and agi >= 80: coms.append("Mazing Run")
-    if acc >= 86 and max_pace_or_acceleration >= 84 and drib >= 78: coms.append("Speeding Bullet")
+    if acc >= 86 and pace_metric >= 84 and drib >= 78: coms.append("Speeding Bullet")
     if otb >= 80 and dec >= 75 and acc >= 75: coms.append("Incisive Run")
     if vis >= 85 and pas >= 80 and cross >= 80: coms.append("Long Ball Expert")
     if cross >= 85 and vis >= 80: coms.append("Early Cross")
@@ -522,7 +538,7 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     com_scores = {
         "Trickster": (0.45*flair + 0.35*drib + 0.20*agi),
         "Mazing Run": (0.40*drib + 0.35*acc + 0.25*agi),
-        "Speeding Bullet": (0.45*acc + 0.35*max_pace_or_acceleration + 0.20*drib),
+        "Speeding Bullet": (0.45*acc + 0.35*pace_metric + 0.20*drib),
         "Incisive Run": (0.40*otb + 0.30*dec + 0.30*acc),
         "Long Ball Expert": (0.40*vis + 0.35*pas + 0.25*cross),
         "Early Cross": (0.55*cross + 0.25*vis + 0.20*wr),
