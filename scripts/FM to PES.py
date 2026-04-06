@@ -387,7 +387,7 @@ def combos_gk(attrs: Dict[str, int]) -> Dict[str, float]:
     return out
 
 # ============== Skills y COM ==============
-def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, float]) -> Tuple[List[str], List[str]]:
+def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, float], regpos: str = "") -> Tuple[List[str], List[str]]:
     skills = []
     coms = []
 
@@ -406,12 +406,16 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
         return out
 
     if is_gk:
+        # Lógica base histórica (restaurada)
         long_punt_score = 0.55*attrs.get("Kicking", 0) + 0.25*attrs.get("Decisions", 0) + 0.20*attrs.get("Vision", 0)
         long_throw_score = 0.55*attrs.get("Throwing", 0) + 0.25*attrs.get("Strength", 0) + 0.20*attrs.get("Technique", 0)
-        if long_punt_score >= 62:
+        if attrs.get("Kicking", 0) >= 68 and attrs.get("Decisions", 0) >= 58:
             skills.append("Low Punt Trajectory")
-        if long_throw_score >= 62:
+        if attrs.get("Throwing", 0) >= 68:
             skills.append("GK Long Throw")
+        # Garantizar al menos 1 skill en cualquier GK
+        if not skills:
+            skills.append("Low Punt Trajectory" if long_punt_score >= long_throw_score else "GK Long Throw")
         return order_skills(skills), []
 
     # Jugador de campo: reglas básicas
@@ -420,28 +424,111 @@ def infer_skills_and_com(attrs: Dict[str, int], is_gk: bool, combos: Dict[str, f
     tech = attrs.get("Technique", 0); cross = attrs.get("Crossing", 0)
     lshot = attrs.get("Long Shots", 0); kpow = combos.get("Kicking Power", 0)
 
-    if (0.45*drib + 0.30*agi + 0.25*flair) >= 76: skills.append("Scissors Feint")
-    if (0.40*drib + 0.35*flair + 0.25*tech) >= 78: skills.append("Flip Flap")
-    if (0.40*ft + 0.30*agi + 0.30*tech) >= 76: skills.append("Marseille Turn")
-    if (0.45*flair + 0.30*tech + 0.25*drib) >= 82: skills.append("Sombrero")
-    if (0.40*agi + 0.35*tech + 0.25*drib) >= 80: skills.append("Scotch Move")
-    if (0.45*flair + 0.35*tech + 0.20*ft) >= 84: skills.append("Heel Trick")
-    if (0.45*ft + 0.35*pas + 0.20*tech) >= 74: skills.append("One-touch Pass")
-    if (0.40*vis + 0.35*pas + 0.25*tech) >= 74: skills.append("Weighted Pass")
-    if (0.45*cross + 0.30*vis + 0.25*tech) >= 74: skills.append("Pinpoint Crossing")
+    # Lógica base histórica (restaurada)
+    if drib >= 85 and agi >= 80: skills.append("Scissors Feint")
+    if drib >= 85 and flair >= 75: skills.append("Flip Flap")
+    if ft >= 80 and agi >= 80 and tech >= 80: skills.append("Marseille Turn")
+    if flair >= 85 and tech >= 80: skills.append("Sombrero")
+    if agi >= 85 and tech >= 80: skills.append("Scotch Move")
+    if flair >= 90 and tech >= 85: skills.append("Heel Trick")
+    if ft >= 85 and pas >= 80: skills.append("One-touch Pass")
+    if vis >= 85 and pas >= 80 and tech >= 80: skills.append("Weighted Pass")
+    if cross >= 85 and vis >= 80 and tech >= 80: skills.append("Pinpoint Crossing")
     swerve_combo = combos.get("Swerve", 0)
-    if (0.55*tech + 0.45*swerve_combo) >= 78: skills.append("Outside Curler")
-    if (0.55*lshot + 0.45*kpow) >= 76: skills.append("Long Range Drive")
-    if (0.55*attrs.get("Heading", 0) + 0.45*attrs.get("Jumping Reach", 0)) >= 74: skills.append("Heading")
-    if (0.50*flair + 0.30*tech + 0.20*drib) >= 88: skills.append("Rabona")
+    if tech >= 85 and swerve_combo >= 70: skills.append("Outside Curler")
+    if lshot >= 85 and kpow >= 70: skills.append("Long Range Drive")
+    if attrs.get("Heading", 0) >= 85 and attrs.get("Jumping Reach", 0) >= 80: skills.append("Heading")
+    if flair >= 95 and tech >= 90: skills.append("Rabona")
 
-    # COM styles
-    if (0.45*flair + 0.35*drib + 0.20*agi) >= 77: coms.append("Trickster")
-    if (0.40*drib + 0.35*attrs.get("Acceleration", 0) + 0.25*agi) >= 76: coms.append("Mazing Run")
-    if (0.40*attrs.get("Off the Ball", 0) + 0.30*attrs.get("Decisions", 0) + 0.30*attrs.get("Acceleration", 0)) >= 74: coms.append("Incisive Run")
-    if (0.40*vis + 0.35*pas + 0.25*cross) >= 74: coms.append("Long Ball Expert")
-    if (0.55*cross + 0.25*vis + 0.20*attrs.get("Work Rate", 0)) >= 74: coms.append("Early Cross")
-    if (0.55*attrs.get("Long Shots", 0) + 0.45*kpow) >= 76: coms.append("Long Ranger")
+    # Distribución equilibrada de skills (sin perder base)
+    overall_profile = (
+        0.12*drib + 0.10*agi + 0.10*ft + 0.10*pas + 0.10*vis + 0.10*tech +
+        0.08*attrs.get("Acceleration", 0) + 0.08*attrs.get("Off the Ball", 0) +
+        0.07*attrs.get("Decisions", 0) + 0.06*flair + 0.05*cross + 0.04*lshot
+    )
+    if overall_profile < 58:
+        target_skills, max_skills, soft_threshold = 1, 2, 66
+    elif overall_profile < 66:
+        target_skills, max_skills, soft_threshold = 2, 3, 69
+    elif overall_profile < 74:
+        target_skills, max_skills, soft_threshold = 3, 4, 72
+    elif overall_profile < 82:
+        target_skills, max_skills, soft_threshold = 4, 5, 74
+    elif overall_profile < 89:
+        target_skills, max_skills, soft_threshold = 5, 6, 76
+    else:
+        target_skills, max_skills, soft_threshold = 6, 7, 78
+
+    skill_scores = {
+        "Scissors Feint": (0.45*drib + 0.30*agi + 0.25*flair),
+        "Flip Flap": (0.40*drib + 0.35*flair + 0.25*tech),
+        "Marseille Turn": (0.40*ft + 0.30*agi + 0.30*tech),
+        "Sombrero": (0.45*flair + 0.30*tech + 0.25*drib),
+        "Scotch Move": (0.40*agi + 0.35*tech + 0.25*drib),
+        "Heel Trick": (0.45*flair + 0.35*tech + 0.20*ft),
+        "One-touch Pass": (0.45*ft + 0.35*pas + 0.20*tech),
+        "Weighted Pass": (0.40*vis + 0.35*pas + 0.25*tech),
+        "Pinpoint Crossing": (0.45*cross + 0.30*vis + 0.25*tech),
+        "Outside Curler": (0.55*tech + 0.45*swerve_combo),
+        "Long Range Drive": (0.55*lshot + 0.45*kpow),
+        "Heading": (0.55*attrs.get("Heading", 0) + 0.45*attrs.get("Jumping Reach", 0)),
+        "Rabona": (0.50*flair + 0.30*tech + 0.20*drib),
+    }
+    for sk, score in sorted(skill_scores.items(), key=lambda x: x[1], reverse=True):
+        if len(skills) >= target_skills:
+            break
+        if sk not in skills and score >= soft_threshold:
+            skills.append(sk)
+    if not skills:
+        best_skill = max(skill_scores.items(), key=lambda x: x[1])[0]
+        skills.append(best_skill)
+    if len(skills) > max_skills:
+        skills = sorted(skills, key=lambda x: skill_scores.get(x, 0), reverse=True)[:max_skills]
+
+    # COM styles (base restaurada + balance por perfil/posición)
+    acc = attrs.get("Acceleration", 0)
+    otb = attrs.get("Off the Ball", 0)
+    dec = attrs.get("Decisions", 0)
+    wr = attrs.get("Work Rate", 0)
+    pace = attrs.get("Pace", 0)
+    if flair >= 85 and drib >= 80: coms.append("Trickster")
+    if drib >= 85 and acc >= 80 and agi >= 80: coms.append("Mazing Run")
+    if otb >= 80 and dec >= 75 and acc >= 75: coms.append("Incisive Run")
+    if vis >= 85 and pas >= 80 and cross >= 80: coms.append("Long Ball Expert")
+    if cross >= 85 and vis >= 80: coms.append("Early Cross")
+    if attrs.get("Long Shots", 0) >= 85 and kpow >= 70: coms.append("Long Ranger")
+
+    com_scores = {
+        "Trickster": (0.45*flair + 0.35*drib + 0.20*agi),
+        "Mazing Run": (0.40*drib + 0.35*acc + 0.25*agi),
+        "Speeding Bullet": (0.45*acc + 0.35*pace + 0.20*drib),
+        "Incisive Run": (0.40*otb + 0.30*dec + 0.30*acc),
+        "Long Ball Expert": (0.40*vis + 0.35*pas + 0.25*cross),
+        "Early Cross": (0.55*cross + 0.25*vis + 0.20*wr),
+        "Long Ranger": (0.55*attrs.get("Long Shots", 0) + 0.45*kpow),
+    }
+    is_winger_mid = regpos in ("WF", "LMF", "RMF", "AMF", "CMF", "DMF")
+    if overall_profile < 62:
+        target_com, max_com, com_threshold = 0, 1, 72
+    elif overall_profile < 76:
+        target_com, max_com, com_threshold = 1, 2, 74
+    elif overall_profile < 88:
+        target_com, max_com, com_threshold = 2, 3, 76
+    else:
+        target_com, max_com, com_threshold = 3, 3, 78
+    if is_winger_mid and overall_profile >= 60:
+        target_com = max(target_com, 1)
+        com_threshold -= 2
+    if regpos in ("WF", "LMF", "RMF", "AMF") and overall_profile >= 74:
+        target_com = max(target_com, 2)
+
+    for cm, score in sorted(com_scores.items(), key=lambda x: x[1], reverse=True):
+        if len(coms) >= target_com:
+            break
+        if cm not in coms and score >= com_threshold:
+            coms.append(cm)
+    if len(coms) > max_com:
+        coms = sorted(coms, key=lambda x: com_scores.get(x, 0), reverse=True)[:max_com]
 
     return order_skills(skills), order_com(coms)
 
@@ -541,7 +628,7 @@ def parse_input_fm(raw: str) -> dict:
     )
 
     pstyle = infer_player_style(attrs, registered, is_gk)
-    skills, coms = infer_skills_and_com(attrs, is_gk, combos)
+    skills, coms = infer_skills_and_com(attrs, is_gk, combos, registered)
     auto_playable = "" if is_gk else build_auto_playable(tokens, registered, is_gk)
 
     data = {
