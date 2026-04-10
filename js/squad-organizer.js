@@ -44,7 +44,8 @@
     const base = parseFloat(match[1]);
     if (Number.isNaN(base)) return null;
     const unit = (match[2] || '').toUpperCase();
-    const multiplier = unit === 'B' ? 1_000_000_000 : unit === 'M' ? 1_000_000 : unit === 'K' ? 1_000 : 1;
+    const unitMultiplier = { B: 1_000_000_000, M: 1_000_000, K: 1_000 };
+    const multiplier = unitMultiplier[unit] || 1;
     return Math.round(base * multiplier);
   }
 
@@ -247,7 +248,7 @@
     els.summary.textContent = `${list.length} de ${state.players.length} jugadores`;
 
     if (!list.length) {
-      els.tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--color-text-muted)">No hay jugadores para ese filtro.</td></tr>`;
+      els.tbody.innerHTML = `<tr><td colspan="9" class="no-results-row">No hay jugadores para ese filtro.</td></tr>`;
       updateSortIcons();
       return;
     }

@@ -3227,3 +3227,9 @@ body {
   margin-bottom: 8px;
   color: var(--color-text-muted);
 }
+
+.no-results-row {
+  text-align: center;
+  padding: 20px;
+  color: var(--color-text-muted);
+}
