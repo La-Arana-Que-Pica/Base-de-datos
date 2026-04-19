@@ -5,8 +5,8 @@
 from __future__ import annotations
 
 import csv
-import tkinter as tk
 from pathlib import Path
+import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 
 
@@ -161,7 +161,7 @@ class NameFormatterApp:
             return
 
         path = Path(selected).expanduser().resolve()
-        if not path.exists() or not path.is_file():
+        if not path.is_file():
             messagebox.showerror("Invalid file", "The selected path is not a valid file.")
             self.set_status("Invalid file selected.")
             return
@@ -233,9 +233,10 @@ class NameFormatterApp:
             self.set_status("No file selected.")
             return
 
+        csv_path = self.selected_csv
         try:
             output_path, changed_count = process_csv(
-                self.selected_csv,
+                csv_path,
                 self.prompt_manual_name,
             )
             messagebox.showinfo(
