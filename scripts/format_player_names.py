@@ -7,6 +7,7 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 import tkinter as tk
+from typing import Callable
 from tkinter import filedialog, messagebox, simpledialog
 
 
@@ -21,7 +22,9 @@ def has_lowercase(value: str) -> bool:
     return any(ch.islower() for ch in value)
 
 
-def format_name(name: str, manual_name_provider) -> tuple[str, bool]:
+def format_name(
+    name: str, manual_name_provider: Callable[[str, str], str]
+) -> tuple[str, bool]:
     """
     Return (new_name, changed).
     Only names with at least one lowercase letter are eligible for modification.
@@ -70,7 +73,9 @@ def detect_dialect(csv_path: Path) -> csv.Dialect:
         return csv.excel
 
 
-def process_csv(csv_path: Path, manual_name_provider) -> tuple[Path, int]:
+def process_csv(
+    csv_path: Path, manual_name_provider: Callable[[str, str], str]
+) -> tuple[Path, int]:
     """Read CSV, modify only `name` column, and write output CSV."""
     dialect = detect_dialect(csv_path)
 
@@ -160,7 +165,7 @@ class NameFormatterApp:
             self.set_status("No file selected.")
             return
 
-        path = Path(selected).expanduser().resolve()
+        path = Path(selected).resolve()
         if not path.is_file():
             messagebox.showerror("Invalid file", "The selected path is not a valid file.")
             self.set_status("Invalid file selected.")
