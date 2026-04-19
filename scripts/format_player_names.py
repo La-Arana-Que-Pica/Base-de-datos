@@ -20,6 +20,7 @@ from tkinter import filedialog
 
 MAX_NAME_LENGTH = 15
 TARGET_FILENAME = "All players exported.csv"
+MANUAL_REPLACEMENT_CACHE: dict[str, str] = {}
 
 
 def ask_csv_path() -> Path:
@@ -62,6 +63,10 @@ def has_lowercase(value: str) -> bool:
 
 def ask_manual_name(original_name: str, reason: str) -> str:
     """Prompt user for a valid manual replacement (<= 15 chars)."""
+    cached = MANUAL_REPLACEMENT_CACHE.get(original_name)
+    if cached is not None:
+        return cached
+
     print(f"\nManual input required for: '{original_name}'")
     print(f"Reason: {reason}")
     while True:
@@ -72,6 +77,7 @@ def ask_manual_name(original_name: str, reason: str) -> str:
         if len(replacement) > MAX_NAME_LENGTH:
             print("Replacement is too long.")
             continue
+        MANUAL_REPLACEMENT_CACHE[original_name] = replacement
         return replacement
 
 
