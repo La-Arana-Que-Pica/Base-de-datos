@@ -13,8 +13,8 @@ from tkinter import filedialog, messagebox, simpledialog
 
 MAX_NAME_LENGTH = 15
 TARGET_FILENAME = "All players exported.csv"
-class UserCancelledInput(Exception):
-    """Raised when the user cancels required manual name input."""
+class UserCanceledInput(Exception):
+    """Raised when user cancels a manual name replacement dialog during processing."""
 
 
 def has_lowercase(value: str) -> bool:
@@ -204,7 +204,7 @@ class NameFormatterApp:
                 parent=self.root,
             )
             if replacement is None:
-                raise UserCancelledInput(
+                raise UserCanceledInput(
                     "Processing canceled by user during manual input."
                 )
 
@@ -252,7 +252,7 @@ class NameFormatterApp:
             self.set_status(
                 f"Processing complete. Updated {changed_count} row(s). Output: {output_path}"
             )
-        except UserCancelledInput as exc:
+        except UserCanceledInput as exc:
             messagebox.showwarning("Processing canceled", str(exc), parent=self.root)
             self.set_status("Processing canceled by user.")
         except (OSError, csv.Error, ValueError) as exc:
