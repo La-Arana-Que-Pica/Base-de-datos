@@ -255,9 +255,13 @@ class NameFormatterApp:
         except UserCancelledInput as exc:
             messagebox.showwarning("Processing canceled", str(exc), parent=self.root)
             self.set_status("Processing canceled by user.")
-        except Exception as exc:
+        except (OSError, csv.Error, ValueError) as exc:
             messagebox.showerror("Processing error", str(exc), parent=self.root)
             self.set_status(f"Processing failed: {exc}")
+        except Exception as exc:
+            error_message = f"Unexpected error ({type(exc).__name__}): {exc}"
+            messagebox.showerror("Processing error", error_message, parent=self.root)
+            self.set_status(error_message)
 
 
 def main() -> None:
