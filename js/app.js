@@ -642,22 +642,42 @@ function restoreNavState() {
 
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
+  if (!sidebar) return;
 
-  const html = `
-    <!-- ── LIGAS ── -->
-    <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" id="nav-header-ligas" onclick="showLeaguesView()">
-        <span class="sidebar-nav-title">Ligas</span>
-      </div>
-    </div>
+  const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-    <!-- ── EQUIPOS ── -->
-    <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" id="nav-header-equipos" onclick="showTeamsView()">
-        <span class="sidebar-nav-title">Equipos</span>
-      </div>
-    </div>
+  const teamById = {};
+  DB.teams.forEach(t => { teamById[t.id] = t; });
 
+  const leaguesHtml = DB.leagues.map(league => {
+    const leagueTeams = league.teamIds.map(id => teamById[id]).filter(Boolean);
+    const teamsHtml = leagueTeams.map(t => `
+      <div class="sidebar-team-item" onclick="selectTeam('${esc(t.id)}')">
+        <img class="sidebar-team-crest"
+          src="img/teams/${esc(t.id)}.webp"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='img/teams/default.webp'"
+          alt="${esc(t.displayName)}">
+        <span>${esc(t.displayName)}</span>
+      </div>`).join('');
+    return `
+      <div class="sidebar-league" data-league-name="${esc(normalizeText(league.name))}">
+        <div class="sidebar-league-header" id="sidebar-league-hdr-${esc(league.id)}"
+          onclick="toggleSidebarLeague('${esc(league.id)}')">
+          <img class="sidebar-league-logo"
+            src="img/leagues/${esc(league.id)}.webp"
+            loading="lazy"
+            onerror="this.onerror=null;this.src='img/leagues/default.webp'"
+            alt="${esc(league.name)}">
+          <span class="sidebar-league-name">${esc(league.name)}</span>
+          <span class="sidebar-league-count">${leagueTeams.length}</span>
+          <span class="sidebar-league-arrow">▶</span>
+        </div>
+        <div class="sidebar-teams-list" id="sidebar-teams-${esc(league.id)}">${teamsHtml}</div>
+      </div>`;
+  }).join('');
+
+  sidebar.innerHTML = `
     <!-- ── JUGADORES ── -->
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-header" id="nav-header-jugadores" onclick="showAllPlayersFromSidebar()">
@@ -671,6 +691,19 @@ function buildSidebar() {
         <span class="sidebar-nav-title">⭐ Favoritos</span>
         <span class="sidebar-nav-badge" id="nav-fav-count"></span>
       </div>
+    </div>
+
+    <div class="sidebar-nav-divider"></div>
+
+    <!-- ── LIGAS (expandable tree) ── -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" style="cursor:pointer" onclick="showLeaguesView()" title="Ver todas las ligas">Ligas</div>
+      <div class="sidebar-filter-wrap">
+        <input type="text" class="sidebar-filter-input" id="sidebar-leagues-filter"
+          placeholder="Filtrar ligas..." autocomplete="off"
+          oninput="filterSidebarLeagues(this.value)">
+      </div>
+      <div id="sidebar-leagues-list">${leaguesHtml}</div>
     </div>
 
     <div class="sidebar-nav-divider"></div>
@@ -689,19 +722,37 @@ function buildSidebar() {
       </a>
     </div>`;
 
-  sidebar.innerHTML = html;
   _updateFavoritesCount();
 }
 
+/**
+ * Toggle the expand/collapse state of a league's team list in the sidebar.
+ */
+function toggleSidebarLeague(leagueId) {
+  const hdr = document.getElementById('sidebar-league-hdr-' + leagueId);
+  const list = document.getElementById('sidebar-teams-' + leagueId);
+  if (!hdr || !list) return;
+  const open = hdr.classList.toggle('open');
+  list.classList.toggle('open', open);
+}
+
+/**
+ * Filter the leagues shown in the sidebar by name.
+ */
+function filterSidebarLeagues(query) {
+  const q = normalizeText(query).trim();
+  document.querySelectorAll('#sidebar-leagues-list .sidebar-league').forEach(item => {
+    const name = item.dataset.leagueName || '';
+    item.style.display = (!q || name.includes(q)) ? '' : 'none';
+  });
+}
+
 function _setActiveSidebarNav(viewName) {
-  ['nav-header-ligas', 'nav-header-equipos', 'nav-header-jugadores', 'nav-header-favoritos'].forEach(id => {
+  ['nav-header-jugadores', 'nav-header-favoritos'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
   const map = {
-    leagues: 'nav-header-ligas',
-    leagueTeams: 'nav-header-ligas',
-    teams: 'nav-header-equipos',
     players: 'nav-header-jugadores',
     favorites: 'nav-header-favoritos',
   };
