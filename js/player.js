@@ -1217,6 +1217,17 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   const appearanceHtml = renderFaceData(appearance, player, baseCopyPlayerName, isScanned);
 
   const content = document.getElementById('player-content');
+
+  // Favorites button state for this player
+  const favActive = (typeof isFavorite === 'function') && isFavorite(player['Id'], team.id);
+  const favBtnHtml = (typeof isFavorite === 'function')
+    ? `<button id="profile-fav-btn" class="profile-fav-btn${favActive ? ' is-fav' : ''}"
+         onclick="toggleProfileFavorite('${player['Id']}','${team.id}')"
+         title="${favActive ? 'Quitar de favoritos' : 'Agregar a favoritos'}">
+         ${favActive ? '★ En favoritos' : '☆ Agregar a favoritos'}
+       </button>`
+    : '';
+
   content.innerHTML = `
     <button class="back-btn" onclick="goBack()">◀ Volver</button>
 
@@ -1261,6 +1272,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
                 <div class="pcs"><span class="pcs-val">${player['Weight'] || '–'} kg</span><span class="pcs-key">Peso</span></div>
                 <div class="pcs"><span class="pcs-val">${footDisplay}</span><span class="pcs-key">Pie</span></div>
               </div>
+              ${favBtnHtml}
             </div>
           </div>
         </div>
@@ -1311,6 +1323,23 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 }
 
 // ─── Back navigation ─────────────────────────────────────────────────────────
+
+/**
+ * Toggles a favorite directly from the player profile page.
+ * Updates the button text/style in place.
+ * @param {string} playerId
+ * @param {string} teamId
+ */
+function toggleProfileFavorite(playerId, teamId) {
+  if (typeof toggleFavorite !== 'function') return;
+  const added = toggleFavorite(playerId, teamId);
+  const btn = document.getElementById('profile-fav-btn');
+  if (btn) {
+    btn.textContent = added ? '★ En favoritos' : '☆ Agregar a favoritos';
+    btn.classList.toggle('is-fav', added);
+    btn.title = added ? 'Quitar de favoritos' : 'Agregar a favoritos';
+  }
+}
 
 function goBack() {
   if (document.referrer && new URL(document.referrer).hostname === window.location.hostname) {
