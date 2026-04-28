@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Organizador de plantilla – Base de datos PES</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="img/logo.webp" type="image/webp" />
+</head>
+<body>
+  <header id="header">
+    <a href="index.html" class="header-logo-link">
+      <img
+        class="logo"
+        src="img/logo.webp"
+        onerror="this.onerror=null;this.src='img/logo.webp'"
+        alt="Logo"
+      />
+    </a>
+    <h1>Organizador de plantilla <span>PES / FM</span></h1>
+  </header>
+
+  <main id="squad-organizer-page">
+    <section class="squad-organizer-panel">
+      <h2>Cargar lista de jugadores</h2>
+      <p class="squad-organizer-help">
+        Pega la lista (como la de FM) o carga un CSV/TSV para ordenar y filtrar por media, potencial, edad, sueldo, cláusula y valor de mercado.
+      </p>
+      <textarea id="squad-input" placeholder="Pega aquí tu plantilla..."></textarea>
+      <div class="squad-organizer-actions">
+        <input id="squad-file" type="file" accept=".csv,.txt,.tsv" />
+        <button id="btn-parse" type="button">Procesar plantilla</button>
+        <button id="btn-clear" type="button" class="secondary">Limpiar</button>
+      </div>
+      <div id="squad-feedback" class="squad-feedback"></div>
+    </section>
+
+    <section id="squad-results" class="squad-results" style="display:none">
+      <div class="squad-filters">
+        <input id="filter-name" type="text" placeholder="Buscar por nombre..." />
+        <select id="filter-position">
+          <option value="">Todas las posiciones</option>
+        </select>
+        <input id="filter-min-overall" type="number" min="0" max="99" placeholder="Media mínima" />
+        <input id="filter-min-potential" type="number" min="0" max="99" placeholder="Potencial mínimo" />
+      </div>
+      <div class="squad-summary" id="squad-summary"></div>
+      <div class="table-responsive">
+        <table id="squad-table" class="players-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="overall">Media <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="potential">Potencial <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="name">Nombre <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="position">Posición <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="age">Edad <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="contract">Contrato <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="wageValue">Sueldo <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="clauseValue">Cláusula <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="marketMin">Valor mercado <span class="sort-icon">⇅</span></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/squad-organizer.js"></script>
+</body>
+</html>
