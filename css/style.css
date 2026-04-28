@@ -3759,9 +3759,113 @@ body {
   border: none;
 }
 
+
 /* =====================================================
-   Responsive overrides
+   Landing hub page (index.html)
    ===================================================== */
+
+.landing-body #landing-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(var(--header-height) + 48px) 24px 60px;
+  min-height: 100vh;
+}
+
+.landing-hero {
+  text-align: center;
+  max-width: 600px;
+  margin-bottom: 48px;
+}
+
+.landing-hero-logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 4px 16px rgba(192,57,43,0.25));
+}
+
+.landing-hero-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.landing-hero-title span {
+  color: var(--color-highlight);
+}
+
+.landing-hero-desc {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.landing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.landing-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 32px 20px;
+  text-decoration: none;
+  color: var(--color-text);
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+
+.landing-card:hover {
+  border-color: var(--color-highlight);
+  box-shadow: 0 6px 24px rgba(192, 57, 43, 0.18);
+  transform: translateY(-3px);
+}
+
+.landing-card-icon {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.landing-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.landing-card-desc {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .landing-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  .landing-hero-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .landing-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 
 @media (max-width: 900px) {
   .header-nav {
