@@ -370,7 +370,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       // Lower on screen (higher topPct) = higher z-index so they appear on top
       const zIdx = Math.round(topPct);
 
-      const shortName = escapeHtml(formatShortName(player.Name || ''));
+      const fullName = escapeHtml(player.Name || '');
       const pid = escapeHtml(player.ID);
       const tid = escapeHtml(teamId || '');
 
@@ -389,14 +389,14 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
           <div class="pitch-player-photo-wrap">
             <img src="img/players/${pid}.webp"
               onerror="handleMinifaceError(this,'${pid}')"
-              class="pitch-player-photo" alt="${shortName}">
+              class="pitch-player-photo" alt="${fullName}">
             ${isCapitan ? '<div class="pitch-captain-badge">C</div>' : ''}
           </div>
           <div class="pitch-player-badge">
             <span class="pitch-badge-pos" style="color:${badgeColor}">${posDisplay}</span>
             <span class="pitch-badge-ovr">${ovr}</span>
           </div>
-          <div class="pitch-player-name"><span>${shortName}</span></div>
+          <div class="pitch-player-name"><span>${fullName}</span></div>
         </a>`);
     }
     return tokens;
@@ -462,7 +462,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     if (isNaN(rawIdx) || rawIdx < 0 || rawIdx >= squadSlots.length) return;
     const p = squadSlots[rawIdx];
     if (!p) return;
-    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
+    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(p.Name || '')}</span></div>`);
   };
 
   // For header roles: the value is a 0-based direct squad slot index
@@ -471,7 +471,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
     if (isNaN(rawIdx) || rawIdx < 0 || rawIdx >= squadSlots.length) return;
     const p = squadSlots[rawIdx];
     if (!p) return;
-    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(formatShortName(p.Name || ''))}</span></div>`);
+    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(p.Name || '')}</span></div>`);
   };
 
   addSquadAssignment('Capitán', 'Capitan');
