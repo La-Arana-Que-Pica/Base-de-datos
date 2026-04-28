@@ -622,6 +622,9 @@ function _applyNavState(state) {
       if (state.page) _allPlayersPage = state.page;
       _showAllPlayersInternal(false);
       break;
+    case 'favorites':
+      _showFavoritesViewInternal();
+      break;
     default: showAllPlayers(); break;
   }
 }
@@ -660,13 +663,38 @@ function buildSidebar() {
       <div class="sidebar-nav-header" id="nav-header-jugadores" onclick="showAllPlayersFromSidebar()">
         <span class="sidebar-nav-title">Jugadores</span>
       </div>
+    </div>
+
+    <!-- ── FAVORITOS ── -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-header" id="nav-header-favoritos" onclick="showFavoritesView()">
+        <span class="sidebar-nav-title">⭐ Favoritos</span>
+        <span class="sidebar-nav-badge" id="nav-fav-count"></span>
+      </div>
+    </div>
+
+    <div class="sidebar-nav-divider"></div>
+
+    <!-- ── DESCARGAS ── -->
+    <div class="sidebar-nav-section">
+      <a class="sidebar-nav-header sidebar-nav-link" href="downloads.html">
+        <span class="sidebar-nav-title">⬇ Descargas</span>
+      </a>
+    </div>
+
+    <!-- ── TUTORIALES ── -->
+    <div class="sidebar-nav-section">
+      <a class="sidebar-nav-header sidebar-nav-link" href="tutorials.html">
+        <span class="sidebar-nav-title">🎥 Tutoriales</span>
+      </a>
     </div>`;
 
   sidebar.innerHTML = html;
+  _updateFavoritesCount();
 }
 
 function _setActiveSidebarNav(viewName) {
-  ['nav-header-ligas', 'nav-header-equipos', 'nav-header-jugadores'].forEach(id => {
+  ['nav-header-ligas', 'nav-header-equipos', 'nav-header-jugadores', 'nav-header-favoritos'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
@@ -675,6 +703,7 @@ function _setActiveSidebarNav(viewName) {
     leagueTeams: 'nav-header-ligas',
     teams: 'nav-header-equipos',
     players: 'nav-header-jugadores',
+    favorites: 'nav-header-favoritos',
   };
   const targetId = map[viewName];
   if (targetId) {
@@ -927,7 +956,7 @@ function filterTeamsGrid(query) {
 // ─── Views ────────────────────────────────────────────────────────────────────
 
 function hideAllViews() {
-  document.querySelectorAll('#home-view, #players-view, #player-view, #search-view, #leagues-view, #teams-grid-view').forEach(el => {
+  document.querySelectorAll('#home-view, #players-view, #player-view, #search-view, #leagues-view, #teams-grid-view, #favorites-view').forEach(el => {
     el.classList.remove('active');
   });
   const loadingOverlay = document.getElementById('loading-overlay');
@@ -964,6 +993,10 @@ function showHome() {
   // Count unique players from teams that have a league assigned
   const uniqueIds = new Set(DB.players.filter(p => teamsInLeaguesSet.has(p._team.id)).map(p => p.ID));
   document.getElementById('stat-players').textContent = uniqueIds.size;
+  // Show favorites count
+  const favCount = getFavoritesCount();
+  const statFav = document.getElementById('stat-favorites');
+  if (statFav) statFav.textContent = favCount > 0 ? favCount : '⭐';
 
   // Populate featured leagues + teams section
   const featuredSection = document.getElementById('home-leagues-section');
@@ -1577,6 +1610,7 @@ function _showAllPlayersInternal(resetPage) {
           <tr>
             <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
             <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
+            <th class="fav-col"></th>
           </tr>
         </thead>
         <tbody id="all-players-tbody"></tbody>
@@ -1640,6 +1674,7 @@ function renderPlayersList(team) {
           <th>PAS</th>
           <th>FIS</th>
           <th>DEF</th>
+          <th class="fav-col"></th>
         </tr>
       </thead>
       <tbody>
@@ -1657,6 +1692,7 @@ function renderPlayerRow(player, team) {
   const nationalNote = player._playsForNational
     ? `<span class="national-team-badge" title="También juega para su selección">🌍</span>`
     : '';
+  const fav = isFavorite(player.ID, team.id);
 
   return `<tr onclick="selectPlayer('${player.ID}', '${team.id}')">
     <td>
@@ -1691,6 +1727,14 @@ function renderPlayerRow(player, team) {
     <td>${radarAttrs.PAS}</td>
     <td>${radarAttrs.FIS}</td>
     <td>${radarAttrs.DEF}</td>
+    <td class="fav-col" onclick="event.stopPropagation()">
+      <button class="fav-btn${fav ? ' is-fav' : ''}"
+        onclick="toggleFavoriteFromBtn(this,'${player.ID}','${team.id}')"
+        title="${fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}"
+        aria-label="Favorito">
+        ${fav ? '★' : '☆'}
+      </button>
+    </td>
   </tr>`;
 }
 
@@ -1944,6 +1988,118 @@ function drawRadar(canvasId, attrs) {
   }
 }
 
+// ─── Favorites ────────────────────────────────────────────────────────────────
+
+/**
+ * Updates the favorites count badge in the sidebar.
+ */
+function _updateFavoritesCount() {
+  const el = document.getElementById('nav-fav-count');
+  if (!el) return;
+  const count = getFavoritesCount();
+  el.textContent = count > 0 ? String(count) : '';
+}
+
+/**
+ * Called by the inline ☆/★ button in each player row.
+ * Toggles the favorite state and updates the button's appearance.
+ * @param {HTMLButtonElement} btn
+ * @param {string} playerId
+ * @param {string} teamId
+ */
+function toggleFavoriteFromBtn(btn, playerId, teamId) {
+  const added = toggleFavorite(playerId, teamId);
+  btn.textContent = added ? '★' : '☆';
+  btn.classList.toggle('is-fav', added);
+  btn.title = added ? 'Quitar de favoritos' : 'Agregar a favoritos';
+  _updateFavoritesCount();
+  // Keep home stat updated if visible
+  const statFav = document.getElementById('stat-favorites');
+  if (statFav) {
+    const count = getFavoritesCount();
+    statFav.textContent = count > 0 ? count : '⭐';
+  }
+}
+
+/** Internal: render the favorites view without pushing nav state. */
+function _showFavoritesViewInternal() {
+  _setActiveSidebarNav('favorites');
+  hideAllViews();
+  const view = document.getElementById('favorites-view');
+  if (!view) return;
+  view.classList.add('active');
+
+  const favs = getFavorites();
+  if (!favs.length) {
+    view.innerHTML = `
+      <div class="view-header">
+        <div class="view-title">⭐ Mis Favoritos</div>
+      </div>
+      <div class="empty-state">
+        <div class="empty-state-icon">⭐</div>
+        <p>No tienes jugadores en favoritos todavía.</p>
+        <p>Usa el botón ☆ en cualquier jugador para agregarlo aquí.</p>
+      </div>`;
+    return;
+  }
+
+  // Look up actual player objects from in-memory index
+  const playerEntries = favs
+    .map(f => DB.playersByKey[getPlayerKey(f.teamId, f.playerId)])
+    .filter(Boolean);
+
+  // Notify user if some favorited players are no longer in the DB
+  const missingCount = favs.length - playerEntries.length;
+  const missingNote = missingCount > 0
+    ? `<div class="favorites-missing-note">⚠️ ${missingCount} jugador(es) ya no están disponibles en la base de datos.</div>`
+    : '';
+
+  const rowsHtml = playerEntries.map(p => renderPlayerRow(p, p._team)).join('');
+
+  view.innerHTML = `
+    <div class="view-header">
+      <div>
+        <div class="view-title">⭐ Mis Favoritos</div>
+        <div class="view-subtitle">${playerEntries.length} jugador(es)</div>
+      </div>
+      <div class="view-header-actions">
+        <button class="adv-filter-toggle btn-danger" onclick="clearAllFavorites()">✕ Limpiar favoritos</button>
+      </div>
+    </div>
+    ${missingNote}
+    <div class="table-responsive">
+      <table class="players-table">
+        <thead>
+          <tr>
+            <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
+            <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
+            <th class="fav-col"></th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>`;
+}
+
+/** Public: navigate to the favorites view and save state. */
+function showFavoritesView() {
+  saveNavState({ view: 'favorites' });
+  _showFavoritesViewInternal();
+}
+
+/**
+ * Clears all favorites after user confirmation, then re-renders the view.
+ */
+function clearAllFavorites() {
+  if (!confirm('¿Eliminar todos los favoritos?')) return;
+  clearFavorites();
+  _updateFavoritesCount();
+  _showFavoritesViewInternal();
+  // Update home stat if visible
+  const statFav = document.getElementById('stat-favorites');
+  if (statFav) statFav.textContent = '⭐';
+}
+
 // ─── Search ───────────────────────────────────────────────────────────────────
 
 let searchTimeout = null;
@@ -2003,16 +2159,19 @@ function runSearch(query) {
         <div class="view-subtitle">${results.length} jugador(es) encontrado(s)</div>
       </div>
     </div>
-    <table class="players-table">
-      <thead>
-        <tr>
-          <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
-          <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th>
-          <th>PAS</th><th>FIS</th><th>DEF</th>
-        </tr>
-      </thead>
-      <tbody>${rowsHtml}</tbody>
-    </table>`;
+    <div class="table-responsive">
+      <table class="players-table">
+        <thead>
+          <tr>
+            <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
+            <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th>
+            <th>PAS</th><th>FIS</th><th>DEF</th>
+            <th class="fav-col"></th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>`;
 }
 
 // ─── Entry point ──────────────────────────────────────────────────────────────

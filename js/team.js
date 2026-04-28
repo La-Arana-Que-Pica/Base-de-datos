@@ -297,7 +297,7 @@ function refreshTableBody() {
   if (!tbody || !_teamId) return;
   const list = getSortedFilteredPlayers();
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--color-text-muted)">Sin resultados para los filtros seleccionados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:24px;color:var(--color-text-muted)">Sin resultados para los filtros seleccionados.</td></tr>`;
     return;
   }
   tbody.innerHTML = list.map(p => renderPlayerRow(p, _teamId)).join('');
@@ -711,6 +711,7 @@ function renderPlayerRow(player, teamId) {
   const radarAttrs = computeRadarAttributes(player);
   const safeName = escapeHtml(player.Name);
   const shirtNum = player._shirtNumber ? escapeHtml(String(player._shirtNumber)) : '–';
+  const fav = (typeof isFavorite === 'function') && isFavorite(player.ID, teamId);
 
   return `<tr class="player-row" data-player-id="${escapeHtml(player.ID)}" data-team-id="${escapeHtml(teamId)}">
     <td class="shirt-number-cell">${shirtNum}</td>
@@ -735,6 +736,14 @@ function renderPlayerRow(player, teamId) {
     <td>${radarAttrs.PAS}</td>
     <td>${(player.Position || '') === 'GK' ? radarAttrs.COM : radarAttrs.RIT}</td>
     <td>${(player.Position || '') === 'GK' ? radarAttrs.POR : radarAttrs.FIS}</td>
+    <td class="fav-col" onclick="event.stopPropagation()">
+      <button class="fav-btn${fav ? ' is-fav' : ''}"
+        onclick="toggleTeamFavBtn(this,'${escapeHtml(player.ID)}','${escapeHtml(teamId)}')"
+        title="${fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}"
+        aria-label="Favorito">
+        ${fav ? '★' : '☆'}
+      </button>
+    </td>
   </tr>`;
 }
 
@@ -868,6 +877,7 @@ function renderPositionGroups(players, teamId) {
               <th>PAS</th>
               <th>RIT/COM</th>
               <th>FIS/POR</th>
+              <th class="fav-col"></th>
             </tr>
           </thead>
           <tbody>${rowsHtml}</tbody>
@@ -891,6 +901,7 @@ function renderPositionGroups(players, teamId) {
               <th class="shirt-number-cell">#</th>
               <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
               <th>OVR</th><th>ATQ</th><th>REG</th><th>DEF</th><th>PAS</th><th>RIT/COM</th><th>FIS/POR</th>
+              <th class="fav-col"></th>
             </tr>
           </thead>
           <tbody>${uncategorized.map(p => renderPlayerRow(p, teamId)).join('')}</tbody>
