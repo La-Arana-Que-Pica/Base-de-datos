@@ -531,7 +531,11 @@ function _stateToUrl(state) {
   }
   if (state.filters) {
     Object.entries(state.filters).forEach(([k, v]) => {
-      if (v !== '') params.set('f_' + k, v);
+      if (k === 'skills') {
+        if (Array.isArray(v) && v.length > 0) params.set('f_skills', v.join(','));
+      } else if (v !== '') {
+        params.set('f_' + k, v);
+      }
     });
   }
   if (state.specialPlayers) params.set('special', '1');
@@ -558,7 +562,11 @@ function _urlToState() {
   }
   const filters = {};
   params.forEach((v, k) => {
-    if (k.startsWith('f_')) filters[k.slice(2)] = v;
+    if (k === 'f_skills') {
+      filters.skills = v ? v.split(',').filter(Boolean) : [];
+    } else if (k.startsWith('f_')) {
+      filters[k.slice(2)] = v;
+    }
   });
   if (Object.keys(filters).length) state.filters = filters;
   if (params.get('special') === '1') state.specialPlayers = true;
@@ -644,85 +652,34 @@ function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
-  const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-  const teamById = {};
-  DB.teams.forEach(t => { teamById[t.id] = t; });
-
-  const leaguesHtml = DB.leagues.map(league => {
-    const leagueTeams = league.teamIds.map(id => teamById[id]).filter(Boolean);
-    const teamsHtml = leagueTeams.map(t => `
-      <div class="sidebar-team-item" onclick="selectTeam('${esc(t.id)}')">
-        <img class="sidebar-team-crest"
-          src="img/teams/${esc(t.id)}.webp"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='img/teams/default.webp'"
-          alt="${esc(t.displayName)}">
-        <span>${esc(t.displayName)}</span>
-      </div>`).join('');
-    return `
-      <div class="sidebar-league" data-league-name="${esc(normalizeText(league.name))}">
-        <div class="sidebar-league-header" id="sidebar-league-hdr-${esc(league.id)}"
-          onclick="toggleSidebarLeague('${esc(league.id)}')">
-          <img class="sidebar-league-logo"
-            src="img/leagues/${esc(league.id)}.webp"
-            loading="lazy"
-            onerror="this.onerror=null;this.src='img/leagues/default.webp'"
-            alt="${esc(league.name)}">
-          <span class="sidebar-league-name">${esc(league.name)}</span>
-          <span class="sidebar-league-count">${leagueTeams.length}</span>
-          <span class="sidebar-league-arrow">▶</span>
-        </div>
-        <div class="sidebar-teams-list" id="sidebar-teams-${esc(league.id)}">${teamsHtml}</div>
-      </div>`;
-  }).join('');
-
   sidebar.innerHTML = `
+    <!-- ── INICIO ── -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-header" id="nav-header-inicio" onclick="goHome()">
+        <span class="sidebar-nav-title">🏠 Inicio</span>
+      </div>
+    </div>
+
+    <!-- ── LIGAS ── -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-header" id="nav-header-ligas" onclick="showLeaguesView()">
+        <span class="sidebar-nav-title">⚽ Ligas</span>
+      </div>
+    </div>
+
+    <!-- ── EQUIPOS ── -->
+    <div class="sidebar-nav-section">
+      <div class="sidebar-nav-header" id="nav-header-equipos" onclick="showTeamsView()">
+        <span class="sidebar-nav-title">🏟 Equipos</span>
+      </div>
+    </div>
+
     <!-- ── JUGADORES ── -->
     <div class="sidebar-nav-section">
       <div class="sidebar-nav-header" id="nav-header-jugadores" onclick="showAllPlayersFromSidebar()">
-        <span class="sidebar-nav-title">Jugadores</span>
+        <span class="sidebar-nav-title">👤 Jugadores</span>
       </div>
-    </div>
-
-    <!-- ── FAVORITOS ── -->
-    <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" id="nav-header-favoritos" onclick="showFavoritesView()">
-        <span class="sidebar-nav-title">⭐ Favoritos</span>
-        <span class="sidebar-nav-badge" id="nav-fav-count"></span>
-      </div>
-    </div>
-
-    <div class="sidebar-nav-divider"></div>
-
-    <!-- ── LIGAS (expandable tree) ── -->
-    <div class="sidebar-section">
-      <div class="sidebar-section-title" style="cursor:pointer" onclick="showLeaguesView()" title="Ver todas las ligas">Ligas</div>
-      <div class="sidebar-filter-wrap">
-        <input type="text" class="sidebar-filter-input" id="sidebar-leagues-filter"
-          placeholder="Filtrar ligas..." autocomplete="off"
-          oninput="filterSidebarLeagues(this.value)">
-      </div>
-      <div id="sidebar-leagues-list">${leaguesHtml}</div>
-    </div>
-
-    <div class="sidebar-nav-divider"></div>
-
-    <!-- ── DESCARGAS ── -->
-    <div class="sidebar-nav-section">
-      <a class="sidebar-nav-header sidebar-nav-link" href="downloads.html">
-        <span class="sidebar-nav-title">⬇ Descargas</span>
-      </a>
-    </div>
-
-    <!-- ── TUTORIALES ── -->
-    <div class="sidebar-nav-section">
-      <a class="sidebar-nav-header sidebar-nav-link" href="tutorials.html">
-        <span class="sidebar-nav-title">🎥 Tutoriales</span>
-      </a>
     </div>`;
-
-  _updateFavoritesCount();
 }
 
 /**
@@ -748,13 +705,17 @@ function filterSidebarLeagues(query) {
 }
 
 function _setActiveSidebarNav(viewName) {
-  ['nav-header-jugadores', 'nav-header-favoritos'].forEach(id => {
+  ['nav-header-inicio', 'nav-header-ligas', 'nav-header-equipos', 'nav-header-jugadores'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
   const map = {
+    home: 'nav-header-inicio',
+    leagues: 'nav-header-ligas',
+    leagueTeams: 'nav-header-ligas',
+    teams: 'nav-header-equipos',
     players: 'nav-header-jugadores',
-    favorites: 'nav-header-favoritos',
+    favorites: 'nav-header-jugadores',
   };
   const targetId = map[viewName];
   if (targetId) {
@@ -1034,6 +995,7 @@ function showError(message) {
 }
 
 function showHome() {
+  _setActiveSidebarNav('home');
   hideAllViews();
   document.getElementById('home-view').classList.add('active');
 
@@ -1134,7 +1096,7 @@ const _advFilters = {
   maxShooting: '',
   minPassing: '',
   maxPassing: '',
-  skill: '',
+  skills: [],
   comStyle: '',
 };
 
@@ -1284,9 +1246,9 @@ function _prepareAllPlayersList() {
     const max = parseInt(f.maxPassing, 10);
     if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Low Pass'], 10) || 0) <= max);
   }
-  // Skill filter
-  if (f.skill) {
-    unique = unique.filter(p => p[f.skill] === 'True');
+  // Skills filter (multi-select: player must have ALL selected skills)
+  if (Array.isArray(f.skills) && f.skills.length > 0) {
+    unique = unique.filter(p => f.skills.every(sk => p[sk] === 'True'));
   }
   // COM style filter
   if (f.comStyle) {
@@ -1415,147 +1377,188 @@ function _buildFilterPanel() {
     `<option value="${p}"${f.position === p ? ' selected' : ''}>${translatePosition(p)} (${p})</option>`
   ).join('');
 
+  // Build skills multi-select HTML
+  const selectedSkills = Array.isArray(f.skills) ? f.skills : [];
+  const skillTagsHtml = selectedSkills.map(sk => {
+    const label = (PLAYER_SKILLS_LABELS.find(([k]) => k === sk) || [sk, sk])[1];
+    return `<span class="skill-filter-tag">${label}<button type="button" class="skill-filter-tag-remove" onclick="removeSkillFilter('${sk}')" title="Quitar">×</button></span>`;
+  }).join('');
+
+  const skillsPickerHtml = PLAYER_SKILLS_LABELS.map(([k, v]) =>
+    `<label class="skills-picker-item${selectedSkills.includes(k) ? ' selected' : ''}">
+      <input type="checkbox" value="${k}" ${selectedSkills.includes(k) ? 'checked' : ''} onchange="onSkillCheckboxChange(this)">
+      <span>${v}</span>
+    </label>`
+  ).join('');
+
   return `
     <div class="adv-filter-panel" id="adv-filter-panel">
-      <div class="adv-filter-grid">
-        <div class="adv-filter-group">
-          <label>Posición</label>
-          <select id="flt-position" onchange="onAdvFilterChange()">
-            <option value="">Todas</option>
-            ${posOptions}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Rol</label>
-          <select id="flt-role" onchange="onAdvFilterChange()">
-            <option value="">Todos</option>
-            <option value="GK"${f.role === 'GK' ? ' selected' : ''}>Portero</option>
-            <option value="DEF"${f.role === 'DEF' ? ' selected' : ''}>Defensa</option>
-            <option value="MID"${f.role === 'MID' ? ' selected' : ''}>Mediocampista</option>
-            <option value="FWD"${f.role === 'FWD' ? ' selected' : ''}>Delantero</option>
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Nacionalidad</label>
-          <select id="flt-nationality" onchange="onAdvFilterChange()">
-            <option value="">Todas</option>
-            ${natOptions}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Club</label>
-          <select id="flt-club" onchange="onAdvFilterChange()">
-            <option value="">Todos</option>
-            ${clubOptions}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Liga</label>
-          <select id="flt-league" onchange="onAdvFilterChange()">
-            <option value="">Todas</option>
-            ${leagueOptions}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Estilo de juego</label>
-          <select id="flt-playing-style" onchange="onAdvFilterChange()">
-            <option value="">Todos</option>
-            ${Object.entries(PLAYING_STYLE_LABELS).map(([k,v]) =>
-              `<option value="${k}"${f.playingStyle === k ? ' selected' : ''}>${v}</option>`
-            ).join('')}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Habilidad específica</label>
-          <select id="flt-skill" onchange="onAdvFilterChange()">
-            <option value="">Cualquiera</option>
-            ${PLAYER_SKILLS_LABELS.map(([k,v]) =>
-              `<option value="${k}"${f.skill === k ? ' selected' : ''}>${v}</option>`
-            ).join('')}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Estilo COM</label>
-          <select id="flt-com-style" onchange="onAdvFilterChange()">
-            <option value="">Cualquiera</option>
-            ${COM_STYLES_LABELS.map(([k,v]) =>
-              `<option value="${k}"${f.comStyle === k ? ' selected' : ''}>${v}</option>`
-            ).join('')}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Pie dominante</label>
-          <select id="flt-foot" onchange="onAdvFilterChange()">
-            <option value="">Ambos</option>
-            <option value="right"${f.foot === 'right' ? ' selected' : ''}>Derecho</option>
-            <option value="left"${f.foot === 'left' ? ' selected' : ''}>Izquierdo</option>
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Cara escaneada</label>
-          <select id="flt-facescan" onchange="onAdvFilterChange()">
-            <option value="">Todos</option>
-            <option value="yes"${f.hasFaceScan === 'yes' ? ' selected' : ''}>Sí</option>
-            <option value="no"${f.hasFaceScan === 'no' ? ' selected' : ''}>No</option>
-          </select>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Valoración (OVR)</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-ovr" placeholder="Min" min="0" max="99" value="${f.minOvr}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-ovr" placeholder="Máx" min="0" max="99" value="${f.maxOvr}" oninput="onAdvFilterChange()">
+
+      <!-- ── Filtros básicos ── -->
+      <div class="filter-section">
+        <div class="filter-section-label">Filtros básicos</div>
+        <div class="adv-filter-grid">
+          <div class="adv-filter-group">
+            <label>Posición</label>
+            <select id="flt-position" onchange="onAdvFilterChange()">
+              <option value="">Todas</option>
+              ${posOptions}
+            </select>
           </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Edad</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-age" placeholder="Min" min="15" max="50" value="${f.minAge}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-age" placeholder="Máx" min="15" max="50" value="${f.maxAge}" oninput="onAdvFilterChange()">
+          <div class="adv-filter-group">
+            <label>Nacionalidad</label>
+            <select id="flt-nationality" onchange="onAdvFilterChange()">
+              <option value="">Todas</option>
+              ${natOptions}
+            </select>
           </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Altura (cm)</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-height" placeholder="Min" min="150" max="220" value="${f.minHeight}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-height" placeholder="Máx" min="150" max="220" value="${f.maxHeight}" oninput="onAdvFilterChange()">
+          <div class="adv-filter-group">
+            <label>Club</label>
+            <select id="flt-club" onchange="onAdvFilterChange()">
+              <option value="">Todos</option>
+              ${clubOptions}
+            </select>
           </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Peso (kg)</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-weight" placeholder="Min" min="50" max="120" value="${f.minWeight}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-weight" placeholder="Máx" min="50" max="120" value="${f.maxWeight}" oninput="onAdvFilterChange()">
+          <div class="adv-filter-group">
+            <label>Liga</label>
+            <select id="flt-league" onchange="onAdvFilterChange()">
+              <option value="">Todas</option>
+              ${leagueOptions}
+            </select>
           </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Velocidad</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-speed" placeholder="Min" min="40" max="99" value="${f.minSpeed}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-speed" placeholder="Máx" min="40" max="99" value="${f.maxSpeed}" oninput="onAdvFilterChange()">
-          </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Finalización</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-shooting" placeholder="Min" min="40" max="99" value="${f.minShooting}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-shooting" placeholder="Máx" min="40" max="99" value="${f.maxShooting}" oninput="onAdvFilterChange()">
-          </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Pase al ras</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-passing" placeholder="Min" min="40" max="99" value="${f.minPassing}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-passing" placeholder="Máx" min="40" max="99" value="${f.maxPassing}" oninput="onAdvFilterChange()">
+          <div class="adv-filter-group adv-filter-range">
+            <label>Valoración (OVR)</label>
+            <div class="range-inputs">
+              <input type="number" id="flt-min-ovr" placeholder="Min" min="0" max="99" value="${f.minOvr}" oninput="onAdvFilterChange()">
+              <span>–</span>
+              <input type="number" id="flt-max-ovr" placeholder="Máx" min="0" max="99" value="${f.maxOvr}" oninput="onAdvFilterChange()">
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- ── Habilidades (multi-select) ── -->
+      <div class="filter-section">
+        <div class="filter-section-label">Habilidades
+          <span class="filter-section-hint">Jugadores con TODAS las habilidades seleccionadas</span>
+        </div>
+        <div class="skills-filter-tags" id="skills-filter-tags">
+          ${skillTagsHtml || '<span class="skills-filter-placeholder">Ninguna seleccionada</span>'}
+        </div>
+        <div class="skills-picker-wrap">
+          <input type="text" class="skills-picker-search" id="skills-picker-search"
+            placeholder="Buscar habilidad..." autocomplete="off"
+            oninput="filterSkillsPicker(this.value)">
+          <div class="skills-picker-list" id="skills-picker-list">
+            ${skillsPickerHtml}
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Filtros avanzados (colapsables) ── -->
+      <div class="filter-section">
+        <div class="filter-section-label filter-advanced-toggle" id="adv-section-toggle" onclick="toggleAdvancedSection()">
+          Filtros avanzados
+          <span class="filter-advanced-arrow" id="adv-section-arrow">▶</span>
+        </div>
+        <div id="adv-section-body" style="display:none">
+          <div class="adv-filter-grid" style="margin-top:12px">
+            <div class="adv-filter-group">
+              <label>Rol</label>
+              <select id="flt-role" onchange="onAdvFilterChange()">
+                <option value="">Todos</option>
+                <option value="GK"${f.role === 'GK' ? ' selected' : ''}>Portero</option>
+                <option value="DEF"${f.role === 'DEF' ? ' selected' : ''}>Defensa</option>
+                <option value="MID"${f.role === 'MID' ? ' selected' : ''}>Mediocampista</option>
+                <option value="FWD"${f.role === 'FWD' ? ' selected' : ''}>Delantero</option>
+              </select>
+            </div>
+            <div class="adv-filter-group">
+              <label>Estilo de juego</label>
+              <select id="flt-playing-style" onchange="onAdvFilterChange()">
+                <option value="">Todos</option>
+                ${Object.entries(PLAYING_STYLE_LABELS).map(([k,v]) =>
+                  `<option value="${k}"${f.playingStyle === k ? ' selected' : ''}>${v}</option>`
+                ).join('')}
+              </select>
+            </div>
+            <div class="adv-filter-group">
+              <label>Estilo COM</label>
+              <select id="flt-com-style" onchange="onAdvFilterChange()">
+                <option value="">Cualquiera</option>
+                ${COM_STYLES_LABELS.map(([k,v]) =>
+                  `<option value="${k}"${f.comStyle === k ? ' selected' : ''}>${v}</option>`
+                ).join('')}
+              </select>
+            </div>
+            <div class="adv-filter-group">
+              <label>Pie dominante</label>
+              <select id="flt-foot" onchange="onAdvFilterChange()">
+                <option value="">Ambos</option>
+                <option value="right"${f.foot === 'right' ? ' selected' : ''}>Derecho</option>
+                <option value="left"${f.foot === 'left' ? ' selected' : ''}>Izquierdo</option>
+              </select>
+            </div>
+            <div class="adv-filter-group">
+              <label>Cara escaneada</label>
+              <select id="flt-facescan" onchange="onAdvFilterChange()">
+                <option value="">Todos</option>
+                <option value="yes"${f.hasFaceScan === 'yes' ? ' selected' : ''}>Sí</option>
+                <option value="no"${f.hasFaceScan === 'no' ? ' selected' : ''}>No</option>
+              </select>
+            </div>
+            <div class="adv-filter-group adv-filter-range">
+              <label>Edad</label>
+              <div class="range-inputs">
+                <input type="number" id="flt-min-age" placeholder="Min" min="15" max="50" value="${f.minAge}" oninput="onAdvFilterChange()">
+                <span>–</span>
+                <input type="number" id="flt-max-age" placeholder="Máx" min="15" max="50" value="${f.maxAge}" oninput="onAdvFilterChange()">
+              </div>
+            </div>
+            <div class="adv-filter-group adv-filter-range">
+              <label>Altura (cm)</label>
+              <div class="range-inputs">
+                <input type="number" id="flt-min-height" placeholder="Min" min="150" max="220" value="${f.minHeight}" oninput="onAdvFilterChange()">
+                <span>–</span>
+                <input type="number" id="flt-max-height" placeholder="Máx" min="150" max="220" value="${f.maxHeight}" oninput="onAdvFilterChange()">
+              </div>
+            </div>
+            <div class="adv-filter-group adv-filter-range">
+              <label>Peso (kg)</label>
+              <div class="range-inputs">
+                <input type="number" id="flt-min-weight" placeholder="Min" min="50" max="120" value="${f.minWeight}" oninput="onAdvFilterChange()">
+                <span>–</span>
+                <input type="number" id="flt-max-weight" placeholder="Máx" min="50" max="120" value="${f.maxWeight}" oninput="onAdvFilterChange()">
+              </div>
+            </div>
+            <div class="adv-filter-group adv-filter-range">
+              <label>Velocidad</label>
+              <div class="range-inputs">
+                <input type="number" id="flt-min-speed" placeholder="Min" min="40" max="99" value="${f.minSpeed}" oninput="onAdvFilterChange()">
+                <span>–</span>
+                <input type="number" id="flt-max-speed" placeholder="Máx" min="40" max="99" value="${f.maxSpeed}" oninput="onAdvFilterChange()">
+              </div>
+            </div>
+            <div class="adv-filter-group adv-filter-range">
+              <label>Finalización (tiro)</label>
+              <div class="range-inputs">
+                <input type="number" id="flt-min-shooting" placeholder="Min" min="40" max="99" value="${f.minShooting}" oninput="onAdvFilterChange()">
+                <span>–</span>
+                <input type="number" id="flt-max-shooting" placeholder="Máx" min="40" max="99" value="${f.maxShooting}" oninput="onAdvFilterChange()">
+              </div>
+            </div>
+            <div class="adv-filter-group adv-filter-range">
+              <label>Pase al ras</label>
+              <div class="range-inputs">
+                <input type="number" id="flt-min-passing" placeholder="Min" min="40" max="99" value="${f.minPassing}" oninput="onAdvFilterChange()">
+                <span>–</span>
+                <input type="number" id="flt-max-passing" placeholder="Máx" min="40" max="99" value="${f.maxPassing}" oninput="onAdvFilterChange()">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="adv-filter-actions">
         <button class="adv-filter-reset" onclick="resetAdvancedFilters()">✕ Limpiar filtros</button>
       </div>
@@ -1585,8 +1588,8 @@ function onAdvFilterChange() {
   _advFilters.maxShooting  = (document.getElementById('flt-max-shooting')   || {}).value || '';
   _advFilters.minPassing   = (document.getElementById('flt-min-passing')    || {}).value || '';
   _advFilters.maxPassing   = (document.getElementById('flt-max-passing')    || {}).value || '';
-  _advFilters.skill        = (document.getElementById('flt-skill')          || {}).value || '';
   _advFilters.comStyle     = (document.getElementById('flt-com-style')      || {}).value || '';
+  // Skills are managed separately via onSkillCheckboxChange / removeSkillFilter
 
   _prepareAllPlayersList();
   _allPlayersPage = 1;
@@ -1595,17 +1598,26 @@ function onAdvFilterChange() {
 }
 
 function resetAdvancedFilters() {
-  Object.keys(_advFilters).forEach(k => { _advFilters[k] = ''; });
+  Object.keys(_advFilters).forEach(k => {
+    _advFilters[k] = k === 'skills' ? [] : '';
+  });
   // Reset all filter inputs
   ['flt-position','flt-role','flt-nationality','flt-league','flt-club','flt-foot','flt-facescan',
    'flt-min-ovr','flt-max-ovr','flt-min-age','flt-max-age',
    'flt-min-height','flt-max-height','flt-min-weight','flt-max-weight',
-   'flt-playing-style','flt-skill','flt-com-style',
+   'flt-playing-style','flt-com-style',
    'flt-min-speed','flt-max-speed','flt-min-shooting','flt-max-shooting',
    'flt-min-passing','flt-max-passing'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  // Reset skill checkboxes
+  document.querySelectorAll('#skills-picker-list input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+    const item = cb.closest('.skills-picker-item');
+    if (item) item.classList.remove('selected');
+  });
+  _refreshSkillsTags();
   onAdvFilterChange();
 }
 
