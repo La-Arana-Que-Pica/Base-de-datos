@@ -174,7 +174,7 @@ async function boot() {
 
   content.innerHTML = `
     <div class="page-section-header">
-      <h1 class="page-section-title">⬇ Descargas</h1>
+      <h1 class="page-section-title">📦 Option Files</h1>
       <p class="page-section-subtitle">
         Descarga el Option File para tu versión de PES y plataforma. Los archivos se
         actualizan periódicamente con los últimos kits, escudos y plantillas.

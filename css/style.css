@@ -3865,6 +3865,232 @@ body {
   }
 }
 
+/* ── Hero CTA buttons ── */
+
+.landing-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, transform 0.1s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+.hero-cta-primary {
+  background: var(--color-highlight);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(192, 57, 43, 0.35);
+}
+
+.hero-cta-primary:hover {
+  background: #e74c3c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(192, 57, 43, 0.45);
+}
+
+.hero-cta-secondary {
+  background: var(--color-card);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.hero-cta-secondary:hover {
+  border-color: var(--color-highlight);
+  color: var(--color-highlight);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(192, 57, 43, 0.15);
+}
+
+@media (max-width: 500px) {
+  .landing-hero-ctas {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-cta {
+    justify-content: center;
+  }
+}
+
+/* ── Landing sections ── */
+
+.landing-section {
+  width: 100%;
+  max-width: 960px;
+  margin-bottom: 48px;
+}
+
+.landing-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.landing-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.landing-section-link {
+  font-size: 0.85rem;
+  color: var(--color-highlight);
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.15s;
+}
+
+.landing-section-link:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
+
+/* ── Featured Option File cards ── */
+
+.featured-of-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.featured-of-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.featured-of-card:hover {
+  border-color: var(--color-highlight);
+  box-shadow: 0 4px 18px rgba(192, 57, 43, 0.18);
+}
+
+.featured-of-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.featured-of-game {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.featured-of-platform {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.featured-of-desc {
+  font-size: 0.83rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.featured-of-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.featured-of-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  border: none;
+  text-align: center;
+}
+
+.featured-of-btn-download {
+  background: var(--color-highlight);
+  color: #fff;
+}
+
+.featured-of-btn-download:hover {
+  background: #e74c3c;
+  transform: translateY(-1px);
+}
+
+.featured-of-btn-soon {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+.featured-of-btn-details {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.featured-of-btn-details:hover {
+  border-color: var(--color-highlight);
+  color: var(--color-highlight);
+}
+
+/* ── Compact landing cards (quick access) ── */
+
+.landing-cards-compact {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 960px;
+}
+
+.landing-card-highlight {
+  border-color: var(--color-highlight);
+  background: linear-gradient(160deg, var(--color-card) 0%, rgba(61,16,16,0.4) 100%);
+}
+
+.landing-card-highlight .landing-card-title {
+  color: var(--color-highlight);
+}
+
+@media (max-width: 640px) {
+  .landing-cards-compact {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Header nav: Option Files primary link ── */
+
+.header-nav-link-primary {
+  color: var(--color-highlight) !important;
+  font-weight: 700;
+}
+
+.header-nav-link-primary:hover {
+  background: var(--color-highlight-dim) !important;
+}
+
 
 
 @media (max-width: 900px) {
