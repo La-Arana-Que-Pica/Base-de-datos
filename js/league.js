@@ -52,6 +52,19 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+function toTitleCaseName(value) {
+  const raw = String(value || '').trim().replace(/\s+/g, ' ');
+  if (!raw) return '';
+  const keepUpper = new Set(['FC', 'AC', 'CF', 'CD', 'CA', 'SC', 'RC', 'AFC', 'BSC', 'PSG', 'PSV', 'UFC', 'UD', 'SD']);
+  const lowerWords = new Set(['de', 'del', 'da', 'das', 'do', 'dos', 'y', 'e']);
+  return raw.toLocaleLowerCase('es').split(' ').map((word, index) => {
+    const clean = word.replace(/[^\p{L}\p{N}]/gu, '').toLocaleUpperCase('es');
+    if (keepUpper.has(clean)) return clean;
+    if (index > 0 && lowerWords.has(word)) return word;
+    return word.split('-').map(part => part ? part.charAt(0).toLocaleUpperCase('es') + part.slice(1) : part).join('-');
+  }).join(' ');
+}
+
 function statColor(value) {
   const v = parseInt(value, 10);
   if (isNaN(v)) return '#d33d35';
@@ -122,7 +135,12 @@ function renderLeaguePage(league, teams) {
   }).join('');
 
   content.innerHTML = `
-    <button class="back-btn" onclick="window.location.href='index.html'">◀ Volver a inicio</button>
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="index.html">Inicio</a>
+      <a href="database.html">Base de datos</a>
+      <span>${escapeHtml(league.name)}</span>
+    </nav>
+    <button class="back-btn" onclick="window.location.href='database.html?view=leagues'">◀ Volver a Ligas</button>
 
     <div class="view-header">
       <img class="grid-card-img" style="width:56px;height:56px;object-fit:contain"
@@ -156,7 +174,7 @@ function showError(message) {
   const backLink = document.createElement('p');
   backLink.style.marginTop = '16px';
   const anchor = document.createElement('a');
-  anchor.href = 'index.html';
+  anchor.href = 'database.html';
   anchor.style.color = 'var(--color-highlight)';
   anchor.textContent = '← Volver a la base de datos';
   backLink.appendChild(anchor);
@@ -225,7 +243,7 @@ async function boot() {
       const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
       if (pid && ovr) {
         if (tid) corregidosMap[tid + '_' + pid] = ovr;
-        if (!tid) corregidosMap[pid] = ovr;
+        corregidosMap[pid] = ovr;
       }
     });
   }
@@ -268,7 +286,8 @@ async function boot() {
       if (!name || name === '-') return null;
       return {
         id: tid,
-        displayName: name,
+        rawName: name,
+        displayName: toTitleCaseName(name),
         players: squadMap[tid] || [],
       };
     })

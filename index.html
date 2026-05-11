@@ -1,110 +1,94 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Base de datos Option File PES 2018–2026</title>
+  <title>La Araña Que Pica - LAqP.website</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="icon" href="img/logo.png" type="image/webp" />
+  <link rel="icon" href="img/logo.webp" type="image/webp" />
 </head>
-<body>
+<body class="landing-body">
 
   <!-- ── Header ── -->
   <header id="header">
-    <img
-      class="logo"
-      src="img/logo.webp"
-      onerror="this.onerror=null;this.src='img/logo.webp'"
-      alt="Logo"
-      onclick="goHome()"
-      style="cursor:pointer"
-    />
-    <h1>
-      Base de datos Option File <span>PES 2018–2026</span>
-    </h1>
-    <div id="search-container">
-      <span class="search-icon">🔍</span>
-      <input
-        type="text"
-        id="search-input"
-        placeholder="Buscar jugadores..."
-        autocomplete="off"
+    <a href="index.html" class="header-logo-link">
+      <img
+        class="logo"
+        src="img/logo.webp"
+        onerror="this.onerror=null;this.src='img/logo.webp'"
+        alt="Logo"
       />
-    </div>
+    </a>
+    <h1>La Araña Que Pica <span>LAqP.website</span></h1>
+    <nav class="header-nav" aria-label="Menu principal">
+      <a href="index.html" class="header-nav-link active">Inicio</a>
+      <a href="downloads.html" class="header-nav-link">Option Files</a>
+      <a href="tutorials.html" class="header-nav-link">Tutoriales</a>
+      <a href="database.html" class="header-nav-link">Base de datos</a>
+    </nav>
   </header>
 
-  <!-- ── Main layout ── -->
-  <div id="layout">
+  <!-- ── Landing hub ── -->
+  <main id="landing-main">
 
-    <!-- Sidebar -->
-    <nav id="sidebar">
-      <!-- Built dynamically by JS -->
-    </nav>
-
-    <!-- Content area -->
-    <main id="main">
-
-      <!-- Loading overlay -->
-      <div id="loading-overlay">
-        <div class="spinner"></div>
-        <span class="loading-message">Cargando base de datos...</span>
+    <!-- 1. Hero -->
+    <section class="landing-hero">
+      <img class="landing-hero-logo" src="img/logo.webp" alt="Logo" />
+      <h2 class="landing-hero-title">La Araña Que Pica</h2>
+      <p class="landing-hero-desc">
+        Página oficial del canal: Option Files, tutoriales y una base de datos completa para explorar jugadores, equipos y ligas.
+      </p>
+      <div class="landing-hero-ctas">
+        <a href="downloads.html" class="hero-cta hero-cta-primary">Descargar Option File</a>
+        <a href="tutorials.html" class="hero-cta hero-cta-secondary">🎥 Ver tutoriales</a>
+        <a href="database.html" class="hero-cta hero-cta-secondary">📊 Explorar base de datos</a>
       </div>
+    </section>
 
-      <!-- Home view -->
-      <div id="home-view">
-        <div class="home-welcome">
-          <h2>Bienvenido a la Base de datos Option File PES</h2>
-          <p>Selecciona un equipo del menú lateral para explorar jugadores, o utiliza la barra de búsqueda.</p>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-card" onclick="showLeaguesView()">
-            <div class="number" id="stat-leagues">0</div>
-            <div class="label">Ligas</div>
-          </div>
-          <div class="stat-card" onclick="showTeamsView()">
-            <div class="number" id="stat-teams">0</div>
-            <div class="label">Equipos</div>
-          </div>
-          <div class="stat-card" onclick="showAllPlayers()">
-            <div class="number" id="stat-players">0</div>
-            <div class="label">Jugadores</div>
-          </div>
-          <a class="stat-card" href="squad-organizer.html" style="text-decoration:none;color:inherit">
-            <div class="number">⚙️</div>
-            <div class="label">Organizador de plantilla</div>
-          </a>
-        </div>
-        <div id="home-leagues-section"></div>
+    <!-- 2. Featured Option Files (from CSV) -->
+    <section id="featured-of-section" class="landing-section">
+      <div class="landing-section-header">
+        <h3 class="landing-section-title">⭐ Option Files Destacados</h3>
+        <a href="downloads.html" class="landing-section-link">Ver todos →</a>
       </div>
-
-      <!-- Players list view -->
-      <div id="players-view">
-        <!-- Filled dynamically -->
+      <div id="featured-of-grid" class="featured-of-grid">
+        <!-- filled by home.js -->
       </div>
+    </section>
 
-      <!-- Individual player profile view -->
-      <div id="player-view">
-        <!-- Filled dynamically -->
+    <!-- 3. Quick access -->
+    <section class="landing-section">
+      <div class="landing-section-header">
+        <h3 class="landing-section-title">🧭 Accesos rápidos</h3>
       </div>
+      <div class="landing-cards landing-cards-compact">
 
-      <!-- Search results view -->
-      <div id="search-view">
-        <!-- Filled dynamically -->
+        <a href="downloads.html" class="landing-card">
+          <div class="landing-card-icon">OF</div>
+          <div class="landing-card-title">Option Files</div>
+          <div class="landing-card-desc">Descarga la ultima version y revisa detalles</div>
+        </a>
+
+        <a href="tutorials.html" class="landing-card">
+          <div class="landing-card-icon">🎥</div>
+          <div class="landing-card-title">Tutoriales</div>
+          <div class="landing-card-desc">Aprende a instalar y configurar tu Option File</div>
+        </a>
+
+        <a href="database.html" class="landing-card landing-card-highlight">
+          <div class="landing-card-icon">📊</div>
+          <div class="landing-card-title">Base de datos</div>
+          <div class="landing-card-desc">Explora jugadores, equipos y ligas</div>
+        </a>
+
       </div>
+    </section>
 
-      <!-- Leagues grid view -->
-      <div id="leagues-view">
-        <!-- Filled dynamically -->
-      </div>
+  </main>
 
-      <!-- Teams grid view -->
-      <div id="teams-grid-view">
-        <!-- Filled dynamically -->
-      </div>
-
-    </main>
-  </div>
-
-  <script src="js/app.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>
+
+

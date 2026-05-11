@@ -41,7 +41,7 @@
 372;215;S. PIOLI;-1;;False;False;False;False;6
 374;215;R. DONADONI;-1;;False;False;False;False;6
 379;215;D. BALLARDINI;-1;;False;False;False;False;6
-389;144;JOSÉ CURTI;-1;;True;True;False;False;0
+389;148;D. ARIAS;-1;;True;True;False;False;0
 398;144;P. GUEDE;-1;;False;False;False;False;6
 419;236;LUIS ENRIQUE;-1;;False;False;False;False;0
 430;228;PAULO SOUSA;-1;;False;False;False;False;0
@@ -49,11 +49,11 @@
 478;144;M. GALLARDO;-1;;False;False;False;False;6
 488;144;D. COCCA;-1;;False;False;False;False;0
 498;144;J. FALCIONI;-1;;False;False;False;False;6
-511;236;JAVIER RABANAL;-1;;True;False;False;False;0
+511;151;J. ARAUJO;-1;;True;True;False;False;0
 513;236;ÓSCAR GARCÍA;-1;;False;False;False;False;6
-1046;144;WALTER ZUNINO;-1;;True;True;False;False;8
+1046;144;W. ZUNINO;-1;;True;True;False;False;8
 1051;146;DORIVAL JÚNIOR;-1;;True;True;False;False;8
-1058;150;FRANCISCO ARCE;-1;;True;True;False;False;8
+1058;150;J. SAMUDIO;-1;;True;True;False;False;8
 100143;215;W. ZENGA;-1;;False;False;False;False;6
 100161;215;R. MARAN;-1;;False;False;False;False;6
 100162;152;D. LÓPEZ;-1;;False;False;False;False;6
@@ -138,7 +138,7 @@
 101071;151;P. ZEGARRA;-1;;False;False;False;False;0
 101072;144;N. LARCAMÓN;-1;;False;False;False;False;6
 101078;200;I. LEKO;-1;;False;False;False;False;6
-101079;144;MARIANO SOSO;-1;;True;False;False;False;0
+101079;144;M. SOSO;-1;;False;False;False;False;0
 101081;238;R. WICKY;-1;;False;False;False;False;6
 101086;190;A. KOCAMAN;-1;;False;False;False;False;6
 101090;152;M. LARRIERA;-1;;False;False;False;False;0
@@ -184,13 +184,13 @@
 262163;303;D. JELIC;-1;;False;False;False;False;0
 262164;215;L. ZAMBONI;-1;;False;False;False;False;0
 262167;215;G. PERRONE;-1;;False;False;False;False;0
-262170;204;EDDIE HOWE;-1;;True;True;False;False;0
+262170;204;E. HOWE;-1;;True;True;False;False;0
 262172;215;K. ROMA;-1;;False;False;False;False;0
 262173;146;MOZART;-1;;True;True;False;False;0
 262175;215;S. CONTINI;-1;;False;False;False;False;0
 262179;215;C. BALBI;-1;;False;False;False;False;0
-262181;147;MANUEL ITURRA;-1;;True;True;False;False;0
-262194;232;DAVID MOYES;-1;;True;True;False;False;0
+262181;144;F. GAGO;-1;;True;True;False;False;0
+262194;232;D. MOYES;-1;;True;True;False;False;0
 262197;236;J. LUSARRETA;-1;;False;False;False;False;0
 262200;236;D. BILLABONA;-1;;False;False;False;False;0
 262209;236;G. SAURA;-1;;False;False;False;False;0
@@ -198,23 +198,23 @@
 262211;236;F. GRIJALVA;-1;;False;False;False;False;0
 262214;146;TITE;-1;;True;False;False;False;0
 262215;236;R. GRIMAU;-1;;False;False;False;False;0
-262216;144;GUSTAVO COSTAS;-1;;True;True;False;False;0
-262221;144;LUCAS PUSINERI;-1;;True;True;False;False;0
+262216;144;G. COSTAS;-1;;True;True;False;False;0
+262221;144;L. PUSINERI;-1;;True;True;False;False;0
 262222;145;G. QUINTEROS;-1;;True;True;False;False;0
 262223;236;MÍCHEL;-1;;True;False;False;False;0
 262224;236;C. GIRÁLDEZ;-1;;True;False;False;False;0
 262226;236;T. DE BLAS;-1;;False;False;False;False;0
 262227;135;P. MATARAZZO;-1;;True;True;False;False;0
-262231;236;UNAI EMERY;-1;;True;False;False;False;0
-262232;236;JOSÉ BORDALÁS;-1;;True;False;False;False;0
+262231;236;U. EMERY;-1;;True;False;False;False;0
+262232;236;J. BORDALÁS;-1;;True;False;False;False;0
 262235;241;W. CESSNA;-1;;False;False;False;False;0
 262236;144;N. TAMUDO;-1;;False;False;False;False;0
-262243;236;MIKEL ARTETA;-1;;True;True;False;False;0
+262243;236;M. ARTETA;-1;;True;True;False;False;0
 262248;236;G. ARCAS;-1;;False;False;False;False;0
 262250;215;M. BAZZONI;-1;;False;False;False;False;0
 262254;215;C. MORINARI;-1;;False;False;False;False;0
 262255;215;A. TESSER;-1;;True;False;False;False;0
-262256;144;DANIEL OLDRÁ;-1;;True;True;False;False;8
+262256;144;D. GARNERO;-1;;True;True;False;False;8
 262268;146;RODRIGO CHAGAS;-1;;True;True;False;False;0
 262294;224;E. POSTMA;-1;;False;False;False;False;0
 262314;144;F. ABASOLO;-1;;False;False;False;False;0
@@ -223,19 +223,19 @@
 262323;204;S. IDOWU;-1;;False;False;False;False;0
 262325;236;F. BLAS;-1;;False;False;False;False;0
 262329;146;A. FIGUEIRA;-1;;False;False;False;False;0
-262330;144;DAMIÁN AYUDE;-1;;True;True;False;False;0
+262330;152;G. ÁLVAREZ;-1;;True;True;False;False;0
 262331;228;LUÍS CASTRO;-1;;True;True;False;False;0
 262332;224;M. DE WIT;-1;;False;False;False;False;0
 262338;214;P. LINFOOT;-1;;False;False;False;False;0
 262341;236;F. ERICE;-1;;False;False;False;False;0
-262360;236;PEP GUARDIOLA;-1;;True;False;False;False;0
+262360;236;J. GUARDIOLA;-1;;True;False;False;False;0
 262364;241;E. TYLER;-1;;False;False;False;False;0
 262365;152;O. BUENDIA;-1;;False;False;False;False;0
 262366;204;H. BLEASDALE;-1;;False;False;False;False;0
 262367;144;N. ACEDO;-1;;False;False;False;False;0
-262368;236;CARLOS CORBERÁN;-1;;True;True;False;False;0
+262368;236;C. CORBERÁN;-1;;True;True;False;False;0
 262370;230;G. KYREJKO;-1;;False;False;False;False;0
-262374;152;PAULO PEZZOLANO;-1;;True;True;False;False;0
+262374;152;P. PEZZOLANO;-1;;True;True;False;False;0
 262379;208;M. LAFARGE;-1;;False;False;False;False;0
 262380;236;G. CORNAGO;-1;;False;False;False;False;0
 262381;236;M. SAURA;-1;;False;False;False;False;0
@@ -262,16 +262,16 @@
 262438;208;A. BARRAUT;-1;;False;False;False;False;0
 262439;208;R. AGNOLUTTO;-1;;False;False;False;False;0
 262451;146;ROGÉRIO CENI;-1;;True;False;False;False;0
-262453;228;MARCO SILVA;-1;;True;True;False;False;8
+262453;228;M. SILVA;-1;;True;True;False;False;8
 262454;228;J. ALBUQUERQUE;-1;;False;False;False;False;0
 262457;228;B. CUNHA;-1;;False;False;False;False;0
-262458;241;ROB EDWARDS;-1;;True;True;False;False;0
+262458;241;R. EDWARDS;-1;;True;True;False;False;0
 262460;228;I. ATAIDE;-1;;False;False;False;False;0
 262461;208;F. TURPIN;-1;;False;False;False;False;0
-262462;228;NUNO E. SANTO;-1;;True;True;False;False;0
+262462;228;N. E. SANTO;-1;;True;True;False;False;0
 262465;204;B. FIRMAN;-1;;False;False;False;False;0
 262480;215;A. CONTE;-1;;True;False;False;False;0
-262485;144;F. ZANIRATTO;-1;;True;True;False;False;0
+262485;144;A. PEREYRA;-1;;True;True;False;False;0
 262494;215;CARLO ANCELOTTI;-1;;True;True;False;False;0
 262495;211;G. LANCHESTER;-1;;False;False;False;False;0
 262497;236;O. BELEN;-1;;False;False;False;False;0
@@ -283,16 +283,16 @@
 262505;208;B. FRAMERY;-1;;False;False;False;False;0
 262507;208;A. LACOSTE;-1;;False;False;False;False;0
 262519;215;A. DE STEFANI;-1;;False;False;False;False;0
-262522;204;M. CUSHING;-1;;False;False;False;False;0
+262522;228;LEONARDO JARDIM;-1;;True;True;False;False;0
 262524;147;M. PELLEGRINI;-1;;True;True;False;False;0
 262525;236;T. MENDOZA;-1;;False;False;False;False;0
-262533;236;ANDONI IRAOLA;-1;;True;True;False;False;0
+262533;236;A. IRAOLA;-1;;True;True;False;False;0
 262536;208;G. JOSPIN;-1;;False;False;False;False;0
 262540;208;C. Galtier;-1;;True;True;False;False;0
 262545;146;JAIR VENTURA;-1;;True;True;False;False;0
 262546;232;K. DAVID;-1;;False;False;False;False;0
-262558;210;HANSI FLICK;-1;;True;True;False;False;0
-262561;204;SCOTT PARKER;-1;;True;False;False;False;0
+262558;210;H. FLICK;-1;;True;True;False;False;0
+262561;204;S. PARKER;-1;;True;False;False;False;0
 262567;236;U. HALFFTER;-1;;False;False;False;False;0
 262576;224;T. KONING;-1;;False;False;False;False;0
 262578;236;J. DE NEBRA;-1;;False;False;False;False;0
@@ -300,14 +300,14 @@
 262580;215;R. CITTERIO;-1;;False;False;False;False;0
 262581;215;R. SODI;-1;;False;False;False;False;0
 262589;208;A. BUSSER;-1;;False;False;False;False;0
-262592;224;ARNE SLOT;-1;;True;True;False;False;8
+262592;224;A. SLOT;-1;;True;True;False;False;8
 262593;224;R. BOS;-1;;False;False;False;False;0
-262597;144;CLAUDIO ÚBEDA;-1;;True;True;False;False;8
+262597;144;C. ÚBEDA;-1;;True;True;False;False;8
 262599;224;A. WILLEMSEN;-1;;False;False;False;False;0
 262601;224;C. MOL;-1;;False;False;False;False;0
-262615;144;NICOLÁS DIEZ;-1;;True;True;False;False;0
+262615;144;N. DIEZ;-1;;True;True;False;False;0
 262616;215;T. BOSCOSCURO;-1;;False;False;False;False;0
-262620;148;HERNÁN TORRES;-1;;True;True;False;False;0
+262620;144;F. BUSTOS;-1;;True;True;False;False;0
 262628;215;M. TROISI;-1;;False;False;False;False;0
 262629;215;F. ETRO;-1;;False;False;False;False;0
 262630;208;E. BERCHOT;-1;;False;False;False;False;0
@@ -316,7 +316,7 @@
 262645;204;T. HAZLEWOOD;-1;;False;False;False;False;0
 262657;236;T. SORIANO;-1;;False;False;False;False;0
 262662;145;ÓSCAR VILLEGAS;-1;;True;True;False;False;0
-262665;146;O. HENRIQUES;-1;;False;False;False;False;0
+262665;228;ARTHUR JORGE;-1;;True;True;False;False;0
 263185;144;A. QUEROL;-1;;False;False;False;False;0
 263203;144;J. ANDREU;-1;;False;False;False;False;0
 263211;144;E. NUNEZ;-1;;False;False;False;False;0
@@ -326,21 +326,21 @@
 362145;144;FRANCISCO;-1;;True;True;False;False;0
 362146;144;H. SALVADOR;-1;;False;False;False;False;0
 362151;194;B. WELLER;-1;;False;False;False;False;0
-362158;236;EDER SARABIA;-1;;True;True;False;False;0
+362158;236;E. SARABIA;-1;;True;True;False;False;0
 362159;227;J. URBAN;-1;;True;True;False;False;0
 362160;227;F. WHEATER;-1;;False;False;False;False;0
 362163;232;M. DEDRICK;-1;;False;False;False;False;0
 362169;210;G. LOHNER;-1;;False;False;False;False;0
-362170;197;VINCENT KOMPANY;-1;;True;True;False;False;0
+362170;197;V. KOMPANY;-1;;True;True;False;False;0
 362171;121;Z. RIVAS;-1;;False;False;False;False;0
 362172;135;S. DUNN;-1;;False;False;False;False;0
-362173;200;NIKO KOVAC;-1;;True;True;False;False;0
-362174;236;XABI ALONSO;-1;;True;True;False;False;0
+362173;200;N. KOVAC;-1;;True;True;False;False;0
+362174;236;Á. ARBELOA;-1;;True;True;False;False;0
 362175;92;R. BIN TALAT;-1;;False;False;False;False;0
 362176;110;G. BEDSON;-1;;False;False;False;False;0
 362177;135;A. GOODMAN;-1;;False;False;False;False;0
 362178;204;H. BARBER;-1;;False;False;False;False;0
-362179;146;PAULO AUTUORI;-1;;True;True;False;False;0
+362179;146;ZÉ RICARDO;-1;;True;True;False;False;0
 362180;44;I. AL MUQIT;-1;;False;False;False;False;0
 362181;208;G. LAFARGE;-1;;False;False;False;False;0
 362182;50;J. COHEN;-1;;False;False;False;False;0
@@ -353,28 +353,28 @@
 362189;144;J. MASCHERANO;-1;;True;True;False;False;0
 362190;146;FÁBIO MATIAS;-1;;True;True;False;False;0
 362191;64;R. STOWE;-1;;False;False;False;False;0
-362192;148;LEONEL ÁLVAREZ;-1;;True;True;False;False;0
+362192;152;P. REPETTO;-1;;True;False;False;False;0
 362193;208;Y. LANSIO;-1;;False;False;False;False;0
-362194;144;FLAVIO ROBATTO;-1;;True;True;False;False;0
+362194;145;V. SORIA;-1;;True;True;False;False;0
 362195;146;TIAGO NUNES;-1;;True;True;False;False;0
-362196;153;DANIEL FARÍAS;-1;;True;True;False;False;0
+362196;153;D. SASSO;-1;;True;True;False;False;0
 362197;208;J. BRAQUE;-1;;False;False;False;False;0
 362198;83;A. HUGUENET;-1;;False;False;False;False;0
-362199;148;DAVID GONZÁLEZ;-1;;True;True;False;False;0
-362200;152;IGNACIO RISSO;-1;;True;True;False;False;0
+362199;148;L. GONZÁLEZ V.;-1;;True;True;False;False;0
+362200;144;H. CAPUTTO;-1;;True;True;False;False;0
 362201;146;LÉO CONDÉ;-1;;True;True;False;False;0
-362202;152;ÁLVARO RECOBA;-1;;True;True;False;False;0
+362202;144;H. BIDOGLIO;-1;;True;True;False;False;0
 362203;144;F. ULLOA;-1;;False;False;False;False;0
 362204;215;A. CORRADINI;-1;;False;False;False;False;0
 362205;144;J. LLOBET;-1;;False;False;False;False;0
 362206;215;D. FANUCCI;-1;;False;False;False;False;0
 362207;145;A. BEITIA;-1;;False;False;False;False;0
-362208;144;PEDRO TROGLIO;-1;;True;False;False;False;0
+362208;144;P. TROGLIO;-1;;True;False;False;False;0
 362209;144;MARIANO TOEDTLI;-1;;True;True;False;False;0
 362210;215;P. EVANI;-1;;False;False;False;False;0
 362211;215;S. DEMY;-1;;False;False;False;False;0
-362212;148;M. ALKORTA;-1;;False;False;False;False;0
-362213;215;V. CHESSARI;-1;;False;False;False;False;0
+362212;146;CUCA;-1;;True;True;False;False;0
+362213;144;D. FLORES;-1;;True;True;False;False;0
 362214;128;J. ESCOLAR;-1;;False;False;False;False;0
 362215;144;M. ESLAVA;-1;;False;False;False;False;0
 362216;121;M. GARBAJOSA;-1;;False;False;False;False;0
@@ -382,7 +382,7 @@
 362218;215;A. MANCIA;-1;;False;False;False;False;0
 362219;147;A. MONTEIRO;-1;;False;False;False;False;0
 362220;215;G. SOMMESE;-1;;False;False;False;False;0
-362221;152;JORGE BAVA;-1;;True;True;False;True;1
+362221;152;J. BAVA;-1;;True;True;False;True;1
 362222;215;A. PACE;-1;;False;False;False;False;0
 362223;144;S. WEINDLER;-1;;False;False;False;False;0
 362224;149;T. URTUBIA;-1;;False;False;False;False;0
@@ -390,9 +390,9 @@
 362226;194;O. SCHLACK;-1;;False;False;False;False;0
 362227;224;C. DE LEEUW;-1;;False;False;False;False;0
 362228;210;I. HEPPNER;-1;;False;False;False;False;0
-362234;152;JOAQUÍN PAPA;-1;;True;True;False;False;0
+362234;152;J. PAPA;-1;;True;True;False;False;0
 362245;210;B. KERPEN;-1;;False;False;False;False;0
-362246;152;ALFREDO ARIAS;-1;;True;True;False;False;0
+362246;152;A. ARIAS;-1;;True;True;False;False;0
 362247;153;R. TOMAS;-1;;False;False;False;False;0
 362248;210;H. SCHOBER;-1;;False;False;False;False;0
 362249;197;P. VAN DER POL;-1;;False;False;False;False;0
@@ -401,39 +401,39 @@
 362252;210;A. OESER;-1;;False;False;False;False;0
 362253;224;T. MAAS;-1;;False;False;False;False;0
 362254;146;JÁDSON VIERA;-1;;True;True;False;False;0
-362255;144;RUBÉN INSÚA;-1;;True;True;False;False;0
+362255;144;R. INSÚA;-1;;True;True;False;False;0
 362256;147;Q. PISADOR;-1;;False;False;False;False;0
 362257;144;D. OLDRÁ;-1;;True;True;False;False;0
 362258;197;D. EVERS;-1;;False;False;False;False;0
-362259;194;OLIVER GLASNER;-1;;True;True;False;False;0
-362260;152;DIEGO AGUIRRE;-1;;True;True;False;False;0
-362261;236;ISMAEL RESCALVO;-1;;True;True;False;False;0
-362262;144;PABLO SÁNCHEZ;-1;;True;True;False;False;0
-362263;146;THIAGO CARPINI;-1;;True;True;False;False;0
+362259;194;O. GLASNER;-1;;True;True;False;False;0
+362260;152;D. AGUIRRE;-1;;True;True;False;False;0
+362261;153;C. FARÍAS;-1;;True;True;False;False;0
+362262;144;P. SÁNCHEZ;-1;;True;True;False;False;0
+362263;215;G. TIBERTI;-1;;True;True;False;False;0
 362264;144;SERGIO GÓMEZ;-1;;True;True;False;False;0
 362265;224;Q. DRIESSEN;-1;;False;False;False;False;0
-362266;144;GUILLERMO FARRÉ;-1;;True;True;False;False;0
+362266;144;I. DAMONTE;-1;;True;True;False;False;0
 362268;194;O. SPEIDEL;-1;;False;False;False;False;0
 362279;204;F. WYNESS;-1;;False;False;False;False;0
 362281;144;S. RANDALL;-1;;False;False;False;False;0
 362283;11;J. GILLAN;-1;;False;False;False;False;0
-362288;236;MANOLO GONZÁLEZ;-1;;True;False;False;False;0
+362288;236;M. GONZÁLEZ;-1;;True;False;False;False;0
 362291;146;RAFAEL GUANAES;-1;;True;True;False;False;0
-362292;210;FABIAN HÜRZELER;-1;;True;True;False;False;0
+362292;210;F. HÜRZELER;-1;;True;True;False;False;0
 362304;215;T. BLANC;-1;;False;False;False;False;0
 362311;215;T. DANGELI;-1;;False;False;False;False;0
 362312;224;P. GROEN;-1;;False;False;False;False;0
 362313;224;G. KONING;-1;;False;False;False;False;0
 362316;228;P. AZEVEDO;-1;;False;False;False;False;0
 362317;228;G. SERPA;-1;;False;False;False;False;0
-362320;208;RÉGIS LE BRIS;-1;;True;True;False;False;0
-362321;148;DIOMEDES PEÑA;-1;;True;True;False;False;0
-362332;144;MATÍAS ALMEIDA;-1;;True;True;False;False;0
+362320;208;R. LE BRIS;-1;;True;True;False;False;0
+362321;145;J. BALDIVIESO;-1;;True;True;False;False;0
+362332;236;L. GARCÍA;-1;;True;True;False;False;0
 362338;224;T. DE RUITER;-1;;False;False;False;False;0
 362342;224;V. SMITS;-1;;False;False;False;False;0
 362346;204;A. MIALL;-1;;False;False;False;False;0
 362349;224;M. BOSMAN;-1;;False;False;False;False;0
-362350;144;CARLOS TEVEZ;-1;;True;True;False;False;0
+362350;144;C. TEVEZ;-1;;True;True;False;False;0
 362368;204;E. CAINE;-1;;False;False;False;False;0
 362369;236;O. MANRIQUE;-1;;False;False;False;False;0
 362381;228;F. PERES;-1;;False;False;False;False;0
@@ -446,7 +446,7 @@
 362436;208;B. RENELLE;-1;;False;False;False;False;0
 362439;208;G. FRAGONARD;-1;;False;False;False;False;0
 362442;204;L. VON SAHER;-1;;False;False;False;False;0
-362456;203;THOMAS FRANK;-1;;True;True;False;False;0
+362456;215;R. DE ZERBI;-1;;True;True;False;False;0
 362462;204;S. AGEE;-1;;False;False;False;False;0
 362473;215;R. BRIOSCHI;-1;;False;False;False;False;0
 362486;215;T. BLANGINI;-1;;False;False;False;False;0
@@ -456,7 +456,7 @@
 362532;228;F. BETENCOURT;-1;;False;False;False;False;0
 362545;236;N. BOLLAIN;-1;;False;False;False;False;0
 362565;236;G. MULLERA;-1;;False;False;False;False;0
-362581;214;KEITH ANDREWS;-1;;True;True;False;False;0
+362581;214;K. ANDREWS;-1;;True;True;False;False;0
 362593;236;G. HERRALDE;-1;;False;False;False;False;0
 362608;236;I. FRAILE;-1;;False;False;False;False;0
 362618;208;N. BONHOMME;-1;;False;False;False;False;0
@@ -469,7 +469,7 @@
 362682;228;N. AGUILAR;-1;;False;False;False;False;0
 362691;236;F. UELTA;-1;;False;False;False;False;0
 362696;144;M. PELLEGRINO;-1;;True;True;False;False;0
-362715;215;ALESSIO LISCI;-1;;True;True;False;False;0
+362715;215;A. LISCI;-1;;True;True;False;False;0
 362738;232;F. HOLE;-1;;False;False;False;False;0
 362791;228;ABEL FERREIRA;-1;;True;True;False;False;0
 362796;204;L. ARFWEDSON;-1;;False;False;False;False;0
@@ -485,17 +485,17 @@
 362840;228;G. VALCARCE;-1;;False;False;False;False;0
 362842;303;R. JOSIPOVIC;-1;;False;False;False;False;0
 362843;236;L. GALDEANO;-1;;False;False;False;False;0
-362850;144;LUIS ZUBELDÍA;-1;;True;False;False;False;0
+362850;144;L. ZUBELDÍA;-1;;True;False;False;False;0
 362865;236;B. UNANUA;-1;;False;False;False;False;0
-362866;228;LUÍS CASTRO;-1;;True;True;False;False;0
-362884;215;ENZO MARESCA;-1;;True;True;False;False;0
-362888;208;Rudi Garcia;-1;;True;False;False;False;0
+362866;228;L. CASTRO;-1;;True;True;False;False;0
+362884;204;C. MCFARLANE;-1;;True;True;False;False;0
+362888;146;RENATO GAÚCHO;-1;;True;True;False;False;0
 362893;208;F. CUVILLIER;-1;;False;False;False;False;0
 362897;210;P. ROBILLARD;-1;;False;False;False;False;0
 362904;144;MANAGER;-1;;True;True;False;False;0
 362906;236;F. AZKORRA;-1;;False;False;False;False;0
-362909;144;GUSTAVO BENÍTEZ;-1;;True;True;False;False;0
-362915;200;IGOR TUDOR;-1;;True;True;False;False;0
+362909;144;G. BENÍTEZ;-1;;True;True;False;False;0
+362915;215;L. SPALLETTI;-1;;True;False;False;False;0
 362926;198;M. KULENOVIC;-1;;False;False;False;False;0
 362928;208;T. ALDAY;-1;;False;False;False;False;0
 362942;224;C. BAKKER;-1;;False;False;False;False;0
@@ -504,7 +504,7 @@
 362967;204;C. BOECE;-1;;False;False;False;False;0
 362979;208;R. LACEPEDE;-1;;False;False;False;False;0
 362980;204;H. BRAMBLE;-1;;False;False;False;False;0
-362981;144;JORGE SAMPAOLI;-1;;True;True;False;False;0
+362981;152;A. MEDINA;-1;;True;True;False;False;0
 362983;146;F. BITENCOURT;-1;;False;False;False;False;0
 362995;215;M. CAPPELLINI;-1;;False;False;False;False;0
 363013;146;FILIPE LUÍS;-1;;True;False;False;False;0
@@ -526,9 +526,9 @@
 363084;146;F. ABOIM;-1;;False;False;False;False;0
 363088;228;J. ATAIDE;-1;;False;False;False;False;0
 363089;228;B. ABOIM;-1;;False;False;False;False;0
-363093;303;JAGOBA ARRASATE;-1;;True;False;False;False;0
+363093;144;M. DEMICHELIS;-1;;True;True;False;False;0
 363095;208;E. DE LEYMARIE;-1;;False;False;False;False;0
-363097;236;IÑIGO PÉREZ;-1;;True;False;False;False;0
+363097;236;I. PÉREZ;-1;;True;False;False;False;0
 363098;208;A. BOUQUET;-1;;False;False;False;False;0
 363099;204;W. RIZA;-1;;False;False;False;False;0
 363115;215;G. SOLLECITO;-1;;False;False;False;False;0
@@ -551,23 +551,23 @@
 363204;215;V. COLUCCI;-1;;False;False;False;False;0
 363206;236;H. PITARUGA;-1;;False;False;False;False;0
 363212;210;D. JAKSCHE;-1;;False;False;False;False;0
-363213;144;FERNANDO ORTIZ;-1;;True;True;False;False;0
+363213;144;F. ORTIZ;-1;;True;True;False;False;0
 363214;208;J. PAILLARD;-1;;False;False;False;False;0
 363217;215;C. SAUDATI;-1;;False;False;False;False;0
 363218;210;M. WASCHER;-1;;False;False;False;False;0
 363219;208;L. ALVINA;-1;;False;False;False;False;0
-363220;210;DANIEL FARKE;-1;;True;True;False;True;0
-363224;144;DIEGO MARTÍNEZ;-1;;True;True;False;False;0
+363220;210;D. FARKE;-1;;True;True;False;True;0
+363224;144;D. MARTÍNEZ;-1;;True;True;False;False;0
 363227;236;J. GIBANEL;-1;;False;False;False;False;0
 363228;224;N. DRIESSEN;-1;;False;False;False;False;0
 363229;208;D. BLANCHOT;-1;;False;False;False;False;0
 363232;236;O. ROBLEDO;-1;;False;False;False;False;0
 363233;215;C. BACCIN;-1;;False;False;False;False;0
-363235;236;EDUARDO COUDET;-1;;True;False;False;False;0
+363235;236;Q. SÁNCHEZ;-1;;True;False;False;False;0
 363236;236;M. DE LA PENA;-1;;False;False;False;False;0
 363238;146;H. FIGUEIRA;-1;;False;False;False;False;0
 363242;228;B. GOIS;-1;;False;False;False;False;0
-363245;144;HERNÁN CRESPO;-1;;True;True;False;False;0
+363245;146;ROGER MACHADO;-1;;True;False;False;False;0
 363249;208;D. FAURE;-1;;False;False;False;False;0
 363250;146;R. SERPA;-1;;False;False;False;False;0
 363251;208;L. GIDE;-1;;False;False;False;False;0
@@ -582,13 +582,13 @@
 363289;224;F. SCHOLTEN;-1;;False;False;False;False;0
 363291;146;V. ALMADA;-1;;False;False;False;False;0
 363292;215;R. CAUSIO;-1;;False;False;False;False;0
-363293;146;M. BARBIERI;-1;;True;False;False;False;0
+363293;152;A. ORFILA;-1;;True;True;False;False;0
 363296;146;T. MASCARENHAS;-1;;False;False;False;False;0
 363298;228;D. MEDEIROS;-1;;False;False;False;False;0
 363299;228;J. TEIXEIRA;-1;;False;False;False;False;0
 363301;208;C. HOLLANDE;-1;;False;False;False;False;0
 363302;208;R. BOTTOLLIER;-1;;False;False;False;False;0
-363305;144;MARTÍN ANSELMI;-1;;True;True;False;False;8
+363305;228;F. CARVALHO;-1;;True;True;False;False;8
 363306;215;V. COBOLLI;-1;;False;False;False;False;0
 363310;146;DANIEL PAULISTA;-1;;True;True;False;False;8
 363652;146;VAGNER MANCINI;-1;;True;True;False;False;8
@@ -603,7 +603,7 @@
 393489;225;H. SWIRE;-1;;False;False;False;False;0
 393490;148;I. LLORET;-1;;False;False;False;False;0
 393499;145;H. SANTOS;-1;;False;False;False;False;0
-393518;204;SEAN DYCHE;-1;;True;True;False;False;0
+393518;228;V. PEREIRA;-1;;True;True;False;False;0
 393521;148;A. BAGUER;-1;;False;False;False;False;0
 393539;228;G. ALVARES;-1;;False;False;False;False;0
 393542;208;M. LAMOULLER;-1;;False;False;False;False;0
@@ -620,7 +620,7 @@
 393632;150;M. VIOLA;-1;;False;False;False;False;0
 393662;238;C. HAMEL;-1;;False;False;False;False;0
 393751;210;A. BAUMGARTEN;-1;;False;False;False;False;0
-493405;224;A. ULDERINK;-1;;True;True;False;False;0
+493405;203;K. HJULMAND;-1;;True;True;False;False;0
 493450;189;I. FINNISSY;-1;;False;False;False;False;0
 493456;144;NÉSTOR LORENZO;-1;;True;True;False;False;0
 493461;208;M. COLLET;-1;;False;False;False;False;0
@@ -628,7 +628,7 @@
 493472;144;MARCELO BIELSA;-1;;True;True;False;False;0
 493482;144;T. VASCO;-1;;False;False;False;False;0
 493569;144;LIONEL SCALONI;-1;;True;True;False;False;0
-493586;228;RUBEN AMORIM;-1;;True;True;False;False;0
+493586;204;M. CARRICK;-1;;True;False;False;False;0
 493615;210;S. ORFF;-1;;False;False;False;False;0
 493648;83;E. NAVARRE;-1;;False;False;False;False;0
 493703;12;J. TAHER;-1;;False;False;False;False;0

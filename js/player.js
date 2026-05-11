@@ -48,6 +48,68 @@ function pickValue(obj, keys, fallback = '') {
   return fallback;
 }
 
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeText(input) {
+  return String(input || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function toTitleCaseName(value) {
+  const raw = String(value || '').trim().replace(/\s+/g, ' ');
+  if (!raw) return '';
+  const keepUpper = new Set(['FC', 'AC', 'CF', 'CD', 'CA', 'SC', 'RC', 'AFC', 'BSC', 'PSG', 'PSV', 'UFC', 'UD', 'SD']);
+  const lowerWords = new Set(['de', 'del', 'da', 'das', 'do', 'dos', 'y', 'e']);
+  return raw.toLocaleLowerCase('es').split(' ').map((word, index) => {
+    const clean = word.replace(/[^\p{L}\p{N}]/gu, '').toLocaleUpperCase('es');
+    if (keepUpper.has(clean)) return clean;
+    if (index > 0 && lowerWords.has(word)) return word;
+    return word.split('-').map(part => part ? part.charAt(0).toLocaleUpperCase('es') + part.slice(1) : part).join('-');
+  }).join(' ');
+}
+
+function correctedPlayerFallbackKey(row) {
+  const name = normalizeText(row['Name'] || row['nombre'] || row['PlayerName'] || '');
+  const country = row['Country'] || row['Nationality'] || row['nacionalidad'] || '';
+  const pos = row['POS'] || row['Position'] || row['posicion'] || '';
+  return { nameCountry: name && country ? `${name}|${country}` : '', namePos: name && pos ? `${name}|${pos}` : '' };
+}
+
+function buildCorrectedOverallMap(rows) {
+  const map = { byTeamPlayer: Object.create(null), byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
+  rows.forEach(r => {
+    const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+    const tid = r['TeamId'] || r['team_id'] || '';
+    const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+    if (!ovr) return;
+    if (pid && tid) map.byTeamPlayer[`${tid}_${pid}`] = ovr;
+    if (pid) map.byPlayer[pid] = ovr;
+    const fallback = correctedPlayerFallbackKey(r);
+    if (fallback.nameCountry) map.byNameCountry[fallback.nameCountry] = ovr;
+    if (fallback.namePos) map.byNamePos[fallback.namePos] = ovr;
+  });
+  return map;
+}
+
+function correctedOverallFor(row, teamId, correctedMap) {
+  if (!row || !correctedMap) return '';
+  const pid = row['Id'] || row.ID || row['PlayerId'] || '';
+  if (teamId && pid && correctedMap.byTeamPlayer[`${teamId}_${pid}`]) return correctedMap.byTeamPlayer[`${teamId}_${pid}`];
+  if (pid && correctedMap.byPlayer[pid]) return correctedMap.byPlayer[pid];
+  const fallback = correctedPlayerFallbackKey(row);
+  return correctedMap.byNameCountry[fallback.nameCountry] || correctedMap.byNamePos[fallback.namePos] || '';
+}
+
 async function fetchText(url) {
   try {
     const resp = await fetch(url);
@@ -221,7 +283,7 @@ function translatePosition(pesPos) {
 
 function positionGroupColor(pesPos) {
   if (pesPos === 'GK') return '#f9d901';
-  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
+  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) return '#D6A84F';
   if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
   if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
   return '#8b949e';
@@ -758,7 +820,7 @@ function drawRadar(canvasId, attrs) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(192, 57, 43, 0.25)';
+  ctx.fillStyle = 'rgba(214, 168, 79, 0.22)';
   ctx.fill();
   ctx.strokeStyle = '#e74c3c';
   ctx.lineWidth = 2;
@@ -1176,7 +1238,196 @@ function renderPositionPitch(player) {
     </div>`;
 }
 
-function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal) {
+function getPesPosition(player) {
+  const rawPos = player['POS'] || '';
+  const posIdx = parseInt(rawPos, 10);
+  return /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
+    ? PES_POSITIONS[posIdx]
+    : rawPos;
+}
+
+function positionFamily(pos) {
+  if (pos === 'GK') return 'GK';
+  if (['CB', 'LB', 'RB'].includes(pos)) return 'DEF';
+  if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pos)) return 'MID';
+  if (['LWF', 'RWF', 'SS', 'CF'].includes(pos)) return 'FWD';
+  return 'UNK';
+}
+
+const SIMILARITY_PROFILE_STATS = {
+  GK: [
+    ['Goalkeeping', 1.8], ['Catching', 1.7], ['Clearing', 1.5], ['Reflexes', 1.8], ['Coverage', 1.6],
+    ['Jump', 0.8], ['OverallStats', 0.7],
+  ],
+  CB: [
+    ['Defensive Prowess', 1.8], ['Ball Winning', 1.7], ['Physical Contact', 1.5], ['Jump', 1.2], ['Header', 1.2],
+    ['Speed', 0.7], ['OverallStats', 0.7],
+  ],
+  FB: [
+    ['Speed', 1.5], ['Stamina', 1.5], ['Defensive Prowess', 1.2], ['Ball Winning', 1.2], ['Low Pass', 1.0],
+    ['Lofted Pass', 1.0], ['Dribbling', 0.9], ['OverallStats', 0.7],
+  ],
+  DMCM: [
+    ['Low Pass', 1.5], ['Ball Control', 1.3], ['Defensive Prowess', 1.2], ['Ball Winning', 1.2],
+    ['Physical Contact', 1.0], ['Stamina', 1.1], ['OverallStats', 0.7],
+  ],
+  AMW: [
+    ['Ball Control', 1.5], ['Dribbling', 1.5], ['Body Control', 1.1], ['Low Pass', 1.1],
+    ['Speed', 1.2], ['Explosive Power', 1.2], ['Finishing', 0.9], ['OverallStats', 0.7],
+  ],
+  ST: [
+    ['Finishing', 1.8], ['Attacking Prowess', 1.6], ['Kicking Power', 1.2], ['Speed', 1.0],
+    ['Physical Contact', 1.0], ['Header', 0.9], ['OverallStats', 0.8],
+  ],
+};
+
+function similarityProfile(pos) {
+  if (pos === 'GK') return 'GK';
+  if (pos === 'CB') return 'CB';
+  if (pos === 'LB' || pos === 'RB') return 'FB';
+  if (pos === 'DMF' || pos === 'CMF') return 'DMCM';
+  if (['AMF', 'LMF', 'RMF', 'LWF', 'RWF', 'SS'].includes(pos)) return 'AMW';
+  if (pos === 'CF') return 'ST';
+  return 'DMCM';
+}
+
+function weightedStatDistance(a, b, profile) {
+  const stats = SIMILARITY_PROFILE_STATS[profile] || SIMILARITY_PROFILE_STATS.DMCM;
+  let sum = 0;
+  let weightSum = 0;
+  stats.forEach(([col, weight]) => {
+    const va = parseFloat(a[col]);
+    const vb = parseFloat(b[col]);
+    if (isNaN(va) || isNaN(vb)) return;
+    const diff = (va - vb) / 99;
+    sum += diff * diff * weight;
+    weightSum += weight;
+  });
+  if (!weightSum) return null;
+  return 1 - Math.sqrt(sum / weightSum);
+}
+
+function positionCompatibility(currentPos, candidatePos) {
+  if (currentPos === candidatePos) return 0.1;
+  if (similarityProfile(currentPos) === similarityProfile(candidatePos)) return 0.06;
+  if (positionFamily(currentPos) === positionFamily(candidatePos)) return 0.03;
+  return -0.14;
+}
+
+function playerSkillSet(player) {
+  return new Set(PLAYER_SKILLS.filter(skill => player[skill.col] === 'True').map(skill => skill.col));
+}
+
+function sharedSkillScore(a, b) {
+  if (!a.size || !b.size) return 0;
+  let shared = 0;
+  a.forEach(skill => { if (b.has(skill)) shared++; });
+  return Math.min(0.04, shared * 0.008);
+}
+
+function findSimilarPlayers(currentPlayer, currentTeamId, playerRows, teamRows, squadRows, correctedMap) {
+  const currentPos = getPesPosition(currentPlayer);
+  const profile = similarityProfile(currentPos);
+
+  const teamMap = {};
+  teamRows.forEach(row => {
+    if (!row['Id'] || !String(row['Name'] || '').trim() || row['Name'] === '-') return;
+    teamMap[row['Id']] = {
+      id: row['Id'],
+      rawName: row['Name'],
+      displayName: toTitleCaseName(row['Name']),
+      type: row['Type'] || '0',
+    };
+  });
+
+  const playerMap = {};
+  playerRows.forEach(row => {
+    if (row['Id']) playerMap[row['Id']] = row;
+  });
+
+  const byPlayerId = new Map();
+  squadRows.forEach(squad => {
+    const team = teamMap[squad['Id']];
+    if (!team) return;
+    for (let i = 1; i <= 32; i++) {
+      const playerId = squad[`Player ${i}`];
+      if (!playerId || playerId === '0' || playerId === currentPlayer['Id']) continue;
+      const player = playerMap[playerId];
+      if (!player) continue;
+      const candidate = { ...player };
+      const correctedOvr = correctedOverallFor(candidate, team.id, correctedMap);
+      if (correctedOvr) candidate['OverallStats'] = correctedOvr;
+
+      const previous = byPlayerId.get(playerId);
+      if (!previous || (previous.team.type === '2' && team.type !== '2')) {
+        byPlayerId.set(playerId, { player: candidate, team });
+      }
+    }
+  });
+
+  const currentSkills = playerSkillSet(currentPlayer);
+
+  return Array.from(byPlayerId.values()).map(entry => {
+    const base = weightedStatDistance(currentPlayer, entry.player, profile);
+    if (base === null) return null;
+
+    const pos = getPesPosition(entry.player);
+    let score = base + positionCompatibility(currentPos, pos);
+    if ((currentPlayer['PlayingStyle'] || '') && currentPlayer['PlayingStyle'] === entry.player['PlayingStyle']) score += 0.04;
+    score += sharedSkillScore(currentSkills, playerSkillSet(entry.player));
+
+    return {
+      ...entry,
+      pos,
+      score,
+    };
+  })
+    .filter(Boolean)
+    .filter(item => positionFamily(item.pos) === positionFamily(currentPos) || item.score >= 0.9)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8);
+}
+
+function renderSimilarPlayers(similarPlayers) {
+  if (!similarPlayers || !similarPlayers.length) {
+    return `
+      <section class="player-section similar-players-section">
+        <div class="player-section-title">Jugadores similares</div>
+        <p class="similar-players-empty">No hay datos suficientes para calcular jugadores similares.</p>
+      </section>`;
+  }
+
+  return `
+    <section class="player-section similar-players-section">
+      <div class="player-section-title">Jugadores similares</div>
+      <div class="similar-players-grid">
+        ${similarPlayers.map(({ player, team, pos }) => {
+          const ovr = player['OverallStats'] || '-';
+          const ovrColor = statColor(ovr);
+          return `
+            <article class="similar-player-card">
+              <div class="similar-player-main">
+                <img class="similar-player-photo"
+                  src="img/players/${player['Id']}.webp"
+                  onerror="handleMinifaceError(this,'${player['Id']}')"
+                  alt="${escapeHtml(player['Name'] || '')}">
+                <div>
+                  <div class="similar-player-name">${escapeHtml(player['Name'] || 'Jugador')}</div>
+                  <div class="similar-player-team">${escapeHtml(team.displayName || '')}</div>
+                </div>
+              </div>
+              <div class="similar-player-meta">
+                <span>${escapeHtml(translatePosition(pos))}</span>
+                <span style="background:${ovrColor};color:${statTextColor(ovrColor)}">${escapeHtml(ovr)}</span>
+              </div>
+              <a class="similar-player-link" href="player.html?id=${encodeURIComponent(player['Id'])}&team=${encodeURIComponent(team.id)}">Abrir ficha</a>
+            </article>`;
+        }).join('')}
+      </div>
+    </section>`;
+}
+
+function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal, similarPlayers = []) {
   const ovrColor = statColor(player['OverallStats'] || '');
   const ovr = player['OverallStats'] || '–';
 
@@ -1217,7 +1468,24 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   const appearanceHtml = renderFaceData(appearance, player, baseCopyPlayerName, isScanned);
 
   const content = document.getElementById('player-content');
+
+  // Favorites button state for this player
+  const favActive = (typeof isFavorite === 'function') && isFavorite(player['Id'], team.id);
+  const favBtnHtml = (typeof isFavorite === 'function')
+    ? `<button id="profile-fav-btn" class="profile-fav-btn${favActive ? ' is-fav' : ''}"
+         onclick="toggleProfileFavorite('${player['Id']}','${team.id}')"
+         title="${favActive ? 'Quitar de favoritos' : 'Agregar a favoritos'}">
+         ${favActive ? '★ En favoritos' : '☆ Agregar a favoritos'}
+       </button>`
+    : '';
+
   content.innerHTML = `
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="index.html">Inicio</a>
+      <a href="database.html">Base de datos</a>
+      <a href="team.html?id=${team.id}">${team.displayName}</a>
+      <span>${player['Name'] || 'Jugador'}</span>
+    </nav>
     <button class="back-btn" onclick="goBack()">◀ Volver</button>
 
     <div class="player-profile-page">
@@ -1261,6 +1529,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
                 <div class="pcs"><span class="pcs-val">${player['Weight'] || '–'} kg</span><span class="pcs-key">Peso</span></div>
                 <div class="pcs"><span class="pcs-val">${footDisplay}</span><span class="pcs-key">Pie</span></div>
               </div>
+              ${favBtnHtml}
             </div>
           </div>
         </div>
@@ -1299,6 +1568,8 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
         </div>
       </div>
 
+      ${renderSimilarPlayers(similarPlayers)}
+
     </div>`;
 
   content.style.display = 'block';
@@ -1312,11 +1583,28 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
 // ─── Back navigation ─────────────────────────────────────────────────────────
 
+/**
+ * Toggles a favorite directly from the player profile page.
+ * Updates the button text/style in place.
+ * @param {string} playerId
+ * @param {string} teamId
+ */
+function toggleProfileFavorite(playerId, teamId) {
+  if (typeof toggleFavorite !== 'function') return;
+  const added = toggleFavorite(playerId, teamId);
+  const btn = document.getElementById('profile-fav-btn');
+  if (btn) {
+    btn.textContent = added ? '★ En favoritos' : '☆ Agregar a favoritos';
+    btn.classList.toggle('is-fav', added);
+    btn.title = added ? 'Quitar de favoritos' : 'Agregar a favoritos';
+  }
+}
+
 function goBack() {
   if (document.referrer && new URL(document.referrer).hostname === window.location.hostname) {
     history.back();
   } else {
-    window.location.href = 'index.html';
+    window.location.href = 'database.html';
   }
 }
 
@@ -1352,25 +1640,20 @@ async function boot() {
   const { rows: teamRows } = parseCSV(teamsText);
   const { rows: appearanceRows } = appearancesText ? parseCSV(appearancesText) : { rows: [] };
   const { rows: squadRows } = squadsText ? parseCSV(squadsText) : { rows: [] };
+  const teamSquadRow = squadRows.find(r => r['Id'] === teamId);
+  const playerIsAssignedToRequestedTeam = !!teamSquadRow && Array.from({ length: 32 }, (_, idx) => teamSquadRow[`Player ${idx + 1}`])
+    .some(pid => pid && pid !== '0' && pid === playerId);
+
+  if (!playerIsAssignedToRequestedTeam) {
+    showError('Este jugador no pertenece a ningun equipo valido de la base de datos.');
+    return;
+  }
 
   // Build corrected overall map from medias_corregidas.csv
   // Keys: "teamId_playerId" for per-team precision, and plain "playerId" as a fallback.
   // When multiple teams have different overrides for the same player, the team-specific key
   // is preferred at lookup time; the plain-playerId fallback stores the last-seen value.
-  const corregidosMap = {};
-  if (corregidosText) {
-    const { rows: corregidosRows } = parseCSV(corregidosText);
-    corregidosRows.forEach(r => {
-      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-      const tid = r['TeamId'] || r['team_id'] || '';
-      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
-      if (pid && ovr) {
-        if (tid) corregidosMap[tid + '_' + pid] = ovr;
-        // Fallback key (used when no TeamId column is present or as a last resort)
-        if (!tid) corregidosMap[pid] = ovr;
-      }
-    });
-  }
+  const corregidosMap = corregidosText ? buildCorrectedOverallMap(parseCSV(corregidosText).rows) : null;
 
   // Build original players map (id → name) for face ID lookups
   const originalPlayersMap = {};
@@ -1401,21 +1684,22 @@ async function boot() {
   }
 
   // Override overall from medias_corregidas.csv if available (team-specific key takes precedence)
-  const corregidosOvr = corregidosMap[teamId + '_' + playerId] || corregidosMap[playerId];
+  const corregidosOvr = correctedOverallFor(player, teamId, corregidosMap);
   if (corregidosOvr) {
     player['OverallStats'] = corregidosOvr;
   }
 
   // Find the team
   const teamRow = teamRows.find(t => t['Id'] === teamId);
-  if (!teamRow) {
+  if (!teamRow || !String(teamRow['Name'] || '').trim() || teamRow['Name'] === '-') {
     showError(`Equipo con ID "${teamId}" no encontrado en la base de datos.`);
     return;
   }
 
   const team = {
     id: teamId,
-    displayName: teamRow['Name'] || teamId,
+    rawName: teamRow['Name'] || teamId,
+    displayName: toTitleCaseName(teamRow['Name'] || teamId),
     type: teamRow['Type'] || '0',
   };
   const typeLabel = TYPE_LABELS[team.type] || '';
@@ -1467,7 +1751,6 @@ async function boot() {
 
   // Find the player's jersey number (dorsal) in the selected team's squad
   let dorsal = null;
-  const teamSquadRow = squadRows.find(r => r['Id'] === teamId);
   if (teamSquadRow) {
     for (let i = 1; i <= 32; i++) {
       if (teamSquadRow[`Player ${i}`] === playerId) {
@@ -1478,7 +1761,8 @@ async function boot() {
     }
   }
 
-  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal);
+  const similarPlayers = findSimilarPlayers(player, teamId, playerRows, teamRows, squadRows, corregidosMap);
+  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal, similarPlayers);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
@@ -1495,7 +1779,7 @@ function showError(message) {
   const backLink = document.createElement('p');
   backLink.style.marginTop = '16px';
   const anchor = document.createElement('a');
-  anchor.href = 'index.html';
+  anchor.href = 'database.html';
   anchor.style.color = 'var(--color-highlight)';
   anchor.textContent = '← Volver a la base de datos';
   backLink.appendChild(anchor);

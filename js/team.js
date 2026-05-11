@@ -57,6 +57,59 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+function normalizeText(input) {
+  return String(input || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function toTitleCaseName(value) {
+  const raw = String(value || '').trim().replace(/\s+/g, ' ');
+  if (!raw) return '';
+  const keepUpper = new Set(['FC', 'AC', 'CF', 'CD', 'CA', 'SC', 'RC', 'AFC', 'BSC', 'PSG', 'PSV', 'UFC', 'UD', 'SD']);
+  const lowerWords = new Set(['de', 'del', 'da', 'das', 'do', 'dos', 'y', 'e']);
+  return raw.toLocaleLowerCase('es').split(' ').map((word, index) => {
+    const clean = word.replace(/[^\p{L}\p{N}]/gu, '').toLocaleUpperCase('es');
+    if (keepUpper.has(clean)) return clean;
+    if (index > 0 && lowerWords.has(word)) return word;
+    return word.split('-').map(part => part ? part.charAt(0).toLocaleUpperCase('es') + part.slice(1) : part).join('-');
+  }).join(' ');
+}
+
+function correctedPlayerFallbackKey(row) {
+  const name = normalizeText(row['Name'] || row['nombre'] || row['PlayerName'] || '');
+  const country = row['Country'] || row['Nationality'] || row['nacionalidad'] || '';
+  const pos = row['POS'] || row['Position'] || row['posicion'] || '';
+  return { nameCountry: name && country ? `${name}|${country}` : '', namePos: name && pos ? `${name}|${pos}` : '' };
+}
+
+function buildCorrectedOverallMap(rows) {
+  const map = { byTeamPlayer: Object.create(null), byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
+  rows.forEach(r => {
+    const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+    const tid = r['TeamId'] || r['team_id'] || '';
+    const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+    if (!ovr) return;
+    if (pid && tid) map.byTeamPlayer[`${tid}_${pid}`] = ovr;
+    if (pid) map.byPlayer[pid] = ovr;
+    const fallback = correctedPlayerFallbackKey(r);
+    if (fallback.nameCountry) map.byNameCountry[fallback.nameCountry] = ovr;
+    if (fallback.namePos) map.byNamePos[fallback.namePos] = ovr;
+  });
+  return map;
+}
+
+function correctedOverallFor(row, teamId, correctedMap) {
+  if (!row || !correctedMap) return '';
+  const pid = row['Id'] || row.ID || row['PlayerId'] || '';
+  if (teamId && pid && correctedMap.byTeamPlayer[`${teamId}_${pid}`]) return correctedMap.byTeamPlayer[`${teamId}_${pid}`];
+  if (pid && correctedMap.byPlayer[pid]) return correctedMap.byPlayer[pid];
+  const fallback = correctedPlayerFallbackKey(row);
+  return correctedMap.byNameCountry[fallback.nameCountry] || correctedMap.byNamePos[fallback.namePos] || '';
+}
+
 function statColorClass(value) {
   const v = parseInt(value, 10);
   if (isNaN(v)) return 'stat-range-1';
@@ -135,10 +188,18 @@ function translatePosition(pesPos) {
 
 function positionGroupColor(pesPos) {
   if (pesPos === 'GK') return '#f9d901';
-  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
+  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) return '#D6A84F';
   if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
   if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
   return '#8b949e';
+}
+
+function positionBadgeStyle(pesPos) {
+  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) {
+    return 'color:#F5F5F5;border-color:rgba(214,168,79,0.35);background:#1A1A1D';
+  }
+  const color = positionGroupColor(pesPos);
+  return `color:${color};border-color:${color};background:${color}18`;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -297,7 +358,7 @@ function refreshTableBody() {
   if (!tbody || !_teamId) return;
   const list = getSortedFilteredPlayers();
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--color-text-muted)">Sin resultados para los filtros seleccionados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:24px;color:var(--color-text-muted)">Sin resultados para los filtros seleccionados.</td></tr>`;
     return;
   }
   tbody.innerHTML = list.map(p => renderPlayerRow(p, _teamId)).join('');
@@ -711,6 +772,7 @@ function renderPlayerRow(player, teamId) {
   const radarAttrs = computeRadarAttributes(player);
   const safeName = escapeHtml(player.Name);
   const shirtNum = player._shirtNumber ? escapeHtml(String(player._shirtNumber)) : '–';
+  const fav = (typeof isFavorite === 'function') && isFavorite(player.ID, teamId);
 
   return `<tr class="player-row" data-player-id="${escapeHtml(player.ID)}" data-team-id="${escapeHtml(teamId)}">
     <td class="shirt-number-cell">${shirtNum}</td>
@@ -727,7 +789,7 @@ function renderPlayerRow(player, teamId) {
         onerror="this.onerror=null;this.src='img/flags/default.webp'"
         alt="">
     </td>
-    <td><span class="position-badge" style="color:${positionGroupColor(player.Position)};border-color:${positionGroupColor(player.Position)};background:${positionGroupColor(player.Position)}18">${escapeHtml(posDisplay) || '–'}</span></td>
+    <td><span class="position-badge" style="${positionBadgeStyle(player.Position)}">${escapeHtml(posDisplay) || '–'}</span></td>
     <td><span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${escapeHtml(ovr)}</span></td>
     <td>${radarAttrs.ATQ}</td>
     <td>${radarAttrs.REG}</td>
@@ -735,6 +797,14 @@ function renderPlayerRow(player, teamId) {
     <td>${radarAttrs.PAS}</td>
     <td>${(player.Position || '') === 'GK' ? radarAttrs.COM : radarAttrs.RIT}</td>
     <td>${(player.Position || '') === 'GK' ? radarAttrs.POR : radarAttrs.FIS}</td>
+    <td class="fav-col" onclick="event.stopPropagation()">
+      <button class="fav-btn${fav ? ' is-fav' : ''}"
+        onclick="toggleTeamFavBtn(this,'${escapeHtml(player.ID)}','${escapeHtml(teamId)}')"
+        title="${fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}"
+        aria-label="Favorito">
+        ${fav ? '★' : '☆'}
+      </button>
+    </td>
   </tr>`;
 }
 
@@ -764,6 +834,11 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
 
   const content = document.getElementById('team-content');
   content.innerHTML = `
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="index.html">Inicio</a>
+      <a href="database.html">Base de datos</a>
+      <span>${safeTeamName}</span>
+    </nav>
     <button class="back-btn" id="btn-back">◀ Volver</button>
 
     <div class="view-header">
@@ -868,6 +943,7 @@ function renderPositionGroups(players, teamId) {
               <th>PAS</th>
               <th>RIT/COM</th>
               <th>FIS/POR</th>
+              <th class="fav-col"></th>
             </tr>
           </thead>
           <tbody>${rowsHtml}</tbody>
@@ -891,6 +967,7 @@ function renderPositionGroups(players, teamId) {
               <th class="shirt-number-cell">#</th>
               <th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
               <th>OVR</th><th>ATQ</th><th>REG</th><th>DEF</th><th>PAS</th><th>RIT/COM</th><th>FIS/POR</th>
+              <th class="fav-col"></th>
             </tr>
           </thead>
           <tbody>${uncategorized.map(p => renderPlayerRow(p, teamId)).join('')}</tbody>
@@ -911,7 +988,7 @@ function goBack() {
   if (document.referrer && new URL(document.referrer).hostname === window.location.hostname) {
     history.back();
   } else {
-    window.location.href = 'index.html';
+    window.location.href = 'database.html';
   }
 }
 
@@ -951,14 +1028,15 @@ async function boot() {
 
   // Find the team
   const teamRow = teamRows.find(t => t['Id'] === teamId);
-  if (!teamRow) {
+  if (!teamRow || !String(teamRow['Name'] || '').trim() || teamRow['Name'] === '-') {
     showError(`Equipo con ID "${teamId}" no encontrado en la base de datos.`);
     return;
   }
 
   const team = {
     id: teamId,
-    displayName: teamRow['Name'] || teamId,
+    rawName: teamRow['Name'] || teamId,
+    displayName: toTitleCaseName(teamRow['Name'] || teamId),
     type: teamRow['Type'] || '0',
   };
 
@@ -970,19 +1048,7 @@ async function boot() {
   });
 
   // Build corrected overall map from medias_corregidas.csv
-  const corregidosMap = {};
-  if (corregidosText) {
-    const { rows: corregidosRows } = parseCSV(corregidosText);
-    corregidosRows.forEach(r => {
-      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-      const tid = r['TeamId'] || r['team_id'] || '';
-      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
-      if (pid && ovr) {
-        if (tid) corregidosMap[tid + '_' + pid] = ovr;
-        if (!tid) corregidosMap[pid] = ovr;
-      }
-    });
-  }
+  const corregidosMap = corregidosText ? buildCorrectedOverallMap(parseCSV(corregidosText).rows) : null;
 
   // Find this team's squad
   const squadRow = squadRows.find(s => s['Id'] === teamId);
@@ -998,7 +1064,7 @@ async function boot() {
         const shirtNum = squadRow[`Shirt number ${i}`];
         const playerWithShirt = { ...player, _shirtNumber: shirtNum && shirtNum !== '0' ? parseInt(shirtNum, 10) || null : null };
         // Apply corrected overall if available (team-specific key takes precedence)
-        const corregidosOvr = corregidosMap[teamId + '_' + pid] || corregidosMap[pid];
+        const corregidosOvr = correctedOverallFor(playerWithShirt, teamId, corregidosMap);
         if (corregidosOvr) playerWithShirt.Overall = corregidosOvr;
         players.push(playerWithShirt);
         squadSlots[i - 1] = playerWithShirt;  // 0-indexed (slot i → index i-1)
@@ -1013,7 +1079,7 @@ async function boot() {
   const coachsMap = {};
   coachRows.forEach(row => {
     const cid = row['Id'];
-    if (cid) coachsMap[cid] = row['Name'] || '';
+    if (cid) coachsMap[cid] = toTitleCaseName(row['Name'] || '');
   });
 
   const coachId = teamRow['Coach'];
@@ -1044,7 +1110,7 @@ function showError(message) {
   const backLink = document.createElement('p');
   backLink.style.marginTop = '16px';
   const anchor = document.createElement('a');
-  anchor.href = 'index.html';
+  anchor.href = 'database.html';
   anchor.style.color = 'var(--color-highlight)';
   anchor.textContent = '← Volver a la base de datos';
   backLink.appendChild(anchor);

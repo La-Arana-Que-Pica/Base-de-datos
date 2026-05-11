@@ -167,10 +167,18 @@ function translatePosition(pesPos) {
 
 function positionGroupColor(pesPos) {
   if (pesPos === 'GK') return '#f9d901';
-  if (['CB', 'LB', 'RB'].includes(pesPos)) return '#2cccfa';
+  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) return '#D6A84F';
   if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
   if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
   return '#8b949e';
+}
+
+function positionBadgeStyle(pesPos) {
+  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) {
+    return 'color:#F5F5F5;border-color:rgba(214,168,79,0.35);background:#1A1A1D';
+  }
+  const color = positionGroupColor(pesPos);
+  return `color:${color};border-color:${color};background:${color}18`;
 }
 
 // Stat bar range for standard attributes (PES stats go from 40 to 99)
@@ -184,6 +192,28 @@ const SPECIAL_ATTRS = {
   'Form':              { max: 8 },
   'Injury Resistance': { max: 3 },
 };
+
+function statFilterKey(csvCol) {
+  return csvCol
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase();
+}
+
+const STAT_FILTERS = Object.entries(STAT_LABELS).map(([csvCol, label]) => {
+  const key = statFilterKey(csvCol);
+  const special = SPECIAL_ATTRS[csvCol];
+  return {
+    csvCol,
+    label,
+    minKey: `statMin_${key}`,
+    maxKey: `statMax_${key}`,
+    min: special ? 0 : STAT_MIN,
+    max: special ? special.max : STAT_MAX,
+  };
+});
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
@@ -218,12 +248,75 @@ function pickValue(obj, keys, fallback = '') {
   return fallback;
 }
 
+function correctedPlayerFallbackKey(row) {
+  const name = normalizeText(row['Name'] || row['nombre'] || row['PlayerName'] || '');
+  const country = row['Country'] || row['Nationality'] || row['nacionalidad'] || '';
+  const pos = row['POS'] || row['Position'] || row['posicion'] || '';
+  return { nameCountry: name && country ? `${name}|${country}` : '', namePos: name && pos ? `${name}|${pos}` : '' };
+}
+
+function buildCorrectedOverallMap(rows) {
+  const map = { byTeamPlayer: Object.create(null), byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
+  rows.forEach(r => {
+    const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
+    const tid = r['TeamId'] || r['team_id'] || '';
+    const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
+    if (!ovr) return;
+    if (pid && tid) map.byTeamPlayer[`${tid}_${pid}`] = ovr;
+    if (pid) map.byPlayer[pid] = ovr;
+    const fallback = correctedPlayerFallbackKey(r);
+    if (fallback.nameCountry) map.byNameCountry[fallback.nameCountry] = ovr;
+    if (fallback.namePos) map.byNamePos[fallback.namePos] = ovr;
+  });
+  return map;
+}
+
+function correctedOverallFor(row, teamId, correctedMap) {
+  if (!row || !correctedMap) return '';
+  const pid = row['Id'] || row.ID || row['PlayerId'] || '';
+  if (teamId && pid && correctedMap.byTeamPlayer[`${teamId}_${pid}`]) return correctedMap.byTeamPlayer[`${teamId}_${pid}`];
+  if (pid && correctedMap.byPlayer[pid]) return correctedMap.byPlayer[pid];
+  const fallback = correctedPlayerFallbackKey(row);
+  return correctedMap.byNameCountry[fallback.nameCountry] || correctedMap.byNamePos[fallback.namePos] || '';
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderBreadcrumbTrail(items) {
+  return `<nav class="breadcrumbs" aria-label="Breadcrumb">
+    ${items.map(item => item.href
+      ? `<a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`
+      : `<span>${escapeHtml(item.label)}</span>`
+    ).join('')}
+  </nav>`;
+}
+
 function normalizeText(input) {
   return String(input || '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .trim();
+}
+
+function toTitleCaseName(value) {
+  const raw = String(value || '').trim().replace(/\s+/g, ' ');
+  if (!raw) return '';
+  const keepUpper = new Set(['FC', 'AC', 'CF', 'CD', 'CA', 'SC', 'RC', 'AFC', 'BSC', 'PSG', 'PSV', 'UFC', 'UD', 'SD']);
+  const lowerWords = new Set(['de', 'del', 'da', 'das', 'do', 'dos', 'y', 'e']);
+  return raw.toLocaleLowerCase('es').split(' ').map((word, index) => {
+    const clean = word.replace(/[^\p{L}\p{N}]/gu, '').toLocaleUpperCase('es');
+    if (keepUpper.has(clean)) return clean;
+    if (index > 0 && lowerWords.has(word)) return word;
+    return word.split('-').map(part => part ? part.charAt(0).toLocaleUpperCase('es') + part.slice(1) : part).join('-');
+  }).join(' ');
 }
 
 function tokenizeSearchText(input) {
@@ -415,7 +508,8 @@ async function boot() {
     const team = {
       id: teamId,
       folder: teamId,
-      displayName: teamName,
+      rawName: teamName,
+      displayName: toTitleCaseName(teamName),
       abbreviation: teamRow['Abbreviation'] || '',
       type: teamRow['Type'] || '0',
       teamData: teamRow,
@@ -448,19 +542,7 @@ async function boot() {
   });
 
   // Build corrected overall map from medias_corregidas.csv
-  const corregidosMap = {};
-  if (corregidosText) {
-    const corregidosRows = parseCSV(corregidosText);
-    corregidosRows.forEach(r => {
-      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-      const tid = r['TeamId'] || r['team_id'] || '';
-      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
-      if (pid && ovr) {
-        if (tid) corregidosMap[tid + '_' + pid] = ovr;
-        if (!tid) corregidosMap[pid] = ovr;
-      }
-    });
-  }
+  const corregidosMap = corregidosText ? buildCorrectedOverallMap(parseCSV(corregidosText)) : null;
 
   // Assign players to teams using squad data
   squadRows.forEach(squadRow => {
@@ -474,7 +556,7 @@ async function boot() {
       if (!player) continue;
       const p = { ...player, _team: team };
       // Apply corrected overall if available (team-specific key takes precedence)
-      const corregidosOvr = corregidosMap[teamId + '_' + playerId] || corregidosMap[playerId];
+      const corregidosOvr = correctedOverallFor(p, teamId, corregidosMap);
       if (corregidosOvr) p.Overall = corregidosOvr;
       team.players.push(p);
       DB.players.push(p);
@@ -560,6 +642,10 @@ function _urlToState() {
   params.forEach((v, k) => {
     if (k.startsWith('f_')) filters[k.slice(2)] = v;
   });
+  if (filters.skill && !filters.skills) {
+    filters.skills = filters.skill;
+    delete filters.skill;
+  }
   if (Object.keys(filters).length) state.filters = filters;
   if (params.get('special') === '1') state.specialPlayers = true;
   return state;
@@ -584,10 +670,10 @@ function saveNavState(state) {
 }
 
 function loadNavState() {
-  // Prefer URL state over localStorage
+  // Prefer explicit URL state. With no query, the database starts at its hub.
   const urlState = _urlToState();
   if (urlState) return urlState;
-  try { return JSON.parse(localStorage.getItem(NAV_STATE_KEY) || 'null'); } catch(e) { return null; }
+  return { view: 'home' };
 }
 
 /**
@@ -597,6 +683,9 @@ function loadNavState() {
 function _applyNavState(state) {
   if (!state || !state.view) { showAllPlayers(); return; }
   switch (state.view) {
+    case 'home':
+      showHome();
+      break;
     case 'leagues':
       _showLeaguesViewInternal();
       if (state.query) {
@@ -609,10 +698,12 @@ function _applyNavState(state) {
       else _showLeaguesViewInternal();
       break;
     case 'teams':
+      if (state.query) _teamFilters.name = state.query;
       _showTeamsViewInternal();
       if (state.query) {
-        const input = document.getElementById('teams-search-input');
-        if (input) { input.value = state.query; filterTeamsGrid(state.query); }
+        const input = document.getElementById('team-flt-name');
+        if (input) input.value = state.query;
+        onTeamFilterChange(false);
       }
       if (state.page > 1) goToTeamsPage(state.page, false);
       break;
@@ -622,6 +713,9 @@ function _applyNavState(state) {
       if (state.page) _allPlayersPage = state.page;
       _showAllPlayersInternal(false);
       break;
+    case 'favorites':
+      _showFavoritesViewInternal();
+      break;
     default: showAllPlayers(); break;
   }
 }
@@ -629,7 +723,7 @@ function _applyNavState(state) {
 function restoreNavState() {
   _lastPushedView = null; // reset so first nav uses pushState
   const state = loadNavState();
-  if (!state || !state.view) { showAllPlayers(); return; }
+  if (!state || !state.view) { showDatabaseHome(); return; }
   // Seed _lastPushedView to avoid a spurious pushState on first render
   _lastPushedView = state.view;
   _applyNavState(state);
@@ -639,38 +733,61 @@ function restoreNavState() {
 
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
+  if (!sidebar) return;
 
-  const html = `
-    <!-- ── LIGAS ── -->
+  sidebar.innerHTML = `
     <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" id="nav-header-ligas" onclick="showLeaguesView()">
+      <button type="button" class="sidebar-nav-header db-sidebar-btn" id="nav-header-inicio" onclick="showDatabaseHome()">
+        <span class="sidebar-nav-title">Inicio</span>
+      </button>
+    </div>
+    <div class="sidebar-nav-section">
+      <button type="button" class="sidebar-nav-header db-sidebar-btn" id="nav-header-ligas" onclick="showLeaguesView()">
         <span class="sidebar-nav-title">Ligas</span>
-      </div>
+      </button>
     </div>
-
-    <!-- ── EQUIPOS ── -->
     <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" id="nav-header-equipos" onclick="showTeamsView()">
+      <button type="button" class="sidebar-nav-header db-sidebar-btn" id="nav-header-equipos" onclick="showTeamsView()">
         <span class="sidebar-nav-title">Equipos</span>
-      </div>
+      </button>
     </div>
-
-    <!-- ── JUGADORES ── -->
     <div class="sidebar-nav-section">
-      <div class="sidebar-nav-header" id="nav-header-jugadores" onclick="showAllPlayersFromSidebar()">
+      <button type="button" class="sidebar-nav-header db-sidebar-btn" id="nav-header-jugadores" onclick="showAllPlayersFromSidebar()">
         <span class="sidebar-nav-title">Jugadores</span>
-      </div>
+      </button>
     </div>`;
 
-  sidebar.innerHTML = html;
+}
+
+/**
+ * Toggle the expand/collapse state of a league's team list in the sidebar.
+ */
+function toggleSidebarLeague(leagueId) {
+  const hdr = document.getElementById('sidebar-league-hdr-' + leagueId);
+  const list = document.getElementById('sidebar-teams-' + leagueId);
+  if (!hdr || !list) return;
+  const open = hdr.classList.toggle('open');
+  list.classList.toggle('open', open);
+}
+
+/**
+ * Filter the leagues shown in the sidebar by name.
+ */
+function filterSidebarLeagues(query) {
+  const q = normalizeText(query).trim();
+  document.querySelectorAll('#sidebar-leagues-list .sidebar-league').forEach(item => {
+    const name = item.dataset.leagueName || '';
+    item.style.display = (!q || name.includes(q)) ? '' : 'none';
+  });
 }
 
 function _setActiveSidebarNav(viewName) {
-  ['nav-header-ligas', 'nav-header-equipos', 'nav-header-jugadores'].forEach(id => {
+  ['nav-header-inicio', 'nav-header-ligas', 'nav-header-equipos', 'nav-header-jugadores'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
   const map = {
+    home: 'nav-header-inicio',
     leagues: 'nav-header-ligas',
     leagueTeams: 'nav-header-ligas',
     teams: 'nav-header-equipos',
@@ -722,6 +839,7 @@ function _showLeaguesViewInternal() {
   }).join('');
 
   view.innerHTML = `
+    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Ligas' }])}
     <div class="view-header">
       <div>
         <div class="view-title">Ligas</div>
@@ -795,6 +913,7 @@ function _showLeagueTeamsViewInternal(leagueId) {
     </div>`).join('');
 
   view.innerHTML = `
+    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Ligas', href: 'database.html?view=leagues' }, { label: league.name }])}
     <div class="view-header">
       <img class="grid-card-img" style="width:48px;height:48px;object-fit:contain"
         src="img/leagues/${leagueId}.webp"
@@ -815,6 +934,134 @@ const TEAMS_PAGE_SIZE = 60;
 let _teamsForGrid = [];
 let _teamsFilteredList = [];
 let _teamsGridPage = 1;
+let _teamFilters = {
+  name: '',
+  league: '',
+  country: '',
+  type: '',
+  minAvg: '',
+  maxAvg: '',
+  minPlayers: '',
+  maxPlayers: '',
+};
+
+function _getLeagueForTeam(teamId) {
+  return DB.leagues.find(l => l.teamIds.includes(teamId)) || null;
+}
+
+function _teamPlayerCount(team) {
+  return (team.players || []).filter(p => p && p.ID).length;
+}
+
+function _teamFilterValue(team, key) {
+  if (key === 'league') return (_getLeagueForTeam(team.id) || {}).id || '';
+  if (key === 'country') return (team.teamData || {}).Country || '';
+  if (key === 'type') return team.type || '';
+  if (key === 'avg') return teamAvgOvr(team);
+  if (key === 'players') return _teamPlayerCount(team);
+  return '';
+}
+
+function _hasActiveTeamFilters() {
+  return Object.values(_teamFilters).some(Boolean);
+}
+
+function _buildTeamActiveFiltersSummary() {
+  if (!_hasActiveTeamFilters()) {
+    return `<div class="active-filters active-filters-empty" id="team-active-filters-summary">Sin filtros activos</div>`;
+  }
+
+  const tags = [];
+  const add = (label, value) => {
+    if (value !== undefined && value !== null && value !== '') tags.push(`${label}: ${value}`);
+  };
+  const league = DB.leagues.find(l => l.id === _teamFilters.league);
+  const country = _teamFilters.country ? nationalityName(_teamFilters.country) : '';
+  add('Nombre', _teamFilters.name);
+  add('Liga', league ? league.name : '');
+  add('Pais', country);
+  add('Tipo', TYPE_LABELS[_teamFilters.type] || '');
+  if (_teamFilters.minAvg || _teamFilters.maxAvg) add('Media', `${_teamFilters.minAvg || 0}-${_teamFilters.maxAvg || 99}`);
+  if (_teamFilters.minPlayers || _teamFilters.maxPlayers) add('Jugadores', `${_teamFilters.minPlayers || 0}-${_teamFilters.maxPlayers || 32}`);
+
+  return `
+    <div class="active-filters" id="team-active-filters-summary">
+      <span class="active-filters-label">Filtros activos</span>
+      <div class="active-filter-tags">
+        ${tags.map(tag => `<span class="active-filter-tag">${escapeHtml(tag)}</span>`).join('')}
+      </div>
+    </div>`;
+}
+
+function _buildTeamFiltersPanel() {
+  const leagues = DB.leagues
+    .filter(l => l.name && l.teamIds.some(id => _teamsForGrid.some(t => t.id === id)))
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  const countries = [...new Set(_teamsForGrid.map(t => _teamFilterValue(t, 'country')).filter(Boolean))]
+    .sort((a, b) => nationalityName(a).localeCompare(nationalityName(b), 'es'));
+  const types = [...new Set(_teamsForGrid.map(t => t.type).filter(t => TYPE_LABELS[t]))];
+
+  return `
+    <div class="adv-filter-panel team-filter-panel">
+      <div class="filter-panel-head">
+        <div>
+          <div class="filter-panel-title">Filtros de equipos</div>
+          <div class="filter-panel-subtitle">Busca por datos reales del CSV y metricas calculadas desde el plantel.</div>
+        </div>
+        <button type="button" class="adv-filter-reset" id="btn-clear-team-filters" onclick="resetTeamFilters()" ${_hasActiveTeamFilters() ? '' : 'disabled'}>Limpiar filtros</button>
+      </div>
+      ${_buildTeamActiveFiltersSummary()}
+      <div class="adv-filter-grid basic-filter-grid">
+        <div class="adv-filter-group">
+          <label>Nombre</label>
+          <input type="text" id="team-flt-name" placeholder="Buscar equipo" value="${escapeHtml(_teamFilters.name)}" oninput="onTeamFilterChange()">
+        </div>
+        <div class="adv-filter-group">
+          <label>Liga</label>
+          <select id="team-flt-league" onchange="onTeamFilterChange()">
+            <option value="">Todas</option>
+            ${leagues.map(l => `<option value="${l.id}"${_teamFilters.league === l.id ? ' selected' : ''}>${escapeHtml(l.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Pais</label>
+          <select id="team-flt-country" onchange="onTeamFilterChange()">
+            <option value="">Todos</option>
+            ${countries.map(c => `<option value="${c}"${_teamFilters.country === c ? ' selected' : ''}>${escapeHtml(nationalityName(c))}</option>`).join('')}
+          </select>
+        </div>
+        <div class="adv-filter-group">
+          <label>Tipo</label>
+          <select id="team-flt-type" onchange="onTeamFilterChange()">
+            <option value="">Todos</option>
+            ${types.map(t => `<option value="${t}"${_teamFilters.type === t ? ' selected' : ''}>${escapeHtml(TYPE_LABELS[t])}</option>`).join('')}
+          </select>
+        </div>
+        ${_buildRangeFilter('Media promedio', 'team-flt-min-avg', 'team-flt-max-avg', 0, 99, _teamFilters.minAvg, _teamFilters.maxAvg).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
+        ${_buildRangeFilter('Cantidad de jugadores', 'team-flt-min-players', 'team-flt-max-players', 0, 32, _teamFilters.minPlayers, _teamFilters.maxPlayers).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
+      </div>
+    </div>`;
+}
+
+function _applyTeamFilters() {
+  const name = normalizeText(_teamFilters.name);
+  _teamsFilteredList = _teamsForGrid.filter(team => {
+    if (name && !normalizeText(team.displayName).includes(name)) return false;
+    if (_teamFilters.league && _teamFilterValue(team, 'league') !== _teamFilters.league) return false;
+    if (_teamFilters.country && _teamFilterValue(team, 'country') !== _teamFilters.country) return false;
+    if (_teamFilters.type && _teamFilterValue(team, 'type') !== _teamFilters.type) return false;
+
+    const avg = _teamFilterValue(team, 'avg');
+    if (_teamFilters.minAvg && (avg === null || avg < parseInt(_teamFilters.minAvg, 10))) return false;
+    if (_teamFilters.maxAvg && (avg === null || avg > parseInt(_teamFilters.maxAvg, 10))) return false;
+
+    const players = _teamFilterValue(team, 'players');
+    if (_teamFilters.minPlayers && players < parseInt(_teamFilters.minPlayers, 10)) return false;
+    if (_teamFilters.maxPlayers && players > parseInt(_teamFilters.maxPlayers, 10)) return false;
+
+    return true;
+  });
+}
 
 /** Internal: render teams grid without saving nav state. */
 function _showTeamsViewInternal() {
@@ -824,7 +1071,7 @@ function _showTeamsViewInternal() {
   DB.leagues.forEach(l => l.teamIds.forEach(id => teamsInLeagues.add(id)));
   const filteredTeams = DB.teams.filter(t => teamsInLeagues.has(t.id));
   _teamsForGrid = filteredTeams;
-  _teamsFilteredList = filteredTeams;
+  _applyTeamFilters();
   _teamsGridPage = 1;
 
   hideAllViews();
@@ -832,17 +1079,14 @@ function _showTeamsViewInternal() {
   view.classList.add('active');
 
   view.innerHTML = `
+    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Equipos' }])}
     <div class="view-header">
       <div>
         <div class="view-title">Equipos</div>
-        <div class="view-subtitle" id="teams-grid-subtitle">${filteredTeams.length} equipos con liga asignada</div>
+        <div class="view-subtitle" id="teams-grid-subtitle">${_teamsFilteredList.length} equipos con liga asignada</div>
       </div>
     </div>
-    <div class="grid-search-wrap">
-      <input type="text" class="grid-search-input" id="teams-search-input"
-        placeholder="Buscar equipo..." autocomplete="off"
-        oninput="filterTeamsGrid(this.value)">
-    </div>
+    ${_buildTeamFiltersPanel()}
     <div class="grid-cards" id="teams-grid-cards"></div>
     <div id="teams-grid-pagination"></div>`;
 
@@ -905,7 +1149,7 @@ function _renderTeamsGridPage() {
 function goToTeamsPage(page, scrollToTop) {
   const totalPages = Math.ceil(_teamsFilteredList.length / TEAMS_PAGE_SIZE) || 1;
   _teamsGridPage = Math.max(1, Math.min(page, totalPages));
-  const query = (document.getElementById('teams-search-input') || {}).value || '';
+  const query = _teamFilters.name || '';
   saveNavState({ view: 'teams', query, page: _teamsGridPage });
   _renderTeamsGridPage();
   if (scrollToTop !== false) {
@@ -915,19 +1159,46 @@ function goToTeamsPage(page, scrollToTop) {
 }
 
 function filterTeamsGrid(query) {
-  const q = query.toLowerCase().trim();
+  _teamFilters.name = query || '';
+  onTeamFilterChange(false);
+}
+
+function onTeamFilterChange(saveState = true) {
   if (!document.getElementById('teams-grid-cards')) return;
-  _teamsFilteredList = q ? _teamsForGrid.filter(t => (t.displayName || '').toLowerCase().includes(q)) : _teamsForGrid;
+  _teamFilters.name = (document.getElementById('team-flt-name') || {}).value || _teamFilters.name || '';
+  _teamFilters.league = (document.getElementById('team-flt-league') || {}).value || '';
+  _teamFilters.country = (document.getElementById('team-flt-country') || {}).value || '';
+  _teamFilters.type = (document.getElementById('team-flt-type') || {}).value || '';
+  _teamFilters.minAvg = (document.getElementById('team-flt-min-avg') || {}).value || '';
+  _teamFilters.maxAvg = (document.getElementById('team-flt-max-avg') || {}).value || '';
+  _teamFilters.minPlayers = (document.getElementById('team-flt-min-players') || {}).value || '';
+  _teamFilters.maxPlayers = (document.getElementById('team-flt-max-players') || {}).value || '';
+
+  _applyTeamFilters();
   _teamsGridPage = 1;
-  saveNavState({ view: 'teams', query, page: 1 });
+  if (saveState) saveNavState({ view: 'teams', query: _teamFilters.name, page: 1 });
+  const summary = document.getElementById('team-active-filters-summary');
+  if (summary) summary.outerHTML = _buildTeamActiveFiltersSummary();
+  const clearBtn = document.getElementById('btn-clear-team-filters');
+  if (clearBtn) clearBtn.disabled = !_hasActiveTeamFilters();
   _renderTeamsGridPage();
+}
+
+function resetTeamFilters() {
+  Object.keys(_teamFilters).forEach(k => { _teamFilters[k] = ''; });
+  ['team-flt-name','team-flt-league','team-flt-country','team-flt-type',
+   'team-flt-min-avg','team-flt-max-avg','team-flt-min-players','team-flt-max-players'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  onTeamFilterChange();
 }
 
 
 // ─── Views ────────────────────────────────────────────────────────────────────
 
 function hideAllViews() {
-  document.querySelectorAll('#home-view, #players-view, #player-view, #search-view, #leagues-view, #teams-grid-view').forEach(el => {
+  document.querySelectorAll('#home-view, #players-view, #player-view, #search-view, #leagues-view, #teams-grid-view, #favorites-view').forEach(el => {
     el.classList.remove('active');
   });
   const loadingOverlay = document.getElementById('loading-overlay');
@@ -954,6 +1225,7 @@ function showError(message) {
 }
 
 function showHome() {
+  _setActiveSidebarNav('home');
   hideAllViews();
   document.getElementById('home-view').classList.add('active');
 
@@ -964,6 +1236,10 @@ function showHome() {
   // Count unique players from teams that have a league assigned
   const uniqueIds = new Set(DB.players.filter(p => teamsInLeaguesSet.has(p._team.id)).map(p => p.ID));
   document.getElementById('stat-players').textContent = uniqueIds.size;
+  // Show favorites count
+  const favCount = getFavoritesCount();
+  const statFav = document.getElementById('stat-favorites');
+  if (statFav) statFav.textContent = favCount > 0 ? favCount : '⭐';
 
   // Populate featured leagues + teams section
   const featuredSection = document.getElementById('home-leagues-section');
@@ -1014,7 +1290,20 @@ function showHome() {
 }
 
 function goHome() {
-  if (DB.loaded) showHome();
+  if (DB.loaded) showDatabaseHome();
+}
+
+function showDatabaseHome() {
+  saveNavState({ view: 'home' });
+  showHome();
+}
+
+function showAllPlayersAndFocusSearch() {
+  showAllPlayers(true);
+  requestAnimationFrame(() => {
+    const input = document.getElementById('search-input');
+    if (input) input.focus();
+  });
 }
 
 // ─── All-players default view (pagination) ───────────────────────────────────
@@ -1025,9 +1314,12 @@ const PLAYERS_PAGE_SIZE = 60;
 let _allPlayersList = [];      // sorted, filtered, deduplicated player array
 let _allPlayersPage = 1;       // current page (1-based)
 let _showSpecialPlayers = false; // whether to include type-1 (special) team players
+let _playerSort = { key: null, dir: null };
+let _playerFiltersOpen = false;
 
 // Advanced filter state
 const _advFilters = {
+  name: '',
   position: '',
   role: '',
   nationality: '',
@@ -1050,7 +1342,15 @@ const _advFilters = {
   maxShooting: '',
   minPassing: '',
   maxPassing: '',
-  skill: '',
+  minDribbling: '',
+  maxDribbling: '',
+  minDefense: '',
+  maxDefense: '',
+  minPhysical: '',
+  maxPhysical: '',
+  minStamina: '',
+  maxStamina: '',
+  skills: '',
   comStyle: '',
 };
 
@@ -1061,6 +1361,66 @@ const ROLE_POSITIONS = {
   'MID': ['DMF', 'CMF', 'LMF', 'RMF', 'AMF'],
   'FWD': ['LWF', 'RWF', 'SS', 'CF'],
 };
+
+function _selectedSkillCodes(value) {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  return String(value || '').split(',').map(v => v.trim()).filter(Boolean);
+}
+
+STAT_FILTERS.forEach(stat => {
+  _advFilters[stat.minKey] = '';
+  _advFilters[stat.maxKey] = '';
+});
+
+const BASIC_FILTER_KEYS = new Set(['name', 'club', 'league', 'nationality', 'position', 'minOvr', 'maxOvr']);
+let _advancedFiltersOpen = false;
+
+function _hasActiveBasicFilters() {
+  return Array.from(BASIC_FILTER_KEYS).some(key => _advFilters[key] !== '');
+}
+
+function _hasActiveAdvancedFilters() {
+  return Object.entries(_advFilters).some(([key, value]) => value !== '' && !BASIC_FILTER_KEYS.has(key));
+}
+
+function _hasActiveFilters() {
+  return Object.values(_advFilters).some(value => value !== '');
+}
+
+function _defaultPlayerSort(list) {
+  list.sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
+}
+
+function _sortValueForPlayer(player, key) {
+  if (key === 'name') return normalizeText(player.Name);
+  if (key === 'team') return normalizeText((player._team || {}).displayName);
+  if (key === 'nationality') return nationalityName(player.Nationality);
+  if (key === 'position') return player.Position || '';
+  if (key === 'ovr') return parseInt(player.Overall, 10) || 0;
+  if (key === 'age') return parseInt(player.Age, 10) || 0;
+  if (key === 'rit') return computeRadarAttributes(player).RIT;
+  if (key === 'dri') return computeRadarAttributes(player).DRI;
+  if (key === 'tir') return computeRadarAttributes(player).TIR;
+  if (key === 'pas') return computeRadarAttributes(player).PAS;
+  if (key === 'fis') return computeRadarAttributes(player).FIS;
+  if (key === 'def') return computeRadarAttributes(player).DEF;
+  return player[key] || '';
+}
+
+function _applyPlayerSort(list) {
+  if (!_playerSort.key || !_playerSort.dir) {
+    _defaultPlayerSort(list);
+    return;
+  }
+  const key = _playerSort.key;
+  const dir = _playerSort.dir === 'asc' ? 1 : -1;
+  list.sort((a, b) => {
+    const va = _sortValueForPlayer(a, key);
+    const vb = _sortValueForPlayer(b, key);
+    if (typeof va === 'number' || typeof vb === 'number') return ((va || 0) - (vb || 0)) * dir;
+    return String(va).localeCompare(String(vb), 'es', { sensitivity: 'base' }) * dir;
+  });
+}
 
 /** Returns the set of team IDs that are assigned to at least one league. */
 function _getTeamsInLeagues() {
@@ -1103,6 +1463,10 @@ function _prepareAllPlayersList() {
   // Apply advanced filters
   const f = _advFilters;
 
+  if (f.name) {
+    const q = normalizeText(f.name);
+    unique = unique.filter(p => normalizeText(p.Name).includes(q));
+  }
   if (f.position) {
     unique = unique.filter(p => p.Position === f.position);
   }
@@ -1200,16 +1564,61 @@ function _prepareAllPlayersList() {
     const max = parseInt(f.maxPassing, 10);
     if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Low Pass'], 10) || 0) <= max);
   }
-  // Skill filter
-  if (f.skill) {
-    unique = unique.filter(p => p[f.skill] === 'True');
+  if (f.minDribbling !== '') {
+    const min = parseInt(f.minDribbling, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Dribbling'], 10) || 0) >= min);
+  }
+  if (f.maxDribbling !== '') {
+    const max = parseInt(f.maxDribbling, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Dribbling'], 10) || 0) <= max);
+  }
+  if (f.minDefense !== '') {
+    const min = parseInt(f.minDefense, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Defensive Prowess'], 10) || 0) >= min);
+  }
+  if (f.maxDefense !== '') {
+    const max = parseInt(f.maxDefense, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Defensive Prowess'], 10) || 0) <= max);
+  }
+  if (f.minPhysical !== '') {
+    const min = parseInt(f.minPhysical, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Physical Contact'], 10) || 0) >= min);
+  }
+  if (f.maxPhysical !== '') {
+    const max = parseInt(f.maxPhysical, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Physical Contact'], 10) || 0) <= max);
+  }
+  if (f.minStamina !== '') {
+    const min = parseInt(f.minStamina, 10);
+    if (!isNaN(min)) unique = unique.filter(p => (parseInt(p['Stamina'], 10) || 0) >= min);
+  }
+  if (f.maxStamina !== '') {
+    const max = parseInt(f.maxStamina, 10);
+    if (!isNaN(max)) unique = unique.filter(p => (parseInt(p['Stamina'], 10) || 0) <= max);
+  }
+  STAT_FILTERS.forEach(stat => {
+    const minValue = f[stat.minKey];
+    const maxValue = f[stat.maxKey];
+    if (minValue !== '') {
+      const min = parseInt(minValue, 10);
+      if (!isNaN(min)) unique = unique.filter(p => (parseInt(p[stat.csvCol], 10) || 0) >= min);
+    }
+    if (maxValue !== '') {
+      const max = parseInt(maxValue, 10);
+      if (!isNaN(max)) unique = unique.filter(p => (parseInt(p[stat.csvCol], 10) || 0) <= max);
+    }
+  });
+  // Skill filter: selected players must have every selected skill.
+  const selectedSkills = _selectedSkillCodes(f.skills);
+  if (selectedSkills.length) {
+    unique = unique.filter(p => selectedSkills.every(skill => p[skill] === 'True'));
   }
   // COM style filter
   if (f.comStyle) {
     unique = unique.filter(p => p[f.comStyle] === 'True');
   }
 
-  unique.sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0));
+  _applyPlayerSort(unique);
   _allPlayersList = unique;
 }
 
@@ -1261,6 +1670,11 @@ function _renderPlayersPage() {
   const start = (_allPlayersPage - 1) * PLAYERS_PAGE_SIZE;
   const pagePlayers = _allPlayersList.slice(start, start + PLAYERS_PAGE_SIZE);
 
+  const table = tbody.closest('table');
+  if (table) {
+    const oldHead = table.querySelector('thead');
+    if (oldHead) oldHead.outerHTML = _buildPlayerTableHead();
+  }
   tbody.innerHTML = pagePlayers.map(p => renderPlayerRow(p, p._team)).join('');
 
   if (paginationEl) {
@@ -1272,6 +1686,93 @@ function _renderPlayersPage() {
     const totalPages = Math.ceil(total / PLAYERS_PAGE_SIZE) || 1;
     subtitle.textContent = `${total} jugadores · página ${_allPlayersPage} de ${totalPages}`;
   }
+  _syncMobilePlayerSortControls();
+}
+
+function sortPlayersBy(key) {
+  if (_playerSort.key !== key) {
+    _playerSort = { key, dir: (key === 'name' || key === 'team' || key === 'nationality' || key === 'position') ? 'asc' : 'desc' };
+  } else if (_playerSort.dir === 'desc') {
+    _playerSort.dir = 'asc';
+  } else if (_playerSort.dir === 'asc') {
+    _playerSort = { key: null, dir: null };
+  } else {
+    _playerSort.dir = 'desc';
+  }
+  _prepareAllPlayersList();
+  _allPlayersPage = 1;
+  _renderPlayersPage();
+}
+
+function setMobilePlayerSort(key) {
+  if (!key) {
+    _playerSort = { key: null, dir: null };
+  } else {
+    _playerSort = {
+      key,
+      dir: (key === 'name' || key === 'team' || key === 'nationality' || key === 'position') ? 'asc' : 'desc',
+    };
+  }
+  _prepareAllPlayersList();
+  _allPlayersPage = 1;
+  _renderPlayersPage();
+}
+
+function toggleMobilePlayerSortDir() {
+  if (!_playerSort.key) return;
+  _playerSort.dir = _playerSort.dir === 'asc' ? 'desc' : 'asc';
+  _prepareAllPlayersList();
+  _allPlayersPage = 1;
+  _renderPlayersPage();
+}
+
+function resetMobilePlayerSort() {
+  _playerSort = { key: null, dir: null };
+  _prepareAllPlayersList();
+  _allPlayersPage = 1;
+  _renderPlayersPage();
+}
+
+function _syncMobilePlayerSortControls() {
+  const select = document.getElementById('mobile-player-sort-key');
+  const dirBtn = document.getElementById('mobile-player-sort-dir');
+  if (select) select.value = _playerSort.key || '';
+  if (dirBtn) {
+    dirBtn.textContent = _playerSort.dir === 'asc' ? 'A-Z / menor-mayor' : 'Z-A / mayor-menor';
+    dirBtn.disabled = !_playerSort.key;
+  }
+}
+
+function _sortClass(key) {
+  return _playerSort.key === key && _playerSort.dir ? ` sort-${_playerSort.dir}` : '';
+}
+
+function _sortIcon(key) {
+  if (_playerSort.key !== key || !_playerSort.dir) return '↕';
+  return _playerSort.dir === 'asc' ? '▲' : '▼';
+}
+
+function _buildPlayerTableHead() {
+  const th = (key, label, extra = '') =>
+    `<th class="sortable${_sortClass(key)} ${extra}" onclick="sortPlayersBy('${key}')">${label}<span class="sort-icon">${_sortIcon(key)}</span></th>`;
+  return `
+    <thead>
+      <tr>
+        <th></th><th class="desktop-stat"></th>${th('name', 'Nombre')}${th('nationality', 'Nac')}${th('position', 'Pos')}
+        ${th('team', 'Equipo', 'mobile-team-col')}${th('ovr', 'OVR')}${th('rit', 'RIT', 'desktop-stat')}${th('dri', 'DRI', 'desktop-stat')}${th('tir', 'TIR', 'desktop-stat')}${th('pas', 'PAS', 'desktop-stat')}${th('fis', 'FIS', 'desktop-stat')}${th('def', 'DEF', 'desktop-stat')}
+        <th class="fav-col"></th>
+      </tr>
+    </thead>`;
+}
+
+function applyQuickPlayerFilter(type, value) {
+  if (!value) return;
+  if (type === 'position') _advFilters.position = value;
+  if (type === 'nationality') _advFilters.nationality = value;
+  if (type === 'club') _advFilters.club = value;
+  _playerFiltersOpen = true;
+  _showAllPlayersInternal(true);
+  saveNavState({ view: 'players', filters: { ..._advFilters }, specialPlayers: _showSpecialPlayers, page: 1 });
 }
 
 /**
@@ -1290,17 +1791,72 @@ function goToPlayersPage(page, scrollToTop) {
   }
 }
 
+function _buildRangeFilter(label, minId, maxId, min, max, minValue, maxValue) {
+  return `
+    <div class="adv-filter-group adv-filter-range">
+      <label>${label}</label>
+      <div class="range-inputs">
+        <input type="number" id="${minId}" placeholder="Min" min="${min}" max="${max}" value="${minValue || ''}" oninput="onAdvFilterChange()">
+        <span>-</span>
+        <input type="number" id="${maxId}" placeholder="Max" min="${min}" max="${max}" value="${maxValue || ''}" oninput="onAdvFilterChange()">
+      </div>
+    </div>`;
+}
+
+function _buildActiveFiltersSummary() {
+  const items = [];
+  const f = _advFilters;
+  const add = (label, value) => {
+    if (value !== undefined && value !== null && value !== '') items.push(`${label}: ${value}`);
+  };
+
+  add('Nombre', f.name);
+  add('Club', f.club ? (DB.teams.find(t => t.id === f.club) || {}).displayName : '');
+  add('Liga', f.league ? (DB.leagues.find(l => l.id === f.league) || {}).name : '');
+  add('Nacionalidad', f.nationality ? nationalityName(f.nationality) : '');
+  add('Posicion', f.position ? translatePosition(f.position) : '');
+  if (f.minOvr || f.maxOvr) add('Media', `${f.minOvr || '0'}-${f.maxOvr || '99'}`);
+  if (f.role) add('Rol', f.role);
+  if (f.playingStyle) add('Estilo', PLAYING_STYLE_LABELS[f.playingStyle] || f.playingStyle);
+  if (f.comStyle) add('COM', (COM_STYLES_LABELS.find(([key]) => key === f.comStyle) || [null, f.comStyle])[1]);
+  if (f.foot) add('Pie', f.foot === 'left' ? 'Izquierdo' : 'Derecho');
+  if (f.hasFaceScan) add('Cara', f.hasFaceScan === 'yes' ? 'Si' : 'No');
+  if (f.minAge || f.maxAge) add('Edad', `${f.minAge || '15'}-${f.maxAge || '50'}`);
+  if (f.minHeight || f.maxHeight) add('Altura', `${f.minHeight || '150'}-${f.maxHeight || '220'}`);
+  if (f.minWeight || f.maxWeight) add('Peso', `${f.minWeight || '50'}-${f.maxWeight || '120'}`);
+
+  STAT_FILTERS.forEach(stat => {
+    if (f[stat.minKey] || f[stat.maxKey]) {
+      add(stat.label, `${f[stat.minKey] || stat.min}-${f[stat.maxKey] || stat.max}`);
+    }
+  });
+
+  const selectedSkills = _selectedSkillCodes(f.skills)
+    .map(code => (PLAYER_SKILLS_LABELS.find(([key]) => key === code) || [null, code])[1]);
+  if (selectedSkills.length) add('Habilidades', selectedSkills.join(', '));
+
+  if (!items.length) {
+    return `<div class="active-filters active-filters-empty" id="active-filters-summary">Sin filtros activos</div>`;
+  }
+
+  return `
+    <div class="active-filters" id="active-filters-summary">
+      <span class="active-filters-label">Filtros activos</span>
+      <div class="active-filter-tags">
+        ${items.map(item => `<span class="active-filter-tag">${escapeHtml(item)}</span>`).join('')}
+      </div>
+    </div>`;
+}
+
 function _buildFilterPanel() {
   const teamsInLeagues = _getTeamsInLeagues();
 
-  // Collect unique sorted nationalities from players actually visible (in a league)
   const clubPlayerIds = new Set(DB.players.filter(p => p._team.type !== '2').map(p => p.ID));
   const seen = new Set();
   const basePlayers = DB.players.filter(p => {
     if (p._team.type === '2' && clubPlayerIds.has(p.ID)) return false;
     if (seen.has(p.ID)) return false;
     seen.add(p.ID);
-    // Only include players whose team is assigned to a league
     return teamsInLeagues.has(p._team.id);
   });
 
@@ -1311,174 +1867,167 @@ function _buildFilterPanel() {
     .sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'));
 
   const f = _advFilters;
-
   const natOptions = nationalities.map(n =>
     `<option value="${n}"${f.nationality === n ? ' selected' : ''}>${nationalityName(n)}</option>`
   ).join('');
-
   const clubOptions = clubTeams.map(t =>
-    `<option value="${t.id}"${f.club === t.id ? ' selected' : ''}>${t.displayName}</option>`
+    `<option value="${t.id}"${f.club === t.id ? ' selected' : ''}>${escapeHtml(t.displayName)}</option>`
   ).join('');
-
-  // IDs 9001/9002 are internal placeholder leagues (e.g. "Free Agents", "Unknown") not shown in filters
   const leagueOptions = DB.leagues
     .filter(l => l.name && l.id !== '9001' && l.id !== '9002')
     .sort((a, b) => a.name.localeCompare(b.name, 'es'))
-    .map(l => `<option value="${l.id}"${f.league === l.id ? ' selected' : ''}>${l.name}</option>`)
+    .map(l => `<option value="${l.id}"${f.league === l.id ? ' selected' : ''}>${escapeHtml(l.name)}</option>`)
     .join('');
-
   const posOptions = PES_POSITIONS.map(p =>
     `<option value="${p}"${f.position === p ? ' selected' : ''}>${translatePosition(p)} (${p})</option>`
   ).join('');
 
+  const selectedSkills = new Set(_selectedSkillCodes(f.skills));
+  const skillOptions = PLAYER_SKILLS_LABELS.map(([key, label]) => `
+    <label class="skill-check${selectedSkills.has(key) ? ' is-selected' : ''}">
+      <input type="checkbox" value="${key}"${selectedSkills.has(key) ? ' checked' : ''} onchange="onAdvFilterChange()">
+      <span>${escapeHtml(label)}</span>
+    </label>`).join('');
+
+  const statFiltersHtml = STAT_FILTERS.map(stat =>
+    _buildRangeFilter(escapeHtml(stat.label), `flt-${stat.minKey}`, `flt-${stat.maxKey}`, stat.min, stat.max, f[stat.minKey], f[stat.maxKey])
+  ).join('');
+
+  const advancedOpen = _advancedFiltersOpen || _hasActiveAdvancedFilters();
+  const advancedToggleLabel = advancedOpen ? 'Ocultar filtros avanzados' : 'Mostrar filtros avanzados';
+  const panelOpen = _playerFiltersOpen || _hasActiveFilters();
+
   return `
     <div class="adv-filter-panel" id="adv-filter-panel">
-      <div class="adv-filter-grid">
-        <div class="adv-filter-group">
-          <label>Posición</label>
-          <select id="flt-position" onchange="onAdvFilterChange()">
-            <option value="">Todas</option>
-            ${posOptions}
-          </select>
+      <div class="filter-panel-head">
+        <div>
+          <div class="filter-panel-title">Filtros de jugadores</div>
+          <div class="filter-panel-subtitle">Usa lo basico para buscar rapido y abre lo avanzado cuando necesites precision.</div>
         </div>
-        <div class="adv-filter-group">
-          <label>Rol</label>
-          <select id="flt-role" onchange="onAdvFilterChange()">
-            <option value="">Todos</option>
-            <option value="GK"${f.role === 'GK' ? ' selected' : ''}>Portero</option>
-            <option value="DEF"${f.role === 'DEF' ? ' selected' : ''}>Defensa</option>
-            <option value="MID"${f.role === 'MID' ? ' selected' : ''}>Mediocampista</option>
-            <option value="FWD"${f.role === 'FWD' ? ' selected' : ''}>Delantero</option>
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Nacionalidad</label>
-          <select id="flt-nationality" onchange="onAdvFilterChange()">
-            <option value="">Todas</option>
-            ${natOptions}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Club</label>
-          <select id="flt-club" onchange="onAdvFilterChange()">
-            <option value="">Todos</option>
-            ${clubOptions}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Liga</label>
-          <select id="flt-league" onchange="onAdvFilterChange()">
-            <option value="">Todas</option>
-            ${leagueOptions}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Estilo de juego</label>
-          <select id="flt-playing-style" onchange="onAdvFilterChange()">
-            <option value="">Todos</option>
-            ${Object.entries(PLAYING_STYLE_LABELS).map(([k,v]) =>
-              `<option value="${k}"${f.playingStyle === k ? ' selected' : ''}>${v}</option>`
-            ).join('')}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Habilidad específica</label>
-          <select id="flt-skill" onchange="onAdvFilterChange()">
-            <option value="">Cualquiera</option>
-            ${PLAYER_SKILLS_LABELS.map(([k,v]) =>
-              `<option value="${k}"${f.skill === k ? ' selected' : ''}>${v}</option>`
-            ).join('')}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Estilo COM</label>
-          <select id="flt-com-style" onchange="onAdvFilterChange()">
-            <option value="">Cualquiera</option>
-            ${COM_STYLES_LABELS.map(([k,v]) =>
-              `<option value="${k}"${f.comStyle === k ? ' selected' : ''}>${v}</option>`
-            ).join('')}
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Pie dominante</label>
-          <select id="flt-foot" onchange="onAdvFilterChange()">
-            <option value="">Ambos</option>
-            <option value="right"${f.foot === 'right' ? ' selected' : ''}>Derecho</option>
-            <option value="left"${f.foot === 'left' ? ' selected' : ''}>Izquierdo</option>
-          </select>
-        </div>
-        <div class="adv-filter-group">
-          <label>Cara escaneada</label>
-          <select id="flt-facescan" onchange="onAdvFilterChange()">
-            <option value="">Todos</option>
-            <option value="yes"${f.hasFaceScan === 'yes' ? ' selected' : ''}>Sí</option>
-            <option value="no"${f.hasFaceScan === 'no' ? ' selected' : ''}>No</option>
-          </select>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Valoración (OVR)</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-ovr" placeholder="Min" min="0" max="99" value="${f.minOvr}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-ovr" placeholder="Máx" min="0" max="99" value="${f.maxOvr}" oninput="onAdvFilterChange()">
-          </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Edad</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-age" placeholder="Min" min="15" max="50" value="${f.minAge}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-age" placeholder="Máx" min="15" max="50" value="${f.maxAge}" oninput="onAdvFilterChange()">
-          </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Altura (cm)</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-height" placeholder="Min" min="150" max="220" value="${f.minHeight}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-height" placeholder="Máx" min="150" max="220" value="${f.maxHeight}" oninput="onAdvFilterChange()">
-          </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Peso (kg)</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-weight" placeholder="Min" min="50" max="120" value="${f.minWeight}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-weight" placeholder="Máx" min="50" max="120" value="${f.maxWeight}" oninput="onAdvFilterChange()">
-          </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Velocidad</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-speed" placeholder="Min" min="40" max="99" value="${f.minSpeed}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-speed" placeholder="Máx" min="40" max="99" value="${f.maxSpeed}" oninput="onAdvFilterChange()">
-          </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Finalización</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-shooting" placeholder="Min" min="40" max="99" value="${f.minShooting}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-shooting" placeholder="Máx" min="40" max="99" value="${f.maxShooting}" oninput="onAdvFilterChange()">
-          </div>
-        </div>
-        <div class="adv-filter-group adv-filter-range">
-          <label>Pase al ras</label>
-          <div class="range-inputs">
-            <input type="number" id="flt-min-passing" placeholder="Min" min="40" max="99" value="${f.minPassing}" oninput="onAdvFilterChange()">
-            <span>–</span>
-            <input type="number" id="flt-max-passing" placeholder="Máx" min="40" max="99" value="${f.maxPassing}" oninput="onAdvFilterChange()">
-          </div>
+        <div class="filter-panel-actions">
+          <button type="button" class="advanced-filter-toggle" id="btn-toggle-player-filters" onclick="togglePlayerFilters()">${panelOpen ? 'Ocultar filtros' : 'Mostrar filtros'}</button>
+          <button type="button" class="adv-filter-reset" id="btn-clear-filters" onclick="resetAdvancedFilters()" ${_hasActiveFilters() ? '' : 'disabled'}>Limpiar filtros</button>
         </div>
       </div>
-      <div class="adv-filter-actions">
-        <button class="adv-filter-reset" onclick="resetAdvancedFilters()">✕ Limpiar filtros</button>
+
+      ${_buildActiveFiltersSummary()}
+
+      <div id="player-filter-body" ${panelOpen ? '' : 'hidden'}>
+      <section class="filter-section filter-section-basic">
+        <div class="filter-section-title">Filtros basicos</div>
+        <div class="adv-filter-grid basic-filter-grid">
+          <div class="adv-filter-group">
+            <label>Nombre</label>
+            <input type="text" id="flt-name" placeholder="Buscar jugador" value="${escapeHtml(f.name)}" oninput="onAdvFilterChange()">
+          </div>
+          <div class="adv-filter-group">
+            <label>Club</label>
+            <select id="flt-club" onchange="onAdvFilterChange()">
+              <option value="">Todos</option>
+              ${clubOptions}
+            </select>
+          </div>
+          <div class="adv-filter-group">
+            <label>Liga</label>
+            <select id="flt-league" onchange="onAdvFilterChange()">
+              <option value="">Todas</option>
+              ${leagueOptions}
+            </select>
+          </div>
+          <div class="adv-filter-group">
+            <label>Nacionalidad</label>
+            <select id="flt-nationality" onchange="onAdvFilterChange()">
+              <option value="">Todas</option>
+              ${natOptions}
+            </select>
+          </div>
+          <div class="adv-filter-group">
+            <label>Posicion</label>
+            <select id="flt-position" onchange="onAdvFilterChange()">
+              <option value="">Todas</option>
+              ${posOptions}
+            </select>
+          </div>
+          ${_buildRangeFilter('Media', 'flt-min-ovr', 'flt-max-ovr', 0, 99, f.minOvr, f.maxOvr)}
+        </div>
+      </section>
+
+      <div class="advanced-filter-toggle-row">
+        <button type="button" id="btn-toggle-advanced-filters" class="advanced-filter-toggle" onclick="toggleAdvancedFilters()">
+          ${advancedToggleLabel}
+        </button>
+      </div>
+
+      <div id="advanced-filter-section" class="advanced-filter-section${advancedOpen ? ' is-open' : ''}" ${advancedOpen ? '' : 'hidden'}>
+        <section class="filter-section">
+          <div class="filter-section-title">Datos avanzados</div>
+          <div class="adv-filter-grid">
+            <div class="adv-filter-group">
+              <label>Rol</label>
+              <select id="flt-role" onchange="onAdvFilterChange()">
+                <option value="">Todos</option>
+                <option value="GK"${f.role === 'GK' ? ' selected' : ''}>Portero</option>
+                <option value="DEF"${f.role === 'DEF' ? ' selected' : ''}>Defensa</option>
+                <option value="MID"${f.role === 'MID' ? ' selected' : ''}>Mediocampista</option>
+                <option value="FWD"${f.role === 'FWD' ? ' selected' : ''}>Delantero</option>
+              </select>
+            </div>
+            <div class="adv-filter-group">
+              <label>Estilo de juego</label>
+              <select id="flt-playing-style" onchange="onAdvFilterChange()">
+                <option value="">Todos</option>
+                ${Object.entries(PLAYING_STYLE_LABELS).map(([k,v]) => `<option value="${k}"${f.playingStyle === k ? ' selected' : ''}>${escapeHtml(v)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="adv-filter-group">
+              <label>Estilo COM</label>
+              <select id="flt-com-style" onchange="onAdvFilterChange()">
+                <option value="">Cualquiera</option>
+                ${COM_STYLES_LABELS.map(([k,v]) => `<option value="${k}"${f.comStyle === k ? ' selected' : ''}>${escapeHtml(v)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="adv-filter-group">
+              <label>Pie dominante</label>
+              <select id="flt-foot" onchange="onAdvFilterChange()">
+                <option value="">Cualquiera</option>
+                <option value="right"${f.foot === 'right' ? ' selected' : ''}>Derecho</option>
+                <option value="left"${f.foot === 'left' ? ' selected' : ''}>Izquierdo</option>
+              </select>
+            </div>
+            <div class="adv-filter-group">
+              <label>Cara escaneada</label>
+              <select id="flt-facescan" onchange="onAdvFilterChange()">
+                <option value="">Todos</option>
+                <option value="yes"${f.hasFaceScan === 'yes' ? ' selected' : ''}>Si</option>
+                <option value="no"${f.hasFaceScan === 'no' ? ' selected' : ''}>No</option>
+              </select>
+            </div>
+            ${_buildRangeFilter('Edad', 'flt-min-age', 'flt-max-age', 15, 50, f.minAge, f.maxAge)}
+            ${_buildRangeFilter('Altura', 'flt-min-height', 'flt-max-height', 150, 220, f.minHeight, f.maxHeight)}
+            ${_buildRangeFilter('Peso', 'flt-min-weight', 'flt-max-weight', 50, 120, f.minWeight, f.maxWeight)}
+          </div>
+        </section>
+
+        <section class="filter-section">
+          <div class="filter-section-title">Stats del jugador</div>
+          <div class="adv-filter-grid stat-filter-grid">
+            ${statFiltersHtml}
+          </div>
+        </section>
+
+        <section class="filter-section">
+          <div class="filter-section-title">Habilidades</div>
+          <div class="skill-filter-grid" id="flt-skills">
+            ${skillOptions}
+          </div>
+          <p class="filter-help">Se muestran jugadores que tengan todas las habilidades elegidas.</p>
+        </section>
+      </div>
       </div>
     </div>`;
 }
-
 function onAdvFilterChange() {
+  _advFilters.name       = (document.getElementById('flt-name')       || {}).value || '';
   _advFilters.position   = (document.getElementById('flt-position')   || {}).value || '';
   _advFilters.role       = (document.getElementById('flt-role')       || {}).value || '';
   _advFilters.nationality= (document.getElementById('flt-nationality') || {}).value || '';
@@ -1501,39 +2050,74 @@ function onAdvFilterChange() {
   _advFilters.maxShooting  = (document.getElementById('flt-max-shooting')   || {}).value || '';
   _advFilters.minPassing   = (document.getElementById('flt-min-passing')    || {}).value || '';
   _advFilters.maxPassing   = (document.getElementById('flt-max-passing')    || {}).value || '';
-  _advFilters.skill        = (document.getElementById('flt-skill')          || {}).value || '';
+  _advFilters.minDribbling = (document.getElementById('flt-min-dribbling')  || {}).value || '';
+  _advFilters.maxDribbling = (document.getElementById('flt-max-dribbling')  || {}).value || '';
+  _advFilters.minDefense   = (document.getElementById('flt-min-defense')    || {}).value || '';
+  _advFilters.maxDefense   = (document.getElementById('flt-max-defense')    || {}).value || '';
+  _advFilters.minPhysical  = (document.getElementById('flt-min-physical')   || {}).value || '';
+  _advFilters.maxPhysical  = (document.getElementById('flt-max-physical')   || {}).value || '';
+  _advFilters.minStamina   = (document.getElementById('flt-min-stamina')    || {}).value || '';
+  _advFilters.maxStamina   = (document.getElementById('flt-max-stamina')    || {}).value || '';
+  STAT_FILTERS.forEach(stat => {
+    _advFilters[stat.minKey] = (document.getElementById(`flt-${stat.minKey}`) || {}).value || '';
+    _advFilters[stat.maxKey] = (document.getElementById(`flt-${stat.maxKey}`) || {}).value || '';
+  });
+  _advFilters.skills       = Array.from(document.querySelectorAll('#flt-skills input[type="checkbox"]:checked')).map(el => el.value).join(',');
   _advFilters.comStyle     = (document.getElementById('flt-com-style')      || {}).value || '';
 
   _prepareAllPlayersList();
   _allPlayersPage = 1;
   saveNavState({ view: 'players', filters: { ..._advFilters }, specialPlayers: _showSpecialPlayers, page: 1 });
+  const summary = document.getElementById('active-filters-summary');
+  if (summary) summary.outerHTML = _buildActiveFiltersSummary();
+  const clearBtn = document.getElementById('btn-clear-filters');
+  if (clearBtn) clearBtn.disabled = !_hasActiveFilters();
+  document.querySelectorAll('#flt-skills .skill-check').forEach(label => {
+    const input = label.querySelector('input[type="checkbox"]');
+    label.classList.toggle('is-selected', !!input && input.checked);
+  });
   _renderPlayersPage();
 }
 
 function resetAdvancedFilters() {
   Object.keys(_advFilters).forEach(k => { _advFilters[k] = ''; });
   // Reset all filter inputs
-  ['flt-position','flt-role','flt-nationality','flt-league','flt-club','flt-foot','flt-facescan',
+  ['flt-name','flt-position','flt-role','flt-nationality','flt-league','flt-club','flt-foot','flt-facescan',
    'flt-min-ovr','flt-max-ovr','flt-min-age','flt-max-age',
    'flt-min-height','flt-max-height','flt-min-weight','flt-max-weight',
-   'flt-playing-style','flt-skill','flt-com-style',
+   'flt-playing-style','flt-com-style',
    'flt-min-speed','flt-max-speed','flt-min-shooting','flt-max-shooting',
-   'flt-min-passing','flt-max-passing'].forEach(id => {
+   'flt-min-passing','flt-max-passing','flt-min-dribbling','flt-max-dribbling',
+   'flt-min-defense','flt-max-defense','flt-min-physical','flt-max-physical',
+   'flt-min-stamina','flt-max-stamina',
+   ...STAT_FILTERS.flatMap(stat => [`flt-${stat.minKey}`, `flt-${stat.maxKey}`])].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  document.querySelectorAll('#flt-skills input[type="checkbox"]').forEach(el => { el.checked = false; });
+  _advancedFiltersOpen = false;
+  _playerFiltersOpen = false;
   onAdvFilterChange();
 }
 
-function toggleFilterPanel() {
-  const panel = document.getElementById('adv-filter-panel');
-  const btn = document.getElementById('btn-toggle-filters');
-  if (!panel) return;
-  const isVisible = panel.style.display !== 'none';
-  panel.style.display = isVisible ? 'none' : '';
-  if (btn) btn.textContent = isVisible ? '⚙ Filtros avanzados' : '⚙ Ocultar filtros';
+function togglePlayerFilters() {
+  _playerFiltersOpen = !_playerFiltersOpen;
+  const body = document.getElementById('player-filter-body');
+  const btn = document.getElementById('btn-toggle-player-filters');
+  if (body) body.hidden = !_playerFiltersOpen;
+  if (btn) btn.textContent = _playerFiltersOpen ? 'Ocultar filtros' : 'Mostrar filtros';
 }
 
+function toggleAdvancedFilters() {
+  _advancedFiltersOpen = !_advancedFiltersOpen;
+  const section = document.getElementById('advanced-filter-section');
+  const btn = document.getElementById('btn-toggle-advanced-filters');
+  if (section) {
+    section.hidden = !_advancedFiltersOpen;
+    section.classList.toggle('is-open', _advancedFiltersOpen);
+  }
+  if (btn) btn.textContent = _advancedFiltersOpen ? 'Ocultar filtros avanzados' : 'Mostrar filtros avanzados';
+}
 function toggleSpecialPlayers() {
   _showSpecialPlayers = !_showSpecialPlayers;
   const btn = document.getElementById('btn-toggle-special');
@@ -1556,10 +2140,12 @@ function _showAllPlayersInternal(resetPage) {
   _prepareAllPlayersList();
   const total = _allPlayersList.length;
 
-  const hasActiveFilters = Object.values(_advFilters).some(v => v !== '');
+  if (_hasActiveAdvancedFilters()) _advancedFiltersOpen = true;
+  if (_hasActiveFilters()) _playerFiltersOpen = true;
 
   // Render skeleton: header + filter panel + table + pagination placeholder
   view.innerHTML = `
+    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Jugadores' }])}
     <div class="view-header">
       <div>
         <div class="view-title">Todos los jugadores</div>
@@ -1567,32 +2153,44 @@ function _showAllPlayersInternal(resetPage) {
       </div>
       <div class="view-header-actions">
         <button id="btn-toggle-special" class="adv-filter-toggle${_showSpecialPlayers ? ' active' : ''}" onclick="toggleSpecialPlayers()">★ Jugadores especiales</button>
-        <button id="btn-toggle-filters" class="adv-filter-toggle" onclick="toggleFilterPanel()">⚙ Filtros avanzados</button>
       </div>
     </div>
     ${_buildFilterPanel()}
+    <div class="mobile-sort-controls" aria-label="Ordenar jugadores">
+      <label for="mobile-player-sort-key">Ordenar</label>
+      <select id="mobile-player-sort-key" onchange="setMobilePlayerSort(this.value)">
+        <option value="">Orden original</option>
+        <option value="ovr">OVR</option>
+        <option value="name">Nombre</option>
+        <option value="age">Edad</option>
+        <option value="position">Posicion</option>
+        <option value="team">Equipo</option>
+        <option value="nationality">Nacionalidad</option>
+        <option value="rit">Ritmo</option>
+        <option value="dri">Regate</option>
+        <option value="tir">Tiro</option>
+        <option value="pas">Pase</option>
+        <option value="fis">Fisico</option>
+        <option value="def">Defensa</option>
+      </select>
+      <button type="button" id="mobile-player-sort-dir" onclick="toggleMobilePlayerSortDir()">Z-A / mayor-menor</button>
+      <button type="button" onclick="resetMobilePlayerSort()">Reset</button>
+    </div>
     <div class="table-responsive">
-      <table class="players-table">
-        <thead>
-          <tr>
-            <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
-            <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
-          </tr>
-        </thead>
+      <table class="players-table players-table--directory">
+        ${_buildPlayerTableHead()}
         <tbody id="all-players-tbody"></tbody>
       </table>
     </div>
     <div id="all-players-pagination"></div>`;
 
-  // Hide the filter panel by default unless filters are active
-  const filterPanel = document.getElementById('adv-filter-panel');
-  if (filterPanel && !hasActiveFilters) filterPanel.style.display = 'none';
 
   // Render the first page
   _renderPlayersPage();
 }
 
 function showAllPlayers(resetPage) {
+  if (resetPage !== false) _allPlayersPage = 1;
   saveNavState({ view: 'players', filters: { ..._advFilters }, specialPlayers: _showSpecialPlayers, page: _allPlayersPage });
   _showAllPlayersInternal(resetPage);
 }
@@ -1640,6 +2238,7 @@ function renderPlayersList(team) {
           <th>PAS</th>
           <th>FIS</th>
           <th>DEF</th>
+          <th class="fav-col"></th>
         </tr>
       </thead>
       <tbody>
@@ -1657,6 +2256,7 @@ function renderPlayerRow(player, team) {
   const nationalNote = player._playsForNational
     ? `<span class="national-team-badge" title="También juega para su selección">🌍</span>`
     : '';
+  const fav = isFavorite(player.ID, team.id);
 
   return `<tr onclick="selectPlayer('${player.ID}', '${team.id}')">
     <td>
@@ -1666,7 +2266,7 @@ function renderPlayerRow(player, team) {
         onerror="handleMinifaceError(this,'${player.ID}')"
         alt="${player.Name}">
     </td>
-    <td class="team-crest-cell">
+    <td class="team-crest-cell desktop-stat">
       <a href="team.html?id=${team.id}" onclick="event.stopPropagation()">
         <img class="player-row-team-crest"
           src="img/teams/${team.id}.webp"
@@ -1681,16 +2281,27 @@ function renderPlayerRow(player, team) {
       <img class="player-flag"
         src="${flagSrc(player.Nationality)}"
         onerror="this.onerror=null;this.src='img/flags/default.webp'"
-        alt="">
+        onclick="event.stopPropagation();applyQuickPlayerFilter('nationality','${player.Nationality}')"
+        title="${nationalityName(player.Nationality)}"
+        alt="${nationalityName(player.Nationality)}">
     </td>
-    <td><span class="position-badge" style="color:${positionGroupColor(player.Position)};border-color:${positionGroupColor(player.Position)};background:${positionGroupColor(player.Position)}18">${posDisplay || '–'}</span></td>
+    <td><span class="position-badge quick-filter-chip" onclick="event.stopPropagation();applyQuickPlayerFilter('position','${player.Position}')" style="${positionBadgeStyle(player.Position)}">${posDisplay || '–'}</span></td>
+    <td class="mobile-team-col"><button type="button" class="row-team-filter" onclick="event.stopPropagation();applyQuickPlayerFilter('club','${team.id}')">${team.displayName}</button></td>
     <td><span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${ovr}</span></td>
-    <td>${radarAttrs.RIT}</td>
-    <td>${radarAttrs.DRI}</td>
-    <td>${radarAttrs.TIR}</td>
-    <td>${radarAttrs.PAS}</td>
-    <td>${radarAttrs.FIS}</td>
-    <td>${radarAttrs.DEF}</td>
+    <td class="desktop-stat">${radarAttrs.RIT}</td>
+    <td class="desktop-stat">${radarAttrs.DRI}</td>
+    <td class="desktop-stat">${radarAttrs.TIR}</td>
+    <td class="desktop-stat">${radarAttrs.PAS}</td>
+    <td class="desktop-stat">${radarAttrs.FIS}</td>
+    <td class="desktop-stat">${radarAttrs.DEF}</td>
+    <td class="fav-col" onclick="event.stopPropagation()">
+      <button class="fav-btn${fav ? ' is-fav' : ''}"
+        onclick="toggleFavoriteFromBtn(this,'${player.ID}','${team.id}')"
+        title="${fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}"
+        aria-label="Favorito">
+        ${fav ? '★' : '☆'}
+      </button>
+    </td>
   </tr>`;
 }
 
@@ -1904,7 +2515,7 @@ function drawRadar(canvasId, attrs) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(192, 57, 43, 0.25)';
+  ctx.fillStyle = 'rgba(214, 168, 79, 0.22)';
   ctx.fill();
   ctx.strokeStyle = '#e74c3c';
   ctx.lineWidth = 2;
@@ -1942,6 +2553,120 @@ function drawRadar(canvasId, attrs) {
     ctx.fillStyle = '#e74c3c';
     ctx.fillText(String(values[i]), lx, ly + 8);
   }
+}
+
+// ─── Favorites ────────────────────────────────────────────────────────────────
+
+/**
+ * Updates the favorites count badge in the sidebar.
+ */
+function _updateFavoritesCount() {
+  const el = document.getElementById('nav-fav-count');
+  if (!el) return;
+  const count = getFavoritesCount();
+  el.textContent = count > 0 ? String(count) : '';
+}
+
+/**
+ * Called by the inline ☆/★ button in each player row.
+ * Toggles the favorite state and updates the button's appearance.
+ * @param {HTMLButtonElement} btn
+ * @param {string} playerId
+ * @param {string} teamId
+ */
+function toggleFavoriteFromBtn(btn, playerId, teamId) {
+  const added = toggleFavorite(playerId, teamId);
+  btn.textContent = added ? '★' : '☆';
+  btn.classList.toggle('is-fav', added);
+  btn.title = added ? 'Quitar de favoritos' : 'Agregar a favoritos';
+  _updateFavoritesCount();
+  // Keep home stat updated if visible
+  const statFav = document.getElementById('stat-favorites');
+  if (statFav) {
+    const count = getFavoritesCount();
+    statFav.textContent = count > 0 ? count : '⭐';
+  }
+}
+
+/** Internal: render the favorites view without pushing nav state. */
+function _showFavoritesViewInternal() {
+  _setActiveSidebarNav('favorites');
+  hideAllViews();
+  const view = document.getElementById('favorites-view');
+  if (!view) return;
+  view.classList.add('active');
+
+  const favs = getFavorites();
+  if (!favs.length) {
+    view.innerHTML = `
+      ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Favoritos' }])}
+      <div class="view-header">
+        <div class="view-title">⭐ Mis Favoritos</div>
+      </div>
+      <div class="empty-state">
+        <div class="empty-state-icon">⭐</div>
+        <p>No tienes jugadores en favoritos todavía.</p>
+        <p>Usa el botón ☆ en cualquier jugador para agregarlo aquí.</p>
+      </div>`;
+    return;
+  }
+
+  // Look up actual player objects from in-memory index
+  const playerEntries = favs
+    .map(f => DB.playersByKey[getPlayerKey(f.teamId, f.playerId)])
+    .filter(Boolean);
+
+  // Notify user if some favorited players are no longer in the DB
+  const missingCount = favs.length - playerEntries.length;
+  const missingNote = missingCount > 0
+    ? `<div class="favorites-missing-note">⚠️ ${missingCount} jugador(es) ya no están disponibles en la base de datos.</div>`
+    : '';
+
+  const rowsHtml = playerEntries.map(p => renderPlayerRow(p, p._team)).join('');
+
+  view.innerHTML = `
+    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Favoritos' }])}
+    <div class="view-header">
+      <div>
+        <div class="view-title">⭐ Mis Favoritos</div>
+        <div class="view-subtitle">${playerEntries.length} jugador(es)</div>
+      </div>
+      <div class="view-header-actions">
+        <button class="adv-filter-toggle btn-danger" onclick="clearAllFavorites()">✕ Limpiar favoritos</button>
+      </div>
+    </div>
+    ${missingNote}
+    <div class="table-responsive">
+      <table class="players-table">
+        <thead>
+          <tr>
+            <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
+            <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th><th>PAS</th><th>FIS</th><th>DEF</th>
+            <th class="fav-col"></th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>`;
+}
+
+/** Public: navigate to the favorites view and save state. */
+function showFavoritesView() {
+  saveNavState({ view: 'favorites' });
+  _showFavoritesViewInternal();
+}
+
+/**
+ * Clears all favorites after user confirmation, then re-renders the view.
+ */
+function clearAllFavorites() {
+  if (!confirm('¿Eliminar todos los favoritos?')) return;
+  clearFavorites();
+  _updateFavoritesCount();
+  _showFavoritesViewInternal();
+  // Update home stat if visible
+  const statFav = document.getElementById('stat-favorites');
+  if (statFav) statFav.textContent = '⭐';
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -1989,7 +2714,8 @@ function runSearch(query) {
   view.classList.add('active');
 
   if (!results.length) {
-    view.innerHTML = `<div class="view-header"><div class="view-title">Resultados: "${query}"</div></div>
+    view.innerHTML = `${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Busqueda' }])}
+      <div class="view-header"><div class="view-title">Resultados: "${query}"</div></div>
       <div class="error-message">No se encontraron jugadores para "${query}"</div>`;
     return;
   }
@@ -1997,22 +2723,26 @@ function runSearch(query) {
   const rowsHtml = results.map(p => renderPlayerRow(p, p._team)).join('');
 
   view.innerHTML = `
+    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Busqueda' }])}
     <div class="view-header">
       <div>
         <div class="view-title">Búsqueda: "${query}"</div>
         <div class="view-subtitle">${results.length} jugador(es) encontrado(s)</div>
       </div>
     </div>
-    <table class="players-table">
-      <thead>
-        <tr>
-          <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
-          <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th>
-          <th>PAS</th><th>FIS</th><th>DEF</th>
-        </tr>
-      </thead>
-      <tbody>${rowsHtml}</tbody>
-    </table>`;
+    <div class="table-responsive">
+      <table class="players-table">
+        <thead>
+          <tr>
+            <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
+            <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th>
+            <th>PAS</th><th>FIS</th><th>DEF</th>
+            <th class="fav-col"></th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>`;
 }
 
 // ─── Entry point ──────────────────────────────────────────────────────────────

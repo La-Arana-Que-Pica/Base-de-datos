@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Option Files – Base de datos Option File PES</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="img/logo.webp" type="image/webp" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header id="header">
+    <a href="index.html" class="header-logo-link">
+      <img
+        class="logo"
+        src="img/logo.webp"
+        onerror="this.onerror=null;this.src='img/logo.webp'"
+        alt="Logo"
+      />
+    </a>
+    <h1>Base de datos Option File <span>PES 2018–2026</span></h1>
+    <nav class="header-nav" aria-label="Menu principal">
+      <a href="downloads.html" class="header-nav-link header-nav-link-primary active">Option Files</a>
+      <a href="tutorials.html" class="header-nav-link">Tutoriales</a>
+      <a href="database.html" class="header-nav-link">Base de datos</a>
+    </nav>
+  </header>
+
+  <!-- ── Downloads content ── -->
+  <main id="downloads-page">
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay">
+      <div class="spinner"></div>
+      <span class="loading-message">Cargando descargas...</span>
+    </div>
+
+    <!-- Downloads content filled by downloads.js -->
+    <div id="downloads-content" style="display:none"></div>
+
+  </main>
+
+  <script src="js/site.js"></script>
+  <script src="js/downloads.js"></script>
+</body>
+</html>
+
