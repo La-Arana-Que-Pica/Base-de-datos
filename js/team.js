@@ -186,17 +186,24 @@ function translatePosition(pesPos) {
   return POSITION_LABELS[pesPos] || pesPos;
 }
 
+const DEFENSIVE_POSITION_COLOR = '#3EBEC8';
+const DEFENSIVE_POSITIONS = new Set(['CB', 'CT', 'DFC', 'LB', 'LI', 'RB', 'LD', 'LWB', 'RWB']);
+
+function isDefensivePosition(pesPos) {
+  return DEFENSIVE_POSITIONS.has(String(pesPos || '').toUpperCase());
+}
+
 function positionGroupColor(pesPos) {
   if (pesPos === 'GK') return '#f9d901';
-  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) return '#D6A84F';
+  if (isDefensivePosition(pesPos)) return DEFENSIVE_POSITION_COLOR;
   if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
   if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
   return '#8b949e';
 }
 
 function positionBadgeStyle(pesPos) {
-  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) {
-    return 'color:#F5F5F5;border-color:rgba(214,168,79,0.35);background:#1A1A1D';
+  if (isDefensivePosition(pesPos)) {
+    return `color:${DEFENSIVE_POSITION_COLOR};border-color:${DEFENSIVE_POSITION_COLOR};background:${DEFENSIVE_POSITION_COLOR}18`;
   }
   const color = positionGroupColor(pesPos);
   return `color:${color};border-color:${color};background:${color}18`;
@@ -209,7 +216,7 @@ const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF'
 // Position groups for squad display
 const POSITION_GROUPS = [
   { key: 'PT',  label: 'Porteros',        positions: ['GK'] },
-  { key: 'DEF', label: 'Defensas',        positions: ['CB', 'RB', 'LB'] },
+  { key: 'DEF', label: 'Defensas',        positions: ['CB', 'RB', 'LB', 'LWB', 'RWB'] },
   { key: 'MID', label: 'Mediocampistas',  positions: ['DMF', 'CMF', 'RMF', 'LMF', 'AMF'] },
   { key: 'FWD', label: 'Delanteros',      positions: ['RWF', 'LWF', 'SS', 'CF'] },
 ];

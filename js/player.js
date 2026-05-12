@@ -281,9 +281,16 @@ function translatePosition(pesPos) {
   return POSITION_LABELS[pesPos] || pesPos;
 }
 
+const DEFENSIVE_POSITION_COLOR = '#3EBEC8';
+const DEFENSIVE_POSITIONS = new Set(['CB', 'CT', 'DFC', 'LB', 'LI', 'RB', 'LD', 'LWB', 'RWB']);
+
+function isDefensivePosition(pesPos) {
+  return DEFENSIVE_POSITIONS.has(String(pesPos || '').toUpperCase());
+}
+
 function positionGroupColor(pesPos) {
   if (pesPos === 'GK') return '#f9d901';
-  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) return '#D6A84F';
+  if (isDefensivePosition(pesPos)) return DEFENSIVE_POSITION_COLOR;
   if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
   if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
   return '#8b949e';
@@ -1248,7 +1255,7 @@ function getPesPosition(player) {
 
 function positionFamily(pos) {
   if (pos === 'GK') return 'GK';
-  if (['CB', 'LB', 'RB'].includes(pos)) return 'DEF';
+  if (isDefensivePosition(pos)) return 'DEF';
   if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pos)) return 'MID';
   if (['LWF', 'RWF', 'SS', 'CF'].includes(pos)) return 'FWD';
   return 'UNK';
