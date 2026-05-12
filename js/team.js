@@ -1032,6 +1032,14 @@ async function boot() {
   const { rows: formationRows } = formationsText ? parseCSV(formationsText) : { rows: [] };
   const { rows: coachRows } = coachsText ? parseCSV(coachsText) : { rows: [] };
   const { rows: leagueRows } = leaguesText ? parseCSV(leaguesText) : { rows: [] };
+  const validTeamIds = new Set();
+  leagueRows.forEach(row => {
+    String(row['team_ids'] || '').split(',').map(id => id.trim()).filter(Boolean).forEach(id => validTeamIds.add(id));
+  });
+  if (!validTeamIds.has(teamId)) {
+    showError('Este equipo no forma parte del Option File publicado.');
+    return;
+  }
 
   // Find the team
   const teamRow = teamRows.find(t => t['Id'] === teamId);

@@ -296,6 +296,11 @@ function positionGroupColor(pesPos) {
   return '#8b949e';
 }
 
+function positionBadgeStyle(pesPos) {
+  const color = positionGroupColor(pesPos);
+  return `color:${color};border-color:${color};background:${color}18`;
+}
+
 // ─── Boot mapping (boot ID → { pesNumber, brand }) ───────────────────────────
 // PES numbers are as defined in the game. Note that boot ID 0 and PES boot 62
 // intentionally share PES number 47 per the official game equivalence table.
@@ -405,20 +410,36 @@ const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF'
 // Position rating columns (same order as PES_POSITIONS)
 const POSITION_RATING_COLS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
 
-const POSITION_FIELD_COORDS = {
-  'GK':  { left: 50, top: 88 },
-  'CB':  { left: 50, top: 72 },
-  'LB':  { left: 16, top: 65 },
-  'RB':  { left: 84, top: 65 },
-  'DMF': { left: 50, top: 52 },
-  'CMF': { left: 50, top: 42 },
-  'LMF': { left: 22, top: 42 },
-  'RMF': { left: 78, top: 42 },
-  'AMF': { left: 50, top: 30 },
-  'LWF': { left: 16, top: 20 },
-  'RWF': { left: 84, top: 20 },
-  'SS':  { left: 50, top: 22 },
-  'CF':  { left: 50, top: 10 },
+const POSITION_DISPLAY = [
+  { pos: 'CF',  abbr: 'CD',   name: 'Centro delantero', category: 'forward' },
+  { pos: 'SS',  abbr: 'SD',   name: 'Segundo delantero', category: 'forward' },
+  { pos: 'LWF', abbr: 'EXI',  name: 'Extremo izquierdo', category: 'forward' },
+  { pos: 'RWF', abbr: 'EXD',  name: 'Extremo derecho', category: 'forward' },
+  { pos: 'AMF', abbr: 'MO',   name: 'Mediocampista ofensivo', category: 'midfielder' },
+  { pos: 'LMF', abbr: 'MCI',  name: 'Mediocampista izquierdo', category: 'midfielder' },
+  { pos: 'CMF', abbr: 'MC',   name: 'Mediocampista central', category: 'midfielder' },
+  { pos: 'RMF', abbr: 'MCD',  name: 'Mediocampista derecho', category: 'midfielder' },
+  { pos: 'DMF', abbr: 'MCD', name: 'Mediocampista contencion', category: 'midfielder' },
+  { pos: 'LB',  abbr: 'LI',   name: 'Lateral izquierdo', category: 'defender' },
+  { pos: 'CB',  abbr: 'DFC',  name: 'Defensa central', category: 'defender' },
+  { pos: 'RB',  abbr: 'LD',   name: 'Lateral derecho', category: 'defender' },
+  { pos: 'GK',  abbr: 'PT',   name: 'Portero', category: 'goalkeeper' },
+];
+
+const POSITION_GRID_LAYOUT = {
+  'LWF': { col: 1, row: 1 },
+  'CF':  { col: 2, row: 1 },
+  'RWF': { col: 3, row: 1 },
+  'SS':  { col: 2, row: 2 },
+  'AMF': { col: 2, row: 3 },
+  'LMF': { col: 1, row: 4 },
+  'CMF': { col: 2, row: 4 },
+  'RMF': { col: 3, row: 4 },
+  'DMF': { col: 2, row: 5 },
+  'LB':  { col: 1, row: 6 },
+  'CB':  { col: 2, row: 6 },
+  'RB':  { col: 3, row: 6 },
+  'GK':  { col: 2, row: 7 },
 };
 
 // Ordered stat columns for the Habilidades section (exact game order)
@@ -1172,9 +1193,39 @@ function switchTab(tabId) {
   });
 }
 
+function selectPlayerPosition(pos) {
+  if (!pos) return;
+  document.querySelectorAll('.position-cell').forEach(cell => {
+    cell.classList.toggle('is-selected', cell.dataset.position === pos);
+  });
+}
+
+function setPositionViewMode(mode) {
+  const nextMode = mode === 'letters' ? 'letters' : 'colors';
+  const section = document.querySelector('.position-map-section');
+  if (!section) return;
+  section.dataset.viewMode = nextMode;
+  try {
+    localStorage.setItem('positionViewMode', nextMode);
+  } catch {}
+  document.querySelectorAll('.position-view-toggle').forEach(btn => {
+    const active = btn.dataset.mode === nextMode;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+}
+
+function getPositionViewMode() {
+  try {
+    return localStorage.getItem('positionViewMode') === 'letters' ? 'letters' : 'colors';
+  } catch {
+    return 'colors';
+  }
+}
+
 // ─── Main render ─────────────────────────────────────────────────────────────
 
-function renderPositionPitch(player) {
+function renderPositionPitchLegacy(player) {
   const rawPos = player['POS'] || '';
   const posIdx = parseInt(rawPos, 10);
   const primaryPos = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
@@ -1240,6 +1291,82 @@ function renderPositionPitch(player) {
           <div class="position-field-line pf-goal-top"></div>
           <div class="position-field-center-circle"></div>
           ${markers.join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function getPositionGrade(value, isPrimary = false) {
+  const raw = String(value ?? '').trim().toUpperCase();
+  if (raw === 'A' || raw === '3' || raw === '2') return 'A';
+  if (raw === 'B' || raw === '1') return 'B';
+  if (raw === 'C' || raw === '0') return isPrimary ? 'A' : 'C';
+  return null;
+}
+
+function getPositionValueClass(grade) {
+  if (grade === 'A') return 'value-a';
+  if (grade === 'B') return 'value-b';
+  if (grade === 'C') return 'value-c';
+  return '';
+}
+
+function getPositionCategoryClass(category) {
+  return `position-${category || 'unknown'}`;
+}
+
+function getPositionCellState(grade, isPrimary) {
+  if (isPrimary) return 'is-primary';
+  if (grade === 'A') return 'is-strong';
+  if (grade === 'B') return 'is-medium';
+  if (grade === 'C') return 'is-low';
+  return 'is-disabled';
+}
+
+function renderPositionPitch(player) {
+  const rawPos = player['POS'] || '';
+  const posIdx = parseInt(rawPos, 10);
+  const primaryPos = /^\d+$/.test(rawPos) && posIdx >= 0 && posIdx < PES_POSITIONS.length
+    ? PES_POSITIONS[posIdx] : rawPos;
+
+  const positions = POSITION_DISPLAY.map(item => ({
+    ...item,
+    grade: getPositionGrade(player[item.pos], item.pos === primaryPos),
+  }));
+  const selectedPos = (positions.find(item => item.pos === primaryPos) || positions.find(item => item.grade) || positions[0]).pos;
+  const viewMode = getPositionViewMode();
+
+  const cells = positions.map(item => {
+    const layout = POSITION_GRID_LAYOUT[item.pos];
+    if (!layout) return '';
+    const isPrimary = item.pos === primaryPos;
+    const state = getPositionCellState(item.grade, isPrimary);
+    const color = positionGroupColor(item.pos);
+    return `
+      <button class="position-cell ${getPositionCategoryClass(item.category)} ${state}${item.pos === selectedPos ? ' is-selected' : ''}"
+        type="button"
+        data-position="${item.pos}"
+        style="--position-color:${color};grid-column:${layout.col};grid-row:${layout.row};"
+        title="${item.abbr} - ${item.name}: ${item.grade}"
+        aria-label="${item.abbr} ${item.name} ${item.grade}"
+        onclick="selectPlayerPosition('${item.pos}')">
+        <span class="position-code">${item.abbr}</span>
+        ${item.grade ? `<span class="position-grade">${item.grade}</span>` : ''}
+      </button>`;
+  }).join('');
+
+  return `
+    <div class="player-section position-map-section" data-view-mode="${viewMode}" style="margin-bottom:0">
+      <div class="position-map-header">
+        <div class="player-section-title">Posiciones aptas</div>
+        <div class="position-view-switch" aria-label="Vista de posiciones">
+          <button class="position-view-toggle${viewMode === 'colors' ? ' is-active' : ''}" type="button" data-mode="colors" aria-pressed="${viewMode === 'colors' ? 'true' : 'false'}" onclick="setPositionViewMode('colors')">Colores</button>
+          <button class="position-view-toggle${viewMode === 'letters' ? ' is-active' : ''}" type="button" data-mode="letters" aria-pressed="${viewMode === 'letters' ? 'true' : 'false'}" onclick="setPositionViewMode('letters')">Letras</button>
+        </div>
+      </div>
+      <div class="positions-map" aria-label="Mapa de posiciones aptas">
+        <div class="positions-grid">
+          ${cells}
         </div>
       </div>
     </div>`;
@@ -1332,13 +1459,14 @@ function sharedSkillScore(a, b) {
   return Math.min(0.04, shared * 0.008);
 }
 
-function findSimilarPlayers(currentPlayer, currentTeamId, playerRows, teamRows, squadRows, correctedMap) {
+function findSimilarPlayers(currentPlayer, currentTeamId, playerRows, teamRows, squadRows, correctedMap, validTeamIds) {
   const currentPos = getPesPosition(currentPlayer);
   const profile = similarityProfile(currentPos);
 
   const teamMap = {};
   teamRows.forEach(row => {
     if (!row['Id'] || !String(row['Name'] || '').trim() || row['Name'] === '-') return;
+    if (validTeamIds && !validTeamIds.has(row['Id'])) return;
     teamMap[row['Id']] = {
       id: row['Id'],
       rawName: row['Name'],
@@ -1354,6 +1482,7 @@ function findSimilarPlayers(currentPlayer, currentTeamId, playerRows, teamRows, 
 
   const byPlayerId = new Map();
   squadRows.forEach(squad => {
+    if (validTeamIds && !validTeamIds.has(squad['Id'])) return;
     const team = teamMap[squad['Id']];
     if (!team) return;
     for (let i = 1; i <= 32; i++) {
@@ -1411,6 +1540,7 @@ function renderSimilarPlayers(similarPlayers) {
         ${similarPlayers.map(({ player, team, pos }) => {
           const ovr = player['OverallStats'] || '-';
           const ovrColor = statColor(ovr);
+          const posStyle = positionBadgeStyle(pos);
           return `
             <article class="similar-player-card">
               <div class="similar-player-main">
@@ -1424,7 +1554,7 @@ function renderSimilarPlayers(similarPlayers) {
                 </div>
               </div>
               <div class="similar-player-meta">
-                <span>${escapeHtml(translatePosition(pos))}</span>
+                <span class="similar-player-position" style="${posStyle}">${escapeHtml(translatePosition(pos))}</span>
                 <span style="background:${ovrColor};color:${statTextColor(ovrColor)}">${escapeHtml(ovr)}</span>
               </div>
               <a class="similar-player-link" href="player.html?id=${encodeURIComponent(player['Id'])}&team=${encodeURIComponent(team.id)}">Abrir ficha</a>
@@ -1628,7 +1758,7 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel (including optional override files)
-  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, corregidosText, scannedPlayersText] = await Promise.all([
+  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, corregidosText, scannedPlayersText, leaguesText] = await Promise.all([
     fetchText('database/All players exported.csv'),
     fetchText('database/All teams exported.csv'),
     fetchText('database/All squads exported.csv'),
@@ -1636,6 +1766,7 @@ async function boot() {
     fetchText('database/players_original.csv'),
     fetchText('database/medias_corregidas.csv'),
     fetchText('database/scanned_players.csv'),
+    fetchText('database/All leagues exported.csv'),
   ]);
 
   if (!playersText || !teamsText) {
@@ -1647,6 +1778,16 @@ async function boot() {
   const { rows: teamRows } = parseCSV(teamsText);
   const { rows: appearanceRows } = appearancesText ? parseCSV(appearancesText) : { rows: [] };
   const { rows: squadRows } = squadsText ? parseCSV(squadsText) : { rows: [] };
+  const { rows: leagueRows } = leaguesText ? parseCSV(leaguesText) : { rows: [] };
+  const validTeamIds = new Set();
+  leagueRows.forEach(row => {
+    String(row['team_ids'] || '').split(',').map(id => id.trim()).filter(Boolean).forEach(id => validTeamIds.add(id));
+  });
+  if (!validTeamIds.has(teamId)) {
+    showError('Este equipo no forma parte del Option File publicado.');
+    return;
+  }
+
   const teamSquadRow = squadRows.find(r => r['Id'] === teamId);
   const playerIsAssignedToRequestedTeam = !!teamSquadRow && Array.from({ length: 32 }, (_, idx) => teamSquadRow[`Player ${idx + 1}`])
     .some(pid => pid && pid !== '0' && pid === playerId);
@@ -1768,7 +1909,7 @@ async function boot() {
     }
   }
 
-  const similarPlayers = findSimilarPlayers(player, teamId, playerRows, teamRows, squadRows, corregidosMap);
+  const similarPlayers = findSimilarPlayers(player, teamId, playerRows, teamRows, squadRows, corregidosMap, validTeamIds);
   renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal, similarPlayers);
 }
 

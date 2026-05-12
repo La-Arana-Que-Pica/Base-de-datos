@@ -541,6 +541,13 @@ async function boot() {
   }
 
   // Build normalized player map (playerId → normalized player row)
+  const validTeamIds = new Set();
+  DB.leagues.forEach(league => league.teamIds.forEach(id => validTeamIds.add(id)));
+  DB.teams = DB.teams.filter(team => validTeamIds.has(team.id));
+  Object.keys(teamById).forEach(teamId => {
+    if (!validTeamIds.has(teamId)) delete teamById[teamId];
+  });
+
   const playerMap = {};
   playerRows.forEach(playerRow => {
     const playerId = playerRow['Id'];
@@ -554,6 +561,7 @@ async function boot() {
   // Assign players to teams using squad data
   squadRows.forEach(squadRow => {
     const teamId = squadRow['Id'];
+    if (!validTeamIds.has(teamId)) return;
     const team = teamById[teamId];
     if (!team) return;
     for (let i = 1; i <= 32; i++) {
