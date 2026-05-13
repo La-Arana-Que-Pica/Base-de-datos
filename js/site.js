@@ -5,6 +5,7 @@ const SITE_NAV_ITEMS = [
   { href: 'downloads.html', label: 'Option Files', key: 'downloads' },
   { href: 'tutorials.html', label: 'Tutoriales', key: 'tutorials' },
   { href: 'database.html', label: 'Base de datos', key: 'database' },
+  { href: 'acerca-de.html', label: 'Acerca de', key: 'about' },
 ];
 
 function currentPageKey() {
@@ -13,6 +14,7 @@ function currentPageKey() {
   if (file === 'downloads.html') return 'downloads';
   if (file === 'tutorials.html') return 'tutorials';
   if (file === 'database.html' || file === 'player.html' || file === 'team.html' || file === 'league.html') return 'database';
+  if (file === 'acerca-de.html') return 'about';
   if (file === 'news.html') return 'news';
   if (file === 'faq.html') return 'faq';
   return '';
@@ -40,6 +42,7 @@ function renderSiteFooter() {
       </div>
       <nav class="site-footer-links" aria-label="Enlaces utiles">
         <a href="faq.html#contacto">Contacto</a>
+        <a href="acerca-de.html">Acerca de</a>
         <a href="https://www.youtube.com/@L.A.q.P" target="_blank" rel="noopener noreferrer">YouTube</a>
         <a href="faq.html#privacidad">Politica de privacidad</a>
         <a href="faq.html">Ayuda / FAQ</a>
