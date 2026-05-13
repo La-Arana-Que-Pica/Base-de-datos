@@ -105,7 +105,8 @@ textarea:focus-visible {
   image-rendering: auto;
 }
 
-#header h1 {
+#header h1,
+#header .header-title {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-text);
@@ -115,7 +116,8 @@ textarea:focus-visible {
   flex: 1;
 }
 
-#header h1 span {
+#header h1 span,
+#header .header-title span {
   color: var(--color-highlight);
 }
 
@@ -2247,7 +2249,8 @@ textarea:focus-visible {
     display: block;
   }
 
-  #header h1 {
+  #header h1,
+  #header .header-title {
     font-size: 0.9rem;
   }
 
@@ -5071,7 +5074,8 @@ textarea:focus-visible {
     display: none;
   }
 
-  #header h1 {
+  #header h1,
+  #header .header-title {
     display: none;
   }
 
@@ -5199,6 +5203,167 @@ body:has(#layout) .site-footer {
 
 .info-section {
   margin-bottom: 16px;
+}
+
+.about-page {
+  width: min(100%, 1040px);
+}
+
+.about-hero,
+.about-section {
+  width: 100%;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.about-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 24px;
+  align-items: center;
+  padding: clamp(24px, 4vw, 36px);
+  margin-bottom: 18px;
+}
+
+.about-kicker {
+  margin-bottom: 10px;
+  color: var(--color-highlight);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+}
+
+.about-hero h1 {
+  margin-bottom: 14px;
+  color: var(--color-text);
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.05;
+}
+
+.about-hero p,
+.about-section p,
+.about-feature-list {
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.about-hero p + p,
+.about-section p + p,
+.about-feature-list + p {
+  margin-top: 12px;
+}
+
+.about-author-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid rgba(214, 168, 79, 0.24);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(214,168,79,0.10), rgba(255,255,255,0.03));
+  text-align: center;
+}
+
+.about-author-image {
+  width: min(100%, 170px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 12px;
+  background: var(--color-surface);
+  padding: 12px;
+}
+
+.about-author-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about-author-meta strong {
+  color: var(--color-text);
+  font-size: 1.05rem;
+}
+
+.about-author-meta span {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+}
+
+.about-section {
+  margin-bottom: 16px;
+  padding: clamp(20px, 3vw, 26px);
+}
+
+.about-section h2 {
+  margin-bottom: 10px;
+  color: var(--color-text);
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+}
+
+.about-feature-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-feature-list li {
+  position: relative;
+  min-height: 44px;
+  padding: 12px 12px 12px 36px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.about-feature-list li::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 1.15rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-highlight);
+}
+
+.about-independent {
+  border-color: rgba(214, 168, 79, 0.28);
+  background: linear-gradient(160deg, var(--color-card) 0%, rgba(61,16,16,0.28) 100%);
+}
+
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.about-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.about-links a:hover {
+  border-color: var(--color-highlight);
+  color: var(--color-highlight);
+  background: var(--color-highlight-dim);
 }
 
 .similar-players-section {
@@ -5502,6 +5667,22 @@ body:has(#layout) .site-footer {
   .faq-list,
   .similar-players-grid {
     grid-template-columns: 1fr;
+  }
+
+  .about-hero,
+  .about-feature-list {
+    grid-template-columns: 1fr;
+  }
+
+  .about-author-card {
+    align-items: flex-start;
+    flex-direction: row;
+    text-align: left;
+  }
+
+  .about-author-image {
+    width: 92px;
+    flex: 0 0 92px;
   }
 
   .profile-tab-bar,
