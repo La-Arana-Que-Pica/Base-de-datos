@@ -122,7 +122,9 @@ const NATIONALITY_NAMES = {
 
 function nationalityName(countryId) {
   if (!countryId) return '–';
-  return NATIONALITY_NAMES[String(countryId)] || countryId;
+  return (typeof i18nLookup === 'function' ? i18nLookup('countries', String(countryId), '') : '')
+    || NATIONALITY_NAMES[String(countryId)]
+    || countryId;
 }
 
 // Team type → Spanish group label
@@ -158,24 +160,47 @@ const COM_STYLES_LABELS = [
 ];
 
 function translateStat(csvCol) {
-  return STAT_LABELS[csvCol] || csvCol;
+  return typeof i18nLookup === 'function' ? i18nLookup('stats', csvCol, csvCol) : (STAT_LABELS[csvCol] || csvCol);
 }
 
 function translatePosition(pesPos) {
-  return POSITION_LABELS[pesPos] || pesPos;
+  return typeof i18nLookup === 'function' ? i18nLookup('positions', pesPos, pesPos) : (POSITION_LABELS[pesPos] || pesPos);
+}
+
+function teamTypeLabel(type) {
+  return typeof i18nLookup === 'function' ? i18nLookup('types', String(type), TYPE_LABELS[type] || '') : (TYPE_LABELS[type] || '');
+}
+
+function playingStyleLabel(value) {
+  return typeof i18nLookup === 'function' ? i18nLookup('playingStyles', String(value), PLAYING_STYLE_LABELS[value] || value) : (PLAYING_STYLE_LABELS[value] || value);
+}
+
+function playerSkillLabels() {
+  return typeof i18nPairs === 'function' ? i18nPairs('playerSkills') : PLAYER_SKILLS_LABELS;
+}
+
+function comStyleLabels() {
+  return typeof i18nPairs === 'function' ? i18nPairs('comStyles') : COM_STYLES_LABELS;
+}
+
+const DEFENSIVE_POSITION_COLOR = '#3EBEC8';
+const DEFENSIVE_POSITIONS = new Set(['CB', 'CT', 'DFC', 'LB', 'LI', 'RB', 'LD', 'LWB', 'RWB']);
+
+function isDefensivePosition(pesPos) {
+  return DEFENSIVE_POSITIONS.has(String(pesPos || '').toUpperCase());
 }
 
 function positionGroupColor(pesPos) {
   if (pesPos === 'GK') return '#f9d901';
-  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) return '#D6A84F';
+  if (isDefensivePosition(pesPos)) return DEFENSIVE_POSITION_COLOR;
   if (['DMF', 'CMF', 'LMF', 'RMF', 'AMF'].includes(pesPos)) return '#57e42b';
   if (['LWF', 'RWF', 'SS', 'CF'].includes(pesPos)) return '#ff2c77';
   return '#8b949e';
 }
 
 function positionBadgeStyle(pesPos) {
-  if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(pesPos)) {
-    return 'color:#F5F5F5;border-color:rgba(214,168,79,0.35);background:#1A1A1D';
+  if (isDefensivePosition(pesPos)) {
+    return `color:${DEFENSIVE_POSITION_COLOR};border-color:${DEFENSIVE_POSITION_COLOR};background:${DEFENSIVE_POSITION_COLOR}18`;
   }
   const color = positionGroupColor(pesPos);
   return `color:${color};border-color:${color};background:${color}18`;
@@ -207,7 +232,7 @@ const STAT_FILTERS = Object.entries(STAT_LABELS).map(([csvCol, label]) => {
   const special = SPECIAL_ATTRS[csvCol];
   return {
     csvCol,
-    label,
+    label: translateStat(csvCol),
     minKey: `statMin_${key}`,
     maxKey: `statMax_${key}`,
     min: special ? 0 : STAT_MIN,
@@ -290,12 +315,12 @@ function escapeHtml(str) {
 }
 
 function renderBreadcrumbTrail(items) {
-  return `<nav class="breadcrumbs" aria-label="Breadcrumb">
+  return `<div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
     ${items.map(item => item.href
       ? `<a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`
       : `<span>${escapeHtml(item.label)}</span>`
     ).join('')}
-  </nav>`;
+  </nav></div>`;
 }
 
 function normalizeText(input) {
@@ -466,7 +491,7 @@ function overallColor(value) {
 // ─── Boot / Indexer ───────────────────────────────────────────────────────────
 
 async function boot() {
-  showLoading('Cargando base de datos...');
+  showLoading(t('loading.database'));
 
   // Load all global CSV files in parallel
   const [teamsText, playersText, squadsText, appearancesText, leaguesText, corregidosText] = await Promise.all([
@@ -479,7 +504,7 @@ async function boot() {
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
-    showError('Error al cargar los archivos de la base de datos.');
+    showError(t('errors.databaseLoad'));
     return;
   }
 
@@ -534,6 +559,13 @@ async function boot() {
   }
 
   // Build normalized player map (playerId → normalized player row)
+  const validTeamIds = new Set();
+  DB.leagues.forEach(league => league.teamIds.forEach(id => validTeamIds.add(id)));
+  DB.teams = DB.teams.filter(team => validTeamIds.has(team.id));
+  Object.keys(teamById).forEach(teamId => {
+    if (!validTeamIds.has(teamId)) delete teamById[teamId];
+  });
+
   const playerMap = {};
   playerRows.forEach(playerRow => {
     const playerId = playerRow['Id'];
@@ -547,6 +579,7 @@ async function boot() {
   // Assign players to teams using squad data
   squadRows.forEach(squadRow => {
     const teamId = squadRow['Id'];
+    if (!validTeamIds.has(teamId)) return;
     const team = teamById[teamId];
     if (!team) return;
     for (let i = 1; i <= 32; i++) {
@@ -583,7 +616,7 @@ async function boot() {
   });
 
   if (!DB.teams.length) {
-    showError('No se encontraron equipos en la base de datos.');
+    showError(t('errors.noTeams'));
     return;
   }
 
@@ -738,22 +771,22 @@ function buildSidebar() {
   sidebar.innerHTML = `
     <div class="sidebar-nav-section">
       <button type="button" class="sidebar-nav-header db-sidebar-btn" id="nav-header-inicio" onclick="showDatabaseHome()">
-        <span class="sidebar-nav-title">Inicio</span>
+        <span class="sidebar-nav-title">${t('common.home')}</span>
       </button>
     </div>
     <div class="sidebar-nav-section">
       <button type="button" class="sidebar-nav-header db-sidebar-btn" id="nav-header-ligas" onclick="showLeaguesView()">
-        <span class="sidebar-nav-title">Ligas</span>
+        <span class="sidebar-nav-title">${t('common.leagues')}</span>
       </button>
     </div>
     <div class="sidebar-nav-section">
       <button type="button" class="sidebar-nav-header db-sidebar-btn" id="nav-header-equipos" onclick="showTeamsView()">
-        <span class="sidebar-nav-title">Equipos</span>
+        <span class="sidebar-nav-title">${t('common.teams')}</span>
       </button>
     </div>
     <div class="sidebar-nav-section">
       <button type="button" class="sidebar-nav-header db-sidebar-btn" id="nav-header-jugadores" onclick="showAllPlayersFromSidebar()">
-        <span class="sidebar-nav-title">Jugadores</span>
+        <span class="sidebar-nav-title">${t('common.players')}</span>
       </button>
     </div>`;
 
@@ -834,21 +867,21 @@ function _showLeaguesViewInternal() {
           onerror="this.onerror=null;this.src='img/leagues/default.webp'"
           alt="${league.name}">
         <div class="grid-card-name">${league.name}</div>
-        <div class="grid-card-sub">${teamCount} equipo${teamCount !== 1 ? 's' : ''}</div>
+        <div class="grid-card-sub">${t('db.teamCount', { count: teamCount })}</div>
       </div>`;
   }).join('');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Ligas' }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.leagues') }])}
     <div class="view-header">
       <div>
-        <div class="view-title">Ligas</div>
-        <div class="view-subtitle" id="leagues-grid-subtitle">${DB.leagues.length} ligas disponibles</div>
+        <div class="view-title">${t('common.leagues')}</div>
+        <div class="view-subtitle" id="leagues-grid-subtitle">${t('db.leaguesAvailable', { count: DB.leagues.length })}</div>
       </div>
     </div>
     <div class="grid-search-wrap">
       <input type="text" class="grid-search-input" id="leagues-search-input"
-        placeholder="Buscar liga..." autocomplete="off"
+        placeholder="${t('db.searchLeague')}" autocomplete="off"
         oninput="filterLeaguesGrid(this.value)">
     </div>
     <div class="grid-cards" id="leagues-grid-cards">${cardsHtml}</div>`;
@@ -876,11 +909,11 @@ function filterLeaguesGrid(query) {
           onerror="this.onerror=null;this.src='img/leagues/default.webp'"
           alt="${league.name}">
         <div class="grid-card-name">${league.name}</div>
-        <div class="grid-card-sub">${teamCount} equipo${teamCount !== 1 ? 's' : ''}</div>
+        <div class="grid-card-sub">${t('db.teamCount', { count: teamCount })}</div>
       </div>`;
   }).join('');
   container.innerHTML = cardsHtml;
-  if (subtitle) subtitle.textContent = `${matches.length} liga${matches.length !== 1 ? 's' : ''} encontrada${matches.length !== 1 ? 's' : ''}`;
+  if (subtitle) subtitle.textContent = t('db.leaguesFound', { count: matches.length });
 }
 
 function showLeagueTeamsView(leagueId) {
@@ -913,7 +946,7 @@ function _showLeagueTeamsViewInternal(leagueId) {
     </div>`).join('');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Ligas', href: 'database.html?view=leagues' }, { label: league.name }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.leagues'), href: 'database.html?view=leagues' }, { label: league.name }])}
     <div class="view-header">
       <img class="grid-card-img" style="width:48px;height:48px;object-fit:contain"
         src="img/leagues/${leagueId}.webp"
@@ -921,7 +954,7 @@ function _showLeagueTeamsViewInternal(leagueId) {
         alt="${league.name}">
       <div>
         <div class="view-title">${league.name}</div>
-        <div class="view-subtitle">${leagueTeams.length} equipo${leagueTeams.length !== 1 ? 's' : ''}</div>
+        <div class="view-subtitle">${t('db.teamCount', { count: leagueTeams.length })}</div>
       </div>
     </div>
     <button class="back-btn" onclick="showLeaguesView()" style="margin-bottom:16px">◀ Volver a Ligas</button>
@@ -968,7 +1001,7 @@ function _hasActiveTeamFilters() {
 
 function _buildTeamActiveFiltersSummary() {
   if (!_hasActiveTeamFilters()) {
-    return `<div class="active-filters active-filters-empty" id="team-active-filters-summary">Sin filtros activos</div>`;
+    return `<div class="active-filters active-filters-empty" id="team-active-filters-summary">${t('common.noActiveFilters')}</div>`;
   }
 
   const tags = [];
@@ -977,16 +1010,16 @@ function _buildTeamActiveFiltersSummary() {
   };
   const league = DB.leagues.find(l => l.id === _teamFilters.league);
   const country = _teamFilters.country ? nationalityName(_teamFilters.country) : '';
-  add('Nombre', _teamFilters.name);
-  add('Liga', league ? league.name : '');
-  add('Pais', country);
-  add('Tipo', TYPE_LABELS[_teamFilters.type] || '');
-  if (_teamFilters.minAvg || _teamFilters.maxAvg) add('Media', `${_teamFilters.minAvg || 0}-${_teamFilters.maxAvg || 99}`);
-  if (_teamFilters.minPlayers || _teamFilters.maxPlayers) add('Jugadores', `${_teamFilters.minPlayers || 0}-${_teamFilters.maxPlayers || 32}`);
+  add(t('common.name'), _teamFilters.name);
+  add(t('common.league'), league ? league.name : '');
+  add(t('common.country'), country);
+  add(t('common.type'), teamTypeLabel(_teamFilters.type));
+  if (_teamFilters.minAvg || _teamFilters.maxAvg) add(t('common.overall'), `${_teamFilters.minAvg || 0}-${_teamFilters.maxAvg || 99}`);
+  if (_teamFilters.minPlayers || _teamFilters.maxPlayers) add(t('common.players'), `${_teamFilters.minPlayers || 0}-${_teamFilters.maxPlayers || 32}`);
 
   return `
     <div class="active-filters" id="team-active-filters-summary">
-      <span class="active-filters-label">Filtros activos</span>
+      <span class="active-filters-label">${t('common.activeFilters')}</span>
       <div class="active-filter-tags">
         ${tags.map(tag => `<span class="active-filter-tag">${escapeHtml(tag)}</span>`).join('')}
       </div>
@@ -1005,40 +1038,40 @@ function _buildTeamFiltersPanel() {
     <div class="adv-filter-panel team-filter-panel">
       <div class="filter-panel-head">
         <div>
-          <div class="filter-panel-title">Filtros de equipos</div>
-          <div class="filter-panel-subtitle">Busca por datos reales del CSV y metricas calculadas desde el plantel.</div>
+          <div class="filter-panel-title">${t('filters.teamTitle')}</div>
+          <div class="filter-panel-subtitle">${t('filters.teamSubtitle')}</div>
         </div>
-        <button type="button" class="adv-filter-reset" id="btn-clear-team-filters" onclick="resetTeamFilters()" ${_hasActiveTeamFilters() ? '' : 'disabled'}>Limpiar filtros</button>
+        <button type="button" class="adv-filter-reset" id="btn-clear-team-filters" onclick="resetTeamFilters()" ${_hasActiveTeamFilters() ? '' : 'disabled'}>${t('common.cleanFilters')}</button>
       </div>
       ${_buildTeamActiveFiltersSummary()}
       <div class="adv-filter-grid basic-filter-grid">
         <div class="adv-filter-group">
-          <label>Nombre</label>
-          <input type="text" id="team-flt-name" placeholder="Buscar equipo" value="${escapeHtml(_teamFilters.name)}" oninput="onTeamFilterChange()">
+          <label>${t('common.name')}</label>
+          <input type="text" id="team-flt-name" placeholder="${t('db.searchTeam')}" value="${escapeHtml(_teamFilters.name)}" oninput="onTeamFilterChange()">
         </div>
         <div class="adv-filter-group">
-          <label>Liga</label>
+          <label>${t('common.league')}</label>
           <select id="team-flt-league" onchange="onTeamFilterChange()">
-            <option value="">Todas</option>
+            <option value="">${t('common.allFem')}</option>
             ${leagues.map(l => `<option value="${l.id}"${_teamFilters.league === l.id ? ' selected' : ''}>${escapeHtml(l.name)}</option>`).join('')}
           </select>
         </div>
         <div class="adv-filter-group">
-          <label>Pais</label>
+          <label>${t('common.country')}</label>
           <select id="team-flt-country" onchange="onTeamFilterChange()">
-            <option value="">Todos</option>
+            <option value="">${t('common.allMasc')}</option>
             ${countries.map(c => `<option value="${c}"${_teamFilters.country === c ? ' selected' : ''}>${escapeHtml(nationalityName(c))}</option>`).join('')}
           </select>
         </div>
         <div class="adv-filter-group">
-          <label>Tipo</label>
+          <label>${t('common.type')}</label>
           <select id="team-flt-type" onchange="onTeamFilterChange()">
-            <option value="">Todos</option>
-            ${types.map(t => `<option value="${t}"${_teamFilters.type === t ? ' selected' : ''}>${escapeHtml(TYPE_LABELS[t])}</option>`).join('')}
+            <option value="">${t('common.allMasc')}</option>
+            ${types.map(t => `<option value="${t}"${_teamFilters.type === t ? ' selected' : ''}>${escapeHtml(teamTypeLabel(t))}</option>`).join('')}
           </select>
         </div>
-        ${_buildRangeFilter('Media promedio', 'team-flt-min-avg', 'team-flt-max-avg', 0, 99, _teamFilters.minAvg, _teamFilters.maxAvg).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
-        ${_buildRangeFilter('Cantidad de jugadores', 'team-flt-min-players', 'team-flt-max-players', 0, 32, _teamFilters.minPlayers, _teamFilters.maxPlayers).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
+        ${_buildRangeFilter(t('filters.avgRange'), 'team-flt-min-avg', 'team-flt-max-avg', 0, 99, _teamFilters.minAvg, _teamFilters.maxAvg).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
+        ${_buildRangeFilter(t('filters.playerQty'), 'team-flt-min-players', 'team-flt-max-players', 0, 32, _teamFilters.minPlayers, _teamFilters.maxPlayers).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
       </div>
     </div>`;
 }
@@ -1079,11 +1112,11 @@ function _showTeamsViewInternal() {
   view.classList.add('active');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Equipos' }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.teams') }])}
     <div class="view-header">
       <div>
-        <div class="view-title">Equipos</div>
-        <div class="view-subtitle" id="teams-grid-subtitle">${_teamsFilteredList.length} equipos con liga asignada</div>
+        <div class="view-title">${t('common.teams')}</div>
+        <div class="view-subtitle" id="teams-grid-subtitle">${t('db.teamsWithLeague', { count: _teamsFilteredList.length })}</div>
       </div>
     </div>
     ${_buildTeamFiltersPanel()}
@@ -1205,7 +1238,7 @@ function hideAllViews() {
   if (loadingOverlay) loadingOverlay.style.display = 'none';
 }
 
-function showLoading(message = 'Cargando...') {
+function showLoading(message = t('loading.database')) {
   hideAllViews();
   const overlay = document.getElementById('loading-overlay');
   if (overlay) {
@@ -1357,7 +1390,7 @@ const _advFilters = {
 // Playing role → position group for filter
 const ROLE_POSITIONS = {
   'GK':  ['GK'],
-  'DEF': ['CB', 'LB', 'RB'],
+  'DEF': ['CB', 'LB', 'RB', 'LWB', 'RWB'],
   'MID': ['DMF', 'CMF', 'LMF', 'RMF', 'AMF'],
   'FWD': ['LWF', 'RWF', 'SS', 'CF'],
 };
@@ -1684,7 +1717,7 @@ function _renderPlayersPage() {
   const subtitle = document.getElementById('all-players-subtitle');
   if (subtitle) {
     const totalPages = Math.ceil(total / PLAYERS_PAGE_SIZE) || 1;
-    subtitle.textContent = `${total} jugadores · página ${_allPlayersPage} de ${totalPages}`;
+    subtitle.textContent = t('db.playersPage', { count: total, page: _allPlayersPage, pages: totalPages });
   }
   _syncMobilePlayerSortControls();
 }
@@ -1738,7 +1771,7 @@ function _syncMobilePlayerSortControls() {
   const dirBtn = document.getElementById('mobile-player-sort-dir');
   if (select) select.value = _playerSort.key || '';
   if (dirBtn) {
-    dirBtn.textContent = _playerSort.dir === 'asc' ? 'A-Z / menor-mayor' : 'Z-A / mayor-menor';
+    dirBtn.textContent = _playerSort.dir === 'asc' ? t('sort.directionAsc') : t('sort.directionDesc');
     dirBtn.disabled = !_playerSort.key;
   }
 }
@@ -1758,8 +1791,8 @@ function _buildPlayerTableHead() {
   return `
     <thead>
       <tr>
-        <th></th><th class="desktop-stat"></th>${th('name', 'Nombre')}${th('nationality', 'Nac')}${th('position', 'Pos')}
-        ${th('team', 'Equipo', 'mobile-team-col')}${th('ovr', 'OVR')}${th('rit', 'RIT', 'desktop-stat')}${th('dri', 'DRI', 'desktop-stat')}${th('tir', 'TIR', 'desktop-stat')}${th('pas', 'PAS', 'desktop-stat')}${th('fis', 'FIS', 'desktop-stat')}${th('def', 'DEF', 'desktop-stat')}
+        <th></th><th class="desktop-stat"></th>${th('name', t('common.name'))}${th('nationality', t('common.nationalityShort'))}${th('position', t('common.positionShort'))}
+        ${th('team', t('common.teams'), 'mobile-team-col')}${th('ovr', 'OVR')}${th('rit', 'RIT', 'desktop-stat')}${th('dri', 'DRI', 'desktop-stat')}${th('tir', 'TIR', 'desktop-stat')}${th('pas', 'PAS', 'desktop-stat')}${th('fis', 'FIS', 'desktop-stat')}${th('def', 'DEF', 'desktop-stat')}
         <th class="fav-col"></th>
       </tr>
     </thead>`;
@@ -1810,20 +1843,20 @@ function _buildActiveFiltersSummary() {
     if (value !== undefined && value !== null && value !== '') items.push(`${label}: ${value}`);
   };
 
-  add('Nombre', f.name);
-  add('Club', f.club ? (DB.teams.find(t => t.id === f.club) || {}).displayName : '');
-  add('Liga', f.league ? (DB.leagues.find(l => l.id === f.league) || {}).name : '');
-  add('Nacionalidad', f.nationality ? nationalityName(f.nationality) : '');
-  add('Posicion', f.position ? translatePosition(f.position) : '');
-  if (f.minOvr || f.maxOvr) add('Media', `${f.minOvr || '0'}-${f.maxOvr || '99'}`);
-  if (f.role) add('Rol', f.role);
-  if (f.playingStyle) add('Estilo', PLAYING_STYLE_LABELS[f.playingStyle] || f.playingStyle);
-  if (f.comStyle) add('COM', (COM_STYLES_LABELS.find(([key]) => key === f.comStyle) || [null, f.comStyle])[1]);
-  if (f.foot) add('Pie', f.foot === 'left' ? 'Izquierdo' : 'Derecho');
-  if (f.hasFaceScan) add('Cara', f.hasFaceScan === 'yes' ? 'Si' : 'No');
-  if (f.minAge || f.maxAge) add('Edad', `${f.minAge || '15'}-${f.maxAge || '50'}`);
-  if (f.minHeight || f.maxHeight) add('Altura', `${f.minHeight || '150'}-${f.maxHeight || '220'}`);
-  if (f.minWeight || f.maxWeight) add('Peso', `${f.minWeight || '50'}-${f.maxWeight || '120'}`);
+  add(t('common.name'), f.name);
+  add(t('common.club'), f.club ? (DB.teams.find(t => t.id === f.club) || {}).displayName : '');
+  add(t('common.league'), f.league ? (DB.leagues.find(l => l.id === f.league) || {}).name : '');
+  add(t('common.nationality'), f.nationality ? nationalityName(f.nationality) : '');
+  add(t('common.position'), f.position ? translatePosition(f.position) : '');
+  if (f.minOvr || f.maxOvr) add(t('common.overall'), `${f.minOvr || '0'}-${f.maxOvr || '99'}`);
+  if (f.role) add(t('filters.role'), f.role);
+  if (f.playingStyle) add(t('filters.playingStyle'), playingStyleLabel(f.playingStyle));
+  if (f.comStyle) add('COM', (comStyleLabels().find(([key]) => key === f.comStyle) || [null, f.comStyle])[1]);
+  if (f.foot) add(t('common.foot'), f.foot === 'left' ? t('filters.left') : t('filters.right'));
+  if (f.hasFaceScan) add(t('filters.faceScan'), f.hasFaceScan === 'yes' ? t('common.yes') : t('common.no'));
+  if (f.minAge || f.maxAge) add(t('common.age'), `${f.minAge || '15'}-${f.maxAge || '50'}`);
+  if (f.minHeight || f.maxHeight) add(t('common.height'), `${f.minHeight || '150'}-${f.maxHeight || '220'}`);
+  if (f.minWeight || f.maxWeight) add(t('common.weight'), `${f.minWeight || '50'}-${f.maxWeight || '120'}`);
 
   STAT_FILTERS.forEach(stat => {
     if (f[stat.minKey] || f[stat.maxKey]) {
@@ -1832,16 +1865,16 @@ function _buildActiveFiltersSummary() {
   });
 
   const selectedSkills = _selectedSkillCodes(f.skills)
-    .map(code => (PLAYER_SKILLS_LABELS.find(([key]) => key === code) || [null, code])[1]);
-  if (selectedSkills.length) add('Habilidades', selectedSkills.join(', '));
+    .map(code => (playerSkillLabels().find(([key]) => key === code) || [null, code])[1]);
+  if (selectedSkills.length) add(t('filters.skills'), selectedSkills.join(', '));
 
   if (!items.length) {
-    return `<div class="active-filters active-filters-empty" id="active-filters-summary">Sin filtros activos</div>`;
+    return `<div class="active-filters active-filters-empty" id="active-filters-summary">${t('common.noActiveFilters')}</div>`;
   }
 
   return `
     <div class="active-filters" id="active-filters-summary">
-      <span class="active-filters-label">Filtros activos</span>
+      <span class="active-filters-label">${t('common.activeFilters')}</span>
       <div class="active-filter-tags">
         ${items.map(item => `<span class="active-filter-tag">${escapeHtml(item)}</span>`).join('')}
       </div>
@@ -1883,7 +1916,7 @@ function _buildFilterPanel() {
   ).join('');
 
   const selectedSkills = new Set(_selectedSkillCodes(f.skills));
-  const skillOptions = PLAYER_SKILLS_LABELS.map(([key, label]) => `
+  const skillOptions = playerSkillLabels().map(([key, label]) => `
     <label class="skill-check${selectedSkills.has(key) ? ' is-selected' : ''}">
       <input type="checkbox" value="${key}"${selectedSkills.has(key) ? ' checked' : ''} onchange="onAdvFilterChange()">
       <span>${escapeHtml(label)}</span>
@@ -1894,19 +1927,19 @@ function _buildFilterPanel() {
   ).join('');
 
   const advancedOpen = _advancedFiltersOpen || _hasActiveAdvancedFilters();
-  const advancedToggleLabel = advancedOpen ? 'Ocultar filtros avanzados' : 'Mostrar filtros avanzados';
+  const advancedToggleLabel = advancedOpen ? t('filters.hideAdvanced') : t('filters.showAdvanced');
   const panelOpen = _playerFiltersOpen || _hasActiveFilters();
 
   return `
     <div class="adv-filter-panel" id="adv-filter-panel">
       <div class="filter-panel-head">
         <div>
-          <div class="filter-panel-title">Filtros de jugadores</div>
-          <div class="filter-panel-subtitle">Usa lo basico para buscar rapido y abre lo avanzado cuando necesites precision.</div>
+          <div class="filter-panel-title">${t('filters.playerTitle')}</div>
+          <div class="filter-panel-subtitle">${t('filters.playerSubtitle')}</div>
         </div>
         <div class="filter-panel-actions">
-          <button type="button" class="advanced-filter-toggle" id="btn-toggle-player-filters" onclick="togglePlayerFilters()">${panelOpen ? 'Ocultar filtros' : 'Mostrar filtros'}</button>
-          <button type="button" class="adv-filter-reset" id="btn-clear-filters" onclick="resetAdvancedFilters()" ${_hasActiveFilters() ? '' : 'disabled'}>Limpiar filtros</button>
+          <button type="button" class="advanced-filter-toggle" id="btn-toggle-player-filters" onclick="togglePlayerFilters()">${panelOpen ? t('filters.hide') : t('filters.show')}</button>
+          <button type="button" class="adv-filter-reset" id="btn-clear-filters" onclick="resetAdvancedFilters()" ${_hasActiveFilters() ? '' : 'disabled'}>${t('common.cleanFilters')}</button>
         </div>
       </div>
 
@@ -1914,41 +1947,41 @@ function _buildFilterPanel() {
 
       <div id="player-filter-body" ${panelOpen ? '' : 'hidden'}>
       <section class="filter-section filter-section-basic">
-        <div class="filter-section-title">Filtros basicos</div>
+        <div class="filter-section-title">${t('filters.basic')}</div>
         <div class="adv-filter-grid basic-filter-grid">
           <div class="adv-filter-group">
-            <label>Nombre</label>
-            <input type="text" id="flt-name" placeholder="Buscar jugador" value="${escapeHtml(f.name)}" oninput="onAdvFilterChange()">
+            <label>${t('common.name')}</label>
+            <input type="text" id="flt-name" placeholder="${t('db.searchPlayer')}" value="${escapeHtml(f.name)}" oninput="onAdvFilterChange()">
           </div>
           <div class="adv-filter-group">
-            <label>Club</label>
+            <label>${t('common.club')}</label>
             <select id="flt-club" onchange="onAdvFilterChange()">
-              <option value="">Todos</option>
+              <option value="">${t('common.allMasc')}</option>
               ${clubOptions}
             </select>
           </div>
           <div class="adv-filter-group">
-            <label>Liga</label>
+            <label>${t('common.league')}</label>
             <select id="flt-league" onchange="onAdvFilterChange()">
-              <option value="">Todas</option>
+              <option value="">${t('common.allFem')}</option>
               ${leagueOptions}
             </select>
           </div>
           <div class="adv-filter-group">
-            <label>Nacionalidad</label>
+            <label>${t('common.nationality')}</label>
             <select id="flt-nationality" onchange="onAdvFilterChange()">
-              <option value="">Todas</option>
+              <option value="">${t('common.allFem')}</option>
               ${natOptions}
             </select>
           </div>
           <div class="adv-filter-group">
-            <label>Posicion</label>
+            <label>${t('common.position')}</label>
             <select id="flt-position" onchange="onAdvFilterChange()">
-              <option value="">Todas</option>
+              <option value="">${t('common.allFem')}</option>
               ${posOptions}
             </select>
           </div>
-          ${_buildRangeFilter('Media', 'flt-min-ovr', 'flt-max-ovr', 0, 99, f.minOvr, f.maxOvr)}
+          ${_buildRangeFilter(t('common.overall'), 'flt-min-ovr', 'flt-max-ovr', 0, 99, f.minOvr, f.maxOvr)}
         </div>
       </section>
 
@@ -1960,67 +1993,67 @@ function _buildFilterPanel() {
 
       <div id="advanced-filter-section" class="advanced-filter-section${advancedOpen ? ' is-open' : ''}" ${advancedOpen ? '' : 'hidden'}>
         <section class="filter-section">
-          <div class="filter-section-title">Datos avanzados</div>
+          <div class="filter-section-title">${t('filters.advancedData')}</div>
           <div class="adv-filter-grid">
             <div class="adv-filter-group">
-              <label>Rol</label>
+              <label>${t('filters.role')}</label>
               <select id="flt-role" onchange="onAdvFilterChange()">
-                <option value="">Todos</option>
-                <option value="GK"${f.role === 'GK' ? ' selected' : ''}>Portero</option>
-                <option value="DEF"${f.role === 'DEF' ? ' selected' : ''}>Defensa</option>
-                <option value="MID"${f.role === 'MID' ? ' selected' : ''}>Mediocampista</option>
-                <option value="FWD"${f.role === 'FWD' ? ' selected' : ''}>Delantero</option>
+                <option value="">${t('common.allMasc')}</option>
+                <option value="GK"${f.role === 'GK' ? ' selected' : ''}>${t('filters.goalkeeper')}</option>
+                <option value="DEF"${f.role === 'DEF' ? ' selected' : ''}>${t('filters.defender')}</option>
+                <option value="MID"${f.role === 'MID' ? ' selected' : ''}>${t('filters.midfielder')}</option>
+                <option value="FWD"${f.role === 'FWD' ? ' selected' : ''}>${t('filters.forward')}</option>
               </select>
             </div>
             <div class="adv-filter-group">
-              <label>Estilo de juego</label>
+              <label>${t('filters.playingStyle')}</label>
               <select id="flt-playing-style" onchange="onAdvFilterChange()">
-                <option value="">Todos</option>
-                ${Object.entries(PLAYING_STYLE_LABELS).map(([k,v]) => `<option value="${k}"${f.playingStyle === k ? ' selected' : ''}>${escapeHtml(v)}</option>`).join('')}
+                <option value="">${t('common.allMasc')}</option>
+                ${Object.keys(PLAYING_STYLE_LABELS).map(k => `<option value="${k}"${f.playingStyle === k ? ' selected' : ''}>${escapeHtml(playingStyleLabel(k))}</option>`).join('')}
               </select>
             </div>
             <div class="adv-filter-group">
-              <label>Estilo COM</label>
+              <label>${t('filters.comStyle')}</label>
               <select id="flt-com-style" onchange="onAdvFilterChange()">
-                <option value="">Cualquiera</option>
-                ${COM_STYLES_LABELS.map(([k,v]) => `<option value="${k}"${f.comStyle === k ? ' selected' : ''}>${escapeHtml(v)}</option>`).join('')}
+                <option value="">${t('common.any')}</option>
+                ${comStyleLabels().map(([k,v]) => `<option value="${k}"${f.comStyle === k ? ' selected' : ''}>${escapeHtml(v)}</option>`).join('')}
               </select>
             </div>
             <div class="adv-filter-group">
-              <label>Pie dominante</label>
+              <label>${t('filters.dominantFoot')}</label>
               <select id="flt-foot" onchange="onAdvFilterChange()">
-                <option value="">Cualquiera</option>
-                <option value="right"${f.foot === 'right' ? ' selected' : ''}>Derecho</option>
-                <option value="left"${f.foot === 'left' ? ' selected' : ''}>Izquierdo</option>
+                <option value="">${t('common.any')}</option>
+                <option value="right"${f.foot === 'right' ? ' selected' : ''}>${t('filters.right')}</option>
+                <option value="left"${f.foot === 'left' ? ' selected' : ''}>${t('filters.left')}</option>
               </select>
             </div>
             <div class="adv-filter-group">
-              <label>Cara escaneada</label>
+              <label>${t('filters.faceScan')}</label>
               <select id="flt-facescan" onchange="onAdvFilterChange()">
-                <option value="">Todos</option>
-                <option value="yes"${f.hasFaceScan === 'yes' ? ' selected' : ''}>Si</option>
-                <option value="no"${f.hasFaceScan === 'no' ? ' selected' : ''}>No</option>
+                <option value="">${t('common.allMasc')}</option>
+                <option value="yes"${f.hasFaceScan === 'yes' ? ' selected' : ''}>${t('common.yes')}</option>
+                <option value="no"${f.hasFaceScan === 'no' ? ' selected' : ''}>${t('common.no')}</option>
               </select>
             </div>
-            ${_buildRangeFilter('Edad', 'flt-min-age', 'flt-max-age', 15, 50, f.minAge, f.maxAge)}
-            ${_buildRangeFilter('Altura', 'flt-min-height', 'flt-max-height', 150, 220, f.minHeight, f.maxHeight)}
-            ${_buildRangeFilter('Peso', 'flt-min-weight', 'flt-max-weight', 50, 120, f.minWeight, f.maxWeight)}
+            ${_buildRangeFilter(t('common.age'), 'flt-min-age', 'flt-max-age', 15, 50, f.minAge, f.maxAge)}
+            ${_buildRangeFilter(t('common.height'), 'flt-min-height', 'flt-max-height', 150, 220, f.minHeight, f.maxHeight)}
+            ${_buildRangeFilter(t('common.weight'), 'flt-min-weight', 'flt-max-weight', 50, 120, f.minWeight, f.maxWeight)}
           </div>
         </section>
 
         <section class="filter-section">
-          <div class="filter-section-title">Stats del jugador</div>
+          <div class="filter-section-title">${t('filters.playerStats')}</div>
           <div class="adv-filter-grid stat-filter-grid">
             ${statFiltersHtml}
           </div>
         </section>
 
         <section class="filter-section">
-          <div class="filter-section-title">Habilidades</div>
+          <div class="filter-section-title">${t('filters.skills')}</div>
           <div class="skill-filter-grid" id="flt-skills">
             ${skillOptions}
           </div>
-          <p class="filter-help">Se muestran jugadores que tengan todas las habilidades elegidas.</p>
+          <p class="filter-help">${t('filters.skillsHelp')}</p>
         </section>
       </div>
       </div>
@@ -2105,7 +2138,7 @@ function togglePlayerFilters() {
   const body = document.getElementById('player-filter-body');
   const btn = document.getElementById('btn-toggle-player-filters');
   if (body) body.hidden = !_playerFiltersOpen;
-  if (btn) btn.textContent = _playerFiltersOpen ? 'Ocultar filtros' : 'Mostrar filtros';
+  if (btn) btn.textContent = _playerFiltersOpen ? t('filters.hide') : t('filters.show');
 }
 
 function toggleAdvancedFilters() {
@@ -2116,7 +2149,7 @@ function toggleAdvancedFilters() {
     section.hidden = !_advancedFiltersOpen;
     section.classList.toggle('is-open', _advancedFiltersOpen);
   }
-  if (btn) btn.textContent = _advancedFiltersOpen ? 'Ocultar filtros avanzados' : 'Mostrar filtros avanzados';
+  if (btn) btn.textContent = _advancedFiltersOpen ? t('filters.hideAdvanced') : t('filters.showAdvanced');
 }
 function toggleSpecialPlayers() {
   _showSpecialPlayers = !_showSpecialPlayers;
@@ -2145,27 +2178,27 @@ function _showAllPlayersInternal(resetPage) {
 
   // Render skeleton: header + filter panel + table + pagination placeholder
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Jugadores' }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.players') }])}
     <div class="view-header">
       <div>
-        <div class="view-title">Todos los jugadores</div>
-        <div class="view-subtitle" id="all-players-subtitle">${total} jugadores · página 1 de ${Math.ceil(total / PLAYERS_PAGE_SIZE) || 1}</div>
+        <div class="view-title">${t('db.allPlayers')}</div>
+        <div class="view-subtitle" id="all-players-subtitle">${t('db.playersPage', { count: total, page: 1, pages: Math.ceil(total / PLAYERS_PAGE_SIZE) || 1 })}</div>
       </div>
       <div class="view-header-actions">
-        <button id="btn-toggle-special" class="adv-filter-toggle${_showSpecialPlayers ? ' active' : ''}" onclick="toggleSpecialPlayers()">★ Jugadores especiales</button>
+        <button id="btn-toggle-special" class="adv-filter-toggle${_showSpecialPlayers ? ' active' : ''}" onclick="toggleSpecialPlayers()">${t('db.specialPlayers')}</button>
       </div>
     </div>
     ${_buildFilterPanel()}
-    <div class="mobile-sort-controls" aria-label="Ordenar jugadores">
-      <label for="mobile-player-sort-key">Ordenar</label>
+    <div class="mobile-sort-controls" aria-label="${t('sort.players')}">
+      <label for="mobile-player-sort-key">${t('sort.sort')}</label>
       <select id="mobile-player-sort-key" onchange="setMobilePlayerSort(this.value)">
-        <option value="">Orden original</option>
+        <option value="">${t('sort.original')}</option>
         <option value="ovr">OVR</option>
-        <option value="name">Nombre</option>
-        <option value="age">Edad</option>
-        <option value="position">Posicion</option>
-        <option value="team">Equipo</option>
-        <option value="nationality">Nacionalidad</option>
+        <option value="name">${t('common.name')}</option>
+        <option value="age">${t('common.age')}</option>
+        <option value="position">${t('common.position')}</option>
+        <option value="team">${t('common.teams')}</option>
+        <option value="nationality">${t('common.nationality')}</option>
         <option value="rit">Ritmo</option>
         <option value="dri">Regate</option>
         <option value="tir">Tiro</option>
@@ -2173,8 +2206,8 @@ function _showAllPlayersInternal(resetPage) {
         <option value="fis">Fisico</option>
         <option value="def">Defensa</option>
       </select>
-      <button type="button" id="mobile-player-sort-dir" onclick="toggleMobilePlayerSortDir()">Z-A / mayor-menor</button>
-      <button type="button" onclick="resetMobilePlayerSort()">Reset</button>
+      <button type="button" id="mobile-player-sort-dir" onclick="toggleMobilePlayerSortDir()">${t('sort.directionDesc')}</button>
+      <button type="button" onclick="resetMobilePlayerSort()">${t('sort.reset')}</button>
     </div>
     <div class="table-responsive">
       <table class="players-table players-table--directory">
@@ -2209,7 +2242,7 @@ function renderPlayersList(team) {
   const view = document.getElementById('players-view');
   view.classList.add('active');
 
-  const typeLabel = TYPE_LABELS[team.type] || '';
+  const typeLabel = teamTypeLabel(team.type);
 
   view.innerHTML = `
     <div class="view-header">
@@ -2228,9 +2261,9 @@ function renderPlayersList(team) {
         <tr>
           <th></th>
           <th></th>
-          <th>Nombre</th>
-          <th>Nac</th>
-          <th>Pos</th>
+          <th>${t('common.name')}</th>
+          <th>${t('common.nationalityShort')}</th>
+          <th>${t('common.positionShort')}</th>
           <th>OVR</th>
           <th>RIT</th>
           <th>DRI</th>
@@ -2297,8 +2330,8 @@ function renderPlayerRow(player, team) {
     <td class="fav-col" onclick="event.stopPropagation()">
       <button class="fav-btn${fav ? ' is-fav' : ''}"
         onclick="toggleFavoriteFromBtn(this,'${player.ID}','${team.id}')"
-        title="${fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}"
-        aria-label="Favorito">
+        title="${fav ? t('favorites.remove') : t('favorites.add')}"
+        aria-label="${t('common.favorites')}">
         ${fav ? '★' : '☆'}
       </button>
     </td>
@@ -2578,7 +2611,7 @@ function toggleFavoriteFromBtn(btn, playerId, teamId) {
   const added = toggleFavorite(playerId, teamId);
   btn.textContent = added ? '★' : '☆';
   btn.classList.toggle('is-fav', added);
-  btn.title = added ? 'Quitar de favoritos' : 'Agregar a favoritos';
+  btn.title = added ? t('favorites.remove') : t('favorites.add');
   _updateFavoritesCount();
   // Keep home stat updated if visible
   const statFav = document.getElementById('stat-favorites');
@@ -2599,14 +2632,14 @@ function _showFavoritesViewInternal() {
   const favs = getFavorites();
   if (!favs.length) {
     view.innerHTML = `
-      ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Favoritos' }])}
+      ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.favorites') }])}
       <div class="view-header">
-        <div class="view-title">⭐ Mis Favoritos</div>
+        <div class="view-title">${t('favorites.emptyTitle')}</div>
       </div>
       <div class="empty-state">
         <div class="empty-state-icon">⭐</div>
-        <p>No tienes jugadores en favoritos todavía.</p>
-        <p>Usa el botón ☆ en cualquier jugador para agregarlo aquí.</p>
+        <p>${t('favorites.empty1')}</p>
+        <p>${t('favorites.empty2')}</p>
       </div>`;
     return;
   }
@@ -2619,17 +2652,17 @@ function _showFavoritesViewInternal() {
   // Notify user if some favorited players are no longer in the DB
   const missingCount = favs.length - playerEntries.length;
   const missingNote = missingCount > 0
-    ? `<div class="favorites-missing-note">⚠️ ${missingCount} jugador(es) ya no están disponibles en la base de datos.</div>`
+    ? `<div class="favorites-missing-note">${t('favorites.missing', { count: missingCount })}</div>`
     : '';
 
   const rowsHtml = playerEntries.map(p => renderPlayerRow(p, p._team)).join('');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Favoritos' }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.favorites') }])}
     <div class="view-header">
       <div>
-        <div class="view-title">⭐ Mis Favoritos</div>
-        <div class="view-subtitle">${playerEntries.length} jugador(es)</div>
+        <div class="view-title">${t('favorites.emptyTitle')}</div>
+        <div class="view-subtitle">${t('db.playerCount', { count: playerEntries.length })}</div>
       </div>
       <div class="view-header-actions">
         <button class="adv-filter-toggle btn-danger" onclick="clearAllFavorites()">✕ Limpiar favoritos</button>
@@ -2660,7 +2693,7 @@ function showFavoritesView() {
  * Clears all favorites after user confirmation, then re-renders the view.
  */
 function clearAllFavorites() {
-  if (!confirm('¿Eliminar todos los favoritos?')) return;
+  if (!confirm(t('favorites.confirmClear'))) return;
   clearFavorites();
   _updateFavoritesCount();
   _showFavoritesViewInternal();
@@ -2714,27 +2747,27 @@ function runSearch(query) {
   view.classList.add('active');
 
   if (!results.length) {
-    view.innerHTML = `${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Busqueda' }])}
+    view.innerHTML = `${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('db.searchPlayers') }])}
       <div class="view-header"><div class="view-title">Resultados: "${query}"</div></div>
-      <div class="error-message">No se encontraron jugadores para "${query}"</div>`;
+      <div class="error-message">${t('errors.noPlayersForSearch', { query })}</div>`;
     return;
   }
 
   const rowsHtml = results.map(p => renderPlayerRow(p, p._team)).join('');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: 'Inicio', href: 'index.html' }, { label: 'Base de datos', href: 'database.html' }, { label: 'Busqueda' }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('db.searchPlayers') }])}
     <div class="view-header">
       <div>
         <div class="view-title">Búsqueda: "${query}"</div>
-        <div class="view-subtitle">${results.length} jugador(es) encontrado(s)</div>
+        <div class="view-subtitle">${t('common.resultsCount', { count: results.length })}</div>
       </div>
     </div>
     <div class="table-responsive">
       <table class="players-table">
         <thead>
           <tr>
-            <th></th><th></th><th>Nombre</th><th>Nac</th><th>Pos</th>
+            <th></th><th></th><th>${t('common.name')}</th><th>${t('common.nationalityShort')}</th><th>${t('common.positionShort')}</th>
             <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th>
             <th>PAS</th><th>FIS</th><th>DEF</th>
             <th class="fav-col"></th>
@@ -2765,7 +2798,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Boot the indexer
   boot().catch(err => {
-    showError(`Error inesperado al iniciar: ${err.message}`);
+    showError(t('errors.unexpectedStart', { message: err.message }));
     console.error(err);
   });
 });

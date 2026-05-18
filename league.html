@@ -1,11 +1,33 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-M7ZNDRZB27');
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Liga – Base de datos PES</title>
+  <title>Liga PES 2018 - Equipos, Escudos y Medias del Option File | LAqP</title>
+  <meta name="description" content="Consultá ligas y competiciones de PES 2018 en LAqP: equipos, escudos, medias y datos del Option File actualizado." />
+  <link rel="canonical" href="https://laqp.website/league.html" />
+  <meta property="og:title" content="Liga PES 2018 - Equipos y Medias | LAqP" />
+  <meta property="og:description" content="Equipos, escudos y medias por liga en la base de datos PES 2018 de LAqP." />
+  <meta property="og:image" content="https://laqp.website/img/logo.png" />
+  <meta property="og:url" content="https://laqp.website/league.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Liga PES 2018 - LAqP" />
+  <meta name="twitter:description" content="Equipos y datos por competición del Option File PES 2018." />
+  <meta name="twitter:image" content="https://laqp.website/img/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="img/logo.png" type="image/webp" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5301686002102491"
+     crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -19,9 +41,9 @@
         alt="Logo"
       />
     </a>
-    <h1>
+    <div class="header-title">
       Base de datos Option File <span>PES 2018–2026</span>
-    </h1>
+    </div>
     <nav class="header-nav" aria-label="Menu principal">
       <a href="downloads.html" class="header-nav-link header-nav-link-primary">Option Files</a>
       <a href="tutorials.html" class="header-nav-link">Tutoriales</a>
@@ -35,7 +57,7 @@
     <!-- Loading overlay -->
     <div id="loading-overlay">
       <div class="spinner"></div>
-      <span class="loading-message">Cargando liga...</span>
+      <span class="loading-message" data-i18n="loading.league">Cargando liga...</span>
     </div>
 
     <!-- League content (filled by league.js) -->
@@ -43,6 +65,7 @@
 
   </div>
 
+  <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/league.js"></script>
 </body>

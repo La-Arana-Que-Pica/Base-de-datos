@@ -245,10 +245,10 @@
 
   function render() {
     const list = getFilteredSortedPlayers();
-    els.summary.textContent = `${list.length} de ${state.players.length} jugadores`;
+    els.summary.textContent = t('squad.summary', { shown: list.length, total: state.players.length });
 
     if (!list.length) {
-      els.tbody.innerHTML = `<tr><td colspan="9" class="no-results-row">No hay jugadores para ese filtro.</td></tr>`;
+      els.tbody.innerHTML = `<tr><td colspan="9" class="no-results-row">${t('squad.noResults')}</td></tr>`;
       updateSortIcons();
       return;
     }
@@ -286,7 +286,7 @@
     const current = els.posFilter.value;
     const positions = Array.from(new Set(players.map(p => p.position).filter(Boolean)))
       .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
-    els.posFilter.innerHTML = '<option value="">Todas las posiciones</option>' +
+    els.posFilter.innerHTML = `<option value="">${t('squad.allPositions')}</option>` +
       positions.map(pos => `<option value="${escapeHtml(pos)}">${escapeHtml(pos)}</option>`).join('');
     els.posFilter.value = positions.includes(current) ? current : '';
   }
@@ -298,12 +298,12 @@
     if (!players.length) {
       state.players = [];
       els.results.style.display = 'none';
-      els.feedback.textContent = 'No se pudo interpretar la lista. Prueba con CSV/TSV con encabezados o con el formato en bloques (rating, potencial, nombre, etc.).';
+      els.feedback.textContent = t('squad.parseError');
       return;
     }
 
     state.players = players;
-    els.feedback.textContent = `Plantilla procesada correctamente (${players.length} jugadores).`;
+    els.feedback.textContent = t('squad.parseSuccess', { count: players.length });
     els.results.style.display = '';
     updatePositionOptions(players);
     render();
