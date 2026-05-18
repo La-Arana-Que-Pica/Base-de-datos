@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Option Files page.
  * Every card is rendered from database/descargas.csv.
  */
@@ -124,7 +124,7 @@ function renderDownloadCard(item) {
   return `
     <article class="download-card" id="${escapeHtml(item.id || '')}">
       <div class="download-card-media">
-        <img src="${image}" alt="${title}" loading="lazy" onerror="this.onerror=null;this.src='img/logo.webp'">
+        <img src="${image}" alt="${title} para PES 2018" loading="lazy" width="640" height="360" onerror="this.onerror=null;this.src='img/logo.webp'">
       </div>
       <div class="download-card-header">
         ${platform ? `<span class="download-platform-badge">${platform}</span>` : ''}
@@ -178,16 +178,16 @@ async function boot() {
 
   content.innerHTML = `
     <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">Inicio</a>
+      <a href="index.html">${t('common.home')}</a>
       <span>Option Files</span>
     </nav>
     <div class="page-section-header">
-      <h1 class="page-section-title">Option Files</h1>
-      <p class="page-section-subtitle">Descargas oficiales de La Araña Que Pica. Encontrá las últimas versiones disponibles de los Option Files.</p>
+      <h1 class="page-section-title">${t('downloads.title')}</h1>
+      <p class="page-section-subtitle">${t('downloads.subtitle')}</p>
     </div>
     <div class="downloads-how-to">
-      <h3>Primera vez?</h3>
-      <p>Revisa los <a href="tutorials.html">tutoriales</a> para instalar el Option File paso a paso.</p>
+      <h3>${t('downloads.firstTime')}</h3>
+      <p>${t('downloads.howTo').replace(t('downloads.howToLink'), `<a href="tutorials.html">${t('downloads.howToLink')}</a>`)}</p>
     </div>
     ${renderDownloads(groupByGame(rows))}`;
 
@@ -201,3 +201,4 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error(err);
   });
 });
+

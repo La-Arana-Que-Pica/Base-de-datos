@@ -1,12 +1,15 @@
 'use strict';
 
 const SITE_NAV_ITEMS = [
-  { href: 'index.html', label: 'Inicio', key: 'index' },
-  { href: 'downloads.html', label: 'Option Files', key: 'downloads' },
-  { href: 'tutorials.html', label: 'Tutoriales', key: 'tutorials' },
-  { href: 'database.html', label: 'Base de datos', key: 'database' },
-  { href: 'acerca-de.html', label: 'Acerca de', key: 'about' },
+  { href: 'index.html', labelKey: 'nav.home', fallback: 'Inicio', key: 'index' },
+  { href: 'downloads.html', labelKey: 'nav.downloads', fallback: 'Option Files', key: 'downloads' },
+  { href: 'tutorials.html', labelKey: 'nav.tutorials', fallback: 'Tutoriales', key: 'tutorials' },
+  { href: 'database.html', labelKey: 'nav.database', fallback: 'Base de datos', key: 'database' },
 ];
+
+function siteText(key, fallback) {
+  return typeof t === 'function' ? t(key) : fallback;
+}
 
 function currentPageKey() {
   const file = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -26,8 +29,28 @@ function renderMainNav() {
   const active = currentPageKey();
   nav.innerHTML = SITE_NAV_ITEMS.map(item => `
     <a href="${item.href}" class="header-nav-link${item.key === active ? ' active' : ''}">
-      ${item.label}
+      ${siteText(item.labelKey, item.fallback)}
     </a>`).join('');
+}
+
+function renderLanguageSelector() {
+  if (document.querySelector('.language-switcher')) return;
+  if (typeof getCurrentLanguage !== 'function' || !window.I18N_LANGUAGES) return;
+
+  const row = document.querySelector('#header');
+  if (!row) return;
+
+  const wrap = document.createElement('label');
+  wrap.className = 'language-switcher';
+  wrap.setAttribute('aria-label', siteText('language.label', 'Idioma'));
+  wrap.innerHTML = `
+    <span>${siteText('language.label', 'Idioma')}</span>
+    <select onchange="setLanguage(this.value)">
+      ${Object.entries(window.I18N_LANGUAGES).map(([code, info]) =>
+        `<option value="${code}"${getCurrentLanguage() === code ? ' selected' : ''}>${info.native}</option>`
+      ).join('')}
+    </select>`;
+  row.appendChild(wrap);
 }
 
 function renderSiteFooter() {
@@ -38,14 +61,14 @@ function renderSiteFooter() {
     <div class="site-footer-inner">
       <div>
         <div class="site-footer-title">La Araña Que Pica</div>
-        <div class="site-footer-copy">LAqP.website: canal, Option Files, tutoriales y base de datos.</div>
+        <div class="site-footer-copy">${siteText('footer.copy', 'LAqP.website: canal, Option Files, tutoriales y base de datos.')}</div>
       </div>
-      <nav class="site-footer-links" aria-label="Enlaces utiles">
-        <a href="faq.html#contacto">Contacto</a>
-        <a href="acerca-de.html">Acerca de</a>
+      <nav class="site-footer-links" aria-label="${siteText('footer.linksLabel', 'Enlaces utiles')}">
+        <a href="faq.html#contacto">${siteText('footer.contact', 'Contacto')}</a>
+        <a href="acerca-de.html">${siteText('nav.about', 'Acerca de')}</a>
         <a href="https://www.youtube.com/@L.A.q.P" target="_blank" rel="noopener noreferrer">YouTube</a>
-        <a href="faq.html#privacidad">Politica de privacidad</a>
-        <a href="faq.html">Ayuda / FAQ</a>
+        <a href="faq.html#privacidad">${siteText('footer.privacy', 'Politica de privacidad')}</a>
+        <a href="faq.html">${siteText('footer.help', 'Ayuda / FAQ')}</a>
       </nav>
     </div>`;
   document.body.appendChild(footer);
@@ -53,5 +76,12 @@ function renderSiteFooter() {
 
 document.addEventListener('DOMContentLoaded', () => {
   renderMainNav();
+  renderLanguageSelector();
   renderSiteFooter();
+  if (typeof applyI18nToDocument === 'function') applyI18nToDocument();
+  if (typeof renderLanguagePrompt === 'function') {
+    renderLanguagePrompt();
+  }
 });
+
+window.renderLanguageSelector = renderLanguageSelector;

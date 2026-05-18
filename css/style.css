@@ -367,9 +367,16 @@ textarea:focus-visible {
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 18px;
   color: var(--color-text-muted);
   font-size: 0.82rem;
+}
+
+.breadcrumb-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
 .breadcrumbs a {
@@ -397,6 +404,7 @@ textarea:focus-visible {
   padding: 60px 20px;
 }
 
+.home-welcome h1,
 .home-welcome h2 {
   font-size: 1.8rem;
   margin-bottom: 12px;
@@ -419,6 +427,49 @@ textarea:focus-visible {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   margin: 18px 0 24px;
+}
+
+.seo-content-block {
+  margin: 18px 0 22px;
+  max-width: 920px;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.seo-content-block h2 {
+  color: var(--color-text);
+  font-size: 1.18rem;
+  margin-bottom: 8px;
+}
+
+.seo-content-block p + p {
+  margin-top: 10px;
+}
+
+.seo-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.seo-link-row a {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.seo-link-row a:hover {
+  border-color: var(--color-highlight);
+  color: var(--color-highlight);
 }
 
 .db-menu-card {
@@ -2588,7 +2639,7 @@ textarea:focus-visible {
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: 10px;
-  padding: 16px;
+  padding: 16px 18px 18px;
   margin-bottom: 24px;
 }
 
@@ -2635,20 +2686,23 @@ textarea:focus-visible {
 
 .formation-layout {
   display: grid;
-  grid-template-columns: minmax(300px, 360px) minmax(260px, 1fr);
-  gap: 22px;
-  align-items: flex-start;
+  grid-template-columns: minmax(260px, 1fr) 380px minmax(260px, 1fr);
+  gap: 18px;
+  align-items: stretch;
+  min-height: 420px;
 }
 
 .pitch-container {
   display: flex;
   justify-content: center;
+  align-items: stretch;
   width: 100%;
+  min-height: 420px;
 }
 
 .pitch-field {
   position: relative;
-  width: 300px;
+  width: 380px;
   height: 420px;
   background:
     repeating-linear-gradient(
@@ -2659,7 +2713,7 @@ textarea:focus-visible {
       rgba(0,0,0,0.045) 44px
     ),
     linear-gradient(to bottom, #1b5c16, #2e7a27);
-  border: 1.5px solid rgba(255,255,255,0.3);
+  border: 1.5px solid rgba(255,255,255,0.36);
   border-radius: 6px;
   overflow: visible;
 }
@@ -2852,18 +2906,24 @@ textarea:focus-visible {
 /* ── Formation tactics & assignments ── */
 .formation-info-columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 18px;
   width: 100%;
   min-width: 200px;
 }
 
 .formation-tactic-block {
-  min-width: 160px;
+  min-width: 0;
+  min-height: 420px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  padding: 12px;
+  padding: 14px 16px;
+  overflow: hidden;
+}
+
+.formation-tactic-block.is-empty {
+  visibility: hidden;
 }
 
 .formation-block-title {
@@ -2872,8 +2932,8 @@ textarea:focus-visible {
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--color-text-muted);
-  margin-bottom: 8px;
-  padding-bottom: 6px;
+  margin-bottom: 10px;
+  padding-bottom: 9px;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -2881,10 +2941,10 @@ textarea:focus-visible {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 8px;
-  padding: 3px 0;
+  gap: 14px;
+  padding: 6px 0;
   border-bottom: 1px solid var(--color-border);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .tactic-row:last-child {
@@ -2893,15 +2953,19 @@ textarea:focus-visible {
 
 .tactic-label {
   color: var(--color-text-muted);
-  font-size: 0.75rem;
-  flex-shrink: 0;
+  font-size: 0.8rem;
+  min-width: 0;
 }
 
 .tactic-value {
   color: var(--color-text);
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   text-align: right;
+  max-width: 52%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 820px) {
@@ -2921,7 +2985,7 @@ textarea:focus-visible {
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: 10px;
-  padding: 16px;
+  padding: 14px;
   margin-bottom: 24px;
 }
 
@@ -2996,7 +3060,7 @@ textarea:focus-visible {
 }
 
 .player-cards-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .player-cards-group:last-child {
@@ -3033,16 +3097,41 @@ textarea:focus-visible {
 
 .player-cards-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 2px 12px;
+  scrollbar-color: var(--color-border) var(--color-surface);
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.player-cards-row::-webkit-scrollbar {
+  height: 10px;
+}
+
+.player-cards-row::-webkit-scrollbar-track {
+  background: var(--color-surface);
+  border-radius: 999px;
+}
+
+.player-cards-row::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+
+.player-cards-row::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
 }
 
 .player-card {
   flex-shrink: 0;
-  width: 155px;
+  width: 136px;
   background: linear-gradient(160deg, var(--color-bg-elevated) 0%, var(--color-bg-card) 100%);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
   text-decoration: none;
   color: inherit;
@@ -3050,14 +3139,15 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   cursor: pointer;
+  scroll-snap-align: start;
 }
 
 /* Responsive player cards: shrink on small screens */
 @media (max-width: 640px) {
   .player-card {
-    width: calc(50vw - 28px);
-    min-width: 120px;
-    max-width: 155px;
+    width: 124px;
+    min-width: 124px;
+    max-width: 124px;
   }
   .player-card-photo-wrap {
     height: 75px;
@@ -3084,8 +3174,8 @@ textarea:focus-visible {
 }
 
 .player-card:hover {
-  transform: translateY(-5px) scale(1.03);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.48);
   border-color: var(--color-highlight);
 }
 
@@ -3093,7 +3183,7 @@ textarea:focus-visible {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 10px 10px 6px;
+  padding: 8px 8px 5px;
   border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 
@@ -3105,14 +3195,14 @@ textarea:focus-visible {
 }
 
 .player-card-ovr {
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: 900;
   line-height: 1;
-  letter-spacing: -1px;
+  letter-spacing: 0;
 }
 
 .player-card-pos {
-  font-size: 0.7rem;
+  font-size: 0.64rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -3123,18 +3213,18 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .player-card-flag {
-  width: 26px;
-  height: 18px;
+  width: 23px;
+  height: 16px;
   object-fit: contain;
 }
 
 .player-card-crest {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 
@@ -3143,40 +3233,40 @@ textarea:focus-visible {
   justify-content: center;
   align-items: flex-end;
   background: rgba(0,0,0,0.15);
-  height: 90px;
+  height: 78px;
   overflow: hidden;
 }
 
 .player-card-photo {
-  width: 80px;
-  height: 90px;
+  width: 70px;
+  height: 78px;
   object-fit: cover;
   object-position: top center;
   display: block;
 }
 
 .player-card-footer {
-  padding: 8px 10px 10px;
+  padding: 7px 8px 8px;
   flex: 1;
 }
 
 .player-card-name {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-align: center;
   color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .player-card-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
+  gap: 3px;
   border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 7px;
+  padding-top: 6px;
 }
 
 .pcs {
@@ -3187,13 +3277,13 @@ textarea:focus-visible {
 }
 
 .pcs-val {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 800;
   line-height: 1;
 }
 
 .pcs-key {
-  font-size: 0.52rem;
+  font-size: 0.48rem;
   color: var(--color-text-muted);
   text-transform: uppercase;
   font-weight: 600;
@@ -3739,6 +3829,11 @@ textarea:focus-visible {
 .team-info-item {
   font-size: 0.8rem;
   color: var(--color-text-muted);
+}
+
+.team-info-label {
+  color: var(--color-text);
+  font-weight: 700;
 }
 
 /* ── Grid search box ── */
@@ -4487,24 +4582,39 @@ textarea:focus-visible {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: rgba(11, 13, 16, 0.82);
-  border: 2.5px solid rgba(255,255,255,0.7);
-  color: #fff;
-  font-size: 1.3rem;
+  background: rgba(11, 13, 16, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  color: transparent;
+  font-size: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, transform 0.15s;
-  padding-left: 4px; /* optical centering for the ▶ char */
+  transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  backdrop-filter: blur(3px);
 }
 
+.tutorial-play-btn::before {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 15px solid #fff;
+}
+
+.tutorial-card:hover .tutorial-play-btn,
 .tutorial-play-btn:hover {
   background: var(--color-highlight);
-  transform: translate(-50%, -50%) scale(1.1);
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12px 28px rgba(214, 168, 79, 0.24);
+  transform: translate(-50%, -50%) scale(1.06);
 }
 
 /* ── Tutorial card body ── */
@@ -5060,6 +5170,163 @@ textarea:focus-visible {
   color: var(--color-highlight);
 }
 
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.language-switcher select {
+  min-height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-card);
+  color: var(--color-text);
+  padding: 0 8px;
+  cursor: pointer;
+}
+
+#header > .language-switcher {
+  margin-left: 0;
+}
+
+.shirt-number-directory {
+  margin-top: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-card);
+  overflow: hidden;
+}
+
+.shirt-number-directory summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  color: var(--color-text);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.shirt-number-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.shirt-number-slot {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.shirt-number-slot.is-free {
+  color: var(--color-text-muted);
+  opacity: 0.72;
+}
+
+.shirt-number-value {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  color: var(--color-highlight);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.shirt-number-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.shirt-number-slot:hover .shirt-number-name {
+  text-overflow: clip;
+}
+
+.shirt-number-slot:hover .shirt-number-name:not(:only-child) {
+  animation: shirt-number-name-marquee 4.8s linear infinite;
+}
+
+@keyframes shirt-number-name-marquee {
+  0%, 12% {
+    transform: translateX(0);
+  }
+  88%, 100% {
+    transform: translateX(calc(-100% + 100px));
+  }
+}
+
+.language-prompt {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 300;
+  width: min(360px, calc(100vw - 28px));
+  border: 1px solid rgba(214, 168, 79, 0.34);
+  border-radius: 10px;
+  background: var(--color-bg-elevated);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+  padding: 16px;
+}
+
+.language-prompt-title {
+  color: var(--color-text);
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.language-prompt-body {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.language-prompt-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.language-prompt-actions button {
+  min-height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  padding: 0 12px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.language-prompt-actions .language-prompt-accept {
+  border-color: var(--color-highlight);
+  background: var(--color-highlight);
+  color: #111;
+}
+
 
 
 @media (max-width: 900px) {
@@ -5082,6 +5349,10 @@ textarea:focus-visible {
   #search-container {
     min-width: 150px;
     max-width: 210px;
+  }
+
+  .language-switcher span {
+    display: none;
   }
 
   .download-cards-grid {
@@ -5782,6 +6053,12 @@ body:has(#layout) .site-footer {
 }
 
 @media (max-width: 640px) {
+  .breadcrumb-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
   #header {
     overflow: hidden;
   }
@@ -6064,10 +6341,15 @@ body:has(#layout) .site-footer {
   .profile-stats-layout,
   .stats-compact-layout,
   .formation-layout,
-  .formation-info-columns,
   .face-data-grid,
   .appearance-stats {
     grid-template-columns: 1fr;
+  }
+
+  .formation-layout,
+  .pitch-container,
+  .formation-tactic-block {
+    min-height: 0;
   }
 
   .player-info-card-name,
@@ -6092,7 +6374,7 @@ body:has(#layout) .site-footer {
   }
 
   .pitch-field {
-    width: min(100%, 300px);
+    width: min(100%, 380px);
   }
 
   .pitch-player {

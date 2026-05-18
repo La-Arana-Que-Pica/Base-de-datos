@@ -12,9 +12,30 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Base de datos – Option File PES 2018–2026</title>
+  <title>Base de Datos PES 2018 Actualizada - Jugadores, Equipos y Stats</title>
+  <meta name="description" content="Consultá la base de datos de PES 2018 de LAqP con jugadores, equipos, ligas, medias, stats, posiciones, caras y datos conectados al Option File actualizado." />
+  <link rel="canonical" href="https://laqp.website/database.html" />
+  <meta property="og:title" content="Base de Datos PES 2018 Actualizada - Jugadores, Equipos y Stats" />
+  <meta property="og:description" content="Explorá jugadores, equipos, ligas, medias, stats y posiciones del Option File PES 2018 de LAqP." />
+  <meta property="og:image" content="https://laqp.website/img/logo.png" />
+  <meta property="og:url" content="https://laqp.website/database.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Base de Datos PES 2018 Actualizada - LAqP" />
+  <meta name="twitter:description" content="Jugadores, equipos, ligas, medias y stats del Option File PES 2018 actualizado." />
+  <meta name="twitter:image" content="https://laqp.website/img/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="img/logo.webp" type="image/webp" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://laqp.website/" },
+      { "@type": "ListItem", "position": 2, "name": "Base de datos", "item": "https://laqp.website/database.html" }
+    ]
+  }
+  </script>
   <!-- Preconnect for YouTube thumbnails / embeds (used in tutorials) -->
   <link rel="preconnect" href="https://img.youtube.com" crossorigin />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5301686002102491"
@@ -32,9 +53,9 @@
       onclick="goHome()"
       style="cursor:pointer"
     />
-    <h1>
+    <div class="header-title">
       Base de datos Option File <span>PES 2018–2026</span>
-    </h1>
+    </div>
     <nav class="header-nav" aria-label="Menu principal">
       <a href="downloads.html" class="header-nav-link header-nav-link-primary">Option Files</a>
       <a href="tutorials.html" class="header-nav-link">Tutoriales</a>
@@ -46,6 +67,7 @@
         type="text"
         id="search-input"
         placeholder="Buscar jugadores..."
+        data-i18n-placeholder="search.players"
         autocomplete="off"
       />
     </div>
@@ -65,49 +87,51 @@
       <!-- Loading overlay -->
       <div id="loading-overlay">
         <div class="spinner"></div>
-        <span class="loading-message">Cargando base de datos...</span>
+        <span class="loading-message" data-i18n="loading.database">Cargando base de datos...</span>
       </div>
 
       <!-- Home view -->
       <div id="home-view">
-        <nav class="breadcrumbs" aria-label="Breadcrumb">
-          <a href="index.html">Inicio</a>
-          <span>Base de datos</span>
-        </nav>
+        <div class="breadcrumb-row">
+          <nav class="breadcrumbs" aria-label="Breadcrumb">
+            <a href="index.html" data-i18n="common.home">Inicio</a>
+            <span data-i18n="common.database">Base de datos</span>
+          </nav>
+        </div>
         <div class="home-welcome db-home-welcome">
-          <h2>Base de datos de jugadores</h2>
-          <p>Explora ligas, equipos y jugadores desde un menu interno simple.</p>
+          <h1 data-i18n="db.homeTitle">Base de datos de jugadores</h1>
+          <p data-i18n="db.homeDesc">Explora ligas, equipos y jugadores desde un menu interno simple.</p>
         </div>
         <div class="db-home-menu">
           <button class="db-menu-card" type="button" onclick="showLeaguesView()">
-            <span class="db-menu-card-title">Explorar ligas</span>
-            <span class="db-menu-card-desc">Ver competiciones y sus equipos</span>
+            <span class="db-menu-card-title" data-i18n="db.exploreLeagues">Explorar ligas</span>
+            <span class="db-menu-card-desc" data-i18n="db.exploreLeaguesDesc">Ver competiciones y sus equipos</span>
           </button>
           <button class="db-menu-card" type="button" onclick="showTeamsView()">
-            <span class="db-menu-card-title">Explorar equipos</span>
-            <span class="db-menu-card-desc">Entrar directo a clubes y selecciones</span>
+            <span class="db-menu-card-title" data-i18n="db.exploreTeams">Explorar equipos</span>
+            <span class="db-menu-card-desc" data-i18n="db.exploreTeamsDesc">Entrar directo a clubes y selecciones</span>
           </button>
           <button class="db-menu-card" type="button" onclick="showAllPlayersAndFocusSearch()">
-            <span class="db-menu-card-title">Buscar jugadores</span>
-            <span class="db-menu-card-desc">Filtrar por nombre, club, media y habilidades</span>
+            <span class="db-menu-card-title" data-i18n="db.searchPlayers">Buscar jugadores</span>
+            <span class="db-menu-card-desc" data-i18n="db.searchPlayersDesc">Filtrar por nombre, club, media y habilidades</span>
           </button>
         </div>
         <div class="stats-grid db-stats-grid">
           <div class="stat-card" onclick="showLeaguesView()">
             <div class="number" id="stat-leagues">0</div>
-            <div class="label">Ligas</div>
+            <div class="label" data-i18n="common.leagues">Ligas</div>
           </div>
           <div class="stat-card" onclick="showTeamsView()">
             <div class="number" id="stat-teams">0</div>
-            <div class="label">Equipos</div>
+            <div class="label" data-i18n="common.teams">Equipos</div>
           </div>
           <div class="stat-card" onclick="showAllPlayers()">
             <div class="number" id="stat-players">0</div>
-            <div class="label">Jugadores</div>
+            <div class="label" data-i18n="common.players">Jugadores</div>
           </div>
           <div class="stat-card" onclick="showFavoritesView()">
             <div class="number" id="stat-favorites">⭐</div>
-            <div class="label">Mis favoritos</div>
+            <div class="label" data-i18n="db.myFavorites">Mis favoritos</div>
           </div>
         </div>
       </div>
@@ -145,6 +169,7 @@
     </main>
   </div>
 
+  <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/favorites.js"></script>
   <script src="js/app.js"></script>

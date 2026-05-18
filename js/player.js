@@ -263,7 +263,9 @@ const NATIONALITY_NAMES = {
 
 function nationalityName(countryId) {
   if (!countryId) return '–';
-  return NATIONALITY_NAMES[String(countryId)] || countryId;
+  return (typeof i18nLookup === 'function' ? i18nLookup('countries', String(countryId), '') : '')
+    || NATIONALITY_NAMES[String(countryId)]
+    || countryId;
 }
 
 // Team type → Spanish label
@@ -274,11 +276,24 @@ const TYPE_LABELS = {
 };
 
 function translateStat(csvCol) {
-  return STAT_LABELS[csvCol] || csvCol;
+  return typeof i18nLookup === 'function' ? i18nLookup('stats', csvCol, csvCol) : (STAT_LABELS[csvCol] || csvCol);
 }
 
 function translatePosition(pesPos) {
-  return POSITION_LABELS[pesPos] || pesPos;
+  return typeof i18nLookup === 'function' ? i18nLookup('positions', pesPos, pesPos) : (POSITION_LABELS[pesPos] || pesPos);
+}
+
+function teamTypeLabel(type) {
+  return typeof i18nLookup === 'function' ? i18nLookup('types', String(type), TYPE_LABELS[type] || '') : (TYPE_LABELS[type] || '');
+}
+
+function playingStyleLabel(value) {
+  return typeof i18nLookup === 'function' ? i18nLookup('playingStyles', String(value), PLAYING_STYLE_LABELS[value] || value) : (PLAYING_STYLE_LABELS[value] || value);
+}
+
+function pairLabel(group, code, fallback) {
+  const pairs = typeof i18nPairs === 'function' ? i18nPairs(group) : [];
+  return (pairs.find(([key]) => key === code) || [null, fallback || code])[1];
 }
 
 const DEFENSIVE_POSITION_COLOR = '#3EBEC8';
@@ -960,17 +975,17 @@ function renderHabilidades(player) {
     .map(col => renderStatRow(translateStat(col), player[col], col))
     .join('');
   return `<div class="player-section">
-    <div class="player-section-title">Habilidades</div>
+    <div class="player-section-title">${t('player.abilities')}</div>
     <div class="stats-list">${rows}</div>
   </div>`;
 }
 
 function renderEstiloDeJuego(player) {
   const val = player['PlayingStyle'] || '';
-  const styleName = PLAYING_STYLE_LABELS[val] || (val ? `Estilo ${val}` : '-');
+  const styleName = playingStyleLabel(val) || (val ? `${t('filters.playingStyle')} ${val}` : '-');
   const isEmpty = !val || val === '0' || val === '18' || styleName === '-';
   return `<div class="player-section">
-    <div class="player-section-title">Roles</div>
+    <div class="player-section-title">${t('player.roles')}</div>
     <div class="skill-items-list">
       <div class="skill-item-row${isEmpty ? ' skill-item-empty' : ''}">${isEmpty ? '-' : styleName}</div>
     </div>
@@ -980,10 +995,10 @@ function renderEstiloDeJuego(player) {
 function renderHabilidadesJugador(player) {
   const active = PLAYER_SKILLS.filter(s => player[s.col] === 'True');
   const content = active.length
-    ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${s.label}</div>`).join('')}</div>`
+    ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${pairLabel('playerSkills', s.col, s.label)}</div>`).join('')}</div>`
     : `<div class="skill-items-list"><div class="skill-item-row skill-item-empty">-</div></div>`;
   return `<div class="player-section">
-    <div class="player-section-title">Habilidades de jugador</div>
+    <div class="player-section-title">${t('player.playerSkills')}</div>
     ${content}
   </div>`;
 }
@@ -991,10 +1006,10 @@ function renderHabilidadesJugador(player) {
 function renderEstilosJuegoCOM(player) {
   const active = COM_PLAYING_STYLES.filter(s => player[s.col] === 'True');
   const content = active.length
-    ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${s.label}</div>`).join('')}</div>`
+    ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${pairLabel('comStyles', s.col, s.label)}</div>`).join('')}</div>`
     : `<div class="skill-items-list"><div class="skill-item-row skill-item-empty">-</div></div>`;
   return `<div class="player-section">
-    <div class="player-section-title">Estilos de juego COM</div>
+    <div class="player-section-title">${t('player.comStyles')}</div>
     ${content}
   </div>`;
 }
@@ -1005,15 +1020,28 @@ function appearanceImagePath(imageKey, value) {
   return `img/appearance/${imageKey}/${value}.webp`;
 }
 
+function appearanceSectionTitle(title) {
+  return title ? i18nLookup('appearanceSections', title, title) : '';
+}
+
+function appearanceFieldLabel(field) {
+  return i18nLookup('appearanceFields', field.col, field.label || field.col);
+}
+
+function appearanceEnumLabel(value) {
+  return i18nLookup('appearanceEnums', value, value);
+}
+
 function renderAppearanceField(field, appearance, player) {
   const source = field.source === 'player' ? player : appearance;
   const rawVal = source ? (source[field.col] !== undefined ? source[field.col] : '') : '';
+  const fieldLabel = appearanceFieldLabel(field);
 
   // Conditional dash: show '-' when a dependency column matches a specific value
   if (field.conditionalDash) {
     const depVal = appearance ? (appearance[field.conditionalDash.col] || '') : '';
     if (depVal === field.conditionalDash.value) {
-      return renderAppearanceRow(field.label, '-', null, null);
+      return renderAppearanceRow(fieldLabel, '-', null, null);
     }
   }
 
@@ -1021,7 +1049,7 @@ function renderAppearanceField(field, appearance, player) {
   if (field.gkOnly) {
     const posIdx = parseInt(player ? (player['POS'] || '') : '', 10);
     if (isNaN(posIdx) || posIdx !== 0) {
-      return renderAppearanceRow(field.label, '-', null, null);
+      return renderAppearanceRow(fieldLabel, '-', null, null);
     }
   }
 
@@ -1029,23 +1057,23 @@ function renderAppearanceField(field, appearance, player) {
   if (field.notApplicableWhen) {
     const depVal = appearance ? (appearance[field.notApplicableWhen.col] || '') : '';
     if (depVal === field.notApplicableWhen.value) {
-      return renderAppearanceRow(field.label, '*', null, null);
+      return renderAppearanceRow(fieldLabel, '*', null, null);
     }
   }
 
   // conditionalLabel: show a specific label when rawVal matches the given value (takes priority over imageKey)
   if (field.conditionalLabel && rawVal === field.conditionalLabel.value) {
-    return renderAppearanceRow(field.label, field.conditionalLabel.label, null, null);
+    return renderAppearanceRow(fieldLabel, appearanceEnumLabel(field.conditionalLabel.label), null, null);
   }
 
   // zeroLabel: show a custom label (e.g. "No") when value is '0'
   if (field.zeroLabel !== undefined && rawVal === '0') {
-    return renderAppearanceRow(field.label, field.zeroLabel, null, null);
+    return renderAppearanceRow(fieldLabel, appearanceEnumLabel(field.zeroLabel), null, null);
   }
 
   // dashIfZero: show '-' if value is '0'
   if (field.dashIfZero && rawVal === '0') {
-    return renderAppearanceRow(field.label, '-', null, null);
+    return renderAppearanceRow(fieldLabel, '-', null, null);
   }
 
   const displayVal = rawVal !== undefined && rawVal !== '' ? rawVal : '-';
@@ -1053,8 +1081,8 @@ function renderAppearanceField(field, appearance, player) {
   // Enum translation
   if (field.enum) {
     const translated = field.enum[rawVal];
-    const label = translated !== undefined ? translated : displayVal;
-    return renderAppearanceRow(field.label, label, null, null);
+    const label = translated !== undefined ? appearanceEnumLabel(translated) : displayVal;
+    return renderAppearanceRow(fieldLabel, label, null, null);
   }
 
   // imageKey with bootDisplay: show equipment image using ID, display 2-digit PES number
@@ -1067,19 +1095,19 @@ function renderAppearanceField(field, appearance, player) {
     } else {
       displayText = rawVal;
     }
-    return renderAppearanceRow(field.label, displayText, imgPath, field.imageKey);
+    return renderAppearanceRow(fieldLabel, displayText, imgPath, field.imageKey);
   }
 
   // imageKey: always show image for the field when value is present
   if (field.imageKey && rawVal) {
     const imgPath = appearanceImagePath(field.imageKey, rawVal);
-    return renderAppearanceRow(field.label, rawVal, imgPath, field.imageKey);
+    return renderAppearanceRow(fieldLabel, rawVal, imgPath, field.imageKey);
   }
 
   // showImageIf: show image only when value is non-zero and non-empty (e.g. Side/Back - Cropped)
   if (field.showImageIf && rawVal && rawVal !== '0') {
     const imgPath = appearanceImagePath(field.imageKey, rawVal);
-    return renderAppearanceRow(field.label, rawVal, imgPath, field.imageKey);
+    return renderAppearanceRow(fieldLabel, rawVal, imgPath, field.imageKey);
   }
 
   const numVal = Number(displayVal);
@@ -1090,7 +1118,7 @@ function renderAppearanceField(field, appearance, player) {
   } else {
     formattedVal = displayVal;
   }
-  return renderAppearanceRow(field.label, formattedVal, null, null);
+  return renderAppearanceRow(fieldLabel, formattedVal, null, null);
 }
 
 function renderAppearanceRow(label, value, imgPath, imageKey) {
@@ -1109,14 +1137,14 @@ function renderAppearanceRow(label, value, imgPath, imageKey) {
     valueHtml = `<span class="face-data-value${extraClass}">${value}</span>`;
   }
   return `<div class="face-data-row">
-    <span class="face-data-label">${label}</span>
+    <span class="face-data-label">${escapeHtml(label)}</span>
     ${valueHtml}
   </div>`;
 }
 
 function renderFaceData(appearance, player, baseCopyPlayerName, isScanned) {
   if (!appearance && !player) {
-    return `<div class="appearance-empty">No hay datos de apariencia para este jugador.</div>`;
+    return `<div class="appearance-empty">${t('player.noAppearance')}</div>`;
   }
 
   // Check if the player has a scanned face (Id_Face ≠ 0)
@@ -1134,20 +1162,20 @@ function renderFaceData(appearance, player, baseCopyPlayerName, isScanned) {
   let noticeHtml = '';
   if (isScanned) {
     noticeHtml = `<div class="scanned-face-notice">
-        <span class="scanned-face-icon">🎯</span>
-        Este jugador está escaneado en el juego.
+        <span class="scanned-face-icon">i</span>
+        ${t('player.scanned')}
       </div>`;
   } else if (hasScannedFace) {
     noticeHtml = `<div class="scanned-face-notice">
-        <span class="scanned-face-icon">📋</span>
+        <span class="scanned-face-icon">i</span>
         ${baseCopyPlayerName
-          ? `Usa la cara base de: <strong>${baseCopyPlayerName}</strong>`
-          : `Usa la cara base de un jugador.`}
+          ? t('player.usesBaseFace', { name: escapeHtml(baseCopyPlayerName) })
+          : t('player.usesBaseFaceUnknown')}
       </div>`;
   }
 
   const navButtons = sectionsToShow.map((section, i) =>
-    `<button class="appearance-section-btn${i === 0 ? ' active' : ''}" onclick="switchAppearanceSection(${i})">${section.title}</button>`
+    `<button class="appearance-section-btn${i === 0 ? ' active' : ''}" onclick="switchAppearanceSection(${i})">${appearanceSectionTitle(section.title)}</button>`
   ).join('');
 
   const sectionsHtml = sectionsToShow.map((section, i) => {
@@ -1157,7 +1185,7 @@ function renderFaceData(appearance, player, baseCopyPlayerName, isScanned) {
         .join('');
       if (!fieldsHtml) return '';
       const subTitle = sub.title
-        ? `<div class="face-subsection-title">${sub.title}</div>`
+        ? `<div class="face-subsection-title">${appearanceSectionTitle(sub.title)}</div>`
         : '';
       return `<div class="face-subsection">${subTitle}<div class="face-data-grid">${fieldsHtml}</div></div>`;
     }).join('');
@@ -1331,6 +1359,7 @@ function renderPositionPitch(player) {
 
   const positions = POSITION_DISPLAY.map(item => ({
     ...item,
+    abbr: translatePosition(item.pos),
     grade: getPositionGrade(player[item.pos], item.pos === primaryPos),
   }));
   const selectedPos = (positions.find(item => item.pos === primaryPos) || positions.find(item => item.grade) || positions[0]).pos;
@@ -1358,13 +1387,13 @@ function renderPositionPitch(player) {
   return `
     <div class="player-section position-map-section" data-view-mode="${viewMode}" style="margin-bottom:0">
       <div class="position-map-header">
-        <div class="player-section-title">Posiciones aptas</div>
-        <div class="position-view-switch" aria-label="Vista de posiciones">
-          <button class="position-view-toggle${viewMode === 'colors' ? ' is-active' : ''}" type="button" data-mode="colors" aria-pressed="${viewMode === 'colors' ? 'true' : 'false'}" onclick="setPositionViewMode('colors')">Colores</button>
-          <button class="position-view-toggle${viewMode === 'letters' ? ' is-active' : ''}" type="button" data-mode="letters" aria-pressed="${viewMode === 'letters' ? 'true' : 'false'}" onclick="setPositionViewMode('letters')">Letras</button>
+        <div class="player-section-title">${t('player.suitablePositions')}</div>
+        <div class="position-view-switch" aria-label="${t('player.positionView')}">
+          <button class="position-view-toggle${viewMode === 'colors' ? ' is-active' : ''}" type="button" data-mode="colors" aria-pressed="${viewMode === 'colors' ? 'true' : 'false'}" onclick="setPositionViewMode('colors')">${t('player.colors')}</button>
+          <button class="position-view-toggle${viewMode === 'letters' ? ' is-active' : ''}" type="button" data-mode="letters" aria-pressed="${viewMode === 'letters' ? 'true' : 'false'}" onclick="setPositionViewMode('letters')">${t('player.letters')}</button>
         </div>
       </div>
-      <div class="positions-map" aria-label="Mapa de posiciones aptas">
+      <div class="positions-map" aria-label="${t('player.positionMap')}">
         <div class="positions-grid">
           ${cells}
         </div>
@@ -1528,14 +1557,14 @@ function renderSimilarPlayers(similarPlayers) {
   if (!similarPlayers || !similarPlayers.length) {
     return `
       <section class="player-section similar-players-section">
-        <div class="player-section-title">Jugadores similares</div>
-        <p class="similar-players-empty">No hay datos suficientes para calcular jugadores similares.</p>
+        <div class="player-section-title">${t('player.similar')}</div>
+        <p class="similar-players-empty">${t('player.noSimilar')}</p>
       </section>`;
   }
 
   return `
     <section class="player-section similar-players-section">
-      <div class="player-section-title">Jugadores similares</div>
+      <div class="player-section-title">${t('player.similar')}</div>
       <div class="similar-players-grid">
         ${similarPlayers.map(({ player, team, pos }) => {
           const ovr = player['OverallStats'] || '-';
@@ -1549,7 +1578,7 @@ function renderSimilarPlayers(similarPlayers) {
                   onerror="handleMinifaceError(this,'${player['Id']}')"
                   alt="${escapeHtml(player['Name'] || '')}">
                 <div>
-                  <div class="similar-player-name">${escapeHtml(player['Name'] || 'Jugador')}</div>
+                  <div class="similar-player-name">${escapeHtml(player['Name'] || t('player.unknown'))}</div>
                   <div class="similar-player-team">${escapeHtml(team.displayName || '')}</div>
                 </div>
               </div>
@@ -1557,7 +1586,7 @@ function renderSimilarPlayers(similarPlayers) {
                 <span class="similar-player-position" style="${posStyle}">${escapeHtml(translatePosition(pos))}</span>
                 <span style="background:${ovrColor};color:${statTextColor(ovrColor)}">${escapeHtml(ovr)}</span>
               </div>
-              <a class="similar-player-link" href="player.html?id=${encodeURIComponent(player['Id'])}&team=${encodeURIComponent(team.id)}">Abrir ficha</a>
+              <a class="similar-player-link" href="player.html?id=${encodeURIComponent(player['Id'])}&team=${encodeURIComponent(team.id)}">${t('player.openCard')}</a>
             </article>`;
         }).join('')}
       </div>
@@ -1579,8 +1608,8 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
   const footVal = player['Foot'];
   let footDisplay;
-  if (footVal === 'True') footDisplay = 'Izquierdo';
-  else if (footVal === 'False') footDisplay = 'Derecho';
+  if (footVal === 'True') footDisplay = t('filters.left');
+  else if (footVal === 'False') footDisplay = t('filters.right');
   else footDisplay = footVal || '–';
 
   // Position pitch rendered in header (removed from stats tab)
@@ -1611,19 +1640,19 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   const favBtnHtml = (typeof isFavorite === 'function')
     ? `<button id="profile-fav-btn" class="profile-fav-btn${favActive ? ' is-fav' : ''}"
          onclick="toggleProfileFavorite('${player['Id']}','${team.id}')"
-         title="${favActive ? 'Quitar de favoritos' : 'Agregar a favoritos'}">
-         ${favActive ? '★ En favoritos' : '☆ Agregar a favoritos'}
+         title="${favActive ? t('favorites.remove') : t('favorites.add')}">
+         ${favActive ? `★ ${t('favorites.in')}` : `☆ ${t('favorites.add')}`}
        </button>`
     : '';
 
   content.innerHTML = `
-    <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">Inicio</a>
-      <a href="database.html">Base de datos</a>
+    <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="index.html">${t('common.home')}</a>
+      <a href="database.html">${t('common.database')}</a>
       <a href="team.html?id=${team.id}">${team.displayName}</a>
-      <span>${player['Name'] || 'Jugador'}</span>
-    </nav>
-    <button class="back-btn" onclick="goBack()">◀ Volver</button>
+      <span>${player['Name'] || t('player.unknown')}</span>
+    </nav></div>
+    <button class="back-btn" onclick="goBack()">◀ ${t('common.back')}</button>
 
     <div class="player-profile-page">
 
@@ -1656,15 +1685,15 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
                 alt="${player['Name'] || ''}">
             </div>
             <div class="player-info-card-body">
-              <div class="player-info-card-name" title="${player['Name'] || ''}">${player['Name'] || 'Jugador desconocido'}</div>
+              <div class="player-info-card-name" title="${player['Name'] || ''}">${player['Name'] || t('player.unknown')}</div>
               ${typeLabel ? `<div class="player-info-card-type">${typeLabel}</div>` : ''}
-              ${playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
-              ${minifacePlayerName ? `<div class="profile-miniface-note">🎭 Miniface: <strong>${minifacePlayerName}</strong></div>` : ''}
+              ${playsForNational ? `<div class="national-team-note">${t('player.alsoNational')}</div>` : ''}
+              ${minifacePlayerName ? `<div class="profile-miniface-note">${t('player.miniface', { name: minifacePlayerName })}</div>` : ''}
               <div class="player-card-stats player-info-card-stats">
-                <div class="pcs"><span class="pcs-val">${player['Age'] || '–'}</span><span class="pcs-key">Edad</span></div>
-                <div class="pcs"><span class="pcs-val">${player['Height'] || '–'} cm</span><span class="pcs-key">Alt</span></div>
-                <div class="pcs"><span class="pcs-val">${player['Weight'] || '–'} kg</span><span class="pcs-key">Peso</span></div>
-                <div class="pcs"><span class="pcs-val">${footDisplay}</span><span class="pcs-key">Pie</span></div>
+                <div class="pcs"><span class="pcs-val">${player['Age'] || '–'}</span><span class="pcs-key">${t('common.age')}</span></div>
+                <div class="pcs"><span class="pcs-val">${player['Height'] || '–'} cm</span><span class="pcs-key">${t('common.heightShort')}</span></div>
+                <div class="pcs"><span class="pcs-val">${player['Weight'] || '–'} kg</span><span class="pcs-key">${t('common.weight')}</span></div>
+                <div class="pcs"><span class="pcs-val">${footDisplay}</span><span class="pcs-key">${t('common.foot')}</span></div>
               </div>
               ${favBtnHtml}
             </div>
@@ -1673,7 +1702,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
         <!-- Column 2: Radar chart card -->
         <div class="player-header-card player-radar-card">
-          <div class="player-header-card-title">Estadísticas</div>
+          <div class="player-header-card-title">${t('player.stats')}</div>
           <div class="player-header-radar-wrap">
             <canvas id="radar-canvas" width="240" height="240"></canvas>
           </div>
@@ -1689,8 +1718,8 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
       <!-- Tabs -->
       <div class="profile-tabs">
         <div class="profile-tab-bar">
-          <button class="profile-tab-btn active" data-tab="tab-stats" onclick="switchTab('tab-stats')">Estadísticas</button>
-          <button class="profile-tab-btn" data-tab="tab-appearance" onclick="switchTab('tab-appearance')">Apariencia</button>
+          <button class="profile-tab-btn active" data-tab="tab-stats" onclick="switchTab('tab-stats')">${t('player.stats')}</button>
+          <button class="profile-tab-btn" data-tab="tab-appearance" onclick="switchTab('tab-appearance')">${t('player.appearance')}</button>
         </div>
 
         <div id="tab-stats" class="profile-tab-panel active">
@@ -1699,7 +1728,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
         <div id="tab-appearance" class="profile-tab-panel">
           <div class="appearance-info">
-            Estos valores definen el aspecto del jugador en el editor del juego.
+            ${t('player.appearanceInfo')}
           </div>
           ${appearanceHtml}
         </div>
@@ -1713,7 +1742,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   document.getElementById('loading-overlay').style.display = 'none';
 
   // Update page title
-  document.title = `${player['Name'] || 'Jugador'} – Base de datos PES`;
+  document.title = `${player['Name'] || t('player.unknown')} - ${t('common.database')} PES`;
 
   requestAnimationFrame(() => drawRadar('radar-canvas', radarAttrs));
 }
@@ -1731,9 +1760,9 @@ function toggleProfileFavorite(playerId, teamId) {
   const added = toggleFavorite(playerId, teamId);
   const btn = document.getElementById('profile-fav-btn');
   if (btn) {
-    btn.textContent = added ? '★ En favoritos' : '☆ Agregar a favoritos';
+    btn.textContent = added ? `★ ${t('favorites.in')}` : `☆ ${t('favorites.add')}`;
     btn.classList.toggle('is-fav', added);
-    btn.title = added ? 'Quitar de favoritos' : 'Agregar a favoritos';
+    btn.title = added ? t('favorites.remove') : t('favorites.add');
   }
 }
 
@@ -1753,7 +1782,7 @@ async function boot() {
   const teamId = params.get('team');
 
   if (!playerId || !teamId) {
-    showError('Faltan el ID del jugador o del equipo en la URL.');
+    showError(t('errors.noPlayerParams'));
     return;
   }
 
@@ -1770,7 +1799,7 @@ async function boot() {
   ]);
 
   if (!playersText || !teamsText) {
-    showError('Error al cargar los archivos de la base de datos.');
+    showError(t('errors.databaseLoad'));
     return;
   }
 
@@ -1784,7 +1813,7 @@ async function boot() {
     String(row['team_ids'] || '').split(',').map(id => id.trim()).filter(Boolean).forEach(id => validTeamIds.add(id));
   });
   if (!validTeamIds.has(teamId)) {
-    showError('Este equipo no forma parte del Option File publicado.');
+    showError(t('errors.teamNotPublished'));
     return;
   }
 
@@ -1793,7 +1822,7 @@ async function boot() {
     .some(pid => pid && pid !== '0' && pid === playerId);
 
   if (!playerIsAssignedToRequestedTeam) {
-    showError('Este jugador no pertenece a ningun equipo valido de la base de datos.');
+    showError(t('errors.playerNotPublished'));
     return;
   }
 
@@ -1827,7 +1856,7 @@ async function boot() {
   // Find the player
   const player = playerRows.find(p => p['Id'] === playerId);
   if (!player) {
-    showError(`Jugador con ID "${playerId}" no encontrado en la base de datos.`);
+    showError(t('errors.playerNotFound', { id: playerId }));
     return;
   }
 
@@ -1840,7 +1869,7 @@ async function boot() {
   // Find the team
   const teamRow = teamRows.find(t => t['Id'] === teamId);
   if (!teamRow || !String(teamRow['Name'] || '').trim() || teamRow['Name'] === '-') {
-    showError(`Equipo con ID "${teamId}" no encontrado en la base de datos.`);
+    showError(t('errors.teamNotFound', { id: teamId }));
     return;
   }
 
@@ -1850,7 +1879,7 @@ async function boot() {
     displayName: toTitleCaseName(teamRow['Name'] || teamId),
     type: teamRow['Type'] || '0',
   };
-  const typeLabel = TYPE_LABELS[team.type] || '';
+  const typeLabel = teamTypeLabel(team.type);
 
   // Build appearance map and find this player's appearance data
   const appearanceMap = {};
@@ -1929,7 +1958,7 @@ function showError(message) {
   const anchor = document.createElement('a');
   anchor.href = 'database.html';
   anchor.style.color = 'var(--color-highlight)';
-  anchor.textContent = '← Volver a la base de datos';
+  anchor.textContent = t('common.backToDatabase');
   backLink.appendChild(anchor);
 
   content.appendChild(errorDiv);
@@ -1941,7 +1970,7 @@ function showError(message) {
 
 document.addEventListener('DOMContentLoaded', () => {
   boot().catch(err => {
-    showError(`Error inesperado: ${err.message}`);
+    showError(t('errors.unexpected', { message: err.message }));
     console.error(err);
   });
 });

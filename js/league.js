@@ -135,12 +135,12 @@ function renderLeaguePage(league, teams) {
   }).join('');
 
   content.innerHTML = `
-    <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">Inicio</a>
-      <a href="database.html">Base de datos</a>
+    <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="index.html">${t('common.home')}</a>
+      <a href="database.html">${t('common.database')}</a>
       <span>${escapeHtml(league.name)}</span>
-    </nav>
-    <button class="back-btn" onclick="window.location.href='database.html?view=leagues'">◀ Volver a Ligas</button>
+    </nav></div>
+    <button class="back-btn" onclick="window.location.href='database.html?view=leagues'">${t('common.backToLeagues')}</button>
 
     <div class="view-header">
       <img class="grid-card-img" style="width:56px;height:56px;object-fit:contain"
@@ -149,7 +149,7 @@ function renderLeaguePage(league, teams) {
         alt="${escapeHtml(league.name)}">
       <div>
         <div class="view-title">${escapeHtml(league.name)}</div>
-        <div class="view-subtitle">${teams.length} equipo${teams.length !== 1 ? 's' : ''}</div>
+        <div class="view-subtitle">${t('db.teamCount', { count: teams.length })}</div>
       </div>
     </div>
 
@@ -157,7 +157,7 @@ function renderLeaguePage(league, teams) {
 
   content.style.display = 'block';
   document.getElementById('loading-overlay').style.display = 'none';
-  document.title = `${league.name} – Base de datos PES`;
+  document.title = `${league.name} - ${t('common.database')} PES`;
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
@@ -176,7 +176,7 @@ function showError(message) {
   const anchor = document.createElement('a');
   anchor.href = 'database.html';
   anchor.style.color = 'var(--color-highlight)';
-  anchor.textContent = '← Volver a la base de datos';
+  anchor.textContent = t('common.backToDatabase');
   backLink.appendChild(anchor);
 
   content.appendChild(errorDiv);
@@ -191,7 +191,7 @@ async function boot() {
   const leagueId = params.get('id');
 
   if (!leagueId) {
-    showError('Falta el ID de la liga en la URL.');
+    showError(t('errors.noLeagueParam'));
     return;
   }
 
@@ -204,7 +204,7 @@ async function boot() {
   ]);
 
   if (!teamsText || !playersText || !squadsText || !leaguesText) {
-    showError('Error al cargar los archivos de la base de datos.');
+    showError(t('errors.databaseLoad'));
     return;
   }
 
@@ -216,7 +216,7 @@ async function boot() {
   // Find this league
   const leagueRow = leagueRows.find(l => (l['league_id'] || '') === leagueId);
   if (!leagueRow) {
-    showError(`Liga con ID "${leagueId}" no encontrada.`);
+    showError(t('errors.leagueNotFound', { id: leagueId }));
     return;
   }
 
@@ -301,7 +301,7 @@ async function boot() {
 
 document.addEventListener('DOMContentLoaded', () => {
   boot().catch(err => {
-    showError(`Error inesperado: ${err.message}`);
+    showError(t('errors.unexpected', { message: err.message }));
     console.error(err);
   });
 });

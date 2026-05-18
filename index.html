@@ -12,9 +12,48 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>La Araña Que Pica - LAqP.website</title>
+  <title>LAqP | PES 2018 Actualizado, Option Files y Tutoriales</title>
+  <meta name="description" content="Descargá Option Files de PES 2018 actualizados para PS4, PS5 y PC. Encontrá tutoriales, jugadores, equipos, kits, caras y una base de datos completa del proyecto LAqP." />
+  <link rel="canonical" href="https://laqp.website/" />
+  <meta property="og:title" content="LAqP | PES 2018 Actualizado, Option Files y Tutoriales" />
+  <meta property="og:description" content="Option Files, tutoriales, caras, kits y base de datos para PES 2018 actualizado." />
+  <meta property="og:image" content="https://laqp.website/assets/images/home-banner.png" />
+  <meta property="og:url" content="https://laqp.website/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="LAqP | PES 2018 Actualizado, Option Files y Tutoriales" />
+  <meta name="twitter:description" content="Option Files PES 2018 para PS4, PS5 y PC, tutoriales y base de datos del proyecto LAqP." />
+  <meta name="twitter:image" content="https://laqp.website/assets/images/home-banner.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="img/logo.webp" type="image/webp" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://laqp.website/#website",
+        "url": "https://laqp.website/",
+        "name": "LAqP.website",
+        "alternateName": "La Araña Que Pica",
+        "inLanguage": "es",
+        "publisher": { "@id": "https://laqp.website/#organization" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://laqp.website/#organization",
+        "name": "LAqP",
+        "url": "https://laqp.website/",
+        "logo": "https://laqp.website/img/logo.png",
+        "sameAs": [
+          "https://www.youtube.com/@L.A.q.P",
+          "https://www.instagram.com/laaranapicante/",
+          "https://www.tiktok.com/@laaraniapicante"
+        ]
+      }
+    ]
+  }
+  </script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5301686002102491"
      crossorigin="anonymous"></script>
 </head>
@@ -30,7 +69,7 @@
         alt="Logo"
       />
     </a>
-    <h1>La Araña Que Pica <span>LAqP.website</span></h1>
+    <div class="header-title">La Araña Que Pica <span>LAqP.website</span></div>
     <nav class="header-nav" aria-label="Menu principal">
       <a href="index.html" class="header-nav-link active">Inicio</a>
       <a href="downloads.html" class="header-nav-link">Option Files</a>
@@ -44,23 +83,23 @@
 
     <!-- 1. Hero -->
     <section class="landing-hero">
-      <img class="landing-hero-logo" src="img/logo.webp" alt="Logo" />
-      <h2 class="landing-hero-title">La Araña Que Pica</h2>
-      <p class="landing-hero-desc">
+      <img class="landing-hero-logo" src="img/logo.webp" alt="Logo de LAqP para PES 2018" width="120" height="120" />
+      <h1 class="landing-hero-title" data-i18n="home.heroTitle">PES 2018 actualizado al 2026 para PS4, PS5 y PC</h1>
+      <p class="landing-hero-desc" data-i18n="home.heroDesc">
         Página oficial del canal: Option Files, tutoriales y una base de datos completa para explorar jugadores, equipos y ligas.
       </p>
       <div class="landing-hero-ctas">
-        <a href="downloads.html" class="hero-cta hero-cta-primary">Descargar Option File</a>
-        <a href="tutorials.html" class="hero-cta hero-cta-secondary">🎥 Ver tutoriales</a>
-        <a href="database.html" class="hero-cta hero-cta-secondary">📊 Explorar base de datos</a>
+        <a href="downloads.html" class="hero-cta hero-cta-primary" data-i18n="home.downloadCta">Descargar Option File</a>
+        <a href="tutorials.html" class="hero-cta hero-cta-secondary" data-i18n="home.tutorialsCta">Ver tutoriales</a>
+        <a href="database.html" class="hero-cta hero-cta-secondary" data-i18n="home.databaseCta">Explorar base de datos</a>
       </div>
     </section>
 
     <!-- 2. Featured Option Files (from CSV) -->
     <section id="featured-of-section" class="landing-section">
       <div class="landing-section-header">
-        <h3 class="landing-section-title">⭐ Option Files Destacados</h3>
-        <a href="downloads.html" class="landing-section-link">Ver todos →</a>
+        <h2 class="landing-section-title" data-i18n="home.featured">Option Files Destacados</h2>
+        <a href="downloads.html" class="landing-section-link" data-i18n="home.viewAll">Ver todos</a>
       </div>
       <div id="featured-of-grid" class="featured-of-grid">
         <!-- filled by home.js -->
@@ -70,26 +109,26 @@
     <!-- 3. Quick access -->
     <section class="landing-section">
       <div class="landing-section-header">
-        <h3 class="landing-section-title">🧭 Accesos rápidos</h3>
+        <h2 class="landing-section-title" data-i18n="home.quickAccess">Accesos rápidos</h2>
       </div>
       <div class="landing-cards landing-cards-compact">
 
         <a href="downloads.html" class="landing-card">
           <div class="landing-card-icon">OF</div>
           <div class="landing-card-title">Option Files</div>
-          <div class="landing-card-desc">Descarga la ultima version y revisa detalles</div>
+          <div class="landing-card-desc" data-i18n="home.downloadDesc">Descarga la ultima version y revisa detalles</div>
         </a>
 
         <a href="tutorials.html" class="landing-card">
           <div class="landing-card-icon">🎥</div>
-          <div class="landing-card-title">Tutoriales</div>
-          <div class="landing-card-desc">Aprende a instalar y configurar tu Option File</div>
+          <div class="landing-card-title" data-i18n="nav.tutorials">Tutoriales</div>
+          <div class="landing-card-desc" data-i18n="home.tutorialsDesc">Aprende a instalar y configurar tu Option File</div>
         </a>
 
         <a href="database.html" class="landing-card landing-card-highlight">
           <div class="landing-card-icon">📊</div>
-          <div class="landing-card-title">Base de datos</div>
-          <div class="landing-card-desc">Explora jugadores, equipos y ligas</div>
+          <div class="landing-card-title" data-i18n="nav.database">Base de datos</div>
+          <div class="landing-card-desc" data-i18n="home.databaseDesc">Explora jugadores, equipos y ligas</div>
         </a>
 
       </div>
@@ -97,6 +136,7 @@
 
   </main>
 
+  <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/home.js"></script>
 </body>

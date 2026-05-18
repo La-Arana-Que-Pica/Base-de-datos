@@ -12,7 +12,18 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Organizador de plantilla – Base de datos PES</title>
+  <title>Organizador de Plantillas PES y FM - Comparar Jugadores y Medias | LAqP</title>
+  <meta name="description" content="Herramienta de LAqP para cargar plantillas, ordenar jugadores por media, potencial, edad, sueldo, cláusula y valor de mercado." />
+  <link rel="canonical" href="https://laqp.website/squad-organizer.html" />
+  <meta property="og:title" content="Organizador de Plantillas PES y FM - LAqP" />
+  <meta property="og:description" content="Ordená y filtrá plantillas por media, potencial, edad y valor de mercado." />
+  <meta property="og:image" content="https://laqp.website/img/logo.png" />
+  <meta property="og:url" content="https://laqp.website/squad-organizer.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Organizador de Plantillas PES y FM - LAqP" />
+  <meta name="twitter:description" content="Herramienta para comparar y ordenar jugadores de plantillas." />
+  <meta name="twitter:image" content="https://laqp.website/img/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="img/logo.webp" type="image/webp" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5301686002102491"
@@ -28,7 +39,7 @@
         alt="Logo"
       />
     </a>
-    <h1>Organizador de plantilla <span>PES / FM</span></h1>
+    <div class="header-title">Organizador de plantilla <span>PES / FM</span></div>
     <nav class="header-nav" aria-label="Menu principal">
       <a href="downloads.html" class="header-nav-link header-nav-link-primary">Option Files</a>
       <a href="tutorials.html" class="header-nav-link">Tutoriales</a>
@@ -38,42 +49,42 @@
 
   <main id="squad-organizer-page">
     <section class="squad-organizer-panel">
-      <h2>Cargar lista de jugadores</h2>
-      <p class="squad-organizer-help">
+      <h1 data-i18n="squad.title">Cargar lista de jugadores</h1>
+      <p class="squad-organizer-help" data-i18n="squad.help">
         Pega la lista (como la de FM) o carga un CSV/TSV para ordenar y filtrar por media, potencial, edad, sueldo, cláusula y valor de mercado.
       </p>
-      <textarea id="squad-input" placeholder="Pega aquí tu plantilla..."></textarea>
+      <textarea id="squad-input" placeholder="Pega aquí tu plantilla..." data-i18n-placeholder="squad.placeholder"></textarea>
       <div class="squad-organizer-actions">
         <input id="squad-file" type="file" accept=".csv,.txt,.tsv" />
-        <button id="btn-parse" type="button">Procesar plantilla</button>
-        <button id="btn-clear" type="button" class="secondary">Limpiar</button>
+        <button id="btn-parse" type="button" data-i18n="squad.process">Procesar plantilla</button>
+        <button id="btn-clear" type="button" class="secondary" data-i18n="squad.clear">Limpiar</button>
       </div>
       <div id="squad-feedback" class="squad-feedback"></div>
     </section>
 
     <section id="squad-results" class="squad-results" style="display:none">
       <div class="squad-filters">
-        <input id="filter-name" type="text" placeholder="Buscar por nombre..." />
+        <input id="filter-name" type="text" placeholder="Buscar por nombre..." data-i18n-placeholder="squad.search" />
         <select id="filter-position">
-          <option value="">Todas las posiciones</option>
+          <option value="" data-i18n="squad.allPositions">Todas las posiciones</option>
         </select>
-        <input id="filter-min-overall" type="number" min="0" max="99" placeholder="Media mínima" />
-        <input id="filter-min-potential" type="number" min="0" max="99" placeholder="Potencial mínimo" />
+        <input id="filter-min-overall" type="number" min="0" max="99" placeholder="Media mínima" data-i18n-placeholder="squad.minOverall" />
+        <input id="filter-min-potential" type="number" min="0" max="99" placeholder="Potencial mínimo" data-i18n-placeholder="squad.minPotential" />
       </div>
       <div class="squad-summary" id="squad-summary"></div>
       <div class="table-responsive">
         <table id="squad-table" class="players-table">
           <thead>
             <tr>
-              <th class="sortable" data-sort="overall">Media <span class="sort-icon">⇅</span></th>
-              <th class="sortable" data-sort="potential">Potencial <span class="sort-icon">⇅</span></th>
-              <th class="sortable" data-sort="name">Nombre <span class="sort-icon">⇅</span></th>
-              <th class="sortable" data-sort="position">Posición <span class="sort-icon">⇅</span></th>
-              <th class="sortable" data-sort="age">Edad <span class="sort-icon">⇅</span></th>
-              <th class="sortable" data-sort="contract">Contrato <span class="sort-icon">⇅</span></th>
-              <th class="sortable" data-sort="wageValue">Sueldo <span class="sort-icon">⇅</span></th>
-              <th class="sortable" data-sort="clauseValue">Cláusula <span class="sort-icon">⇅</span></th>
-              <th class="sortable" data-sort="marketMin">Valor mercado <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="overall"><span data-i18n="common.overall">Media</span> <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="potential"><span data-i18n="squad.potential">Potencial</span> <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="name"><span data-i18n="common.name">Nombre</span> <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="position"><span data-i18n="common.position">Posición</span> <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="age"><span data-i18n="common.age">Edad</span> <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="contract"><span data-i18n="squad.contract">Contrato</span> <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="wageValue"><span data-i18n="squad.wage">Sueldo</span> <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="clauseValue"><span data-i18n="squad.clause">Cláusula</span> <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="marketMin"><span data-i18n="squad.market">Valor mercado</span> <span class="sort-icon">⇅</span></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -82,6 +93,7 @@
     </section>
   </main>
 
+  <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/squad-organizer.js"></script>
 </body>

@@ -1,5 +1,5 @@
-/**
- * Base de datos Option File PES 2018–2026
+﻿/**
+ * Base de datos Option File PES 2018-2026
  * Team Profile Page Script
  *
  * Loads a team's full roster from URL params:
@@ -8,7 +8,7 @@
 
 'use strict';
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function handleMinifaceError(img, playerId) {
   img.onerror = null;
@@ -156,9 +156,9 @@ function overallColor(value) {
   return 'stat-range-1';
 }
 
-// ─── Translations (UI display only) ──────────────────────────────────────────
+// â”€â”€â”€ Translations (UI display only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// Positions: PES abbreviation → Spanish UI label
+// Positions: PES abbreviation -> Spanish UI label
 const POSITION_LABELS = {
   'GK':  'PT',
   'CB':  'DEC',
@@ -175,7 +175,7 @@ const POSITION_LABELS = {
   'CF':  'CD',
 };
 
-// Team type → Spanish group label
+// Team type -> Spanish group label
 const TYPE_LABELS = {
   '0': 'Clubes',
   '1': 'Equipos especiales',
@@ -183,7 +183,15 @@ const TYPE_LABELS = {
 };
 
 function translatePosition(pesPos) {
-  return POSITION_LABELS[pesPos] || pesPos;
+  return typeof i18nLookup === 'function' ? i18nLookup('positions', pesPos, pesPos) : (POSITION_LABELS[pesPos] || pesPos);
+}
+
+function teamTypeLabel(type) {
+  return typeof i18nLookup === 'function' ? i18nLookup('types', String(type), TYPE_LABELS[type] || '') : (TYPE_LABELS[type] || '');
+}
+
+function positionGroupLabel(key, fallback) {
+  return typeof i18nLookup === 'function' ? i18nLookup('positionGroups', key, fallback) : fallback;
 }
 
 const DEFENSIVE_POSITION_COLOR = '#3EBEC8';
@@ -209,33 +217,38 @@ function positionBadgeStyle(pesPos) {
   return `color:${color};border-color:${color};background:${color}18`;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const PES_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF'];
 
 // Position groups for squad display
 const POSITION_GROUPS = [
-  { key: 'PT',  label: 'Porteros',        positions: ['GK'] },
-  { key: 'DEF', label: 'Defensas',        positions: ['CB', 'RB', 'LB', 'LWB', 'RWB'] },
-  { key: 'MID', label: 'Mediocampistas',  positions: ['DMF', 'CMF', 'RMF', 'LMF', 'AMF'] },
-  { key: 'FWD', label: 'Delanteros',      positions: ['RWF', 'LWF', 'SS', 'CF'] },
+  { key: 'GK',  label: positionGroupLabel('GK', 'Porteros'),        positions: ['GK'] },
+  { key: 'DEF', label: positionGroupLabel('DEF', 'Defensas'),        positions: ['CB', 'RB', 'LB', 'LWB', 'RWB'] },
+  { key: 'MID', label: positionGroupLabel('MID', 'Mediocampistas'),  positions: ['DMF', 'CMF', 'RMF', 'LMF', 'AMF'] },
+  { key: 'FWD', label: positionGroupLabel('FWD', 'Delanteros'),      positions: ['RWF', 'LWF', 'SS', 'CF'] },
 ];
 
 // Tactics labels and value maps
 const FORMATION_TACTIC_FIELDS = [
-  { col: 'EstiloAtaque F1',   label: 'Estilos de ataque',              values: { '0': 'Contraataque', '1': 'Juego de posesión' } },
-  { col: 'Creacion F1',       label: 'Creación',                       values: { '0': 'Pase largo', '1': 'Pase corto' } },
-  { col: 'ZonaAtaque F1',     label: 'Zona de ataque',                 values: { '0': 'Por las bandas', '1': 'Centro' } },
-  { col: 'Colocacion F1',     label: 'Posicionamiento',                values: { '0': 'Mantener formación', '1': 'Flexible' } },
-  { col: 'ZonaApoyo F1',      label: 'Zona de apoyo',                  values: {} },
-  { col: 'EstiloDefensa F1',  label: 'Estilos de defensa',             values: { '0': 'Presión en la frontal', '1': 'Defensa total' } },
-  { col: 'ZonaContencion F1', label: 'Zona de contención',             values: { '0': 'Centro', '1': 'Por las bandas' } },
-  { col: 'Presion F1',        label: 'Presión',                        values: { '0': 'Agresivo', '1': 'Conservador' } },
-  { col: 'LineaDefensiva F1', label: 'Línea defensiva',                values: {} },
-  { col: 'CierreFilas F1',    label: 'Distancia al jugador con balón', values: {} },
+  { col: 'EstiloAtaque F1',   labelKey: 'tactics.attackStyle', valuesKey: 'attackStyle' },
+  { col: 'Creacion F1',       labelKey: 'tactics.buildUp', valuesKey: 'buildUp' },
+  { col: 'ZonaAtaque F1',     labelKey: 'tactics.attackArea', valuesKey: 'sideCenter' },
+  { col: 'Colocacion F1',     labelKey: 'tactics.positioning', valuesKey: 'positioning' },
+  { col: 'ZonaApoyo F1',      labelKey: 'tactics.supportRange' },
+  { col: 'EstiloDefensa F1',  labelKey: 'tactics.defenseStyle', valuesKey: 'defenseStyle' },
+  { col: 'ZonaContencion F1', labelKey: 'tactics.containmentArea', valuesKey: 'centerSide' },
+  { col: 'Presion F1',        labelKey: 'tactics.pressuring', valuesKey: 'pressuring' },
+  { col: 'LineaDefensiva F1', labelKey: 'tactics.defensiveLine' },
+  { col: 'CierreFilas F1',    labelKey: 'tactics.compactness' },
 ];
 
-// Helper: "J. Álvarez" format
+function tacticValue(valuesKey, raw) {
+  if (!valuesKey) return raw;
+  return i18nLookup('tacticValues', `${valuesKey}.${raw}`, raw);
+}
+
+// Helper: "J. Alvarez" format
 function formatShortName(fullName) {
   const parts = (fullName || '').trim().split(/\s+/);
   if (parts.length <= 1) return parts[0] || '';
@@ -259,7 +272,7 @@ function normalizePlayerRow(row) {
   };
 }
 
-// ─── Radar chart helpers ──────────────────────────────────────────────────────
+// â”€â”€â”€ Radar chart helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function computeRadarAttributes(player) {
   const avg = (...keys) => {
@@ -279,7 +292,7 @@ function computeRadarAttributes(player) {
   };
 }
 
-// ─── Sort / Filter state ──────────────────────────────────────────────────────
+// â”€â”€â”€ Sort / Filter state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let _sortCol = 'OVR';
 let _sortDir = 'desc';
@@ -352,10 +365,10 @@ function updateSortHeaders() {
     if (col === _sortCol) {
       th.classList.add(_sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
       const icon = th.querySelector('.sort-icon');
-      if (icon) icon.textContent = _sortDir === 'asc' ? '▲' : '▼';
+      if (icon) icon.textContent = _sortDir === 'asc' ? '\u25B2' : '\u25BC';
     } else {
       const icon = th.querySelector('.sort-icon');
-      if (icon) icon.textContent = '⇅';
+      if (icon) icon.textContent = '\u2195';
     }
   });
 }
@@ -365,7 +378,7 @@ function refreshTableBody() {
   if (!tbody || !_teamId) return;
   const list = getSortedFilteredPlayers();
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:24px;color:var(--color-text-muted)">Sin resultados para los filtros seleccionados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:24px;color:var(--color-text-muted)">${t('team.noFilterResults')}</td></tr>`;
     return;
   }
   tbody.innerHTML = list.map(p => renderPlayerRow(p, _teamId)).join('');
@@ -394,7 +407,7 @@ function resetFilters() {
   refreshTableBody();
 }
 
-// ─── Formation pitch rendering ────────────────────────────────────────────────
+// â”€â”€â”€ Formation pitch rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Build an HTML string showing the formation as a football pitch with player
@@ -431,8 +444,8 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       const yWidth  = parseFloat(formationRow[`Ubicacion Y${i} ${suffix}`]) || 52;
 
       // Map to CSS percentage positions on a full pitch:
-      //   left: 5 + (yWidth / 104) * 90%  (0=left touchline → 5%, 52=center → 50%, 104=right → 95%)
-      //   top:  7 + (1 - xDepth / 52) * 86%  (xDepth=52=midfield → 7%, xDepth=0=own goal → 93%)
+      //   left: 5 + (yWidth / 104) * 90%  (0=left touchline -> 5%, 52=center -> 50%, 104=right -> 95%)
+      //   top:  7 + (1 - xDepth / 52) * 86%  (xDepth=52=midfield -> 7%, xDepth=0=own goal -> 93%)
       const leftPct = 5 + (yWidth / 104) * 90;
       const topPct  = 7 + (1 - xDepth / 52) * 86;
       // Lower on screen (higher topPct) = higher z-index so they appear on top
@@ -449,7 +462,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       const posDisplay = escapeHtml(translatePosition(formationPos));
       const badgeColor = positionGroupColor(formationPos);
 
-      const ovr = escapeHtml(player.Overall || '–');
+      const ovr = escapeHtml(player.Overall || '-');
       const isCapitan = !isNaN(captainRawIdx) && squadIdx === captainRawIdx;
 
       tokens.push(`
@@ -516,48 +529,48 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
   const tacticsRows = FORMATION_TACTIC_FIELDS.map(tf => {
     const raw = formationRow[tf.col];
     if (raw === undefined || raw === '') return '';
-    const translated = tf.values[raw];
-    const display = translated !== undefined ? translated : raw;
-    return `<div class="tactic-row"><span class="tactic-label">${escapeHtml(tf.label)}</span><span class="tactic-value">${escapeHtml(display)}</span></div>`;
+    const display = tacticValue(tf.valuesKey, String(raw));
+    return `<div class="tactic-row"><span class="tactic-label">${escapeHtml(t(tf.labelKey))}</span><span class="tactic-value">${escapeHtml(display)}</span></div>`;
   }).filter(Boolean).join('');
 
   // Build assignments section
   const assignmentRows = [];
 
   // For set-piece roles using direct squad-slot indices (0-based)
-  const addSquadAssignment = (label, colName) => {
+  const addSquadAssignment = (labelKey, colName) => {
     const rawIdx = parseInt(formationRow[colName], 10);
     if (isNaN(rawIdx) || rawIdx < 0 || rawIdx >= squadSlots.length) return;
     const p = squadSlots[rawIdx];
     if (!p) return;
-    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(p.Name || '')}</span></div>`);
+    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${escapeHtml(t(labelKey))}</span><span class="tactic-value">${escapeHtml(p.Name || '')}</span></div>`);
   };
 
   // For header roles: the value is a 0-based direct squad slot index
-  const addHeaderAssignment = (label, colName) => {
+  const addHeaderAssignment = (labelKey, colName) => {
     const rawIdx = parseInt(formationRow[colName], 10);
     if (isNaN(rawIdx) || rawIdx < 0 || rawIdx >= squadSlots.length) return;
     const p = squadSlots[rawIdx];
     if (!p) return;
-    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${label}</span><span class="tactic-value">${escapeHtml(p.Name || '')}</span></div>`);
+    assignmentRows.push(`<div class="tactic-row"><span class="tactic-label">${escapeHtml(t(labelKey))}</span><span class="tactic-value">${escapeHtml(p.Name || '')}</span></div>`);
   };
 
-  addSquadAssignment('Capitán', 'Capitan');
-  addSquadAssignment('Tiro libre corto', 'TiroCorto');
-  addSquadAssignment('Tiro libre largo', 'TiroLargo');
-  addSquadAssignment('Segundo cobrador', 'Cabeceador1');
-  addSquadAssignment('Córner derecho', 'EsquinaDerecho');
-  addSquadAssignment('Córner izquierdo', 'EsquinaIzquierdo');
-  addSquadAssignment('Penal', 'Penalti');
-  addHeaderAssignment('Remate de cabeza 1', 'SegundoCobrador');
-  addHeaderAssignment('Remate de cabeza 2', 'Cabeceador2');
-  addHeaderAssignment('Remate de cabeza 3', 'Cabeceador3');
+  addSquadAssignment('assignments.captain', 'Capitan');
+  addSquadAssignment('assignments.shortFreeKick', 'TiroCorto');
+  addSquadAssignment('assignments.longFreeKick', 'TiroLargo');
+  addSquadAssignment('assignments.secondTaker', 'Cabeceador1');
+  addSquadAssignment('assignments.rightCorner', 'EsquinaDerecho');
+  addSquadAssignment('assignments.leftCorner', 'EsquinaIzquierdo');
+  addSquadAssignment('assignments.penalty', 'Penalti');
+  addHeaderAssignment('assignments.header1', 'SegundoCobrador');
+  addHeaderAssignment('assignments.header2', 'Cabeceador2');
+  addHeaderAssignment('assignments.header3', 'Cabeceador3');
 
-  const infoHtml = (tacticsRows || assignmentRows.length) ? `
-    <div class="formation-info-columns">
-      ${tacticsRows ? `<div class="formation-tactic-block"><div class="formation-block-title">Tácticas</div>${tacticsRows}</div>` : ''}
-      ${assignmentRows.length ? `<div class="formation-tactic-block"><div class="formation-block-title">Asignaciones</div>${assignmentRows.join('')}</div>` : ''}
-    </div>` : '';
+  const tacticsHtml = tacticsRows
+    ? `<div class="formation-tactic-block formation-tactics-panel"><div class="formation-block-title">${t('team.tactics')}</div>${tacticsRows}</div>`
+    : '<div class="formation-tactic-block formation-tactics-panel is-empty"></div>';
+  const assignmentsHtml = assignmentRows.length
+    ? `<div class="formation-tactic-block formation-assignments-panel"><div class="formation-block-title">${t('team.assignments')}</div>${assignmentRows.join('')}</div>`
+    : '<div class="formation-tactic-block formation-assignments-panel is-empty"></div>';
 
   const fluidaVal = parseInt(formationRow['Fluida F1'], 10);
   const isFluid = !isNaN(fluidaVal) && fluidaVal !== 0;
@@ -565,56 +578,60 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
   if (!isFluid) {
     return `
       <div class="formation-section">
-        <div class="formation-section-title">Formación inicial</div>
+        <div class="formation-section-title">${t('team.initialFormation')}</div>
         <div class="formation-layout">
+          ${tacticsHtml}
           <div class="pitch-container">
             ${buildPitchField('F1')}
           </div>
-          ${infoHtml}
+          ${assignmentsHtml}
         </div>
       </div>`;
   }
 
-  // Fluid formation: three tabs (General / Con Balón / Sin Balón)
+  // Fluid formation: three tabs (General / Con Balon / Sin Balon)
   return `
     <div class="formation-section">
       <div class="formation-tabs">
-        <button class="formation-tab-btn active" data-variant="F1">General</button>
-        <button class="formation-tab-btn" data-variant="F1 Con Balon">Con Balón</button>
-        <button class="formation-tab-btn" data-variant="F1 Sin Balon">Sin Balón</button>
+        <button class="formation-tab-btn active" data-variant="F1">${t('team.general')}</button>
+        <button class="formation-tab-btn" data-variant="F1 Con Balon">${t('team.withBall')}</button>
+        <button class="formation-tab-btn" data-variant="F1 Sin Balon">${t('team.withoutBall')}</button>
       </div>
-      <div class="formation-section-title">Formación inicial</div>
+      <div class="formation-section-title">${t('team.initialFormation')}</div>
       <div class="formation-layout" data-variant="F1">
+        ${tacticsHtml}
         <div class="pitch-container">
           ${buildPitchField('F1')}
         </div>
-        ${infoHtml}
+        ${assignmentsHtml}
       </div>
       <div class="formation-layout" data-variant="F1 Con Balon" style="display:none">
+        ${tacticsHtml}
         <div class="pitch-container">
           ${buildPitchField('F1 Con Balon')}
         </div>
-        ${infoHtml}
+        ${assignmentsHtml}
       </div>
       <div class="formation-layout" data-variant="F1 Sin Balon" style="display:none">
+        ${tacticsHtml}
         <div class="pitch-container">
           ${buildPitchField('F1 Sin Balon')}
         </div>
-        ${infoHtml}
+        ${assignmentsHtml}
       </div>
     </div>`;
 }
 
 
-// ─── Player card carousel ─────────────────────────────────────────────────────
+// â”€â”€â”€ Player card carousel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function renderPlayerCard(player, teamId) {
-  const ovr = player.Overall || '–';
+  const ovr = player.Overall || '-';
   const ovrColor = statColor(ovr);
   const posDisplay = escapeHtml(translatePosition(player.Position || ''));
   const posColor = positionGroupColor(player.Position || '');
   const radarAttrs = computeRadarAttributes(player);
-  const safeName = escapeHtml(player.Name || '–');
+  const safeName = escapeHtml(player.Name || '-');
   const pid = escapeHtml(player.ID);
   const tid = escapeHtml(teamId || '');
 
@@ -664,7 +681,7 @@ function renderPlayerCard(player, teamId) {
 
 function renderPlayerCarousel(players, teamId) {
   if (!players || !players.length) {
-    return `<div class="player-cards-section"><p style="color:var(--color-text-muted);padding:16px 0">No hay jugadores en este equipo.</p></div>`;
+    return `<div class="player-cards-section"><p style="color:var(--color-text-muted);padding:16px 0">${t('team.noPlayers')}</p></div>`;
   }
 
   const sortByOvr = arr =>
@@ -698,7 +715,7 @@ function renderPlayerCarousel(players, teamId) {
     groupsHtml += `
       <div class="player-cards-group">
         <div class="player-cards-group-header">
-          <span class="player-cards-group-title">Otros</span>
+          <span class="player-cards-group-title">${t('team.others')}</span>
           <span class="player-cards-group-count">${uncategorized.length}</span>
         </div>
         <div class="player-cards-row">
@@ -710,7 +727,7 @@ function renderPlayerCarousel(players, teamId) {
   return `
     <div class="player-cards-section">
       <div class="player-cards-header">
-        <span class="player-cards-title">Plantilla</span>
+        <span class="player-cards-title">${t('team.squad')}</span>
       </div>
       ${groupsHtml}
     </div>`;
@@ -751,7 +768,7 @@ function initPlayerCarousel() {
     nextBtn.disabled = currentIndex >= maxIndex;
 
     const displayEnd = Math.min(currentIndex + visCount, total);
-    counter.textContent = `${currentIndex + 1}–${displayEnd} de ${total}`;
+    counter.textContent = `${currentIndex + 1}-${displayEnd} de ${total}`;
   }
 
   prevBtn.addEventListener('click', () => {
@@ -771,14 +788,51 @@ function initPlayerCarousel() {
   window.addEventListener('resize', update);
 }
 
+function renderShirtNumberDirectory(players, teamId) {
+  const byNumber = new Map();
+  players.forEach(player => {
+    const num = parseInt(player._shirtNumber, 10);
+    if (num >= 1 && num <= 99 && !byNumber.has(num)) byNumber.set(num, player);
+  });
+
+  const items = [];
+  for (let num = 1; num <= 99; num++) {
+    const player = byNumber.get(num);
+    if (player) {
+      const safeName = escapeHtml(player.Name || '');
+      items.push(`
+        <a class="shirt-number-slot is-used" href="player.html?id=${encodeURIComponent(player.ID)}&team=${encodeURIComponent(teamId)}">
+          <span class="shirt-number-value">${num}</span>
+          <span class="shirt-number-name">${safeName}</span>
+        </a>`);
+    } else {
+      items.push(`
+        <div class="shirt-number-slot is-free">
+          <span class="shirt-number-value">${num}</span>
+          <span class="shirt-number-name">${t('team.freeNumber')}</span>
+        </div>`);
+    }
+  }
+
+  return `
+    <details class="shirt-number-directory">
+      <summary>
+        <span>${t('team.showShirtNumbers')}</span>
+      </summary>
+      <div class="shirt-number-grid" aria-label="${t('team.shirtNumbers')}">
+        ${items.join('')}
+      </div>
+    </details>`;
+}
+
 function renderPlayerRow(player, teamId) {
-  const ovr = player.Overall || '–';
+  const ovr = player.Overall || '-';
   const ovrColor = statColor(ovr);
   const ovrTextColor = statTextColor(ovrColor);
   const posDisplay = translatePosition(player.Position);
   const radarAttrs = computeRadarAttributes(player);
   const safeName = escapeHtml(player.Name);
-  const shirtNum = player._shirtNumber ? escapeHtml(String(player._shirtNumber)) : '–';
+  const shirtNum = player._shirtNumber ? escapeHtml(String(player._shirtNumber)) : '-';
   const fav = (typeof isFavorite === 'function') && isFavorite(player.ID, teamId);
 
   return `<tr class="player-row" data-player-id="${escapeHtml(player.ID)}" data-team-id="${escapeHtml(teamId)}">
@@ -789,14 +843,14 @@ function renderPlayerRow(player, teamId) {
         onerror="handleMinifaceError(this,'${escapeHtml(player.ID)}')"
         alt="${safeName}">
     </td>
-    <td><strong>${safeName || '–'}</strong></td>
+    <td><strong>${safeName || '-'}</strong></td>
     <td>
       <img class="player-flag"
         src="${flagSrc(player.Nationality)}"
         onerror="this.onerror=null;this.src='img/flags/default.webp'"
         alt="">
     </td>
-    <td><span class="position-badge" style="${positionBadgeStyle(player.Position)}">${escapeHtml(posDisplay) || '–'}</span></td>
+    <td><span class="position-badge" style="${positionBadgeStyle(player.Position)}">${escapeHtml(posDisplay) || '-'}</span></td>
     <td><span class="overall-badge" style="background:${ovrColor};color:${ovrTextColor}">${escapeHtml(ovr)}</span></td>
     <td>${radarAttrs.ATQ}</td>
     <td>${radarAttrs.REG}</td>
@@ -807,9 +861,9 @@ function renderPlayerRow(player, teamId) {
     <td class="fav-col" onclick="event.stopPropagation()">
       <button class="fav-btn${fav ? ' is-fav' : ''}"
         onclick="toggleTeamFavBtn(this,'${escapeHtml(player.ID)}','${escapeHtml(teamId)}')"
-        title="${fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}"
-        aria-label="Favorito">
-        ${fav ? '★' : '☆'}
+        title="${fav ? t('favorites.remove') : t('favorites.add')}"
+        aria-label="${t('common.favorites')}">
+        ${fav ? '&#9733;' : '&#9734;'}
       </button>
     </td>
   </tr>`;
@@ -823,30 +877,31 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
   _players = players;
   _teamId = team.id;
 
-  const typeLabel = TYPE_LABELS[team.type] || '';
+  const typeLabel = teamTypeLabel(team.type);
   const safeTeamName = escapeHtml(team.displayName);
 
   // Build extra info row
   const extraInfoHtml = [
-    leagueName ? `<span class="team-info-item">🏆 ${escapeHtml(leagueName)}</span>` : '',
-    stadiumName ? `<span class="team-info-item">🏟️ ${escapeHtml(stadiumName)}</span>` : '',
-    coachName ? `<span class="team-info-item">👨‍💼 ${escapeHtml(coachName)}</span>` : '',
+    leagueName ? `<span class="team-info-item"><span class="team-info-label">${t('common.league')}</span> ${escapeHtml(leagueName)}</span>` : '',
+    stadiumName ? `<span class="team-info-item"><span class="team-info-label">${t('team.stadium')}</span> ${escapeHtml(stadiumName)}</span>` : '',
+    coachName ? `<span class="team-info-item"><span class="team-info-label">${t('team.coach')}</span> ${escapeHtml(coachName)}</span>` : '',
   ].filter(Boolean).join('');
 
   // Build player card carousel
   const carouselHtml = renderPlayerCarousel(players, team.id);
+  const shirtNumbersHtml = renderShirtNumberDirectory(players, team.id);
 
   // Build formation pitch (above the carousel)
   const pitchHtml = renderFormationPitch(players, formationRow, squadSlots, team.id);
 
   const content = document.getElementById('team-content');
   content.innerHTML = `
-    <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">Inicio</a>
-      <a href="database.html">Base de datos</a>
+    <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="index.html">${t('common.home')}</a>
+      <a href="database.html">${t('common.database')}</a>
       <span>${safeTeamName}</span>
-    </nav>
-    <button class="back-btn" id="btn-back">◀ Volver</button>
+    </nav></div>
+    <button class="back-btn" id="btn-back">‹ ${t('common.back')}</button>
 
     <div class="view-header">
       <img class="team-crest" src="img/teams/${escapeHtml(team.id)}.webp"
@@ -854,14 +909,16 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
         alt="${safeTeamName}">
       <div>
         <div class="view-title">${safeTeamName}</div>
-        <div class="view-subtitle">${escapeHtml(typeLabel)} · ${players.length} jugadores</div>
+        <div class="view-subtitle">${escapeHtml(typeLabel)} · ${t('db.playerCount', { count: players.length })}</div>
         ${extraInfoHtml ? `<div class="team-extra-info">${extraInfoHtml}</div>` : ''}
       </div>
     </div>
 
     ${pitchHtml}
 
-    ${carouselHtml}`;
+    ${carouselHtml}
+
+    ${shirtNumbersHtml}`;
 
   content.style.display = 'block';
   document.getElementById('loading-overlay').style.display = 'none';
@@ -898,7 +955,7 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
   });
 
   // Update page title
-  document.title = `${team.displayName} – Base de datos PES`;
+  document.title = `${team.displayName} - ${t('common.database')} PES`;
 }
 
 function renderPositionGroups(players, teamId) {
@@ -983,13 +1040,13 @@ function renderPositionGroups(players, teamId) {
   }
 
   if (!html) {
-    html = `<div class="error-message">No hay jugadores en este equipo.</div>`;
+    html = `<div class="error-message">${t('team.noPlayers')}</div>`;
   }
 
   return html;
 }
 
-// ─── Back navigation ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Back navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function goBack() {
   if (document.referrer && new URL(document.referrer).hostname === window.location.hostname) {
@@ -999,14 +1056,14 @@ function goBack() {
   }
 }
 
-// ─── Boot ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function boot() {
   const params = new URLSearchParams(window.location.search);
   const teamId = params.get('id');
 
   if (!teamId) {
-    showError('Falta el ID del equipo en la URL.');
+    showError(t('errors.noTeamParam'));
     return;
   }
 
@@ -1022,7 +1079,7 @@ async function boot() {
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
-    showError('Error al cargar los archivos de la base de datos.');
+    showError(t('errors.databaseLoad'));
     return;
   }
 
@@ -1037,14 +1094,14 @@ async function boot() {
     String(row['team_ids'] || '').split(',').map(id => id.trim()).filter(Boolean).forEach(id => validTeamIds.add(id));
   });
   if (!validTeamIds.has(teamId)) {
-    showError('Este equipo no forma parte del Option File publicado.');
+    showError(t('errors.teamNotPublished'));
     return;
   }
 
   // Find the team
   const teamRow = teamRows.find(t => t['Id'] === teamId);
   if (!teamRow || !String(teamRow['Name'] || '').trim() || teamRow['Name'] === '-') {
-    showError(`Equipo con ID "${teamId}" no encontrado en la base de datos.`);
+    showError(t('errors.teamNotFound', { id: teamId }));
     return;
   }
 
@@ -1082,7 +1139,7 @@ async function boot() {
         const corregidosOvr = correctedOverallFor(playerWithShirt, teamId, corregidosMap);
         if (corregidosOvr) playerWithShirt.Overall = corregidosOvr;
         players.push(playerWithShirt);
-        squadSlots[i - 1] = playerWithShirt;  // 0-indexed (slot i → index i-1)
+        squadSlots[i - 1] = playerWithShirt;  // 0-indexed (slot i -> index i-1)
       }
     }
   }
@@ -1090,7 +1147,7 @@ async function boot() {
   // Find this team's formation data
   const formationRow = formationRows.find(f => f['Id'] === teamId) || null;
 
-  // Build coach map: coachId → coachName
+  // Build coach map: coachId -> coachName
   const coachsMap = {};
   coachRows.forEach(row => {
     const cid = row['Id'];
@@ -1111,7 +1168,7 @@ async function boot() {
   renderTeamPage(team, players, formationRow, squadSlots, coachName, stadiumName, leagueName);
 }
 
-// ─── Error display ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Error display â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function showError(message) {
   document.getElementById('loading-overlay').style.display = 'none';
@@ -1127,7 +1184,7 @@ function showError(message) {
   const anchor = document.createElement('a');
   anchor.href = 'database.html';
   anchor.style.color = 'var(--color-highlight)';
-  anchor.textContent = '← Volver a la base de datos';
+  anchor.textContent = t('common.backToDatabase');
   backLink.appendChild(anchor);
 
   content.appendChild(errorDiv);
@@ -1135,11 +1192,12 @@ function showError(message) {
   content.style.display = 'block';
 }
 
-// ─── Entry point ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Entry point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 document.addEventListener('DOMContentLoaded', () => {
   boot().catch(err => {
-    showError(`Error inesperado: ${err.message}`);
+    showError(t('errors.unexpected', { message: err.message }));
     console.error(err);
   });
 });
+

@@ -75,7 +75,7 @@ function showError(message) {
 
 function renderNewsItem(item) {
   const cta = item.href
-    ? `<a class="news-card-link" href="${escapeHtml(item.href)}">${escapeHtml(item.cta || 'Ver mas')}</a>`
+    ? `<a class="news-card-link" href="${escapeHtml(item.href)}">${escapeHtml(item.cta || t('news.viewMore'))}</a>`
     : '';
 
   return `
@@ -107,7 +107,7 @@ async function bootNews() {
           description: row.description || row.descripcion || '',
           meta: row.date || row.fecha || '',
           href: row.link || row.url || '',
-          cta: 'Ver relacionado',
+          cta: t('news.related'),
         });
       });
   }
@@ -120,10 +120,10 @@ async function bootNews() {
         items.push({
           type: 'Option File',
           title: row.titulo || `${row.juego || 'Option File'} ${row.version || ''}`.trim(),
-          description: row.descripcion || 'Nueva version destacada disponible.',
+          description: row.descripcion || t('news.featuredAvailable'),
           meta: row.plataforma || '',
           href: 'downloads.html',
-          cta: 'Ver descarga',
+          cta: t('news.viewDownload'),
         });
       });
   }
@@ -135,11 +135,11 @@ async function bootNews() {
       .forEach(row => {
         items.push({
           type: 'Tutorial',
-          title: row.titulo || 'Nuevo tutorial',
-          description: row.descripcion || 'Nuevo contenido del canal.',
+          title: row.titulo || t('news.newTutorial'),
+          description: row.descripcion || t('news.newContent'),
           meta: row.fecha || '',
           href: 'tutorials.html',
-          cta: 'Ver tutorial',
+          cta: t('news.viewTutorial'),
         });
       });
   }
@@ -149,16 +149,16 @@ async function bootNews() {
       items.push({
         type: 'Option File',
         title: `${row.juego || 'Option File'} ${row.version || ''}`.trim(),
-        description: row.descripcion || 'Archivo disponible en la seccion de descargas.',
+        description: row.descripcion || t('news.fileAvailable'),
         meta: row.plataforma || '',
         href: 'downloads.html',
-        cta: 'Ver descarga',
+        cta: t('news.viewDownload'),
       });
     });
   }
 
   if (!items.length) {
-    showError('No hay novedades disponibles en este momento.');
+    showError(t('news.empty'));
     return;
   }
 
@@ -168,14 +168,12 @@ async function bootNews() {
 
   content.innerHTML = `
     <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">Inicio</a>
-      <span>Novedades</span>
+      <a href="index.html">${t('common.home')}</a>
+      <span>${t('news.header')}</span>
     </nav>
     <div class="page-section-header">
-      <h1 class="page-section-title">Novedades</h1>
-      <p class="page-section-subtitle">
-        Changelog del Option File, actualizaciones del canal, tutoriales nuevos y cambios importantes de la base de datos.
-      </p>
+      <h1 class="page-section-title">${t('news.header')}</h1>
+      <p class="page-section-subtitle">${t('news.subtitle')}</p>
     </div>
     <div class="news-grid">
       ${items.map(renderNewsItem).join('')}

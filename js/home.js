@@ -102,12 +102,12 @@ function renderFeaturedCard(item) {
       </div>
       ${game && game !== title ? `<div class="featured-of-game-sub">${game}</div>` : ''}
       ${platform ? `<div class="featured-of-platform"><span class="download-platform-badge">${platform}</span></div>` : ''}
-      <p class="featured-of-desc">${desc || 'Sin descripcion.'}</p>
+      <p class="featured-of-desc">${desc || t('home.noDescription')}</p>
       <div class="featured-of-actions">
         ${isAvailable
-          ? `<a class="featured-of-btn featured-of-btn-download" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Descargar</a>`
-          : `<span class="featured-of-btn featured-of-btn-soon">Proximamente</span>`}
-        ${details ? `<a class="featured-of-btn featured-of-btn-details" href="${escapeHtml(details)}">Ver detalles</a>` : ''}
+          ? `<a class="featured-of-btn featured-of-btn-download" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${t('home.downloadAction')}</a>`
+          : `<span class="featured-of-btn featured-of-btn-soon">${t('home.soon')}</span>`}
+        ${details ? `<a class="featured-of-btn featured-of-btn-details" href="${escapeHtml(details)}">${t('home.details')}</a>` : ''}
       </div>
     </article>`;
 }
