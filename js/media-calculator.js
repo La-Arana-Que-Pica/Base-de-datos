@@ -1041,7 +1041,7 @@ async function initMediaCalculator() {
   if (!content) return;
   try {
     mediaCalcLoadState();
-    const formulasText = await mediaCalcFetchText('Formula_Medias_PES2018/outputs/formulas_por_posicion.json');
+    const formulasText = await mediaCalcFetchText('assets/data/formulas_por_posicion.json');
     mediaCalcFormulas = JSON.parse(formulasText);
     renderMediaCalculatorPage();
     mediaCalcSaveState(true);

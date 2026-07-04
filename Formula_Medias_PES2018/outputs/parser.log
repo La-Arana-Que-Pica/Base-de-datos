@@ -1,2 +1,0 @@
-2026-06-01 00:20:51,219 | WARNING | __main__ | Se descartaron 19 filas porque no son de PES 2018.
-2026-06-01 00:20:51,721 | INFO | __main__ | HTML cache parseado: 13552 registros -> data\processed\pes2018_players_dataset.csv
