@@ -2,7 +2,8 @@
  * Base de datos Option File PES 2018–2026
  * League Profile Page Script
  *
- * Loads a league's teams from URL params:
+ * Loads a league's teams from pretty paths or URL params:
+ *   /league/LEAGUEID/league-slug
  *   league.html?id=LEAGUEID
  */
 
@@ -124,7 +125,7 @@ function renderLeaguePage(league, teams) {
       ? `<div class="grid-card-ovr"><span class="team-avg-badge" style="background:${statColor(avg)};color:${statTextColor(statColor(avg))}">${avg}</span></div>`
       : '';
     return `
-      <div class="grid-card" onclick="window.location.href='team.html?id=${encodeURIComponent(t.id)}'">
+      <div class="grid-card" onclick="window.location.href='${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(t.id, t.displayName) : `team.html?id=${encodeURIComponent(t.id)}`}'">
         <img class="grid-card-img"
           src="img/teams/${escapeHtml(t.id)}.webp"
           onerror="this.onerror=null;this.src='img/teams/default.webp'"
@@ -136,11 +137,11 @@ function renderLeaguePage(league, teams) {
 
   content.innerHTML = `
     <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">${t('common.home')}</a>
-      <a href="database.html">${t('common.database')}</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html'}">${t('common.home')}</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html'}">${t('common.database')}</a>
       <span>${escapeHtml(league.name)}</span>
     </nav></div>
-    <button class="back-btn" onclick="window.location.href='database.html?view=leagues'">${t('common.backToLeagues')}</button>
+    <button class="back-btn" onclick="window.location.href='${typeof laqpDatabaseUrl === 'function' ? laqpDatabaseUrl('leagues') : 'database.html?view=leagues'}'">${t('common.backToLeagues')}</button>
 
     <div class="view-header">
       <img class="grid-card-img" style="width:56px;height:56px;object-fit:contain"
@@ -158,6 +159,15 @@ function renderLeaguePage(league, teams) {
   content.style.display = 'block';
   document.getElementById('loading-overlay').style.display = 'none';
   document.title = `${league.name} - ${t('common.database')} PES`;
+  const leaguePath = typeof laqpLeagueUrl === 'function' ? laqpLeagueUrl(league.id, league.name) : `/league.html?id=${encodeURIComponent(league.id)}`;
+  const leagueUrl = typeof laqpAbsoluteUrl === 'function' ? laqpAbsoluteUrl(leaguePath) : `https://laqp.website${leaguePath}`;
+  const canonical = document.querySelector('link[rel="canonical"]');
+  const ogUrl = document.querySelector('meta[property="og:url"]');
+  if (canonical) canonical.setAttribute('href', leagueUrl);
+  if (ogUrl) ogUrl.setAttribute('content', leagueUrl);
+  if (window.location.pathname !== leaguePath && typeof history.replaceState === 'function') {
+    history.replaceState(null, '', leaguePath);
+  }
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────
@@ -174,7 +184,7 @@ function showError(message) {
   const backLink = document.createElement('p');
   backLink.style.marginTop = '16px';
   const anchor = document.createElement('a');
-  anchor.href = 'database.html';
+  anchor.href = typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html';
   anchor.style.color = 'var(--color-highlight)';
   anchor.textContent = t('common.backToDatabase');
   backLink.appendChild(anchor);
@@ -188,7 +198,8 @@ function showError(message) {
 
 async function boot() {
   const params = new URLSearchParams(window.location.search);
-  const leagueId = params.get('id');
+  const embeddedLeagueId = document.querySelector('meta[name="laqp-league-id"]')?.content || '';
+  const leagueId = embeddedLeagueId || params.get('id');
 
   if (!leagueId) {
     showError(t('errors.noLeagueParam'));
@@ -239,10 +250,8 @@ async function boot() {
     const { rows: corregidosRows } = parseCSV(corregidosText);
     corregidosRows.forEach(r => {
       const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-      const tid = r['TeamId'] || r['team_id'] || '';
       const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
       if (pid && ovr) {
-        if (tid) corregidosMap[tid + '_' + pid] = ovr;
         corregidosMap[pid] = ovr;
       }
     });
@@ -259,8 +268,7 @@ async function boot() {
       if (!pid || pid === '0') continue;
       const p = playerMap[pid];
       if (p) {
-        // Apply corrected overall if available (team-specific key takes precedence)
-        const corregidosOvr = corregidosMap[tid + '_' + pid] || corregidosMap[pid];
+        const corregidosOvr = corregidosMap[pid];
         if (corregidosOvr) {
           players.push({ ...p, OverallStats: corregidosOvr });
         } else {

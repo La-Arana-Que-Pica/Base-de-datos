@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+194101;Héctor Barrios;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+194102;José Ramos;DFC;30;75;DFC;30;75;MI;18;53;DFC;30;76
+194103;Ricardo Vaghi;DFC;50;77;DFC;50;77;DFC;58;73;DFC;50;78
+194104;Norberto Yácono;DFC;70;73;DFC;70;73;DFC;42;75;DFC;70;74
+194105;Bruno Rodolfi;MC;42;55;MC;42;55;MC;42;53;MC;38;57
+194106;Néstor Rossi;MCD;58;60;MCD;58;60;MCD;58;58;MC;62;58
+194107;José Manuel Moreno;MP;42;40;MP;42;40;SD;38;24;MC;42;45
+194108;Ángel Labruna;MP;58;38;MP;58;38;SD;62;22;MC;58;43
+194109;Juan Carlos Muñoz;ED;82;23;ED;82;23;ED;75;21;ED;76;30
+194110;Adolfo Pedernera;DC;50;20;DC;50;20;DC;50;18;DC;50;22
+194111;Félix Loustau;EI;18;25;EI;18;25;EI;25;23;EI;24;32

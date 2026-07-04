@@ -64,13 +64,26 @@ function showError(message) {
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr + 'T00:00:00');
+  const normalized = String(dateStr).includes('/')
+    ? String(dateStr).split('/').reverse().join('-')
+    : String(dateStr);
+  const d = new Date(normalized + 'T00:00:00');
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+function tutorialLocalThumbnail(item) {
+  const text = `${item.id || ''} ${item.titulo || item.title || ''}`.toLowerCase();
+  if (text.includes('complemento')) return 'assets/images/option-files/OF COMPLEMENTO.png';
+  if (text.includes('2025') || text.includes('v5')) return 'assets/images/option-files/OF V 5.png';
+  if (text.includes('option file')) return 'assets/images/guias/instalar-of.png';
+  if (text.includes('pagina web') || text.includes('página web')) return 'assets/images/home-banner.png';
+  if (text.includes('pes 2018 (pc)') || text.includes('relatores')) return 'assets/images/home-banner.png';
+  return '';
+}
+
 function tutorialThumbnail(videoId, item) {
-  return item.thumbnail || item.image || (videoId ? `https://img.youtube.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg` : 'img/logo.webp');
+  return item.thumbnail || item.image || (videoId ? `https://img.youtube.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg` : tutorialLocalThumbnail(item) || 'img/logo.webp');
 }
 
 function renderTutorialCard(item, index) {
@@ -87,8 +100,11 @@ function renderTutorialCard(item, index) {
         ${videoId ? `<span class="tutorial-play-btn" aria-hidden="true">&#9658;</span>` : ''}
       </div>
       <div class="tutorial-card-body">
+        <div class="tutorial-card-meta">
+          <span>Video</span>
+          ${date ? `<time>${date}</time>` : ''}
+        </div>
         <h3 class="tutorial-card-title">${title}</h3>
-        ${date ? `<time class="tutorial-card-date">${date}</time>` : ''}
         <p class="tutorial-card-desc">${desc}</p>
         <button class="tutorial-watch-btn" onclick="event.stopPropagation();showTutorialDetail(${index})">Ver tutorial</button>
       </div>
@@ -98,16 +114,50 @@ function renderTutorialCard(item, index) {
 function renderTutorialList() {
   return `
     <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">${t('common.home')}</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html'}">${t('common.home')}</a>
       <span>${t('nav.tutorials')}</span>
     </nav>
-    <div class="page-section-header">
-      <h1 class="page-section-title">${t('tutorials.title')}</h1>
-      <p class="page-section-subtitle">${t('tutorials.subtitle')}</p>
-    </div>
-    <div class="tutorial-cards-grid">
-      ${_tutorialRows.map(renderTutorialCard).join('')}
-    </div>`;
+    <section class="content-hub-hero tutorials-hero">
+      <div class="guides-hero-icon" aria-hidden="true">YT</div>
+      <div class="guides-hero-copy">
+        <div class="content-hub-kicker">Videos PES 2018</div>
+        <h1>Tutoriales</h1>
+        <p>Instalacion, Option Files, caras y ajustes explicados en video.</p>
+      </div>
+    </section>
+    <section class="guides-library-panel tutorials-library-panel">
+      <div class="guides-panel-head">
+        <div>
+          <span class="guides-panel-kicker">Biblioteca</span>
+          <h2>Tutoriales publicados</h2>
+        </div>
+        <span class="guides-count-pill">${_tutorialRows.length} tutoriales</span>
+      </div>
+      <div class="tutorial-cards-grid">
+        ${_tutorialRows.map(renderTutorialCard).join('')}
+      </div>
+    </section>
+    <section class="guides-quick-strip">
+      <div class="guides-brand-tile">
+        <img src="img/logo.webp" alt="LAqP" loading="lazy">
+        <div>
+          <strong>La Arana Que Pica</strong>
+          <span>Tutoriales y recursos PES 2018.</span>
+        </div>
+      </div>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('downloads.html') : 'downloads.html'}">
+        <strong>Option Files</strong>
+        <span>Archivos y descargas</span>
+      </a>
+      <a href="${typeof laqpArticleUrl === 'function' ? laqpArticleUrl('instalar-option-file-pes-2018-2026', 'Instalar Option Files') : 'articulo.html?id=instalar-option-file-pes-2018-2026'}">
+        <strong>Guia escrita</strong>
+        <span>Instalacion paso a paso</span>
+      </a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('rankings.html') : 'rankings.html'}">
+        <strong>Scouting</strong>
+        <span>Fichajes recomendados</span>
+      </a>
+    </section>`;
 }
 
 function showTutorialList() {
@@ -131,18 +181,18 @@ function showTutorialDetail(index) {
 
   content.innerHTML = `
     <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">Inicio</a>
-      <a href="tutorials.html">Tutoriales</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html'}">Inicio</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('tutorials.html') : 'tutorials.html'}">Tutoriales</a>
       <span>${title}</span>
     </nav>
-    <button class="back-btn" onclick="showTutorialList()">‹ Volver a tutoriales</button>
-    <article class="tutorial-detail">
+    <article class="tutorial-detail tutorial-detail-redesign">
       <div class="tutorial-detail-media">
         ${videoId
           ? `<iframe class="tutorial-iframe" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?rel=0" title="${title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>`
           : `<img class="tutorial-detail-thumb" src="${thumb}" alt="${title} - tutorial PES 2018" width="960" height="540">`}
       </div>
       <div class="tutorial-detail-body">
+        <button class="back-btn" onclick="showTutorialList()">Volver</button>
         ${date ? `<time class="tutorial-card-date">${date}</time>` : ''}
         <h1>${title}</h1>
         <p>${desc}</p>

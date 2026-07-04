@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+201001;Iker Casillas;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+201002;Sergio Ramos;LD;83;70;LD;83;70;MD;82;51;LD;80;71
+201003;Gerard Piqué;DFC;61;73;DFC;61;73;DFC;61;73;DFC;61;74
+201004;Carles Puyol;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+201005;Joan Capdevila;LI;17;72;LI;17;72;MI;18;53;LI;20;73
+201006;Sergio Busquets;MCD;42;62;MCD;42;62;MCD;58;58;MC;58;58
+201007;Xabi Alonso;MC;58;56;MC;58;56;MC;42;53;MC;42;57
+201008;Andrés Iniesta;MI;18;41;MI;18;41;MP;35;38;MI;21;43
+201009;Xavi Hernández;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+201010;Pedro Rodríguez;ED;82;23;ED;82;23;MP;65;36;MD;79;41
+201011;David Villa;DC;50;20;DC;50;20;DC;50;18;DC;50;22

@@ -2,7 +2,8 @@
  * Base de datos Option File PES 2018-2026
  * Team Profile Page Script
  *
- * Loads a team's full roster from URL params:
+ * Loads a team's full roster from pretty paths or URL params:
+ *   /team/TEAMID/team-slug
  *   team.html?id=TEAMID
  */
 
@@ -86,13 +87,11 @@ function correctedPlayerFallbackKey(row) {
 }
 
 function buildCorrectedOverallMap(rows) {
-  const map = { byTeamPlayer: Object.create(null), byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
+  const map = { byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
   rows.forEach(r => {
     const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-    const tid = r['TeamId'] || r['team_id'] || '';
     const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
     if (!ovr) return;
-    if (pid && tid) map.byTeamPlayer[`${tid}_${pid}`] = ovr;
     if (pid) map.byPlayer[pid] = ovr;
     const fallback = correctedPlayerFallbackKey(r);
     if (fallback.nameCountry) map.byNameCountry[fallback.nameCountry] = ovr;
@@ -104,7 +103,6 @@ function buildCorrectedOverallMap(rows) {
 function correctedOverallFor(row, teamId, correctedMap) {
   if (!row || !correctedMap) return '';
   const pid = row['Id'] || row.ID || row['PlayerId'] || '';
-  if (teamId && pid && correctedMap.byTeamPlayer[`${teamId}_${pid}`]) return correctedMap.byTeamPlayer[`${teamId}_${pid}`];
   if (pid && correctedMap.byPlayer[pid]) return correctedMap.byPlayer[pid];
   const fallback = correctedPlayerFallbackKey(row);
   return correctedMap.byNameCountry[fallback.nameCountry] || correctedMap.byNamePos[fallback.namePos] || '';
@@ -466,7 +464,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       const isCapitan = !isNaN(captainRawIdx) && squadIdx === captainRawIdx;
 
       tokens.push(`
-        <a class="pitch-player" href="player.html?id=${pid}&team=${tid}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%;z-index:${zIdx}">
+        <a class="pitch-player" href="${typeof laqpPlayerUrl === 'function' ? laqpPlayerUrl(pid, tid, player.Name) : `player.html?id=${pid}&team=${tid}`}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%;z-index:${zIdx}">
           <div class="pitch-player-photo-wrap">
             <img src="img/players/${pid}.webp"
               onerror="handleMinifaceError(this,'${pid}')"
@@ -648,7 +646,7 @@ function renderPlayerCard(player, teamId) {
   const stat6Key   = isGK ? 'POR' : 'FIS';
 
   return `
-    <a class="player-card" href="player.html?id=${pid}&team=${tid}">
+    <a class="player-card" href="${typeof laqpPlayerUrl === 'function' ? laqpPlayerUrl(pid, tid, player.Name) : `player.html?id=${pid}&team=${tid}`}">
       <div class="player-card-top" style="background:linear-gradient(135deg,${ovrColor}33 0%,${ovrColor}11 100%)">
         <div class="player-card-ovr-block">
           <span class="player-card-ovr" style="color:${ovrColor}">${escapeHtml(ovr)}</span>
@@ -801,15 +799,19 @@ function renderShirtNumberDirectory(players, teamId) {
     if (player) {
       const safeName = escapeHtml(player.Name || '');
       items.push(`
-        <a class="shirt-number-slot is-used" href="player.html?id=${encodeURIComponent(player.ID)}&team=${encodeURIComponent(teamId)}">
+        <a class="shirt-number-slot is-used" href="${typeof laqpPlayerUrl === 'function' ? laqpPlayerUrl(player.ID, teamId, player.Name) : `player.html?id=${encodeURIComponent(player.ID)}&team=${encodeURIComponent(teamId)}`}">
           <span class="shirt-number-value">${num}</span>
-          <span class="shirt-number-name">${safeName}</span>
+          <span class="shirt-number-name-clip" title="${safeName}">
+            <span class="shirt-number-name">${safeName}</span>
+          </span>
         </a>`);
     } else {
       items.push(`
         <div class="shirt-number-slot is-free">
           <span class="shirt-number-value">${num}</span>
-          <span class="shirt-number-name">${t('team.freeNumber')}</span>
+          <span class="shirt-number-name-clip">
+            <span class="shirt-number-name">${t('team.freeNumber')}</span>
+          </span>
         </div>`);
     }
   }
@@ -870,7 +872,10 @@ function renderPlayerRow(player, teamId) {
 }
 
 function selectPlayer(playerId, teamId) {
-  window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
+  const player = _players.find(p => p.ID === String(playerId));
+  window.location.href = typeof laqpPlayerUrl === 'function'
+    ? laqpPlayerUrl(playerId, teamId, player && player.Name)
+    : `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
 }
 
 function renderTeamPage(team, players, formationRow, squadSlots, coachName, stadiumName, leagueName) {
@@ -897,8 +902,8 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
   const content = document.getElementById('team-content');
   content.innerHTML = `
     <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">${t('common.home')}</a>
-      <a href="database.html">${t('common.database')}</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html'}">${t('common.home')}</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html'}">${t('common.database')}</a>
       <span>${safeTeamName}</span>
     </nav></div>
     <button class="back-btn" id="btn-back">‹ ${t('common.back')}</button>
@@ -954,8 +959,27 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
     }
   });
 
+  // Apply the same overflow marquee to shirt numbers.
+  content.querySelectorAll('.shirt-number-name-clip').forEach(el => {
+    const span = el.querySelector('.shirt-number-name');
+    if (!span || el.closest('.shirt-number-slot.is-free')) return;
+    if (span.scrollWidth > el.clientWidth) {
+      span.textContent = span.textContent + '\u00A0\u00A0\u00A0\u00A0' + span.textContent;
+      el.classList.add('scrolling');
+    }
+  });
+
   // Update page title
   document.title = `${team.displayName} - ${t('common.database')} PES`;
+  const teamPath = typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `/team.html?id=${encodeURIComponent(team.id)}`;
+  const teamUrl = typeof laqpAbsoluteUrl === 'function' ? laqpAbsoluteUrl(teamPath) : `https://laqp.website${teamPath}`;
+  const canonical = document.querySelector('link[rel="canonical"]');
+  const ogUrl = document.querySelector('meta[property="og:url"]');
+  if (canonical) canonical.setAttribute('href', teamUrl);
+  if (ogUrl) ogUrl.setAttribute('content', teamUrl);
+  if (window.location.pathname !== teamPath && typeof history.replaceState === 'function') {
+    history.replaceState(null, '', teamPath);
+  }
 }
 
 function renderPositionGroups(players, teamId) {
@@ -1052,7 +1076,7 @@ function goBack() {
   if (document.referrer && new URL(document.referrer).hostname === window.location.hostname) {
     history.back();
   } else {
-    window.location.href = 'database.html';
+    window.location.href = typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html';
   }
 }
 
@@ -1060,7 +1084,8 @@ function goBack() {
 
 async function boot() {
   const params = new URLSearchParams(window.location.search);
-  const teamId = params.get('id');
+  const embeddedTeamId = document.querySelector('meta[name="laqp-team-id"]')?.content || '';
+  const teamId = embeddedTeamId || params.get('id');
 
   if (!teamId) {
     showError(t('errors.noTeamParam'));
@@ -1135,7 +1160,7 @@ async function boot() {
       if (player) {
         const shirtNum = squadRow[`Shirt number ${i}`];
         const playerWithShirt = { ...player, _shirtNumber: shirtNum && shirtNum !== '0' ? parseInt(shirtNum, 10) || null : null };
-        // Apply corrected overall if available (team-specific key takes precedence)
+        // Apply corrected overall if available for this player ID.
         const corregidosOvr = correctedOverallFor(playerWithShirt, teamId, corregidosMap);
         if (corregidosOvr) playerWithShirt.Overall = corregidosOvr;
         players.push(playerWithShirt);
@@ -1182,7 +1207,7 @@ function showError(message) {
   const backLink = document.createElement('p');
   backLink.style.marginTop = '16px';
   const anchor = document.createElement('a');
-  anchor.href = 'database.html';
+  anchor.href = typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html';
   anchor.style.color = 'var(--color-highlight)';
   anchor.textContent = t('common.backToDatabase');
   backLink.appendChild(anchor);

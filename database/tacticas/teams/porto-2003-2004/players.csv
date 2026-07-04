@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+30401;Vítor Baía;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+30402;Paulo Ferreira;LD;83;72;LD;83;72;MD;85;53;LD;80;73
+30403;Ricardo Carvalho;DFC;61;75;DFC;61;75;DFC;61;75;DFC;61;76
+30404;Jorge Costa;DFC;39;73;DFC;39;73;DFC;39;73;DFC;39;74
+30405;Nuno Valente;LI;17;70;LI;17;70;MI;15;51;LI;20;71
+30406;Costinha;MCD;50;61;MCD;50;61;MCD;50;59;MCD;50;63
+30407;Maniche;MC;35;56;MC;35;56;MP;70;38;MC;35;58
+30408;Pedro Mendes;MC;65;55;MC;65;55;MP;30;36;MC;65;57
+30409;Deco;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+30410;Derlei;SD;42;24;SD;42;24;SD;42;22;SD;42;26
+30411;Benni McCarthy;DC;58;21;DC;58;21;DC;58;19;DC;58;23

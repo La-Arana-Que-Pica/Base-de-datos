@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+198601;Nery Pumpido;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+198602;José Cuciuffo;DFC;70;73;DFC;70;73;DFC;70;73;DFC;66;74
+198603;José Luis Brown;DFC;50;77;DFC;50;77;DFC;50;77;DFC;50;78
+198604;Oscar Ruggeri;DFC;30;75;DFC;30;75;DFC;30;75;DFC;34;76
+198605;Ricardo Giusti;MD;82;53;MD;82;53;MD;82;51;LD;80;71
+198606;Julio Olarticoechea;MI;18;55;MI;18;55;MI;18;53;LI;20;73
+198607;Sergio Batista;MCD;50;61;MCD;50;61;MCD;50;59;MCD;50;63
+198608;Héctor Enrique;MC;38;55;MC;38;55;MC;38;53;MC;38;57
+198609;Jorge Burruchaga;SD;58;24;SD;58;24;ED;82;21;MC;62;58
+198610;Diego Maradona;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+198611;Jorge Valdano;DC;42;21;DC;42;21;DC;46;18;DC;50;22

@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+181901;Franco Armani;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+181902;Milton Casco;LI;17;73;LI;17;74;MI;18;55;LI;17;74
+181903;Javier Pinola;DFC;39;76;DFC;39;74;DFC;35;74;DFC;39;74
+181904;Jonatan Maidana;DFC;61;76;DFC;61;74;DFC;65;74;DFC;61;74
+181905;Gonzalo Montiel;LD;83;73;LD;83;74;MD;82;55;LD;83;74
+181906;Leonardo Ponzio;MCD;50;61;MCD;50;58;MCD;50;60;MC;42;52
+181907;Nacho Fernández;MC;30;47;MC;30;39;MC;35;39;MI;20;52
+181908;Enzo Pérez;MC;50;48;MC;50;39;MC;50;39;MC;58;52
+181909;Exequiel Palacios;MC;70;47;MC;70;39;MC;65;39;MD;80;52
+181910;Rafael Borré;DC;39;22;DC;39;22;DC;40;22;DC;40;24
+181911;Lucas Pratto;DC;61;22;DC;61;22;DC;60;22;DC;60;24

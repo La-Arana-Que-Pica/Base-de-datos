@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+200601;Gianluigi Buffon;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+200602;Gianluca Zambrotta;LD;83;70;LD;83;70;LD;83;70;LD;80;71
+200603;Fabio Cannavaro;DFC;61;73;DFC;61;73;DFC;61;73;DFC;61;74
+200604;Marco Materazzi;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+200605;Fabio Grosso;LI;17;72;LI;17;72;LI;17;72;LI;20;73
+200606;Gennaro Gattuso;MC;64;56;MC;64;56;MC;64;54;MC;38;57
+200607;Andrea Pirlo;MCD;50;61;MCD;50;61;MCD;50;59;MC;62;58
+200608;Simone Perrotta;MC;36;55;MC;36;55;MC;36;53;MD;79;55
+200609;Francesco Totti;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+200610;Luca Toni;DC;58;19;DC;58;19;DC;58;17;DC;50;22
+200611;Alessandro Del Piero;SD;42;26;SD;42;26;SD;42;24;MI;21;57

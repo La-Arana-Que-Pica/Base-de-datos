@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+121301;Roman Weidenfeller;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+121302;Lukasz Piszczek;LD;83;70;LD;83;70;MD;82;51;LD;80;71
+121303;Neven Subotic;DFC;61;73;DFC;61;73;DFC;61;73;DFC;61;74
+121304;Mats Hummels;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+121305;Marcel Schmelzer;LI;17;72;LI;17;72;MI;18;53;LI;20;73
+121306;Sven Bender;MCD;42;62;MCD;42;62;MCD;42;60;MC;42;57
+121307;Ilkay Gündogan;MC;58;56;MC;58;56;MC;58;54;MC;58;58
+121308;Jakub Blaszczykowski;ED;82;23;ED;82;23;ED;74;21;MD;79;41
+121309;Mario Götze;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+121310;Marco Reus;EI;18;25;EI;18;25;EI;26;23;MI;21;43
+121311;Robert Lewandowski;DC;50;20;DC;50;20;DC;50;18;DC;50;22

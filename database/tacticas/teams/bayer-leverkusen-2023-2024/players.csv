@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+232401;Lukáš Hrádecký;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+232402;Edmond Tapsoba;DFC;70;73;DFC;70;73;DFC;70;73;DFC;66;74
+232403;Jonathan Tah;DFC;50;77;DFC;50;77;DFC;50;77;DFC;50;78
+232404;Piero Hincapié;DFC;30;75;DFC;30;75;DFC;30;75;DFC;34;76
+232405;Jeremie Frimpong;MD;82;53;MD;82;53;ED;85;21;LD;80;71
+232406;Alejandro Grimaldo;MI;18;55;MI;18;55;EI;15;23;LI;20;73
+232407;Granit Xhaka;MC;42;55;MC;42;55;MCD;42;60;MC;42;57
+232408;Robert Andrich;MC;58;56;MC;58;56;MCD;58;58;MC;58;58
+232409;Jonas Hofmann;MP;58;38;MP;58;38;MP;62;36;MD;79;41
+232410;Florian Wirtz;MP;42;40;MP;42;40;MP;38;38;MI;21;43
+232411;Victor Boniface;DC;50;20;DC;50;20;DC;50;18;DC;50;22

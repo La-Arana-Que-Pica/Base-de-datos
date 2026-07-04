@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Botin dorado">
+  <rect width="160" height="160" rx="32" fill="#17181c"/>
+  <path fill="#f1c40f" d="M42 96c25 2 45-8 61-27l18 21 18 8c3 2 4 6 2 9l-7 12c-2 3-5 4-9 3l-26-8H48c-8 0-14-6-14-14v-3c0-2 3-2 8-1Z"/>
+  <path fill="#d33d35" d="m92 67 9-13 25 31-10 7-24-25Z"/>
+  <path fill="none" stroke="#17181c" stroke-width="5" stroke-linecap="round" d="M61 96h49M75 83l13 11M86 75l14 13M96 65l15 15"/>
+  <circle cx="54" cy="121" r="5" fill="#f1c40f"/>
+  <circle cx="76" cy="121" r="5" fill="#f1c40f"/>
+  <circle cx="98" cy="121" r="5" fill="#f1c40f"/>
+</svg>

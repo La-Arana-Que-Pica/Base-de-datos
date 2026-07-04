@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+868701;Claudio Garella;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+868702;Moreno Ferrario;DFC;30;75;DFC;30;75;DFC;30;75;DFC;66;74
+868703;Giuseppe Bruscolotti;DFC;50;77;DFC;50;77;DFC;50;77;DFC;50;78
+868704;Alessandro Renica;DFC;70;73;DFC;70;73;DFC;70;73;DFC;34;76
+868705;Salvatore Bagni;MD;82;53;MD;82;53;MD;82;51;LD;80;71
+868706;Giovanni Francini;MI;18;55;MI;18;55;MI;18;53;LI;20;73
+868707;Fernando De Napoli;MC;38;55;MC;38;55;MC;38;53;MCD;50;63
+868708;Francesco Romano;MC;62;56;MC;62;56;MC;62;54;MC;38;57
+868709;Diego Maradona;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+868710;Bruno Giordano;SD;42;26;SD;42;26;SD;42;24;MC;62;58
+868711;Andrea Carnevale;DC;58;19;DC;58;19;DC;58;17;DC;50;22

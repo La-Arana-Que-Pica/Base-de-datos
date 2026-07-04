@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+40501;Petr Cech;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+40502;Paulo Ferreira;LD;83;70;LD;83;70;LD;83;70;LD;80;71
+40503;Ricardo Carvalho;DFC;61;73;DFC;61;73;DFC;61;73;DFC;61;74
+40504;John Terry;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+40505;William Gallas;LI;17;72;LI;17;72;LI;17;72;LI;20;73
+40506;Claude Makelele;MCD;50;61;MCD;50;61;MCD;50;59;MCD;50;63
+40507;Frank Lampard;MC;37;55;MC;37;55;MC;37;53;MC;37;57
+40508;Tiago;MC;63;56;MC;63;56;MC;63;54;MC;63;58
+40509;Arjen Robben;ED;82;23;ED;82;23;ED;82;21;MD;79;41
+40510;Damien Duff;EI;18;25;EI;18;25;EI;18;23;MI;21;43
+40511;Didier Drogba;DC;50;20;DC;50;20;DC;50;18;DC;50;22

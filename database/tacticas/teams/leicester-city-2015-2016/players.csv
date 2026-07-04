@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+151601;Kasper Schmeichel;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+151602;Danny Simpson;LD;83;72;LD;83;72;LD;86;72;LD;80;73
+151603;Wes Morgan;DFC;61;75;DFC;61;75;DFC;61;75;DFC;61;76
+151604;Robert Huth;DFC;39;73;DFC;39;73;DFC;39;73;DFC;39;74
+151605;Christian Fuchs;LI;17;70;LI;17;70;LI;14;70;LI;20;71
+151606;Riyad Mahrez;MD;82;55;MD;82;55;MP;70;38;MD;79;57
+151607;N'Golo Kanté;MC;42;56;MC;42;56;MC;42;54;MC;42;58
+151608;Danny Drinkwater;MC;58;55;MC;58;55;MC;58;53;MC;58;57
+151609;Marc Albrighton;MI;18;53;MI;18;53;MI;15;51;MI;21;55
+151610;Shinji Okazaki;SD;42;24;SD;42;24;MP;50;35;SD;42;26
+151611;Jamie Vardy;DC;58;21;DC;58;21;DC;58;19;DC;58;23

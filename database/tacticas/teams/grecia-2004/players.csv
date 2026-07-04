@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+200401;Antonios Nikopolidis;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+200402;Giourkas Seitaridis;LD;83;70;LD;83;70;LD;83;70;LD;80;71
+200403;Traianos Dellas;DFC;61;73;DFC;61;73;DFC;61;73;DFC;61;74
+200404;Michalis Kapsis;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+200405;Takis Fyssas;LI;17;72;LI;17;72;LI;17;72;LI;20;73
+200406;Theodoros Zagorakis;MCD;50;61;MCD;50;61;MC;62;54;MC;38;57
+200407;Stelios Giannakopoulos;MD;82;53;MD;82;53;MP;50;35;MD;79;55
+200408;Angelos Basinas;MC;37;55;MC;37;55;MC;38;53;MCD;50;63
+200409;Kostas Katsouranis;MC;63;56;MC;63;56;MD;82;51;MC;62;58
+200410;Giorgos Karagounis;MI;18;55;MI;18;55;MI;18;53;MI;21;57
+200411;Angelos Charisteas;DC;50;20;DC;50;20;DC;50;18;DC;50;22

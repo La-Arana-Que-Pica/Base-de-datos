@@ -72,65 +72,145 @@
     <div class="header-title">La Araña Que Pica <span>LAqP.website</span></div>
     <nav class="header-nav" aria-label="Menu principal">
       <a href="index.html" class="header-nav-link active">Inicio</a>
-      <a href="downloads.html" class="header-nav-link">Option Files</a>
-      <a href="tutorials.html" class="header-nav-link">Tutoriales</a>
       <a href="database.html" class="header-nav-link">Base de datos</a>
+      <a href="rankings.html" class="header-nav-link">Scouting</a>
+      <a href="guias.html" class="header-nav-link">Guias</a>
+      <a href="calculadora-medias.html" class="header-nav-link">Calculadora</a>
+      <a href="downloads.html" class="header-nav-link">Descargas</a>
     </nav>
   </header>
 
   <!-- ── Landing hub ── -->
-  <main id="landing-main">
+  <main id="landing-main" class="home-shell">
 
-    <!-- 1. Hero -->
-    <section class="landing-hero">
-      <img class="landing-hero-logo" src="img/logo.webp" alt="Logo de LAqP para PES 2018" width="120" height="120" />
-      <h1 class="landing-hero-title" data-i18n="home.heroTitle">PES 2018 actualizado al 2026 para PS4, PS5 y PC</h1>
-      <p class="landing-hero-desc" data-i18n="home.heroDesc">
-        Página oficial del canal: Option Files, tutoriales y una base de datos completa para explorar jugadores, equipos y ligas.
-      </p>
-      <div class="landing-hero-ctas">
-        <a href="downloads.html" class="hero-cta hero-cta-primary" data-i18n="home.downloadCta">Descargar Option File</a>
-        <a href="tutorials.html" class="hero-cta hero-cta-secondary" data-i18n="home.tutorialsCta">Ver tutoriales</a>
-        <a href="database.html" class="hero-cta hero-cta-secondary" data-i18n="home.databaseCta">Explorar base de datos</a>
+    <section class="landing-hero home-academy-hero">
+      <div class="home-hero-copy">
+        <span class="home-kicker">LAqP</span>
+        <h1 class="landing-hero-title">Tu web de PES 2018</h1>
+        <p class="landing-hero-desc">
+          Option Files, guías, scouting y base de datos para dominar tu Liga Máster.
+        </p>
+        <div class="landing-hero-ctas">
+          <a href="guias.html" class="hero-cta hero-cta-primary">Explorar guias</a>
+          <a href="rankings.html" class="hero-cta hero-cta-secondary">Ir a Scouting</a>
+        </div>
       </div>
     </section>
 
-    <!-- 2. Featured Option Files (from CSV) -->
-    <section id="featured-of-section" class="landing-section">
-      <div class="landing-section-header">
-        <h2 class="landing-section-title" data-i18n="home.featured">Option Files Destacados</h2>
-        <a href="downloads.html" class="landing-section-link" data-i18n="home.viewAll">Ver todos</a>
+    <section class="home-quick-access" aria-label="Acceso rapido">
+      <div class="home-quick-title">
+        <span>Acceso rapido</span>
       </div>
-      <div id="featured-of-grid" class="featured-of-grid">
-        <!-- filled by home.js -->
-      </div>
+      <a href="guias.html" class="home-quick-link">
+        <span class="home-quick-icon">G</span>
+        <span><strong>Guías</strong><small>Tutoriales y consejos</small></span>
+      </a>
+      <a href="rankings.html" class="home-quick-link">
+        <span class="home-quick-icon">S</span>
+        <span><strong>Scouting</strong><small>Encontra fichajes</small></span>
+      </a>
+      <a href="downloads.html" class="home-quick-link">
+        <span class="home-quick-icon">OF</span>
+        <span><strong>Option Files</strong><small>Archivos y descargas</small></span>
+      </a>
+      <a href="database.html" class="home-quick-link">
+        <span class="home-quick-icon">DB</span>
+        <span><strong>Base de datos</strong><small>Jugadores y equipos</small></span>
+      </a>
+      <a href="database/DTs/" class="home-quick-link">
+        <span class="home-quick-icon">DT</span>
+        <span><strong>DTs</strong><small>Caras Liga Master</small></span>
+      </a>
+      <a href="tactics.html" class="home-quick-link">
+        <span class="home-quick-icon">TAC</span>
+        <span><strong>Tácticas</strong><small>Formaciones históricas</small></span>
+      </a>
+      <a href="calculadora-medias.html" class="home-quick-link">
+        <span class="home-quick-icon">OVR</span>
+        <span><strong>Calculadora</strong><small>Medias de jugadores</small></span>
+      </a>
     </section>
 
-    <!-- 3. Quick access -->
-    <section class="landing-section">
-      <div class="landing-section-header">
-        <h2 class="landing-section-title" data-i18n="home.quickAccess">Accesos rápidos</h2>
+    <div class="home-content-layout">
+      <div class="home-content-main">
+        <section id="featured-of-section" class="landing-section home-downloads-panel">
+          <div class="landing-section-header">
+            <h2 class="landing-section-title" data-i18n="home.featured">Option Files destacados</h2>
+            <a href="downloads.html" class="landing-section-link" data-i18n="home.viewAll">Ver todos</a>
+          </div>
+          <div id="featured-of-grid" class="featured-of-grid">
+            <!-- filled by home.js -->
+          </div>
+        </section>
       </div>
-      <div class="landing-cards landing-cards-compact">
 
-        <a href="downloads.html" class="landing-card">
-          <div class="landing-card-icon">OF</div>
-          <div class="landing-card-title">Option Files</div>
-          <div class="landing-card-desc" data-i18n="home.downloadDesc">Descarga la ultima version y revisa detalles</div>
-        </a>
+      <aside class="home-side-rail" aria-label="Menu de inicio">
+        <section class="home-side-card">
+          <div class="home-side-card-head">
+            <h2>Guías recomendadas</h2>
+          </div>
+          <div class="home-side-list">
+            <a href="articulo.html?id=instalar-option-file-pes-2018-2026">
+              <strong>Instalar Option File 2026</strong>
+              <span>Guía paso a paso</span>
+            </a>
+            <a href="articulo.html?id=importar-kits-pes-2018">
+              <strong>Importar kits correctamente</strong>
+              <span>Edicion y configuracion</span>
+            </a>
+            <a href="rankings.html">
+              <strong>Scouting de fichajes</strong>
+              <span>Busca jugadores por necesidad</span>
+            </a>
+            <a href="articulo.html?id=sistema-medias-pes-2018">
+              <strong>Sistema de medias</strong>
+              <span>Entende el OVR</span>
+            </a>
+          </div>
+        </section>
 
-        <a href="tutorials.html" class="landing-card">
-          <div class="landing-card-icon">🎥</div>
-          <div class="landing-card-title" data-i18n="nav.tutorials">Tutoriales</div>
-          <div class="landing-card-desc" data-i18n="home.tutorialsDesc">Aprende a instalar y configurar tu Option File</div>
-        </a>
+        <section class="home-side-card">
+          <div class="home-side-card-head">
+            <h2>Sobre LAqP</h2>
+          </div>
+          <p>Un espacio creado para ordenar Option Files, guías, datos y herramientas de PES 2018 en un solo lugar.</p>
+          <a class="home-side-button" href="acerca-de.html">Conocer mas</a>
+        </section>
 
-        <a href="database.html" class="landing-card landing-card-highlight">
-          <div class="landing-card-icon">📊</div>
-          <div class="landing-card-title" data-i18n="nav.database">Base de datos</div>
-          <div class="landing-card-desc" data-i18n="home.databaseDesc">Explora jugadores, equipos y ligas</div>
-        </a>
+        <section class="home-side-card home-social-card">
+          <div class="home-side-card-head">
+            <h2>Mis Redes</h2>
+          </div>
+          <div class="home-social-links" aria-label="Redes de LAqP">
+            <a href="https://www.youtube.com/@L.A.q.P" target="_blank" rel="noopener noreferrer" aria-label="YouTube LAqP">
+              <img class="home-social-logo" src="assets/images/logos/youtube.png" alt="" loading="lazy">
+              <span>YouTube</span>
+            </a>
+            <a href="https://www.instagram.com/laaranapicante/" target="_blank" rel="noopener noreferrer" aria-label="Instagram LAqP">
+              <img class="home-social-logo" src="assets/images/logos/Instagram.png" alt="" loading="lazy">
+              <span>Instagram</span>
+            </a>
+            <a href="https://www.tiktok.com/@laaraniapicante" target="_blank" rel="noopener noreferrer" aria-label="TikTok LAqP">
+              <img class="home-social-logo" src="assets/images/logos/TikTok.png" alt="" loading="lazy">
+              <span>TikTok</span>
+            </a>
+          </div>
+        </section>
+      </aside>
+    </div>
 
+    <section class="home-feature-strip" aria-label="Resumen del proyecto">
+      <div>
+        <strong>Contenido propio</strong>
+        <span>Guías y recursos pensados para PES 2018.</span>
+      </div>
+      <div>
+        <strong>Actualizaciones frecuentes</strong>
+        <span>Option Files y datos ordenados por version.</span>
+      </div>
+      <div>
+        <strong>Hecho con pasion</strong>
+        <span>Para mejorar tu Liga Máster al maximo.</span>
       </div>
     </section>
 
@@ -141,5 +221,3 @@
   <script src="js/home.js"></script>
 </body>
 </html>
-
-

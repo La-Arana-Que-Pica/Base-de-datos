@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+200901;Júlio César;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+200902;Maicon;LD;83;72;LD;83;72;LD;86;67;LD;80;73
+200903;Lúcio;DFC;61;75;DFC;61;75;DFC;61;75;DFC;61;76
+200904;Walter Samuel;DFC;39;73;DFC;39;73;DFC;39;73;DFC;39;74
+200905;Cristian Chivu;LI;17;70;LI;17;70;LI;14;65;LI;20;71
+200906;Javier Zanetti;MC;42;56;MC;42;56;MC;42;54;MC;58;57
+200907;Esteban Cambiasso;MCD;58;62;MCD;58;62;MCD;58;60;MC;42;58
+200908;Samuel Eto'o;ED;82;25;ED;82;25;ED;85;23;MD;79;57
+200909;Wesley Sneijder;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+200910;Goran Pandev;EI;18;23;EI;18;23;EI;15;21;MI;21;55
+200911;Diego Milito;DC;50;20;DC;50;20;DC;50;18;DC;50;22

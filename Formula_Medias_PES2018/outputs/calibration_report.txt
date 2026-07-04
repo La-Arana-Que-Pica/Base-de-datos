@@ -1,0 +1,23 @@
+CALIBRACION INCREMENTAL DE FORMULA PES 2018
+
+Esta mejora no reemplaza la formula base.
+Agrega un corrector residual chico encima de cada modelo existente cuando mejora la validacion.
+
+Posiciones con calibracion activada: 13 / 13
+
+Detalle por posicion
+- GK: activada, muestras=1551, MAE antes=0.746, MAE despues=0.232, <=1 antes=94.86%, <=1 despues=99.04%
+- CB: activada, muestras=2245, MAE antes=0.566, MAE despues=0.432, <=1 antes=94.21%, <=1 despues=96.88%
+- LB: activada, muestras=916, MAE antes=0.679, MAE despues=0.408, <=1 antes=90.22%, <=1 despues=98.37%
+- RB: activada, muestras=1009, MAE antes=0.639, MAE despues=0.436, <=1 antes=93.07%, <=1 despues=99.50%
+- DMF: activada, muestras=1052, MAE antes=0.905, MAE despues=0.682, <=1 antes=82.46%, <=1 despues=90.05%
+- CMF: activada, muestras=1536, MAE antes=0.701, MAE despues=0.516, <=1 antes=90.91%, <=1 despues=95.78%
+- LMF: activada, muestras=338, MAE antes=0.588, MAE despues=0.441, <=1 antes=92.65%, <=1 despues=97.06%
+- RMF: activada, muestras=389, MAE antes=0.756, MAE despues=0.590, <=1 antes=88.46%, <=1 despues=93.59%
+- AMF: activada, muestras=930, MAE antes=0.651, MAE despues=0.382, <=1 antes=90.32%, <=1 despues=98.92%
+- LWF: activada, muestras=516, MAE antes=0.817, MAE despues=0.606, <=1 antes=88.46%, <=1 despues=98.08%
+- RWF: activada, muestras=540, MAE antes=0.750, MAE despues=0.546, <=1 antes=88.89%, <=1 despues=96.30%
+- SS: activada, muestras=319, MAE antes=0.734, MAE despues=0.578, <=1 antes=85.94%, <=1 despues=95.31%
+- CF: activada, muestras=1703, MAE antes=0.557, MAE despues=0.387, <=1 antes=92.38%, <=1 despues=99.41%
+
+CSV de metricas: D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs\calibration_scores.csv

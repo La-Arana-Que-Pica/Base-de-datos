@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+232421;Juan Musso;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+232422;Berat Djimsiti;DFC;70;73;DFC;70;73;DFC;70;73;DFC;66;74
+232423;Isak Hien;DFC;50;77;DFC;50;77;DFC;50;77;DFC;50;78
+232424;Sead Kolasinac;DFC;30;75;DFC;30;75;DFC;30;75;DFC;34;76
+232425;Davide Zappacosta;MD;82;53;MD;82;53;MD;82;37;LD;80;71
+232426;Matteo Ruggeri;MI;18;55;MI;18;55;MI;18;39;LI;20;73
+232427;Marten de Roon;MC;42;55;MC;42;55;MCD;42;60;MC;42;57
+232428;Éderson;MC;58;56;MC;58;56;MCD;58;58;MC;58;58
+232429;Teun Koopmeiners;MP;42;40;MP;42;40;MP;42;38;MP;42;42
+232430;Ademola Lookman;MP;58;38;MP;58;38;MP;58;36;MP;58;40
+232431;Gianluca Scamacca;DC;50;20;DC;50;20;DC;50;18;DC;50;22

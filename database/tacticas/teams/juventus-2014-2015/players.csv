@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+141501;Gianluigi Buffon;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+141502;Stephan Lichtsteiner;LD;83;70;LD;83;70;MD;82;51;LD;80;71
+141503;Leonardo Bonucci;DFC;61;73;DFC;61;73;DFC;70;73;DFC;61;74
+141504;Giorgio Chiellini;DFC;39;75;DFC;39;75;DFC;50;77;DFC;39;76
+141505;Patrice Evra;LI;17;72;LI;17;72;DFC;30;75;LI;20;73
+141506;Claudio Marchisio;MC;65;56;MC;65;56;MC;62;54;MC;35;57
+141507;Andrea Pirlo;MCD;50;61;MCD;50;61;MCD;50;59;MCD;50;63
+141508;Paul Pogba;MC;35;55;MC;35;55;MI;18;53;MC;65;58
+141509;Arturo Vidal;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+141510;Carlos Tévez;SD;42;26;SD;42;26;SD;42;24;SD;42;28
+141511;Álvaro Morata;DC;58;19;DC;58;19;DC;58;17;DC;58;21

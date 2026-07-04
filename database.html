@@ -92,48 +92,91 @@
 
       <!-- Home view -->
       <div id="home-view">
-        <div class="breadcrumb-row">
-          <nav class="breadcrumbs" aria-label="Breadcrumb">
-            <a href="index.html" data-i18n="common.home">Inicio</a>
-            <span data-i18n="common.database">Base de datos</span>
-          </nav>
-        </div>
-        <div class="home-welcome db-home-welcome">
-          <h1 data-i18n="db.homeTitle">Base de datos de jugadores</h1>
-          <p data-i18n="db.homeDesc">Explora ligas, equipos y jugadores desde un menu interno simple.</p>
-        </div>
-        <div class="db-home-menu">
-          <button class="db-menu-card" type="button" onclick="showLeaguesView()">
-            <span class="db-menu-card-title" data-i18n="db.exploreLeagues">Explorar ligas</span>
-            <span class="db-menu-card-desc" data-i18n="db.exploreLeaguesDesc">Ver competiciones y sus equipos</span>
-          </button>
-          <button class="db-menu-card" type="button" onclick="showTeamsView()">
-            <span class="db-menu-card-title" data-i18n="db.exploreTeams">Explorar equipos</span>
-            <span class="db-menu-card-desc" data-i18n="db.exploreTeamsDesc">Entrar directo a clubes y selecciones</span>
-          </button>
-          <button class="db-menu-card" type="button" onclick="showAllPlayersAndFocusSearch()">
-            <span class="db-menu-card-title" data-i18n="db.searchPlayers">Buscar jugadores</span>
-            <span class="db-menu-card-desc" data-i18n="db.searchPlayersDesc">Filtrar por nombre, club, media y habilidades</span>
-          </button>
-        </div>
-        <div class="stats-grid db-stats-grid">
-          <div class="stat-card" onclick="showLeaguesView()">
-            <div class="number" id="stat-leagues">0</div>
-            <div class="label" data-i18n="common.leagues">Ligas</div>
+        <section class="db-dashboard">
+          <div class="db-dashboard-main">
+            <section class="db-hero-panel">
+              <div class="db-hero-copy">
+                <span class="db-section-kicker">Base de Datos</span>
+                <h1>Toda la base de datos de PES 2018</h1>
+                <p>Accede a jugadores, equipos y ligas del Option File LAqP desde un panel mas ordenado.</p>
+              </div>
+              <div class="db-home-search">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  placeholder="Buscar jugador, equipo o liga..."
+                  autocomplete="off"
+                  onkeydown="if(event.key === 'Enter') runHomeDatabaseSearch(this.value)"
+                />
+                <button type="button" onclick="showAllPlayersAndFocusSearch()">Busqueda avanzada</button>
+              </div>
+              <div class="db-stat-tiles">
+                <button class="db-stat-tile db-stat-green" type="button" onclick="showAllPlayers()">
+                  <span>Jugadores</span>
+                  <strong id="stat-players">0</strong>
+                  <small>Ver todos</small>
+                </button>
+                <button class="db-stat-tile db-stat-blue" type="button" onclick="showTeamsView()">
+                  <span>Equipos</span>
+                  <strong id="stat-teams">0</strong>
+                  <small>Ver todos</small>
+                </button>
+                <button class="db-stat-tile db-stat-purple" type="button" onclick="showLeaguesView()">
+                  <span>Ligas</span>
+                  <strong id="stat-leagues">0</strong>
+                  <small>Ver todas</small>
+                </button>
+                <a class="db-stat-tile db-stat-red" href="database/DTs/">
+                  <span>DTs</span>
+                  <strong>ML</strong>
+                  <small>Caras Liga Master</small>
+                </a>
+                <button class="db-stat-tile db-stat-gold" type="button" onclick="showFavoritesView()">
+                  <span>Favoritos</span>
+                  <strong id="stat-favorites">0</strong>
+                  <small>Ver guardados</small>
+                </button>
+              </div>
+            </section>
+
+            <section class="db-home-content-grid">
+              <article class="db-panel">
+                <header>
+                  <h2>Jugadores destacados</h2>
+                  <button type="button" onclick="showAllPlayers()">Ver todos</button>
+                </header>
+                <div class="db-feature-list" id="db-latest-players"></div>
+              </article>
+
+              <article class="db-panel">
+                <header>
+                  <h2>Equipos destacados</h2>
+                  <button type="button" onclick="showTeamsView()">Ver todos</button>
+                </header>
+                <div class="db-featured-teams" id="db-featured-teams"></div>
+              </article>
+            </section>
           </div>
-          <div class="stat-card" onclick="showTeamsView()">
-            <div class="number" id="stat-teams">0</div>
-            <div class="label" data-i18n="common.teams">Equipos</div>
-          </div>
-          <div class="stat-card" onclick="showAllPlayers()">
-            <div class="number" id="stat-players">0</div>
-            <div class="label" data-i18n="common.players">Jugadores</div>
-          </div>
-          <div class="stat-card" onclick="showFavoritesView()">
-            <div class="number" id="stat-favorites">⭐</div>
-            <div class="label" data-i18n="db.myFavorites">Mis favoritos</div>
-          </div>
-        </div>
+
+          <aside class="db-dashboard-aside">
+            <article class="db-panel db-side-leagues">
+              <header>
+                <h2>Ligas destacadas</h2>
+                <button type="button" onclick="showLeaguesView()">Ver todas</button>
+              </header>
+              <div id="db-featured-leagues"></div>
+            </article>
+
+            <article class="db-panel db-side-favorites">
+              <header>
+                <h2>Favoritos</h2>
+                <button type="button" onclick="showFavoritesView()">Ver todos</button>
+              </header>
+              <div id="db-favorite-players"></div>
+            </article>
+          </aside>
+        </section>
+
       </div>
 
       <!-- Players list view -->

@@ -1,0 +1,2 @@
+grupo;jugadores;mae_decimal;rmse_decimal;mae_media;rmse_media;exactas_pct;error_<=1_pct;error_<=2_pct;error_max;sesgo_promedio;predice_de_mas;predice_de_menos
+TOTAL;13044;0,44771151367936535;0,5863718761721932;0,37135847899417357;0,6452002392017949;64,75774302361239;98,27506899724011;99,89267095982828;9,0;0,0;2281;2316

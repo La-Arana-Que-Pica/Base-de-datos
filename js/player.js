@@ -2,7 +2,8 @@
  * Base de datos Option File PES 2018–2026
  * Player Profile Page Script
  *
- * Loads a single player's full data from URL params:
+ * Loads a single player's full data from generated HTML or URL params:
+ *   /player/v2/TEAMID/player-slug/
  *   player.html?id=PLAYERID&team=TEAMID
  */
 
@@ -86,13 +87,11 @@ function correctedPlayerFallbackKey(row) {
 }
 
 function buildCorrectedOverallMap(rows) {
-  const map = { byTeamPlayer: Object.create(null), byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
+  const map = { byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
   rows.forEach(r => {
     const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-    const tid = r['TeamId'] || r['team_id'] || '';
     const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
     if (!ovr) return;
-    if (pid && tid) map.byTeamPlayer[`${tid}_${pid}`] = ovr;
     if (pid) map.byPlayer[pid] = ovr;
     const fallback = correctedPlayerFallbackKey(r);
     if (fallback.nameCountry) map.byNameCountry[fallback.nameCountry] = ovr;
@@ -104,7 +103,6 @@ function buildCorrectedOverallMap(rows) {
 function correctedOverallFor(row, teamId, correctedMap) {
   if (!row || !correctedMap) return '';
   const pid = row['Id'] || row.ID || row['PlayerId'] || '';
-  if (teamId && pid && correctedMap.byTeamPlayer[`${teamId}_${pid}`]) return correctedMap.byTeamPlayer[`${teamId}_${pid}`];
   if (pid && correctedMap.byPlayer[pid]) return correctedMap.byPlayer[pid];
   const fallback = correctedPlayerFallbackKey(row);
   return correctedMap.byNameCountry[fallback.nameCountry] || correctedMap.byNamePos[fallback.namePos] || '';
@@ -258,7 +256,7 @@ const NATIONALITY_NAMES = {
   '235': 'Eslovenia',    '236': 'España',       '237': 'Suecia',
   '238': 'Suiza',        '239': 'Ucrania',      '240': 'Uzbekistán',
   '241': 'Gales',        '303': 'Serbia',       '304': 'Montenegro',
-  '311': 'Kosovo',
+  '311': 'Kosovo', '129': 'Puerto Rico', '206': 'Islas Feroe',
 };
 
 function nationalityName(countryId) {
@@ -1409,6 +1407,93 @@ function getPesPosition(player) {
     : rawPos;
 }
 
+function playerStatValue(player, key) {
+  const value = parseInt(player[key], 10);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function topPlayerStrengths(player, limit = 4) {
+  const candidates = [
+    ['Speed', 'velocidad'], ['Explosive Power', 'aceleracion'], ['Finishing', 'definicion'],
+    ['Attacking Prowess', 'movimientos ofensivos'], ['Ball Control', 'control de balon'],
+    ['Dribbling', 'drible'], ['Low Pass', 'pase corto'], ['Lofted Pass', 'pase largo'],
+    ['Kicking Power', 'potencia de tiro'], ['Header', 'juego aereo'], ['Defensive Prowess', 'lectura defensiva'],
+    ['Ball Winning', 'recuperacion'], ['Physical Contact', 'contacto fisico'], ['Jump', 'salto'],
+    ['Stamina', 'resistencia'], ['Goalkeeping', 'capacidad de portero'], ['Reflexes', 'reflejos'],
+    ['Coverage', 'cobertura'],
+  ];
+  return candidates
+    .map(([key, label]) => ({ key, label, value: playerStatValue(player, key) }))
+    .filter(item => item.value > 0)
+    .sort((a, b) => b.value - a.value)
+    .slice(0, limit);
+}
+
+function tacticalProfileText(player, pesPosition, team) {
+  const strengths = topPlayerStrengths(player, 5);
+  const names = strengths.map(item => item.label);
+  const ovr = player['OverallStats'] || '';
+  const age = player['Age'] || '';
+  const style = playingStyleLabel(player['PlayingStyle'] || '');
+  const pos = translatePosition(pesPosition);
+  const teamName = team && team.displayName ? team.displayName : 'su equipo';
+
+  const has = key => playerStatValue(player, key);
+  const phrasePool = {
+    GK: [
+      `${player['Name']} es un arquero de perfil ${has('Reflexes') >= 80 ? 'reactivo' : 'ordenado'}, util para sostener partidos donde el rival llega con remates claros.`,
+      `Como ${pos}, su valor dentro de ${teamName} aparece sobre todo en ${names.slice(0, 3).join(', ') || 'atributos de porteria'}.`,
+    ],
+    DEF: [
+      `${player['Name']} es un defensor ${has('Physical Contact') >= 80 ? 'fuerte en el cuerpo a cuerpo' : 'de perfil tactico'} que puede aportar equilibrio cuando el equipo necesita cerrar espacios.`,
+      `Su ficha destaca por ${names.slice(0, 3).join(', ') || 'atributos defensivos'}, rasgos importantes para sostener la linea de fondo de ${teamName}.`,
+    ],
+    MID: [
+      `${player['Name']} es un mediocampista ${has('Low Pass') >= 80 ? 'asociativo y preciso' : 'funcional para conectar lineas'} dentro de la base de datos de PES 2018.`,
+      `En ${teamName}, su utilidad pasa por ${names.slice(0, 3).join(', ') || 'equilibrio con pelota y sin pelota'}, especialmente si se lo usa cerca de su posicion natural.`,
+    ],
+    FWD: [
+      `${player['Name']} es un atacante ${has('Speed') >= 82 ? 'profundo y peligroso al espacio' : 'de movimientos ofensivos utiles'} para esquemas que buscan dañar en los ultimos metros.`,
+      `Su perfil combina ${names.slice(0, 3).join(', ') || 'recursos ofensivos'}, por lo que puede funcionar como referencia o alternativa segun el plan de partido de ${teamName}.`,
+    ],
+    UNK: [
+      `${player['Name']} tiene un perfil versatil dentro de PES 2018, con atributos que conviene revisar antes de cambiarlo de posicion.`,
+      `Sus puntos fuertes principales son ${names.slice(0, 3).join(', ') || 'sus atributos generales'}.`,
+    ],
+  };
+
+  const family = positionFamily(pesPosition);
+  const base = phrasePool[family] || phrasePool.UNK;
+  const context = [];
+  if (ovr) context.push(`Con media ${ovr}, se ubica como una opcion ${parseInt(ovr, 10) >= 80 ? 'de alto impacto' : 'interesante'} para su rol.`);
+  if (age) context.push(`${parseInt(age, 10) <= 23 ? 'Por edad, tambien puede leerse como una pieza de proyeccion.' : 'Por edad, encaja mejor como pieza de rendimiento inmediato.'}`);
+  if (style && style !== player['PlayingStyle']) context.push(`Su estilo de juego registrado es ${style}, un dato clave para compararlo con jugadores similares.`);
+  return [...base, ...context].join(' ');
+}
+
+function renderPlayerEditorial(player, team, pesPosition, similarPlayers) {
+  const strengths = topPlayerStrengths(player, 5);
+  const family = positionFamily(pesPosition);
+  const scoutingLink = typeof laqpPageUrl === 'function' ? laqpPageUrl('rankings.html') : 'rankings.html';
+  const similarNames = (similarPlayers || []).slice(0, 3).map(item => item.player && item.player.Name).filter(Boolean);
+
+  return `
+    <section class="player-section player-editorial-section">
+      <div class="player-section-title">Analisis del jugador</div>
+      <p>${escapeHtml(tacticalProfileText(player, pesPosition, team))}</p>
+      ${strengths.length ? `
+        <div class="player-strength-tags">
+          ${strengths.map(item => `<span>${escapeHtml(item.label)} <strong>${item.value}</strong></span>`).join('')}
+        </div>` : ''}
+      <div class="player-context-links">
+        <a href="${scoutingLink}">Abrir Scouting</a>
+        <a href="${typeof laqpArticleUrl === 'function' ? laqpArticleUrl('sistema-medias-pes-2018', 'Como interpretar medias') : 'articulo.html?id=sistema-medias-pes-2018'}">Como interpretar medias</a>
+        <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html'}">Explorar mas jugadores</a>
+      </div>
+      ${similarNames.length ? `<p class="player-editorial-note">Perfiles cercanos en la base: ${escapeHtml(similarNames.join(', '))}. Abrir esas fichas ayuda a comparar alternativas por media, posicion y fortalezas.</p>` : ''}
+    </section>`;
+}
+
 function positionFamily(pos) {
   if (pos === 'GK') return 'GK';
   if (isDefensivePosition(pos)) return 'DEF';
@@ -1586,7 +1671,7 @@ function renderSimilarPlayers(similarPlayers) {
                 <span class="similar-player-position" style="${posStyle}">${escapeHtml(translatePosition(pos))}</span>
                 <span style="background:${ovrColor};color:${statTextColor(ovrColor)}">${escapeHtml(ovr)}</span>
               </div>
-              <a class="similar-player-link" href="player.html?id=${encodeURIComponent(player['Id'])}&team=${encodeURIComponent(team.id)}">${t('player.openCard')}</a>
+              <a class="similar-player-link" href="${typeof laqpPlayerUrl === 'function' ? laqpPlayerUrl(player['Id'], team.id, player['Name']) : `player.html?id=${encodeURIComponent(player['Id'])}&team=${encodeURIComponent(team.id)}`}">${t('player.openCard')}</a>
             </article>`;
         }).join('')}
       </div>
@@ -1647,9 +1732,9 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
   content.innerHTML = `
     <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">${t('common.home')}</a>
-      <a href="database.html">${t('common.database')}</a>
-      <a href="team.html?id=${team.id}">${team.displayName}</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html'}">${t('common.home')}</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html'}">${t('common.database')}</a>
+      <a href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`}">${team.displayName}</a>
       <span>${player['Name'] || t('player.unknown')}</span>
     </nav></div>
     <button class="back-btn" onclick="goBack()">◀ ${t('common.back')}</button>
@@ -1715,6 +1800,8 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
       </div>
 
+      ${renderPlayerEditorial(player, team, pesPosition, similarPlayers)}
+
       <!-- Tabs -->
       <div class="profile-tabs">
         <div class="profile-tab-bar">
@@ -1743,6 +1830,45 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
   // Update page title
   document.title = `${player['Name'] || t('player.unknown')} - ${t('common.database')} PES`;
+  const playerPath = typeof laqpPlayerUrl === 'function'
+    ? laqpPlayerUrl(player['Id'], team.id, player['Name'])
+    : `/player.html?id=${encodeURIComponent(player['Id'])}&team=${encodeURIComponent(team.id)}`;
+  const playerUrl = typeof laqpAbsoluteUrl === 'function' ? laqpAbsoluteUrl(playerPath) : `https://laqp.website${playerPath}`;
+  const playerDescription = `${player['Name'] || 'Jugador'} en PES 2018 actualizado: media ${player['OverallStats'] || '-'}, posicion ${posDisplay || '-'}, equipo ${team.displayName}, stats, apariencia, fortalezas y jugadores similares.`;
+  const canonical = document.querySelector('link[rel="canonical"]');
+  const metaDescription = document.querySelector('meta[name="description"]');
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  const ogDescription = document.querySelector('meta[property="og:description"]');
+  const ogUrl = document.querySelector('meta[property="og:url"]');
+  const ogImage = document.querySelector('meta[property="og:image"]');
+  if (canonical) canonical.setAttribute('href', playerUrl);
+  if (metaDescription) metaDescription.setAttribute('content', playerDescription);
+  if (ogTitle) ogTitle.setAttribute('content', `${player['Name'] || t('player.unknown')} PES 2018 - Stats y analisis`);
+  if (ogDescription) ogDescription.setAttribute('content', playerDescription);
+  if (ogUrl) ogUrl.setAttribute('content', playerUrl);
+  if (ogImage) ogImage.setAttribute('content', `https://laqp.website/img/players/${player['Id']}.webp`);
+  if (window.location.pathname !== playerPath && typeof history.replaceState === 'function') {
+    history.replaceState(null, '', playerPath);
+  }
+
+  document.querySelectorAll('script[data-dynamic-schema="player"]').forEach(el => el.remove());
+  const schema = document.createElement('script');
+  schema.type = 'application/ld+json';
+  schema.dataset.dynamicSchema = 'player';
+  schema.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    name: `${player['Name'] || 'Jugador'} - PES 2018`,
+    description: playerDescription,
+    url: playerUrl,
+    about: {
+      '@type': 'Person',
+      name: player['Name'] || 'Jugador',
+      nationality: nationalityName(player['Country']),
+      memberOf: { '@type': 'SportsTeam', name: team.displayName },
+    },
+  });
+  document.head.appendChild(schema);
 
   requestAnimationFrame(() => drawRadar('radar-canvas', radarAttrs));
 }
@@ -1770,7 +1896,7 @@ function goBack() {
   if (document.referrer && new URL(document.referrer).hostname === window.location.hostname) {
     history.back();
   } else {
-    window.location.href = 'database.html';
+    window.location.href = typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html';
   }
 }
 
@@ -1778,8 +1904,10 @@ function goBack() {
 
 async function boot() {
   const params = new URLSearchParams(window.location.search);
-  const playerId = params.get('id');
-  const teamId = params.get('team');
+  const embeddedPlayerId = document.querySelector('meta[name="laqp-player-id"]')?.content || '';
+  const embeddedTeamId = document.querySelector('meta[name="laqp-team-id"]')?.content || '';
+  const playerId = embeddedPlayerId || params.get('id');
+  const teamId = embeddedTeamId || params.get('team');
 
   if (!playerId || !teamId) {
     showError(t('errors.noPlayerParams'));
@@ -1826,10 +1954,8 @@ async function boot() {
     return;
   }
 
-  // Build corrected overall map from medias_corregidas.csv
-  // Keys: "teamId_playerId" for per-team precision, and plain "playerId" as a fallback.
-  // When multiple teams have different overrides for the same player, the team-specific key
-  // is preferred at lookup time; the plain-playerId fallback stores the last-seen value.
+  // Build corrected overall map from medias_corregidas.csv.
+  // Keys are plain player IDs because corrected ratings are global per player.
   const corregidosMap = corregidosText ? buildCorrectedOverallMap(parseCSV(corregidosText).rows) : null;
 
   // Build original players map (id → name) for face ID lookups
@@ -1860,7 +1986,7 @@ async function boot() {
     return;
   }
 
-  // Override overall from medias_corregidas.csv if available (team-specific key takes precedence)
+  // Override overall from medias_corregidas.csv if available for this player ID.
   const corregidosOvr = correctedOverallFor(player, teamId, corregidosMap);
   if (corregidosOvr) {
     player['OverallStats'] = corregidosOvr;
@@ -1956,7 +2082,7 @@ function showError(message) {
   const backLink = document.createElement('p');
   backLink.style.marginTop = '16px';
   const anchor = document.createElement('a');
-  anchor.href = 'database.html';
+  anchor.href = typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html';
   anchor.style.color = 'var(--color-highlight)';
   anchor.textContent = t('common.backToDatabase');
   backLink.appendChild(anchor);

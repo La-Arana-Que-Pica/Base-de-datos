@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+222301;Ederson;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+222302;Kyle Walker;DFC;70;75;DFC;70;75;DFC;70;75;LD;80;73
+222303;Rúben Dias;DFC;50;77;DFC;50;77;DFC;50;77;DFC;61;76
+222304;Nathan Aké;DFC;30;73;DFC;30;73;DFC;30;73;LI;20;71
+222305;John Stones;MCD;42;60;MCD;42;60;MCD;42;58;DFC;39;74
+222306;Rodri;MCD;58;62;MCD;58;62;MCD;58;60;MC;58;57
+222307;Bernardo Silva;MD;82;41;MD;82;41;ED;82;23;MD;79;57
+222308;Kevin De Bruyne;MP;62;40;MP;62;40;MP;62;38;SD;58;28
+222309;Ilkay Gündogan;MP;38;38;MP;38;38;MP;38;36;MC;42;58
+222310;Jack Grealish;MI;18;39;MI;18;39;EI;18;21;MI;21;55
+222311;Erling Haaland;DC;50;20;DC;50;20;DC;50;18;DC;42;21

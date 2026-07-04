@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base href="/">
+  <meta name="laqp-database-view" content="players">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-M7ZNDRZB27');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jugadores PES 2018 - Base de datos LAqP</title>
+  <meta name="description" content="Explora todos los jugadores publicados de PES 2018 con medias, stats, posiciones, equipos y nacionalidades." />
+  <link rel="canonical" href="https://laqp.website/database/v2/players/" />
+  <meta property="og:title" content="Jugadores PES 2018 - Base de datos LAqP" />
+  <meta property="og:description" content="Explora todos los jugadores publicados de PES 2018 con medias, stats, posiciones, equipos y nacionalidades." />
+  <meta property="og:image" content="https://laqp.website/img/logo.png" />
+  <meta property="og:url" content="https://laqp.website/database/v2/players/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Jugadores PES 2018 - Base de datos LAqP" />
+  <meta name="twitter:description" content="Explora todos los jugadores publicados de PES 2018 con medias, stats, posiciones, equipos y nacionalidades." />
+  <meta name="twitter:image" content="https://laqp.website/img/logo.png" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="img/logo.webp" type="image/webp" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://laqp.website/" },
+      { "@type": "ListItem", "position": 2, "name": "Base de datos", "item": "https://laqp.website/database.html" }
+    ]
+  }
+  </script>
+  <!-- Preconnect for YouTube thumbnails / embeds (used in tutorials) -->
+  <link rel="preconnect" href="https://img.youtube.com" crossorigin />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5301686002102491"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header id="header">
+    <img
+      class="logo"
+      src="img/logo.webp"
+      onerror="this.onerror=null;this.src='img/logo.webp'"
+      alt="Logo"
+      onclick="goHome()"
+      style="cursor:pointer"
+    />
+    <div class="header-title">
+      Base de datos Option File <span>PES 2018–2026</span>
+    </div>
+    <nav class="header-nav" aria-label="Menu principal">
+      <a href="downloads.html" class="header-nav-link header-nav-link-primary">Option Files</a>
+      <a href="tutorials.html" class="header-nav-link">Tutoriales</a>
+      <a href="database.html" class="header-nav-link active">Base de datos</a>
+    </nav>
+    <div id="search-container">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Buscar jugadores..."
+        data-i18n-placeholder="search.players"
+        autocomplete="off"
+      />
+    </div>
+  </header>
+
+  <!-- ── Main layout ── -->
+  <div id="layout">
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+      <!-- Built dynamically by JS -->
+    </nav>
+
+    <!-- Content area -->
+    <main id="main">
+
+      <!-- Loading overlay -->
+      <div id="loading-overlay">
+        <div class="spinner"></div>
+        <span class="loading-message" data-i18n="loading.database">Cargando base de datos...</span>
+      </div>
+
+      <!-- Home view -->
+      <div id="home-view">
+        <section class="db-dashboard">
+          <div class="db-dashboard-main">
+            <section class="db-hero-panel">
+              <div class="db-hero-copy">
+                <span class="db-section-kicker">Base de Datos</span>
+                <h1>Toda la base de datos de PES 2018</h1>
+                <p>Accede a jugadores, equipos y ligas del Option File LAqP desde un panel mas ordenado.</p>
+              </div>
+              <div class="db-home-search">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  placeholder="Buscar jugador, equipo o liga..."
+                  autocomplete="off"
+                  onkeydown="if(event.key === 'Enter') runHomeDatabaseSearch(this.value)"
+                />
+                <button type="button" onclick="showAllPlayersAndFocusSearch()">Busqueda avanzada</button>
+              </div>
+              <div class="db-stat-tiles">
+                <button class="db-stat-tile db-stat-green" type="button" onclick="showAllPlayers()">
+                  <span>Jugadores</span>
+                  <strong id="stat-players">0</strong>
+                  <small>Ver todos</small>
+                </button>
+                <button class="db-stat-tile db-stat-blue" type="button" onclick="showTeamsView()">
+                  <span>Equipos</span>
+                  <strong id="stat-teams">0</strong>
+                  <small>Ver todos</small>
+                </button>
+                <button class="db-stat-tile db-stat-purple" type="button" onclick="showLeaguesView()">
+                  <span>Ligas</span>
+                  <strong id="stat-leagues">0</strong>
+                  <small>Ver todas</small>
+                </button>
+                <button class="db-stat-tile db-stat-gold" type="button" onclick="showFavoritesView()">
+                  <span>Favoritos</span>
+                  <strong id="stat-favorites">0</strong>
+                  <small>Ver guardados</small>
+                </button>
+              </div>
+            </section>
+
+            <section class="db-home-content-grid">
+              <article class="db-panel">
+                <header>
+                  <h2>Jugadores destacados</h2>
+                  <button type="button" onclick="showAllPlayers()">Ver todos</button>
+                </header>
+                <div class="db-feature-list" id="db-latest-players"></div>
+              </article>
+
+              <article class="db-panel">
+                <header>
+                  <h2>Equipos destacados</h2>
+                  <button type="button" onclick="showTeamsView()">Ver todos</button>
+                </header>
+                <div class="db-featured-teams" id="db-featured-teams"></div>
+              </article>
+            </section>
+          </div>
+
+          <aside class="db-dashboard-aside">
+            <article class="db-panel db-side-leagues">
+              <header>
+                <h2>Ligas destacadas</h2>
+                <button type="button" onclick="showLeaguesView()">Ver todas</button>
+              </header>
+              <div id="db-featured-leagues"></div>
+            </article>
+
+            <article class="db-panel db-side-favorites">
+              <header>
+                <h2>Favoritos</h2>
+                <button type="button" onclick="showFavoritesView()">Ver todos</button>
+              </header>
+              <div id="db-favorite-players"></div>
+            </article>
+          </aside>
+        </section>
+
+      </div>
+
+      <!-- Players list view -->
+      <div id="players-view">
+        <!-- Filled dynamically -->
+      </div>
+
+      <!-- Individual player profile view -->
+      <div id="player-view">
+        <!-- Filled dynamically -->
+      </div>
+
+      <!-- Search results view -->
+      <div id="search-view">
+        <!-- Filled dynamically -->
+      </div>
+
+      <!-- Leagues grid view -->
+      <div id="leagues-view">
+        <!-- Filled dynamically -->
+      </div>
+
+      <!-- Teams grid view -->
+      <div id="teams-grid-view">
+        <!-- Filled dynamically -->
+      </div>
+
+      <!-- Favorites view -->
+      <div id="favorites-view">
+        <!-- Filled dynamically -->
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/favorites.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
+

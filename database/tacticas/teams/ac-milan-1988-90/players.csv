@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+88001;Giovanni Galli;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+88002;Paolo Maldini;LI;17;72;LI;17;72;MI;15;53;LI;20;73
+88003;Alessandro Costacurta;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+88004;Franco Baresi;DFC;61;73;DFC;61;73;DFC;61;73;DFC;61;74
+88005;Mauro Tassotti;LD;83;70;LD;83;70;MD;85;51;LD;80;71
+88006;Roberto Donadoni;MD;82;53;MD;82;53;ED;85;21;MD;79;55
+88007;Carlo Ancelotti;MC;40;55;MC;40;55;MC;42;53;MC;40;57
+88008;Frank Rijkaard;MC;60;56;MC;60;56;MC;58;54;MC;60;58
+88009;Angelo Colombo;MI;18;55;MI;18;55;EI;15;23;MI;21;57
+88010;Ruud Gullit;SD;42;26;SD;42;26;SD;42;24;SD;42;28
+88011;Marco van Basten;DC;60;19;DC;60;19;DC;60;17;DC;60;21

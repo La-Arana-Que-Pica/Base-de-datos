@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+201601;Keylor Navas;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+201602;Dani Carvajal;LD;83;70;LD;83;70;MD;85;51;LD;80;71
+201603;Raphaël Varane;DFC;61;73;DFC;61;73;DFC;61;73;DFC;61;74
+201604;Sergio Ramos;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+201605;Marcelo;LI;17;72;LI;17;72;MI;15;53;LI;20;73
+201606;Casemiro;MCD;50;61;MCD;50;61;MCD;50;59;MCD;50;63
+201607;Luka Modrić;MC;62;56;MC;62;56;MC;62;54;MC;62;58
+201608;Toni Kroos;MC;38;55;MC;38;55;MC;38;53;MC;38;57
+201609;Gareth Bale;ED;82;23;ED;82;23;ED;85;21;MD;79;41
+201610;Karim Benzema;DC;50;20;DC;50;20;DC;50;18;DC;50;22
+201611;Cristiano Ronaldo;EI;18;25;EI;18;25;EI;15;23;MI;21;43

@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+199401;Edwin van der Sar;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+199402;Michael Reiziger;DFC;70;75;DFC;70;75;DFC;70;75;LD;80;73
+199403;Danny Blind;DFC;50;77;DFC;50;77;DFC;50;77;DFC;61;76
+199404;Frank de Boer;DFC;30;73;DFC;30;73;DFC;30;73;DFC;39;74
+199405;Finidi George;MD;82;55;MD;82;55;ED;85;23;MD;79;43
+199406;Frank Rijkaard;MC;62;55;MC;62;55;MCD;50;59;MCD;50;63
+199407;Clarence Seedorf;SD;63;26;SD;63;26;MC;62;53;MC;62;45
+199408;Edgar Davids;MC;38;56;MC;38;56;MC;38;54;LI;20;71
+199409;Marc Overmars;MI;18;53;MI;18;53;EI;15;21;MI;21;41
+199410;Jari Litmanen;SD;37;24;SD;37;24;MP;50;35;MC;38;43
+199411;Patrick Kluivert;DC;50;20;DC;50;20;DC;50;18;DC;50;22

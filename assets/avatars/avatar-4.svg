@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Copa">
+  <rect width="160" height="160" rx="32" fill="#17181c"/>
+  <path fill="#f1c40f" d="M55 39h50v29c0 19-10 32-25 36-15-4-25-17-25-36V39Z"/>
+  <path fill="none" stroke="#f1c40f" stroke-width="10" d="M55 52H38c0 23 10 37 28 39M105 52h17c0 23-10 37-28 39"/>
+  <path fill="#f1c40f" d="M73 101h14v18h20v12H53v-12h20v-18Z"/>
+  <path fill="#fff3a8" d="M69 53h22v12H69z"/>
+</svg>

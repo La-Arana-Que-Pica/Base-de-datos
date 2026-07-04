@@ -1,5 +1,5 @@
 /**
- * Favorites module – localStorage-based favorites for PES players.
+ * Favorites module – localStorage fallback for PES players.
  * Loaded on index.html and player.html.
  *
  * Storage format: array of { playerId: string, teamId: string }
@@ -35,6 +35,30 @@ function _saveFavorites(favs) {
   } catch (e) { /* quota exceeded or private mode – silently ignore */ }
 }
 
+function _favoriteCloudReady() {
+  return Boolean(window.LAQP_SUPABASE && typeof window.laqpCurrentUser === 'function' && window.laqpCurrentUser());
+}
+
+async function _syncFavoriteToCloud(playerId, added) {
+  if (!_favoriteCloudReady()) return;
+  const user = window.laqpCurrentUser();
+  try {
+    if (added) {
+      await window.LAQP_SUPABASE
+        .from('user_favorites')
+        .insert({ user_id: user.id, player_id: String(playerId) });
+    } else {
+      await window.LAQP_SUPABASE
+        .from('user_favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('player_id', String(playerId));
+    }
+  } catch (e) {
+    console.warn('No se pudo sincronizar favorito en Supabase.', e);
+  }
+}
+
 /**
  * Returns true if the given player is in favorites.
  * @param {string|number} playerId
@@ -61,10 +85,12 @@ function toggleFavorite(playerId, teamId) {
   if (idx >= 0) {
     favs.splice(idx, 1);
     _saveFavorites(favs);
+    _syncFavoriteToCloud(id, false);
     return false;
   }
   favs.push({ playerId: id, teamId: tid });
   _saveFavorites(favs);
+  _syncFavoriteToCloud(id, true);
   return true;
 }
 
@@ -77,6 +103,7 @@ function removeFavorite(playerId, teamId) {
   const id = String(playerId);
   const tid = String(teamId);
   _saveFavorites(getFavorites().filter(f => !(f.playerId === id && f.teamId === tid)));
+  _syncFavoriteToCloud(id, false);
 }
 
 /**

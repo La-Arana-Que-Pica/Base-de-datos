@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+200001;Óscar Córdoba;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+200002;Rodolfo Arruabarrena;LI;17;70;LI;17;70;LI;17;70;LI;20;71
+200003;Walter Samuel;DFC;39;73;DFC;39;73;DFC;39;73;DFC;39;74
+200004;Jorge Bermúdez;DFC;61;75;DFC;61;75;DFC;61;75;DFC;61;76
+200005;Hugo Ibarra;LD;83;72;LD;83;72;LD;83;72;LD;80;73
+200006;Mauricio Serna;MCD;50;61;MCD;50;61;MCD;50;59;MCD;50;63
+200007;José Basualdo;MC;32;56;MC;32;56;MC;33;54;MC;34;58
+200008;Sebastián Battaglia;MC;68;55;MC;68;55;MC;67;53;MC;66;57
+200009;Juan Román Riquelme;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+200010;Guillermo Barros Schelotto;SD;42;24;SD;42;24;SD;42;22;SD;42;26
+200011;Martín Palermo;DC;58;21;DC;58;21;DC;59;19;DC;58;23

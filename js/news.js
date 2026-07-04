@@ -122,7 +122,7 @@ async function bootNews() {
           title: row.titulo || `${row.juego || 'Option File'} ${row.version || ''}`.trim(),
           description: row.descripcion || t('news.featuredAvailable'),
           meta: row.plataforma || '',
-          href: 'downloads.html',
+          href: typeof laqpPageUrl === 'function' ? laqpPageUrl('downloads.html') : 'downloads.html',
           cta: t('news.viewDownload'),
         });
       });
@@ -138,7 +138,7 @@ async function bootNews() {
           title: row.titulo || t('news.newTutorial'),
           description: row.descripcion || t('news.newContent'),
           meta: row.fecha || '',
-          href: 'tutorials.html',
+          href: typeof laqpPageUrl === 'function' ? laqpPageUrl('tutorials.html') : 'tutorials.html',
           cta: t('news.viewTutorial'),
         });
       });
@@ -151,7 +151,7 @@ async function bootNews() {
         title: `${row.juego || 'Option File'} ${row.version || ''}`.trim(),
         description: row.descripcion || t('news.fileAvailable'),
         meta: row.plataforma || '',
-        href: 'downloads.html',
+        href: typeof laqpPageUrl === 'function' ? laqpPageUrl('downloads.html') : 'downloads.html',
         cta: t('news.viewDownload'),
       });
     });
@@ -168,7 +168,7 @@ async function bootNews() {
 
   content.innerHTML = `
     <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="index.html">${t('common.home')}</a>
+      <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html'}">${t('common.home')}</a>
       <span>${t('news.header')}</span>
     </nav>
     <div class="page-section-header">

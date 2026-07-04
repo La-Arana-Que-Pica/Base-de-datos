@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+197001;Félix;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+197002;Carlos Alberto;LD;83;72;LD;83;72;MD;85;53;LD;80;73
+197003;Brito;DFC;61;75;DFC;61;75;DFC;70;75;DFC;61;76
+197004;Piazza;DFC;39;73;DFC;39;73;DFC;50;77;DFC;39;74
+197005;Everaldo;LI;17;70;LI;17;70;DFC;30;73;LI;20;71
+197006;Clodoaldo;MCD;42;60;MCD;42;60;MCD;53;59;MC;51;59
+197007;Gérson;MC;58;55;MC;58;55;MC;39;54;MC;38;58
+197008;Jairzinho;ED;82;25;ED;82;25;ED;85;23;MD;79;43
+197009;Pelé;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+197010;Rivelino;EI;18;23;EI;18;23;MI;15;37;MI;21;41
+197011;Tostão;DC;50;20;DC;50;20;DC;50;18;DC;50;22

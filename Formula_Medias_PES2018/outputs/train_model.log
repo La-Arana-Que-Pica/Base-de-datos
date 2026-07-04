@@ -1,0 +1,210 @@
+2026-06-01 00:21:05,388 | INFO | __main__ | Modelo PES-like GK guardado (Ridge, MAE train 0.269)
+2026-06-01 00:21:05,550 | INFO | __main__ | Modelo PES-like CB guardado (LinearRegression, MAE train 0.272)
+2026-06-01 00:21:05,688 | INFO | __main__ | Modelo PES-like LB guardado (Ridge, MAE train 0.275)
+2026-06-01 00:21:05,841 | INFO | __main__ | Modelo PES-like RB guardado (Ridge, MAE train 0.261)
+2026-06-01 00:21:05,978 | INFO | __main__ | Modelo PES-like DMF guardado (LinearRegression, MAE train 0.283)
+2026-06-01 00:21:06,114 | INFO | __main__ | Modelo PES-like CMF guardado (Ridge, MAE train 0.292)
+2026-06-01 00:21:06,237 | INFO | __main__ | Modelo PES-like LMF guardado (LinearRegression, MAE train 0.251)
+2026-06-01 00:21:06,383 | INFO | __main__ | Modelo PES-like RMF guardado (LinearRegression, MAE train 0.250)
+2026-06-01 00:21:06,528 | INFO | __main__ | Modelo PES-like AMF guardado (ElasticNet, MAE train 0.282)
+2026-06-01 00:21:06,648 | INFO | __main__ | Modelo PES-like LWF guardado (LinearRegression, MAE train 0.357)
+2026-06-01 00:21:06,792 | INFO | __main__ | Modelo PES-like RWF guardado (Lasso, MAE train 0.371)
+2026-06-01 00:21:06,919 | INFO | __main__ | Modelo PES-like SS guardado (Lasso, MAE train 0.310)
+2026-06-01 00:21:07,064 | INFO | __main__ | Modelo PES-like CF guardado (LinearRegression, MAE train 0.264)
+2026-06-01 00:21:07,162 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-01 00:24:23,435 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-01 00:24:23,589 | INFO | __main__ | Modelo PES-like GK guardado (Ridge, MAE train 0.270)
+2026-06-01 00:24:23,734 | INFO | __main__ | Modelo PES-like CB guardado (Lasso, MAE train 0.422)
+2026-06-01 00:24:23,879 | INFO | __main__ | Modelo PES-like LB guardado (Ridge, MAE train 0.448)
+2026-06-01 00:24:24,006 | INFO | __main__ | Modelo PES-like RB guardado (Ridge, MAE train 0.395)
+2026-06-01 00:24:24,151 | INFO | __main__ | Modelo PES-like DMF guardado (ElasticNet, MAE train 0.620)
+2026-06-01 00:24:24,295 | INFO | __main__ | Modelo PES-like CMF guardado (Lasso, MAE train 0.457)
+2026-06-01 00:24:24,410 | INFO | __main__ | Modelo PES-like LMF guardado (LinearRegression, MAE train 0.416)
+2026-06-01 00:24:24,535 | INFO | __main__ | Modelo PES-like RMF guardado (Ridge, MAE train 0.446)
+2026-06-01 00:24:24,693 | INFO | __main__ | Modelo PES-like AMF guardado (LinearRegression, MAE train 0.412)
+2026-06-01 00:24:24,818 | INFO | __main__ | Modelo PES-like LWF guardado (Lasso, MAE train 0.586)
+2026-06-01 00:24:24,939 | INFO | __main__ | Modelo PES-like RWF guardado (Lasso, MAE train 0.563)
+2026-06-01 00:24:25,066 | INFO | __main__ | Modelo PES-like SS guardado (Lasso, MAE train 0.402)
+2026-06-01 00:24:25,220 | INFO | __main__ | Modelo PES-like CF guardado (Lasso, MAE train 0.380)
+2026-06-01 00:24:25,300 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-01 00:25:34,015 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-01 00:25:34,190 | INFO | __main__ | Modelo PES-like GK guardado (Ridge, MAE train 0.270)
+2026-06-01 00:25:34,350 | INFO | __main__ | Modelo PES-like CB guardado (Ridge, MAE train 0.422)
+2026-06-01 00:25:34,482 | INFO | __main__ | Modelo PES-like LB guardado (Ridge, MAE train 0.448)
+2026-06-01 00:25:34,623 | INFO | __main__ | Modelo PES-like RB guardado (Ridge, MAE train 0.395)
+2026-06-01 00:25:34,772 | INFO | __main__ | Modelo PES-like DMF guardado (Ridge, MAE train 0.620)
+2026-06-01 00:25:34,920 | INFO | __main__ | Modelo PES-like CMF guardado (Ridge, MAE train 0.457)
+2026-06-01 00:25:35,044 | INFO | __main__ | Modelo PES-like LMF guardado (Ridge, MAE train 0.416)
+2026-06-01 00:25:35,169 | INFO | __main__ | Modelo PES-like RMF guardado (Ridge, MAE train 0.446)
+2026-06-01 00:25:35,303 | INFO | __main__ | Modelo PES-like AMF guardado (Ridge, MAE train 0.413)
+2026-06-01 00:25:35,422 | INFO | __main__ | Modelo PES-like LWF guardado (Ridge, MAE train 0.586)
+2026-06-01 00:25:35,545 | INFO | __main__ | Modelo PES-like RWF guardado (Ridge, MAE train 0.563)
+2026-06-01 00:25:35,669 | INFO | __main__ | Modelo PES-like SS guardado (Ridge, MAE train 0.399)
+2026-06-01 00:25:35,845 | INFO | __main__ | Modelo PES-like CF guardado (Ridge, MAE train 0.380)
+2026-06-01 00:25:35,923 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-01 00:27:02,449 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-01 00:27:02,615 | INFO | __main__ | Modelo PES-like GK guardado (Ridge, MAE train 0.270)
+2026-06-01 00:27:02,758 | INFO | __main__ | Modelo PES-like CB guardado (Ridge, MAE train 0.422)
+2026-06-01 00:27:02,898 | INFO | __main__ | Modelo PES-like LB guardado (Ridge, MAE train 0.448)
+2026-06-01 00:27:03,024 | INFO | __main__ | Modelo PES-like RB guardado (Ridge, MAE train 0.395)
+2026-06-01 00:27:03,165 | INFO | __main__ | Modelo PES-like DMF guardado (Ridge, MAE train 0.620)
+2026-06-01 00:27:03,326 | INFO | __main__ | Modelo PES-like CMF guardado (Ridge, MAE train 0.457)
+2026-06-01 00:27:03,451 | INFO | __main__ | Modelo PES-like LMF guardado (Ridge, MAE train 0.416)
+2026-06-01 00:27:03,583 | INFO | __main__ | Modelo PES-like RMF guardado (Ridge, MAE train 0.446)
+2026-06-01 00:27:03,717 | INFO | __main__ | Modelo PES-like AMF guardado (Ridge, MAE train 0.413)
+2026-06-01 00:27:03,838 | INFO | __main__ | Modelo PES-like LWF guardado (Ridge, MAE train 0.586)
+2026-06-01 00:27:03,958 | INFO | __main__ | Modelo PES-like RWF guardado (Ridge, MAE train 0.563)
+2026-06-01 00:27:04,096 | INFO | __main__ | Modelo PES-like SS guardado (Ridge, MAE train 0.399)
+2026-06-01 00:27:04,246 | INFO | __main__ | Modelo PES-like CF guardado (Ridge, MAE train 0.380)
+2026-06-01 00:27:04,359 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-04 21:24:11,428 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve, weak_foot_usage, weak_foot_accuracy, injury_resistance
+2026-06-04 21:24:13,499 | INFO | __main__ | Modelo PES-like GK guardado (Ridge, MAE train 0.230)
+2026-06-04 21:24:15,591 | INFO | __main__ | Modelo PES-like CB guardado (Ridge, MAE train 0.590)
+2026-06-04 21:24:16,205 | INFO | __main__ | Modelo PES-like LB guardado (Ridge, MAE train 0.433)
+2026-06-04 21:24:17,414 | INFO | __main__ | Modelo PES-like RB guardado (Ridge, MAE train 0.367)
+2026-06-04 21:24:18,727 | INFO | __main__ | Modelo PES-like DMF guardado (Ridge, MAE train 0.429)
+2026-06-04 21:24:19,568 | INFO | __main__ | Modelo PES-like CMF guardado (Ridge, MAE train 0.417)
+2026-06-04 21:24:20,448 | INFO | __main__ | Modelo PES-like LMF guardado (Ridge, MAE train 0.361)
+2026-06-04 21:24:21,264 | INFO | __main__ | Modelo PES-like RMF guardado (Ridge, MAE train 0.408)
+2026-06-04 21:24:21,931 | INFO | __main__ | Modelo PES-like AMF guardado (Ridge, MAE train 0.441)
+2026-06-04 21:24:22,939 | INFO | __main__ | Modelo PES-like LWF guardado (Ridge, MAE train 0.609)
+2026-06-04 21:24:24,005 | INFO | __main__ | Modelo PES-like RWF guardado (Ridge, MAE train 0.564)
+2026-06-04 21:24:24,433 | INFO | __main__ | Modelo PES-like SS guardado (Ridge, MAE train 0.533)
+2026-06-04 21:24:26,199 | INFO | __main__ | Modelo PES-like CF guardado (Ridge, MAE train 0.550)
+2026-06-04 21:24:26,282 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-23 22:27:26,401 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve, weak_foot_usage, weak_foot_accuracy, injury_resistance
+2026-06-23 22:27:28,437 | INFO | __main__ | Modelo PES-like GK guardado (Ridge, MAE train 0.230)
+2026-06-23 22:27:30,580 | INFO | __main__ | Modelo PES-like CB guardado (Ridge, MAE train 0.590)
+2026-06-23 22:27:31,171 | INFO | __main__ | Modelo PES-like LB guardado (Ridge, MAE train 0.433)
+2026-06-23 22:27:32,745 | INFO | __main__ | Modelo PES-like RB guardado (Ridge, MAE train 0.367)
+2026-06-23 22:27:34,211 | INFO | __main__ | Modelo PES-like DMF guardado (Ridge, MAE train 0.429)
+2026-06-23 22:27:35,109 | INFO | __main__ | Modelo PES-like CMF guardado (Ridge, MAE train 0.417)
+2026-06-23 22:27:36,121 | INFO | __main__ | Modelo PES-like LMF guardado (Ridge, MAE train 0.361)
+2026-06-23 22:27:36,986 | INFO | __main__ | Modelo PES-like RMF guardado (Ridge, MAE train 0.408)
+2026-06-23 22:27:37,715 | INFO | __main__ | Modelo PES-like AMF guardado (Ridge, MAE train 0.441)
+2026-06-23 22:27:38,807 | INFO | __main__ | Modelo PES-like LWF guardado (Ridge, MAE train 0.609)
+2026-06-23 22:27:39,753 | INFO | __main__ | Modelo PES-like RWF guardado (Ridge, MAE train 0.564)
+2026-06-23 22:27:40,202 | INFO | __main__ | Modelo PES-like SS guardado (Ridge, MAE train 0.533)
+2026-06-23 22:27:41,896 | INFO | __main__ | Modelo PES-like CF guardado (Ridge, MAE train 0.550)
+2026-06-23 22:27:42,010 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-23 22:30:29,592 | WARNING | __main__ | El dataset parece tener stats corridas de una version vieja del parser (stamina demasiado baja). Se usara la cache local de PES Master solo en memoria.
+2026-06-23 22:38:30,903 | WARNING | parser | Se descartaron 19 filas porque no son de PES 2018.
+2026-06-23 22:38:31,027 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-23 22:38:31,982 | INFO | __main__ | Modelo PES-like GK guardado (Ridge, MAE train 0.270)
+2026-06-23 22:38:32,982 | INFO | __main__ | Modelo PES-like CB guardado (Ridge, MAE train 0.422)
+2026-06-23 22:38:34,077 | INFO | __main__ | Modelo PES-like LB guardado (Ridge, MAE train 0.385)
+2026-06-23 22:38:35,397 | INFO | __main__ | Modelo PES-like RB guardado (Ridge, MAE train 0.348)
+2026-06-23 22:38:36,732 | INFO | __main__ | Modelo PES-like DMF guardado (Ridge, MAE train 0.511)
+2026-06-23 22:38:37,579 | INFO | __main__ | Modelo PES-like CMF guardado (Ridge, MAE train 0.457)
+2026-06-23 22:38:38,020 | INFO | __main__ | Modelo PES-like LMF guardado (Ridge, MAE train 0.416)
+2026-06-23 22:38:38,877 | INFO | __main__ | Modelo PES-like RMF guardado (Ridge, MAE train 0.340)
+2026-06-23 22:38:39,538 | INFO | __main__ | Modelo PES-like AMF guardado (Ridge, MAE train 0.413)
+2026-06-23 22:38:40,470 | INFO | __main__ | Modelo PES-like LWF guardado (Ridge, MAE train 0.419)
+2026-06-23 22:38:41,403 | INFO | __main__ | Modelo PES-like RWF guardado (Ridge, MAE train 0.435)
+2026-06-23 22:38:42,177 | INFO | __main__ | Modelo PES-like SS guardado (Ridge, MAE train 0.286)
+2026-06-23 22:38:43,999 | INFO | __main__ | Modelo PES-like CF guardado (Ridge, MAE train 0.346)
+2026-06-23 22:38:44,069 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-24 14:07:20,359 | WARNING | __main__ | El dataset parece tener stats corridas de una version vieja del parser (stamina demasiado baja). Se usara la cache local de PES Master solo en memoria.
+2026-06-24 14:09:05,436 | WARNING | parser | Se descartaron 19 filas porque no son de PES 2018.
+2026-06-24 14:09:05,580 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-24 14:09:05,744 | INFO | __main__ | Modelo PES-like GK guardado (AnchorRidge, MAE train 1.134)
+2026-06-24 14:09:05,962 | INFO | __main__ | Modelo PES-like CB guardado (AnchorRidge, MAE train 0.688)
+2026-06-24 14:09:06,145 | INFO | __main__ | Modelo PES-like LB guardado (AnchorRidge, MAE train 0.837)
+2026-06-24 14:09:06,339 | INFO | __main__ | Modelo PES-like RB guardado (AnchorRidge, MAE train 0.836)
+2026-06-24 14:09:06,538 | INFO | __main__ | Modelo PES-like DMF guardado (AnchorRidge, MAE train 1.014)
+2026-06-24 14:09:06,746 | INFO | __main__ | Modelo PES-like CMF guardado (AnchorRidge, MAE train 0.862)
+2026-06-24 14:09:06,939 | INFO | __main__ | Modelo PES-like LMF guardado (AnchorRidge, MAE train 0.685)
+2026-06-24 14:09:07,115 | INFO | __main__ | Modelo PES-like RMF guardado (AnchorRidge, MAE train 0.787)
+2026-06-24 14:09:07,300 | INFO | __main__ | Modelo PES-like AMF guardado (AnchorRidge, MAE train 0.753)
+2026-06-24 14:09:07,475 | INFO | __main__ | Modelo PES-like LWF guardado (AnchorRidge, MAE train 0.850)
+2026-06-24 14:09:07,639 | INFO | __main__ | Modelo PES-like RWF guardado (AnchorRidge, MAE train 0.832)
+2026-06-24 14:09:07,802 | INFO | __main__ | Modelo PES-like SS guardado (AnchorRidge, MAE train 0.650)
+2026-06-24 14:09:08,060 | INFO | __main__ | Modelo PES-like CF guardado (AnchorRidge, MAE train 0.672)
+2026-06-24 14:09:08,154 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-24 14:20:00,538 | WARNING | __main__ | El dataset parece tener stats corridas de una version vieja del parser (stamina demasiado baja). Se usara la cache local de PES Master solo en memoria.
+2026-06-24 14:22:00,813 | WARNING | parser | Se descartaron 19 filas porque no son de PES 2018.
+2026-06-24 14:22:00,976 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-24 14:22:14,045 | INFO | __main__ | Modelo PES-like GK guardado (AnchorRandomForest, MAE train 0.809)
+2026-06-24 14:22:43,517 | INFO | __main__ | Modelo PES-like CB guardado (AnchorElasticNet, MAE train 0.611)
+2026-06-24 14:22:56,990 | INFO | __main__ | Modelo PES-like LB guardado (AnchorLinearRegression, MAE train 0.757)
+2026-06-24 14:23:13,250 | INFO | __main__ | Modelo PES-like RB guardado (AnchorLinearRegression, MAE train 0.712)
+2026-06-24 14:23:30,371 | INFO | __main__ | Modelo PES-like DMF guardado (AnchorLinearRegression, MAE train 0.940)
+2026-06-24 14:23:52,063 | INFO | __main__ | Modelo PES-like CMF guardado (AnchorLinearRegression, MAE train 0.811)
+2026-06-24 14:23:58,590 | INFO | __main__ | Modelo PES-like LMF guardado (AnchorLasso, MAE train 0.597)
+2026-06-24 14:24:05,949 | INFO | __main__ | Modelo PES-like RMF guardado (AnchorElasticNet, MAE train 0.726)
+2026-06-24 14:24:20,132 | INFO | __main__ | Modelo PES-like AMF guardado (AnchorElasticNet, MAE train 0.688)
+2026-06-24 14:24:29,013 | INFO | __main__ | Modelo PES-like LWF guardado (AnchorLasso, MAE train 0.796)
+2026-06-24 14:24:38,215 | INFO | __main__ | Modelo PES-like RWF guardado (AnchorElasticNet, MAE train 0.738)
+2026-06-24 14:24:44,672 | INFO | __main__ | Modelo PES-like SS guardado (AnchorRidge, MAE train 0.565)
+2026-06-24 14:25:09,558 | INFO | __main__ | Modelo PES-like CF guardado (AnchorLinearRegression, MAE train 0.637)
+2026-06-24 14:25:09,657 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-24 14:32:32,484 | WARNING | __main__ | El dataset parece tener stats corridas de una version vieja del parser (stamina demasiado baja). Se usara la cache local de PES Master solo en memoria.
+2026-06-24 14:34:07,453 | WARNING | parser | Se descartaron 19 filas porque no son de PES 2018.
+2026-06-24 14:34:07,593 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-24 14:34:18,640 | INFO | __main__ | Modelo PES-like GK guardado (AnchorRandomForest, MAE train 0.809)
+2026-06-24 14:34:43,094 | INFO | __main__ | Modelo PES-like CB guardado (AnchorElasticNet, MAE train 0.611)
+2026-06-24 14:34:56,523 | INFO | __main__ | Modelo PES-like LB guardado (AnchorLinearRegression, MAE train 0.757)
+2026-06-24 14:35:10,614 | INFO | __main__ | Modelo PES-like RB guardado (AnchorLinearRegression, MAE train 0.712)
+2026-06-24 14:35:25,613 | INFO | __main__ | Modelo PES-like DMF guardado (AnchorLinearRegression, MAE train 0.940)
+2026-06-24 14:35:44,041 | INFO | __main__ | Modelo PES-like CMF guardado (AnchorLinearRegression, MAE train 0.811)
+2026-06-24 14:35:49,228 | INFO | __main__ | Modelo PES-like LMF guardado (AnchorLasso, MAE train 0.597)
+2026-06-24 14:35:55,731 | INFO | __main__ | Modelo PES-like RMF guardado (AnchorElasticNet, MAE train 0.726)
+2026-06-24 14:36:08,020 | INFO | __main__ | Modelo PES-like AMF guardado (AnchorElasticNet, MAE train 0.688)
+2026-06-24 14:36:15,335 | INFO | __main__ | Modelo PES-like LWF guardado (AnchorLasso, MAE train 0.796)
+2026-06-24 14:36:23,185 | INFO | __main__ | Modelo PES-like RWF guardado (AnchorElasticNet, MAE train 0.738)
+2026-06-24 14:36:28,686 | INFO | __main__ | Modelo PES-like SS guardado (AnchorRidge, MAE train 0.565)
+2026-06-24 14:36:48,898 | INFO | __main__ | Modelo PES-like CF guardado (AnchorLinearRegression, MAE train 0.637)
+2026-06-24 14:36:48,970 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-24 14:41:08,765 | WARNING | __main__ | El dataset parece tener stats corridas de una version vieja del parser (stamina demasiado baja). Se usara la cache local de PES Master solo en memoria.
+2026-06-24 14:42:41,886 | WARNING | parser | Se descartaron 19 filas porque no son de PES 2018.
+2026-06-24 14:42:42,013 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-24 14:42:59,985 | INFO | __main__ | Modelo PES-like GK guardado (AnchorRandomForest, MAE train 0.809)
+2026-06-24 14:43:34,265 | INFO | __main__ | Modelo PES-like CB guardado (AnchorElasticNet, MAE train 0.611)
+2026-06-24 14:43:53,977 | INFO | __main__ | Modelo PES-like LB guardado (AnchorLinearRegression, MAE train 0.757)
+2026-06-24 14:44:16,397 | INFO | __main__ | Modelo PES-like RB guardado (AnchorLinearRegression, MAE train 0.712)
+2026-06-24 14:44:38,901 | INFO | __main__ | Modelo PES-like DMF guardado (AnchorLinearRegression, MAE train 0.940)
+2026-06-24 14:45:07,397 | INFO | __main__ | Modelo PES-like CMF guardado (AnchorLinearRegression, MAE train 0.811)
+2026-06-24 14:45:16,651 | INFO | __main__ | Modelo PES-like LMF guardado (AnchorLasso, MAE train 0.597)
+2026-06-24 14:45:27,162 | INFO | __main__ | Modelo PES-like RMF guardado (AnchorElasticNet, MAE train 0.726)
+2026-06-24 14:45:48,455 | INFO | __main__ | Modelo PES-like AMF guardado (AnchorElasticNet, MAE train 0.688)
+2026-06-24 14:46:01,215 | INFO | __main__ | Modelo PES-like LWF guardado (AnchorLasso, MAE train 0.796)
+2026-06-24 14:46:14,699 | INFO | __main__ | Modelo PES-like RWF guardado (AnchorElasticNet, MAE train 0.738)
+2026-06-24 14:46:23,605 | INFO | __main__ | Modelo PES-like SS guardado (AnchorRidge, MAE train 0.565)
+2026-06-24 14:46:53,503 | INFO | __main__ | Modelo PES-like CF guardado (AnchorLinearRegression, MAE train 0.637)
+2026-06-24 14:46:53,584 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs
+2026-06-24 14:52:07,233 | WARNING | __main__ | El dataset parece tener stats corridas de una version vieja del parser (stamina demasiado baja). Se usara la cache local de PES Master solo en memoria.
+2026-06-24 14:53:43,256 | WARNING | parser | Se descartaron 19 filas porque no son de PES 2018.
+2026-06-24 14:53:43,405 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-24 14:54:00,426 | INFO | __main__ | Modelo PES-like GK guardado (AnchorLinearRegression, MAE train 12.457)
+2026-06-24 14:56:49,688 | INFO | __main__ | Modelo PES-like CB guardado (AnchorElasticNet, MAE train 2.485)
+2026-06-24 14:59:53,081 | WARNING | __main__ | El dataset parece tener stats corridas de una version vieja del parser (stamina demasiado baja). Se usara la cache local de PES Master solo en memoria.
+2026-06-24 15:01:27,496 | WARNING | parser | Se descartaron 19 filas porque no son de PES 2018.
+2026-06-24 15:01:27,626 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-24 15:01:47,614 | INFO | __main__ | Modelo PES-like GK guardado (DirectGradientBoosting, MAE train 0.267)
+2026-06-24 15:03:57,402 | INFO | __main__ | Modelo PES-like CB guardado (DirectHistGradient, MAE train 0.727)
+2026-06-24 15:05:44,596 | INFO | __main__ | Modelo PES-like LB guardado (DirectHistGradient, MAE train 1.008)
+2026-06-24 15:07:26,795 | INFO | __main__ | Modelo PES-like RB guardado (DirectHistGradient, MAE train 0.994)
+2026-06-24 15:09:04,226 | INFO | __main__ | Modelo PES-like DMF guardado (DirectHistGradient, MAE train 0.958)
+2026-06-24 15:10:34,907 | INFO | __main__ | Modelo PES-like CMF guardado (DirectExtraTrees, MAE train 0.024)
+2026-06-24 15:12:13,645 | INFO | __main__ | Modelo PES-like LMF guardado (DirectHistGradient, MAE train 0.936)
+2026-06-24 15:13:49,949 | INFO | __main__ | Modelo PES-like RMF guardado (DirectHistGradient, MAE train 0.878)
+2026-06-24 15:15:29,051 | INFO | __main__ | Modelo PES-like AMF guardado (DirectExtraTrees, MAE train 0.018)
+2026-06-24 15:17:12,905 | INFO | __main__ | Modelo PES-like LWF guardado (DirectHistGradient, MAE train 0.830)
+2026-06-24 15:19:12,699 | INFO | __main__ | Modelo PES-like RWF guardado (DirectExtraTrees, MAE train 0.015)
+2026-06-24 15:20:13,711 | WARNING | __main__ | El dataset parece tener stats corridas de una version vieja del parser (stamina demasiado baja). Se usara la cache local de PES Master solo en memoria.
+2026-06-24 15:21:32,706 | WARNING | parser | Se descartaron 19 filas porque no son de PES 2018.
+2026-06-24 15:21:32,804 | WARNING | __main__ | Se ignoran stats sin valor numerico o excluidas de la formula base: place_kicking, swerve
+2026-06-24 15:21:43,352 | INFO | __main__ | Modelo PES-like GK guardado (DirectGradientBoosting, MAE train 0.267)
+2026-06-24 15:23:23,442 | INFO | __main__ | Modelo PES-like CB guardado (DirectHistGradient, MAE train 0.727)
+2026-06-24 15:25:21,541 | INFO | __main__ | Modelo PES-like LB guardado (DirectHistGradient, MAE train 1.008)
+2026-06-24 15:27:04,002 | INFO | __main__ | Modelo PES-like RB guardado (DirectHistGradient, MAE train 0.994)
+2026-06-24 15:28:41,488 | INFO | __main__ | Modelo PES-like DMF guardado (DirectHistGradient, MAE train 0.958)
+2026-06-24 15:30:16,264 | INFO | __main__ | Modelo PES-like CMF guardado (DirectExtraTrees, MAE train 0.024)
+2026-06-24 15:31:51,934 | INFO | __main__ | Modelo PES-like LMF guardado (DirectHistGradient, MAE train 0.936)
+2026-06-24 15:33:29,495 | INFO | __main__ | Modelo PES-like RMF guardado (DirectHistGradient, MAE train 0.878)
+2026-06-24 15:35:18,314 | INFO | __main__ | Modelo PES-like AMF guardado (DirectExtraTrees, MAE train 0.018)
+2026-06-24 15:37:10,007 | INFO | __main__ | Modelo PES-like LWF guardado (DirectHistGradient, MAE train 0.830)
+2026-06-24 15:39:08,624 | INFO | __main__ | Modelo PES-like RWF guardado (DirectExtraTrees, MAE train 0.015)
+2026-06-24 15:41:06,007 | INFO | __main__ | Modelo PES-like SS guardado (DirectHistGradient, MAE train 0.657)
+2026-06-24 15:42:56,709 | INFO | __main__ | Modelo PES-like CF guardado (DirectHistGradient, MAE train 0.657)
+2026-06-24 15:42:56,727 | INFO | __main__ | Resultados guardados en D:\Agustín\Webs\Base-de-datos-main\Formula_Medias_PES2018\outputs

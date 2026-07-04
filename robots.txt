@@ -2,3 +2,6 @@ User-agent: *
 Allow: /
 
 Sitemap: https://laqp.website/sitemap.xml
+Sitemap: https://laqp.website/sitemap-players-v2.xml
+Sitemap: https://laqp.website/sitemap-database-v2.xml
+Sitemap: https://laqp.website/sitemap-dts.xml

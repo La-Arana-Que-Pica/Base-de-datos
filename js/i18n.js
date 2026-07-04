@@ -18,7 +18,12 @@ const I18N_MESSAGES = {
     'nav.home': 'Inicio',
     'nav.downloads': 'Option Files',
     'nav.tutorials': 'Tutoriales',
-    'nav.database': 'Base de datos',
+    'nav.database': 'Base de Datos',
+    'nav.dts': 'DTs',
+    'nav.guides': 'Guías',
+    'nav.scouting': 'Scouting',
+    'nav.tactics': 'Tácticas',
+    'nav.calculator': 'Calculadora',
     'nav.about': 'Acerca de',
     'footer.copy': 'LAqP.website: canal, Option Files, tutoriales y base de datos.',
     'footer.linksLabel': 'Enlaces utiles',
@@ -93,7 +98,7 @@ const I18N_MESSAGES = {
     'db.searchPlayer': 'Buscar jugador',
     'db.leaguesAndTeams': 'Ligas y equipos',
     'filters.teamTitle': 'Filtros de equipos',
-    'filters.teamSubtitle': 'Busca por datos reales del CSV y metricas calculadas desde el plantel.',
+    'filters.teamSubtitle': 'Busca por datos del juego y metricas calculadas desde el plantel.',
     'filters.playerTitle': 'Filtros de jugadores',
     'filters.playerSubtitle': 'Usa lo basico para buscar rapido y abre lo avanzado cuando necesites precision.',
     'filters.basic': 'Filtros basicos',
@@ -184,6 +189,11 @@ const I18N_MESSAGES = {
     'nav.downloads': 'Option Files',
     'nav.tutorials': 'Tutorials',
     'nav.database': 'Database',
+    'nav.dts': 'Managers',
+    'nav.guides': 'Guides',
+    'nav.scouting': 'Scouting',
+    'nav.tactics': 'Tactics',
+    'nav.calculator': 'Calculator',
     'nav.about': 'About',
     'footer.copy': 'LAqP.website: channel, Option Files, tutorials, and database.',
     'footer.linksLabel': 'Useful links',
@@ -258,7 +268,7 @@ const I18N_MESSAGES = {
     'db.searchPlayer': 'Search player',
     'db.leaguesAndTeams': 'Leagues and teams',
     'filters.teamTitle': 'Team filters',
-    'filters.teamSubtitle': 'Search by real CSV data and squad-based calculated metrics.',
+    'filters.teamSubtitle': 'Search by game data and squad-based calculated metrics.',
     'filters.playerTitle': 'Player filters',
     'filters.playerSubtitle': 'Use the basics for quick search and open advanced filters when you need precision.',
     'filters.basic': 'Basic filters',
@@ -349,6 +359,11 @@ const I18N_MESSAGES = {
     'nav.downloads': 'Option Files',
     'nav.tutorials': 'Tutoriais',
     'nav.database': 'Base de dados',
+    'nav.dts': 'Treinadores',
+    'nav.guides': 'Guias',
+    'nav.scouting': 'Scouting',
+    'nav.tactics': 'Táticas',
+    'nav.calculator': 'Calculadora',
     'nav.about': 'Sobre',
     'footer.copy': 'LAqP.website: canal, Option Files, tutoriais e base de dados.',
     'footer.linksLabel': 'Links uteis',
@@ -423,7 +438,7 @@ const I18N_MESSAGES = {
     'db.searchPlayer': 'Buscar jogador',
     'db.leaguesAndTeams': 'Ligas e equipes',
     'filters.teamTitle': 'Filtros de equipes',
-    'filters.teamSubtitle': 'Busque por dados reais do CSV e metricas calculadas a partir do elenco.',
+    'filters.teamSubtitle': 'Busque por dados do jogo e metricas calculadas a partir do elenco.',
     'filters.playerTitle': 'Filtros de jogadores',
     'filters.playerSubtitle': 'Use o basico para buscar rapido e abra o avancado quando precisar de precisao.',
     'filters.basic': 'Filtros basicos',
@@ -514,6 +529,11 @@ const I18N_MESSAGES = {
     'nav.downloads': 'Option Files',
     'nav.tutorials': 'Tutorial',
     'nav.database': 'Database',
+    'nav.dts': 'Allenatori',
+    'nav.guides': 'Guide',
+    'nav.scouting': 'Scouting',
+    'nav.tactics': 'Tattiche',
+    'nav.calculator': 'Calcolatrice',
     'nav.about': 'Chi siamo',
     'footer.copy': 'LAqP.website: canale, Option Files, tutorial e database.',
     'footer.linksLabel': 'Link utili',
@@ -588,7 +608,7 @@ const I18N_MESSAGES = {
     'db.searchPlayer': 'Cerca giocatore',
     'db.leaguesAndTeams': 'Campionati e squadre',
     'filters.teamTitle': 'Filtri squadre',
-    'filters.teamSubtitle': 'Cerca usando dati reali del CSV e metriche calcolate dalla rosa.',
+    'filters.teamSubtitle': 'Cerca usando dati del gioco e metriche calcolate dalla rosa.',
     'filters.playerTitle': 'Filtri giocatori',
     'filters.playerSubtitle': 'Usa i filtri base per cercare rapidamente e apri gli avanzati quando serve precisione.',
     'filters.basic': 'Filtri base',
@@ -830,8 +850,8 @@ const SITE_PAGE_MESSAGES = {
     'faq.installA': 'La sección Tutoriales reúne guías paso a paso para instalar y configurar el Option File.',
     'faq.databaseQ': '¿Cómo busco jugadores, equipos o ligas?',
     'faq.databaseA': 'En Base de datos podés entrar a Ligas, Equipos o Jugadores. Los favoritos quedan guardados dentro de esa sección.',
-    'faq.csvQ': '¿Los datos se actualizan por CSV?',
-    'faq.csvA': 'Sí. Las descargas y los datos principales se mantienen con archivos del proyecto para no romper la estructura de la base.',
+    'faq.updatesQ': '¿La base de datos se actualiza?',
+    'faq.updatesA': 'Sí. El contenido se va revisando y actualizando para mantener jugadores, equipos, ligas y descargas bien ordenados.',
     'faq.facesQ': '¿Puedo usar o republicar las caras?',
     'faq.facesA': 'Las caras publicadas en esta web son de autoría de LAqP. Se pueden usar en Option Files o parches dando los créditos correspondientes, pero no se permite republicarlas en YouTube u otras plataformas como contenido propio.',
     'faq.contactTitle': 'Contacto',
@@ -865,7 +885,7 @@ const SITE_PAGE_MESSAGES = {
     'news.fileAvailable': 'Archivo disponible en la sección de descargas.',
     'news.empty': 'No hay novedades disponibles en este momento.',
     'squad.title': 'Cargar lista de jugadores',
-    'squad.help': 'Pegá la lista o cargá un CSV/TSV para ordenar y filtrar por media, potencial, edad, sueldo, cláusula y valor de mercado.',
+    'squad.help': 'Pegá tu plantilla para ordenar y filtrar por media, potencial, edad, sueldo, cláusula y valor de mercado.',
     'squad.placeholder': 'Pegá aquí tu plantilla...',
     'squad.process': 'Procesar plantilla',
     'squad.clear': 'Limpiar',
@@ -914,8 +934,8 @@ const SITE_PAGE_MESSAGES = {
     'faq.installA': 'The Tutorials section gathers step-by-step guides to install and configure the Option File.',
     'faq.databaseQ': 'How do I search players, teams or leagues?',
     'faq.databaseA': 'Inside Database you can open Leagues, Teams or Players. Favorites are saved within that section.',
-    'faq.csvQ': 'Are the data updated through CSV files?',
-    'faq.csvA': 'Yes. Downloads and main data are maintained with project files without breaking the database structure.',
+    'faq.updatesQ': 'Is the database updated?',
+    'faq.updatesA': 'Yes. Content is reviewed and updated to keep players, teams, leagues and downloads well organized.',
     'faq.facesQ': 'Can I use or repost the faces?',
     'faq.facesA': 'Faces published on this website are authored by LAqP. They may be used in Option Files or patches with proper credit, but they cannot be reposted on YouTube or other platforms as your own content.',
     'faq.contactTitle': 'Contact',
@@ -949,7 +969,7 @@ const SITE_PAGE_MESSAGES = {
     'news.fileAvailable': 'File available in the downloads section.',
     'news.empty': 'There are no news items available right now.',
     'squad.title': 'Load player list',
-    'squad.help': 'Paste the list or load a CSV/TSV to sort and filter by overall, potential, age, wage, clause and market value.',
+    'squad.help': 'Paste your squad to sort and filter by overall, potential, age, wage, clause and market value.',
     'squad.placeholder': 'Paste your squad here...',
     'squad.process': 'Process squad',
     'squad.clear': 'Clear',
@@ -964,7 +984,7 @@ const SITE_PAGE_MESSAGES = {
     'squad.market': 'Market value',
     'squad.summary': '{shown} of {total} players',
     'squad.noResults': 'No players match that filter.',
-    'squad.parseError': 'The list could not be interpreted. Try CSV/TSV with headers or the block format.',
+    'squad.parseError': 'The list could not be interpreted. Check the format and try again.',
     'squad.parseSuccess': 'Squad processed successfully ({count} players).',
     'team.shirtNumbers': 'Shirt numbers',
     'team.showShirtNumbers': 'View numbers 1-99',
@@ -1007,8 +1027,8 @@ const SITE_PAGE_MESSAGES = {
     'faq.installA': 'A seção Tutoriais reúne guias passo a passo para instalar e configurar o Option File.',
     'faq.databaseQ': 'Como busco jogadores, equipes ou ligas?',
     'faq.databaseA': 'Na Base de dados você pode entrar em Ligas, Equipes ou Jogadores. Os favoritos ficam salvos nessa seção.',
-    'faq.csvQ': 'Os dados são atualizados por CSV?',
-    'faq.csvA': 'Sim. Downloads e dados principais são mantidos com arquivos do projeto sem quebrar a estrutura da base.',
+    'faq.updatesQ': 'A base de dados é atualizada?',
+    'faq.updatesA': 'Sim. O conteúdo é revisado e atualizado para manter jogadores, equipes, ligas e downloads bem organizados.',
     'faq.facesQ': 'Posso usar ou republicar as faces?',
     'faq.facesA': 'As faces publicadas neste site são de autoria da LAqP. Elas podem ser usadas em Option Files ou patches com os créditos correspondentes, mas não podem ser republicadas no YouTube ou em outras plataformas como conteúdo próprio.',
     'faq.contactTitle': 'Contato',
@@ -1042,7 +1062,7 @@ const SITE_PAGE_MESSAGES = {
     'news.fileAvailable': 'Arquivo disponível na seção de downloads.',
     'news.empty': 'Não há novidades disponíveis no momento.',
     'squad.title': 'Carregar lista de jogadores',
-    'squad.help': 'Cole a lista ou carregue um CSV/TSV para ordenar e filtrar por overall, potencial, idade, salário, cláusula e valor de mercado.',
+    'squad.help': 'Cole seu elenco para ordenar e filtrar por overall, potencial, idade, salário, cláusula e valor de mercado.',
     'squad.placeholder': 'Cole seu elenco aqui...',
     'squad.process': 'Processar elenco',
     'squad.clear': 'Limpar',
@@ -1091,8 +1111,8 @@ const SITE_PAGE_MESSAGES = {
     'faq.installA': 'La sezione Tutorial raccoglie guide passo dopo passo per installare e configurare l Option File.',
     'faq.databaseQ': 'Come cerco giocatori, squadre o leghe?',
     'faq.databaseA': 'Nel Database puoi aprire Leghe, Squadre o Giocatori. I preferiti vengono salvati in quella sezione.',
-    'faq.csvQ': 'I dati sono aggiornati tramite CSV?',
-    'faq.csvA': 'Sì. Download e dati principali sono mantenuti con file del progetto senza rompere la struttura del database.',
+    'faq.updatesQ': 'Il database viene aggiornato?',
+    'faq.updatesA': 'Sì. I contenuti vengono rivisti e aggiornati per mantenere giocatori, squadre, leghe e download ben ordinati.',
     'faq.facesQ': 'Posso usare o ripubblicare i volti?',
     'faq.facesA': 'I volti pubblicati su questo sito sono realizzati da LAqP. Possono essere usati in Option File o patch con i crediti corretti, ma non possono essere ripubblicati su YouTube o altre piattaforme come contenuti propri.',
     'faq.contactTitle': 'Contatto',
@@ -1116,7 +1136,7 @@ const SITE_PAGE_MESSAGES = {
     'news.header': 'Novità',
     'news.loading': 'Caricamento novità...',
     'squad.title': 'Carica lista giocatori',
-    'squad.help': 'Incolla la lista o carica un CSV/TSV per ordinare e filtrare per overall, potenziale, età, stipendio, clausola e valore di mercato.',
+    'squad.help': 'Incolla la tua rosa per ordinare e filtrare per overall, potenziale, età, stipendio, clausola e valore di mercato.',
     'squad.placeholder': 'Incolla qui la tua rosa...',
     'squad.process': 'Elabora rosa',
     'squad.clear': 'Pulisci',
@@ -1131,7 +1151,7 @@ const SITE_PAGE_MESSAGES = {
     'squad.market': 'Valore mercato',
     'squad.summary': '{shown} di {total} giocatori',
     'squad.noResults': 'Nessun giocatore per questo filtro.',
-    'squad.parseError': 'Impossibile interpretare la lista. Prova CSV/TSV con intestazioni o il formato a blocchi.',
+    'squad.parseError': 'Impossibile interpretare la lista. Controlla il formato e riprova.',
     'squad.parseSuccess': 'Rosa elaborata correttamente ({count} giocatori).',
     'team.shirtNumbers': 'Numeri maglia',
     'team.showShirtNumbers': 'Vedi numeri 1-99',
@@ -1346,6 +1366,21 @@ function getStoredLanguage() {
   }
 }
 
+function i18nPageSupportsTranslations() {
+  const parts = window.location.pathname
+    .split('/')
+    .filter(Boolean)
+    .map(part => part.toLowerCase());
+  const first = parts[0] || '';
+  const file = (parts[parts.length - 1] || 'index.html').toLowerCase();
+  return ['database', 'player', 'team', 'league'].includes(first)
+    || ['database.html', 'player.html', 'team.html', 'league.html'].includes(file);
+}
+
+function getActiveLanguage() {
+  return i18nPageSupportsTranslations() ? getStoredLanguage() : I18N_DEFAULT_LANG;
+}
+
 function setLanguage(lang) {
   const next = i18nNormalizeLang(lang);
   try {
@@ -1355,7 +1390,7 @@ function setLanguage(lang) {
 }
 
 function getCurrentLanguage() {
-  return getStoredLanguage();
+  return getActiveLanguage();
 }
 
 function t(key, params = {}) {
@@ -1387,7 +1422,7 @@ function i18nPairs(group) {
 }
 
 function applyI18nToDocument(root = document) {
-  document.documentElement.lang = getCurrentLanguage();
+  document.documentElement.lang = getActiveLanguage();
   root.querySelectorAll('[data-i18n]').forEach(el => {
     el.textContent = t(el.dataset.i18n);
   });
@@ -1410,6 +1445,7 @@ function detectedBrowserLanguage() {
 }
 
 function renderLanguagePrompt() {
+  if (!i18nPageSupportsTranslations()) return;
   const detected = detectedBrowserLanguage();
   if (!detected || getCurrentLanguage() === detected) return;
   try {
@@ -1446,6 +1482,7 @@ function renderLanguagePrompt() {
 window.I18N_LANGUAGES = I18N_LANGUAGES;
 window.getCurrentLanguage = getCurrentLanguage;
 window.setLanguage = setLanguage;
+window.i18nPageSupportsTranslations = i18nPageSupportsTranslations;
 window.t = t;
 window.i18nMap = i18nMap;
 window.i18nLookup = i18nLookup;

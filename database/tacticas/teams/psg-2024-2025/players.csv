@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+242501;Gianluigi Donnarumma;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+242502;Achraf Hakimi;LD;83;72;LD;83;72;MD;85;53;LD;80;73
+242503;Marquinhos;DFC;61;75;DFC;61;75;DFC;61;75;DFC;61;76
+242504;Willian Pacho;DFC;39;73;DFC;39;73;DFC;39;73;DFC;39;74
+242505;Nuno Mendes;LI;17;70;LI;17;70;MI;15;51;LI;20;71
+242506;Vitinha;MCD;50;61;MCD;50;61;MCD;50;59;MCD;50;63
+242507;João Neves;MC;62;55;MC;62;55;MC;62;53;MC;62;57
+242508;Fabián Ruiz;MC;38;56;MC;38;56;MC;38;54;MC;38;58
+242509;Ousmane Dembélé;DC;50;20;DC;50;20;SD;50;23;DC;50;22
+242510;Désiré Doué;ED;82;25;ED;82;25;ED;85;23;MD;79;43
+242511;Khvicha Kvaratskhelia;EI;18;23;EI;18;23;EI;15;21;MI;21;41

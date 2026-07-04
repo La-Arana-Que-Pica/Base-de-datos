@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+197801;Jan Jongbloed;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+197802;Jan Poortvliet;LI;17;70;LI;17;70;DFC;20;73;LI;20;71
+197803;Ruud Krol;DFC;39;73;DFC;39;73;DFC;50;77;DFC;39;74
+197804;Ernie Brandts;DFC;61;75;DFC;61;75;DFC;80;75;DFC;61;76
+197805;Wim Jansen;LD;83;72;LD;83;72;MD;82;53;LD;80;73
+197806;Arie Haan;MCD;50;61;MCD;50;61;MCD;50;59;MCD;50;63
+197807;Johan Neeskens;MC;35;56;MC;35;56;MC;35;54;MC;38;43
+197808;Willy van de Kerkhof;MC;65;55;MC;65;55;MC;65;53;MC;62;45
+197809;Rob Rensenbrink;EI;18;23;EI;18;23;EI;26;21;MI;21;41
+197810;Johnny Rep;DC;50;20;DC;50;20;DC;50;18;DC;50;22
+197811;René van de Kerkhof;ED;82;25;ED;82;25;ED;74;23;MD;79;43

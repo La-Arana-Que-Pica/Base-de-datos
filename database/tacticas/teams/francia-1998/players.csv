@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+199801;Fabien Barthez;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+199802;Lilian Thuram;LD;83;72;LD;83;72;LD;83;72;LD;80;73
+199803;Laurent Blanc;DFC;61;75;DFC;61;75;DFC;61;75;DFC;61;76
+199804;Marcel Desailly;DFC;39;73;DFC;39;73;DFC;39;73;DFC;39;74
+199805;Bixente Lizarazu;LI;17;70;LI;17;70;LI;17;70;LI;20;71
+199806;Didier Deschamps;MCD;50;61;MCD;50;61;MCD;42;58;MCD;50;63
+199807;Christian Karembeu;MC;68;55;MC;68;55;MD;82;39;MD;79;57
+199808;Emmanuel Petit;MC;32;56;MC;32;56;MC;58;53;MC;38;58
+199809;Zinedine Zidane;MP;50;38;MP;50;38;MP;50;35;MP;50;40
+199810;Youri Djorkaeff;SD;42;24;SD;42;24;MP;28;36;MI;21;55
+199811;Stéphane Guivarc'h;DC;58;21;DC;58;21;DC;50;18;DC;50;22

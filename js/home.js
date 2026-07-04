@@ -112,6 +112,37 @@ function renderFeaturedCard(item) {
     </article>`;
 }
 
+function renderHomeGuide(article) {
+  const articleUrl = typeof laqpArticleUrl === 'function'
+    ? laqpArticleUrl(article.id, article.title)
+    : `articulo.html?id=${encodeURIComponent(article.id)}`;
+  return `
+    <article class="editorial-card">
+      <a class="editorial-card-media" href="${articleUrl}">
+        <img src="${escapeHtml(assetPath(article.image))}" alt="${escapeHtml(article.title)}" loading="lazy" width="640" height="360" onerror="this.onerror=null;this.src='img/logo.webp'">
+      </a>
+      <div class="editorial-card-body">
+        <div class="editorial-meta">
+          <span>${escapeHtml(article.category)}</span>
+          <span>${escapeHtml(article.readTime)}</span>
+        </div>
+        <h2><a href="${articleUrl}">${escapeHtml(article.title)}</a></h2>
+        <p>${escapeHtml(article.description)}</p>
+        <a class="editorial-card-cta" href="${articleUrl}">Ver guia</a>
+      </div>
+    </article>`;
+}
+
+async function renderHomeGuides() {
+  const grid = document.getElementById('home-guides-grid');
+  if (!grid) return;
+  const articles = typeof loadLAQPArticles === 'function'
+    ? await loadLAQPArticles()
+    : (window.LAQP_ARTICLES || []);
+  if (!articles.length) return;
+  grid.innerHTML = articles.slice(0, 6).map(renderHomeGuide).join('');
+}
+
 async function bootHome() {
   const section = document.getElementById('featured-of-section');
   if (!section) return;
@@ -133,5 +164,6 @@ async function bootHome() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  renderHomeGuides().catch(err => console.error('Error loading home guides:', err));
   bootHome().catch(err => console.error('Error loading featured option files:', err));
 });

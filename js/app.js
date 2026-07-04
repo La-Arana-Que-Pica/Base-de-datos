@@ -117,14 +117,15 @@ const NATIONALITY_NAMES = {
   '235': 'Eslovenia',    '236': 'España',       '237': 'Suecia',
   '238': 'Suiza',        '239': 'Ucrania',      '240': 'Uzbekistán',
   '241': 'Gales',        '303': 'Serbia',       '304': 'Montenegro',
-  '311': 'Kosovo',
+  '311': 'Kosovo', '129': 'Puerto Rico', '206': 'Islas Feroe',
 };
 
 function nationalityName(countryId) {
   if (!countryId) return '–';
-  return (typeof i18nLookup === 'function' ? i18nLookup('countries', String(countryId), '') : '')
-    || NATIONALITY_NAMES[String(countryId)]
-    || countryId;
+  const key = String(countryId);
+  const localized = typeof i18nLookup === 'function' ? i18nLookup('countries', key, '') : '';
+  if (localized && localized !== key) return localized;
+  return NATIONALITY_NAMES[key] || key;
 }
 
 // Team type → Spanish group label
@@ -281,13 +282,11 @@ function correctedPlayerFallbackKey(row) {
 }
 
 function buildCorrectedOverallMap(rows) {
-  const map = { byTeamPlayer: Object.create(null), byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
+  const map = { byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
   rows.forEach(r => {
     const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-    const tid = r['TeamId'] || r['team_id'] || '';
     const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
     if (!ovr) return;
-    if (pid && tid) map.byTeamPlayer[`${tid}_${pid}`] = ovr;
     if (pid) map.byPlayer[pid] = ovr;
     const fallback = correctedPlayerFallbackKey(r);
     if (fallback.nameCountry) map.byNameCountry[fallback.nameCountry] = ovr;
@@ -299,7 +298,6 @@ function buildCorrectedOverallMap(rows) {
 function correctedOverallFor(row, teamId, correctedMap) {
   if (!row || !correctedMap) return '';
   const pid = row['Id'] || row.ID || row['PlayerId'] || '';
-  if (teamId && pid && correctedMap.byTeamPlayer[`${teamId}_${pid}`]) return correctedMap.byTeamPlayer[`${teamId}_${pid}`];
   if (pid && correctedMap.byPlayer[pid]) return correctedMap.byPlayer[pid];
   const fallback = correctedPlayerFallbackKey(row);
   return correctedMap.byNameCountry[fallback.nameCountry] || correctedMap.byNamePos[fallback.namePos] || '';
@@ -588,7 +586,7 @@ async function boot() {
       const player = playerMap[playerId];
       if (!player) continue;
       const p = { ...player, _team: team };
-      // Apply corrected overall if available (team-specific key takes precedence)
+      // Apply corrected overall if available for this player ID.
       const corregidosOvr = correctedOverallFor(p, teamId, corregidosMap);
       if (corregidosOvr) p.Overall = corregidosOvr;
       team.players.push(p);
@@ -634,9 +632,13 @@ const NAV_STATE_KEY = 'pes_nav_state';
  * Pagination is expressed as `offset` (items skipped), e.g. offset=60 for page 2.
  */
 function _stateToUrl(state) {
-  if (!state || !state.view) return window.location.pathname;
+  const directoryViews = new Set(['players', 'teams', 'leagues']);
+  const basePath = directoryViews.has(state && state.view) && typeof laqpDatabaseUrl === 'function'
+    ? laqpDatabaseUrl(state.view)
+    : (typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : window.location.pathname);
+  if (!state || !state.view) return basePath;
   const params = new URLSearchParams();
-  params.set('view', state.view);
+  if (!directoryViews.has(state.view)) params.set('view', state.view);
   if (state.leagueId) params.set('leagueId', state.leagueId);
   if (state.query) params.set('q', state.query);
   if (state.page && state.page > 1) {
@@ -650,7 +652,8 @@ function _stateToUrl(state) {
     });
   }
   if (state.specialPlayers) params.set('special', '1');
-  return window.location.pathname + '?' + params.toString();
+  const query = params.toString();
+  return query ? `${basePath}?${query}` : basePath;
 }
 
 /**
@@ -659,7 +662,7 @@ function _stateToUrl(state) {
  */
 function _urlToState() {
   const params = new URLSearchParams(window.location.search);
-  const view = params.get('view');
+  const view = params.get('view') || document.querySelector('meta[name="laqp-database-view"]')?.content;
   if (!view) return null;
   const state = { view };
   const leagueId = params.get('leagueId');
@@ -849,6 +852,24 @@ function filterAllPlayers(query) {
 
 let _leaguesForGrid = [];
 
+function renderLeagueGridCard(league) {
+  const teamCount = (league.teamIds || []).length;
+  const leagueId = escapeHtml(league.id);
+  const leagueName = escapeHtml(league.name);
+  return `
+    <button type="button" class="grid-card db-index-card db-league-card" onclick="showLeagueTeamsView('${leagueId}')">
+      <img class="grid-card-img"
+        src="img/leagues/${leagueId}.webp"
+        loading="lazy"
+        onerror="this.onerror=null;this.src='img/leagues/default.webp'"
+        alt="${leagueName}">
+      <span class="grid-card-kicker">Liga</span>
+      <span class="grid-card-name">${leagueName}</span>
+      <span class="grid-card-sub">${t('db.teamCount', { count: teamCount })}</span>
+      <span class="grid-card-action">Ver equipos</span>
+    </button>`;
+}
+
 /** Internal: render the leagues grid without saving nav state. */
 function _showLeaguesViewInternal() {
   _setActiveSidebarNav('leagues');
@@ -857,22 +878,10 @@ function _showLeaguesViewInternal() {
   const view = document.getElementById('leagues-view');
   view.classList.add('active');
 
-  const cardsHtml = DB.leagues.map(league => {
-    const teamCount = league.teamIds.length;
-    return `
-      <div class="grid-card" onclick="window.location.href='league.html?id=${encodeURIComponent(league.id)}'">
-        <img class="grid-card-img"
-          src="img/leagues/${league.id}.webp"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='img/leagues/default.webp'"
-          alt="${league.name}">
-        <div class="grid-card-name">${league.name}</div>
-        <div class="grid-card-sub">${t('db.teamCount', { count: teamCount })}</div>
-      </div>`;
-  }).join('');
+  const cardsHtml = DB.leagues.map(renderLeagueGridCard).join('');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.leagues') }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('common.leagues') }])}
     <div class="view-header">
       <div>
         <div class="view-title">${t('common.leagues')}</div>
@@ -899,24 +908,17 @@ function filterLeaguesGrid(query) {
   if (!container) return;
   saveNavState({ view: 'leagues', query });
   const matches = q ? _leaguesForGrid.filter(l => (l.name || '').toLowerCase().includes(q)) : _leaguesForGrid;
-  const cardsHtml = matches.map(league => {
-    const teamCount = league.teamIds.length;
-    return `
-      <div class="grid-card" onclick="window.location.href='league.html?id=${encodeURIComponent(league.id)}'">
-        <img class="grid-card-img"
-          src="img/leagues/${league.id}.webp"
-          loading="lazy"
-          onerror="this.onerror=null;this.src='img/leagues/default.webp'"
-          alt="${league.name}">
-        <div class="grid-card-name">${league.name}</div>
-        <div class="grid-card-sub">${t('db.teamCount', { count: teamCount })}</div>
-      </div>`;
-  }).join('');
+  const cardsHtml = matches.map(renderLeagueGridCard).join('');
   container.innerHTML = cardsHtml;
   if (subtitle) subtitle.textContent = t('db.leaguesFound', { count: matches.length });
 }
 
 function showLeagueTeamsView(leagueId) {
+  const league = DB.leagues.find(item => item.id === String(leagueId));
+  if (league && typeof laqpLeagueUrl === 'function') {
+    window.location.href = laqpLeagueUrl(league.id, league.name);
+    return;
+  }
   saveNavState({ view: 'leagueTeams', leagueId });
   _showLeagueTeamsViewInternal(leagueId);
 }
@@ -935,18 +937,10 @@ function _showLeagueTeamsViewInternal(leagueId) {
   const view = document.getElementById('leagues-view');
   view.classList.add('active');
 
-  const cardsHtml = leagueTeams.map(team => `
-    <div class="grid-card" onclick="selectTeam('${team.id}')">
-      <img class="grid-card-img"
-        src="img/teams/${team.id}.webp"
-        loading="lazy"
-        onerror="this.onerror=null;this.src='img/teams/default.webp'"
-        alt="${team.displayName}">
-      <div class="grid-card-name">${team.displayName}</div>
-    </div>`).join('');
+  const cardsHtml = leagueTeams.map(renderTeamGridCard).join('');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.leagues'), href: 'database.html?view=leagues' }, { label: league.name }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('common.leagues'), href: `${typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html'}?view=leagues` }, { label: league.name }])}
     <div class="view-header">
       <img class="grid-card-img" style="width:48px;height:48px;object-fit:contain"
         src="img/leagues/${leagueId}.webp"
@@ -977,9 +971,36 @@ let _teamFilters = {
   minPlayers: '',
   maxPlayers: '',
 };
+let _teamFiltersOpen = false;
 
 function _getLeagueForTeam(teamId) {
   return DB.leagues.find(l => l.teamIds.includes(teamId)) || null;
+}
+
+function renderTeamGridCard(team) {
+  const teamId = escapeHtml(team.id);
+  const teamName = escapeHtml(team.displayName);
+  const league = _getLeagueForTeam(team.id);
+  const leagueName = league ? escapeHtml(league.name) : 'Sin liga';
+  const avg = teamAvgOvr(team);
+  const players = _teamPlayerCount(team);
+  const avgHtml = avg !== null
+    ? `<span class="team-avg-badge" style="background:${statColor(avg)};color:${statTextColor(statColor(avg))}">${avg}</span>`
+    : '';
+
+  return `
+    <button type="button" class="grid-card db-index-card db-team-card" onclick="selectTeam('${teamId}')">
+      <span class="grid-card-ovr">${avgHtml}</span>
+      <img class="grid-card-img"
+        src="img/teams/${teamId}.webp"
+        loading="lazy"
+        onerror="this.onerror=null;this.src='img/teams/default.webp'"
+        alt="${teamName}">
+      <span class="grid-card-kicker">Equipo</span>
+      <span class="grid-card-name">${teamName}</span>
+      <span class="grid-card-sub">${leagueName} - ${players} jugadores</span>
+      <span class="grid-card-action">Ver plantel</span>
+    </button>`;
 }
 
 function _teamPlayerCount(team) {
@@ -1033,6 +1054,7 @@ function _buildTeamFiltersPanel() {
   const countries = [...new Set(_teamsForGrid.map(t => _teamFilterValue(t, 'country')).filter(Boolean))]
     .sort((a, b) => nationalityName(a).localeCompare(nationalityName(b), 'es'));
   const types = [...new Set(_teamsForGrid.map(t => t.type).filter(t => TYPE_LABELS[t]))];
+  const panelOpen = _teamFiltersOpen || _hasActiveTeamFilters();
 
   return `
     <div class="adv-filter-panel team-filter-panel">
@@ -1041,9 +1063,13 @@ function _buildTeamFiltersPanel() {
           <div class="filter-panel-title">${t('filters.teamTitle')}</div>
           <div class="filter-panel-subtitle">${t('filters.teamSubtitle')}</div>
         </div>
-        <button type="button" class="adv-filter-reset" id="btn-clear-team-filters" onclick="resetTeamFilters()" ${_hasActiveTeamFilters() ? '' : 'disabled'}>${t('common.cleanFilters')}</button>
+        <div class="filter-panel-actions">
+          <button type="button" class="advanced-filter-toggle" id="btn-toggle-team-filters" onclick="toggleTeamFilters()">${panelOpen ? t('filters.hide') : t('filters.show')}</button>
+          <button type="button" class="adv-filter-reset" id="btn-clear-team-filters" onclick="resetTeamFilters()" ${_hasActiveTeamFilters() ? '' : 'disabled'}>${t('common.cleanFilters')}</button>
+        </div>
       </div>
       ${_buildTeamActiveFiltersSummary()}
+      <div id="team-filter-body" ${panelOpen ? '' : 'hidden'}>
       <div class="adv-filter-grid basic-filter-grid">
         <div class="adv-filter-group">
           <label>${t('common.name')}</label>
@@ -1072,6 +1098,7 @@ function _buildTeamFiltersPanel() {
         </div>
         ${_buildRangeFilter(t('filters.avgRange'), 'team-flt-min-avg', 'team-flt-max-avg', 0, 99, _teamFilters.minAvg, _teamFilters.maxAvg).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
         ${_buildRangeFilter(t('filters.playerQty'), 'team-flt-min-players', 'team-flt-max-players', 0, 32, _teamFilters.minPlayers, _teamFilters.maxPlayers).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
+      </div>
       </div>
     </div>`;
 }
@@ -1106,13 +1133,14 @@ function _showTeamsViewInternal() {
   _teamsForGrid = filteredTeams;
   _applyTeamFilters();
   _teamsGridPage = 1;
+  if (_hasActiveTeamFilters()) _teamFiltersOpen = true;
 
   hideAllViews();
   const view = document.getElementById('teams-grid-view');
   view.classList.add('active');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.teams') }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('common.teams') }])}
     <div class="view-header">
       <div>
         <div class="view-title">${t('common.teams')}</div>
@@ -1141,22 +1169,7 @@ function _renderTeamsGridPage() {
   const start = (_teamsGridPage - 1) * TEAMS_PAGE_SIZE;
   const pageTeams = _teamsFilteredList.slice(start, start + TEAMS_PAGE_SIZE);
 
-  const cardsHtml = pageTeams.map(team => {
-    const avg = teamAvgOvr(team);
-    const avgHtml = avg !== null
-      ? `<div class="grid-card-ovr"><span class="team-avg-badge" style="background:${statColor(avg)};color:${statTextColor(statColor(avg))}">${avg}</span></div>`
-      : '';
-    return `
-    <div class="grid-card" onclick="selectTeam('${team.id}')">
-      <img class="grid-card-img"
-        src="img/teams/${team.id}.webp"
-        loading="lazy"
-        onerror="this.onerror=null;this.src='img/teams/default.webp'"
-        alt="${team.displayName}">
-      <div class="grid-card-name">${team.displayName}</div>
-      ${avgHtml}
-    </div>`;
-  }).join('');
+  const cardsHtml = pageTeams.map(renderTeamGridCard).join('');
 
   container.innerHTML = cardsHtml;
 
@@ -1224,7 +1237,20 @@ function resetTeamFilters() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  _teamFiltersOpen = false;
   onTeamFilterChange();
+  const body = document.getElementById('team-filter-body');
+  const btn = document.getElementById('btn-toggle-team-filters');
+  if (body) body.hidden = true;
+  if (btn) btn.textContent = t('filters.show');
+}
+
+function toggleTeamFilters() {
+  _teamFiltersOpen = !_teamFiltersOpen;
+  const body = document.getElementById('team-filter-body');
+  const btn = document.getElementById('btn-toggle-team-filters');
+  if (body) body.hidden = !_teamFiltersOpen;
+  if (btn) btn.textContent = _teamFiltersOpen ? t('filters.hide') : t('filters.show');
 }
 
 
@@ -1257,7 +1283,7 @@ function showError(message) {
   main.appendChild(div);
 }
 
-function showHome() {
+function showHomeLegacy() {
   _setActiveSidebarNav('home');
   hideAllViews();
   document.getElementById('home-view').classList.add('active');
@@ -1294,7 +1320,7 @@ function showHome() {
       const safeTName = (t.displayName || '')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      return `<a class="home-team-crest" href="team.html?id=${t.id.replace(/"/g, '&quot;')}" title="${safeTName}">
+      return `<a class="home-team-crest" href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(t.id, t.displayName) : `team.html?id=${t.id.replace(/"/g, '&quot;')}`}" title="${safeTName}">
         <img src="img/teams/${t.id}.webp"
           loading="lazy"
           onerror="this.onerror=null;this.src='img/teams/default.webp'"
@@ -1320,6 +1346,198 @@ function showHome() {
   featuredSection.querySelectorAll('.home-league-header').forEach(header => {
     header.addEventListener('click', () => showLeagueTeamsView(header.dataset.leagueId));
   });
+}
+
+function formatDbNumber(value) {
+  return Number(value || 0).toLocaleString('es-AR');
+}
+
+function setDbText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function getHomePlayers(limit = 5) {
+  const teamsInLeaguesSet = _getTeamsInLeagues();
+  const seen = new Set();
+  return DB.players
+    .filter(player => player && player.ID && player._team && player._team.type !== '1' && teamsInLeaguesSet.has(player._team.id))
+    .slice()
+    .sort((a, b) => (parseInt(b.Overall, 10) || 0) - (parseInt(a.Overall, 10) || 0))
+    .filter(player => {
+      if (seen.has(player.ID)) return false;
+      seen.add(player.ID);
+      return true;
+    })
+    .slice(0, limit);
+}
+
+function renderHomePlayerItem(player) {
+  const team = player._team || {};
+  const playerId = escapeHtml(player.ID);
+  const teamId = escapeHtml(team.id);
+  const playerName = escapeHtml(player.Name || 'Jugador');
+  const teamName = escapeHtml(team.displayName || 'Equipo');
+  const nationality = escapeHtml(nationalityName(player.Nationality));
+  const position = escapeHtml(translatePosition(player.Position) || player.Position || '-');
+  const ovr = player.Overall || '-';
+  const ovrColor = statColor(ovr);
+
+  return `
+    <button type="button" class="db-player-item" onclick="selectPlayer('${playerId}', '${teamId}')">
+      <img class="db-player-face"
+        src="img/players/${playerId}.webp"
+        loading="lazy"
+        onerror="handleMinifaceError(this,'${playerId}')"
+        alt="${playerName}">
+      <span class="db-player-main">
+        <strong>${playerName}</strong>
+        <small>
+          <img src="${flagSrc(player.Nationality)}" loading="lazy" onerror="this.onerror=null;this.src='img/flags/default.webp'" alt="">
+          ${nationality}
+        </small>
+      </span>
+      <span class="db-player-pos">${position}</span>
+      <span class="db-player-ovr" style="background:${ovrColor};color:${statTextColor(ovrColor)}">${escapeHtml(ovr)}</span>
+      <span class="db-player-team" title="${teamName}">
+        <img src="img/teams/${teamId}.webp" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'" alt="${teamName}">
+      </span>
+    </button>`;
+}
+
+function getFeaturedTeams(limit = 6) {
+  const teamsInLeaguesSet = _getTeamsInLeagues();
+  return DB.teams
+    .filter(team => team && teamsInLeaguesSet.has(team.id))
+    .slice()
+    .sort((a, b) => (teamAvgOvr(b) || 0) - (teamAvgOvr(a) || 0))
+    .slice(0, limit);
+}
+
+function renderHomeTeamItem(team) {
+  const teamId = escapeHtml(team.id);
+  const teamName = escapeHtml(team.displayName);
+  const league = _getLeagueForTeam(team.id);
+  const leagueName = league ? escapeHtml(league.name) : 'Sin liga';
+  const avg = teamAvgOvr(team);
+  const avgHtml = avg !== null ? `<span>${avg}</span>` : '';
+
+  return `
+    <button type="button" class="db-feature-team" onclick="selectTeam('${teamId}')">
+      ${avgHtml}
+      <img src="img/teams/${teamId}.webp"
+        loading="lazy"
+        onerror="this.onerror=null;this.src='img/teams/default.webp'"
+        alt="${teamName}">
+      <strong>${teamName}</strong>
+      <small>${leagueName}</small>
+    </button>`;
+}
+
+function renderHomeLeagueItem(league) {
+  const leagueId = escapeHtml(league.id);
+  const leagueName = escapeHtml(league.name);
+  const teamCount = (league.teamIds || []).length;
+  return `
+    <button type="button" class="db-side-league" onclick="showLeagueTeamsView('${leagueId}')">
+      <img src="img/leagues/${leagueId}.webp"
+        loading="lazy"
+        onerror="this.onerror=null;this.src='img/leagues/default.webp'"
+        alt="${leagueName}">
+      <span>
+        <strong>${leagueName}</strong>
+        <small>${teamCount} equipos</small>
+      </span>
+    </button>`;
+}
+
+function getHomeFavoritePlayers(limit = 6) {
+  return getFavorites()
+    .map(fav => DB.playersByKey[getPlayerKey(fav.teamId, fav.playerId)])
+    .filter(Boolean)
+    .slice(-limit)
+    .reverse();
+}
+
+function renderHomeFavoriteItem(player) {
+  const team = player._team || {};
+  const playerId = escapeHtml(player.ID);
+  const teamId = escapeHtml(team.id);
+  const playerName = escapeHtml(player.Name || 'Jugador');
+  const teamName = escapeHtml(team.displayName || 'Equipo');
+  const position = escapeHtml(translatePosition(player.Position) || player.Position || '-');
+  const ovr = player.Overall || '-';
+  const ovrColor = statColor(ovr);
+
+  return `
+    <button type="button" class="db-favorite-player" onclick="selectPlayer('${playerId}', '${teamId}')">
+      <img class="db-favorite-face"
+        src="img/players/${playerId}.webp"
+        loading="lazy"
+        onerror="handleMinifaceError(this,'${playerId}')"
+        alt="${playerName}">
+      <span>
+        <strong>${playerName}</strong>
+        <small>${position} - ${teamName}</small>
+      </span>
+      <b style="background:${ovrColor};color:${statTextColor(ovrColor)}">${escapeHtml(ovr)}</b>
+    </button>`;
+}
+
+function renderHomeFavoritesPanel() {
+  const container = document.getElementById('db-favorite-players');
+  if (!container) return;
+  const favorites = getHomeFavoritePlayers();
+  if (!favorites.length) {
+    container.innerHTML = `
+      <div class="db-favorites-empty">
+        <strong>Sin favoritos guardados</strong>
+        <span>Marc&aacute; jugadores con la estrella para verlos ac&aacute;.</span>
+      </div>`;
+    return;
+  }
+  container.innerHTML = favorites.map(renderHomeFavoriteItem).join('');
+}
+
+function runHomeDatabaseSearch(value) {
+  const query = String(value || '').trim();
+  if (!query) return;
+  const headerSearch = document.getElementById('search-input');
+  if (headerSearch) headerSearch.value = query;
+  runSearch(query);
+}
+
+function showHome() {
+  _setActiveSidebarNav('home');
+  hideAllViews();
+  const homeView = document.getElementById('home-view');
+  if (!homeView) return;
+  homeView.classList.add('active');
+
+  const teamsInLeaguesSet = _getTeamsInLeagues();
+  const leagueCount = DB.leagues.length;
+  const teamCount = DB.teams.filter(team => teamsInLeaguesSet.has(team.id)).length;
+  const uniqueIds = new Set(DB.players
+    .filter(player => player && player._team && teamsInLeaguesSet.has(player._team.id))
+    .map(player => player.ID));
+  const playerCount = uniqueIds.size;
+  const favCount = getFavoritesCount();
+
+  setDbText('stat-leagues', formatDbNumber(leagueCount));
+  setDbText('stat-teams', formatDbNumber(teamCount));
+  setDbText('stat-players', formatDbNumber(playerCount));
+  setDbText('stat-favorites', formatDbNumber(favCount));
+
+  const latestPlayers = document.getElementById('db-latest-players');
+  if (latestPlayers) latestPlayers.innerHTML = getHomePlayers().map(renderHomePlayerItem).join('');
+
+  const featuredTeams = document.getElementById('db-featured-teams');
+  if (featuredTeams) featuredTeams.innerHTML = getFeaturedTeams().map(renderHomeTeamItem).join('');
+
+  const featuredLeagues = document.getElementById('db-featured-leagues');
+  if (featuredLeagues) featuredLeagues.innerHTML = DB.leagues.slice(0, 7).map(renderHomeLeagueItem).join('');
+
+  renderHomeFavoritesPanel();
 }
 
 function goHome() {
@@ -2178,7 +2396,7 @@ function _showAllPlayersInternal(resetPage) {
 
   // Render skeleton: header + filter panel + table + pagination placeholder
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.players') }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('common.players') }])}
     <div class="view-header">
       <div>
         <div class="view-title">${t('db.allPlayers')}</div>
@@ -2233,7 +2451,10 @@ function showAllPlayers(resetPage) {
 let currentTeam = null;
 
 function selectTeam(teamId) {
-  window.location.href = `team.html?id=${encodeURIComponent(teamId)}`;
+  const team = DB.teams.find(t => t.id === String(teamId));
+  window.location.href = typeof laqpTeamUrl === 'function'
+    ? laqpTeamUrl(teamId, team && team.displayName)
+    : `team.html?id=${encodeURIComponent(teamId)}`;
 }
 
 function renderPlayersList(team) {
@@ -2246,13 +2467,13 @@ function renderPlayersList(team) {
 
   view.innerHTML = `
     <div class="view-header">
-      <a href="team.html?id=${team.id}">
+      <a href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`}">
         <img class="team-crest" src="img/teams/${team.id}.webp"
           onerror="this.onerror=null;this.src='img/teams/default.webp'"
           alt="${team.displayName}" title="Ver página del equipo">
       </a>
       <div>
-        <a class="view-title-link" href="team.html?id=${team.id}">${team.displayName}</a>
+        <a class="view-title-link" href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`}">${team.displayName}</a>
         <div class="view-subtitle">${typeLabel}</div>
       </div>
     </div>
@@ -2300,7 +2521,7 @@ function renderPlayerRow(player, team) {
         alt="${player.Name}">
     </td>
     <td class="team-crest-cell desktop-stat">
-      <a href="team.html?id=${team.id}" onclick="event.stopPropagation()">
+      <a href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`}" onclick="event.stopPropagation()">
         <img class="player-row-team-crest"
           src="img/teams/${team.id}.webp"
           loading="lazy"
@@ -2341,7 +2562,10 @@ function renderPlayerRow(player, team) {
 // ─── Player profile ───────────────────────────────────────────────────────────
 
 function selectPlayer(playerId, teamId) {
-  window.location.href = `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
+  const player = DB.playersByKey[getPlayerKey(teamId, playerId)] || DB.players.find(p => p.ID === String(playerId) && p._team && p._team.id === String(teamId));
+  window.location.href = typeof laqpPlayerUrl === 'function'
+    ? laqpPlayerUrl(playerId, teamId, player && player.Name)
+    : `player.html?id=${encodeURIComponent(playerId)}&team=${encodeURIComponent(teamId)}`;
 }
 
 /**
@@ -2440,7 +2664,7 @@ function renderPlayerProfile(player, team) {
           </div>
           <div class="player-info-row">
             <span class="info-label">Equipo</span>
-            <a href="team.html?id=${team.id}" class="team-crest-link">
+            <a href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`}" class="team-crest-link">
               <img class="team-crest-sm"
                 src="img/teams/${team.id}.webp"
                 onerror="this.onerror=null;this.src='img/teams/default.webp'"
@@ -2617,8 +2841,9 @@ function toggleFavoriteFromBtn(btn, playerId, teamId) {
   const statFav = document.getElementById('stat-favorites');
   if (statFav) {
     const count = getFavoritesCount();
-    statFav.textContent = count > 0 ? count : '⭐';
+    statFav.textContent = formatDbNumber(count);
   }
+  renderHomeFavoritesPanel();
 }
 
 /** Internal: render the favorites view without pushing nav state. */
@@ -2632,7 +2857,7 @@ function _showFavoritesViewInternal() {
   const favs = getFavorites();
   if (!favs.length) {
     view.innerHTML = `
-      ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.favorites') }])}
+      ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('common.favorites') }])}
       <div class="view-header">
         <div class="view-title">${t('favorites.emptyTitle')}</div>
       </div>
@@ -2658,7 +2883,7 @@ function _showFavoritesViewInternal() {
   const rowsHtml = playerEntries.map(p => renderPlayerRow(p, p._team)).join('');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('common.favorites') }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('common.favorites') }])}
     <div class="view-header">
       <div>
         <div class="view-title">${t('favorites.emptyTitle')}</div>
@@ -2699,7 +2924,8 @@ function clearAllFavorites() {
   _showFavoritesViewInternal();
   // Update home stat if visible
   const statFav = document.getElementById('stat-favorites');
-  if (statFav) statFav.textContent = '⭐';
+  if (statFav) statFav.textContent = '0';
+  renderHomeFavoritesPanel();
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -2747,7 +2973,7 @@ function runSearch(query) {
   view.classList.add('active');
 
   if (!results.length) {
-    view.innerHTML = `${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('db.searchPlayers') }])}
+    view.innerHTML = `${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('db.searchPlayers') }])}
       <div class="view-header"><div class="view-title">Resultados: "${query}"</div></div>
       <div class="error-message">${t('errors.noPlayersForSearch', { query })}</div>`;
     return;
@@ -2756,7 +2982,7 @@ function runSearch(query) {
   const rowsHtml = results.map(p => renderPlayerRow(p, p._team)).join('');
 
   view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: t('common.home'), href: 'index.html' }, { label: t('common.database'), href: 'database.html' }, { label: t('db.searchPlayers') }])}
+    ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('db.searchPlayers') }])}
     <div class="view-header">
       <div>
         <div class="view-title">Búsqueda: "${query}"</div>

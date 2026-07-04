@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+202101;Samir Handanovic;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+202102;Milan Skriniar;DFC;70;75;DFC;70;75;DFC;70;75;DFC;66;76
+202103;Stefan de Vrij;DFC;50;77;DFC;50;77;DFC;50;77;DFC;50;78
+202104;Alessandro Bastoni;DFC;30;73;DFC;30;73;DFC;30;73;DFC;34;74
+202105;Achraf Hakimi;MD;82;55;MD;82;55;MD;85;53;LD;80;73
+202106;Ivan Perisic;MI;18;53;MI;18;53;MI;15;51;LI;20;71
+202107;Nicolò Barella;MC;64;55;MC;64;55;MP;62;38;MC;64;57
+202108;Marcelo Brozovic;MCD;50;61;MCD;50;61;MCD;50;59;MCD;50;63
+202109;Christian Eriksen;MC;36;56;MC;36;56;MP;38;36;MC;36;58
+202110;Lautaro Martínez;SD;42;24;SD;42;24;SD;42;22;SD;42;26
+202111;Romelu Lukaku;DC;58;21;DC;58;21;DC;58;19;DC;58;23

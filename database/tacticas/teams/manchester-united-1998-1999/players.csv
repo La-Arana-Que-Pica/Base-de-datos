@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+989901;Peter Schmeichel;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+989902;Gary Neville;LD;83;72;LD;83;72;MD;85;53;LD;80;73
+989903;Jaap Stam;DFC;61;75;DFC;61;75;DFC;61;75;DFC;61;76
+989904;Ronny Johnsen;DFC;39;73;DFC;39;73;DFC;39;73;DFC;39;74
+989905;Denis Irwin;LI;17;70;LI;17;70;MI;15;51;LI;20;71
+989906;David Beckham;MD;82;55;MD;82;55;ED;85;23;MD;79;57
+989907;Roy Keane;MC;42;56;MC;42;56;MC;42;54;MC;42;58
+989908;Paul Scholes;MC;58;55;MC;58;55;MC;58;53;MC;58;57
+989909;Ryan Giggs;MI;18;53;MI;18;53;EI;15;21;MI;21;55
+989910;Dwight Yorke;SD;42;24;SD;42;24;SD;42;22;SD;42;26
+989911;Andy Cole;DC;58;21;DC;58;21;DC;58;19;DC;58;23

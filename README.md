@@ -103,3 +103,39 @@ Al iniciar, `js/app.js`:
 4. Construye un índice invertido en memoria para búsqueda rápida de jugadores por nombre/posición/id
 
 No se usa API externa ni base de datos externa.
+
+## Paginas individuales de jugadores
+
+Las fichas compartibles se generan en rutas versionadas:
+
+```text
+player/v2/ID_EQUIPO/nombre-del-jugador-ID_JUGADOR/index.html
+```
+
+El ID al final evita colisiones entre jugadores homonimos del mismo equipo.
+
+Para regenerar todas las fichas publicadas y `sitemap-players-v2.xml` despues de
+actualizar los CSV:
+
+```bash
+node scripts/build-player-pages.js
+```
+
+`player.html?id=...&team=...` se conserva como ruta compatible para enlaces
+anteriores.
+
+Los directorios, ligas y equipos tambien tienen paginas versionadas:
+
+```text
+database/v2/players/
+database/v2/teams/
+database/v2/leagues/
+league/v2/nombre-liga-ID_LIGA/
+team/v2/nombre-equipo-ID_EQUIPO/
+```
+
+Para regenerarlas junto con `sitemap-database-v2.xml`:
+
+```bash
+node scripts/build-database-pages.js
+```

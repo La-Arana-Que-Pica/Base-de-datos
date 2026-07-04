@@ -1,0 +1,12 @@
+id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+200301;Jens Lehmann;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+200302;Lauren;LD;83;70;LD;83;70;LD;86;65;LD;80;71
+200303;Kolo Touré;DFC;61;73;DFC;61;73;DFC;61;73;DFC;61;74
+200304;Sol Campbell;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+200305;Ashley Cole;LI;17;72;LI;17;72;LI;14;67;LI;20;73
+200306;Fredrik Ljungberg;MD;82;53;MD;82;53;MD;85;37;MD;79;55
+200307;Patrick Vieira;MC;42;55;MC;42;55;MC;42;53;MC;42;57
+200308;Gilberto Silva;MCD;58;60;MCD;58;60;MCD;58;58;MC;58;58
+200309;Robert Pires;MI;18;55;MI;18;55;MI;15;39;MI;21;57
+200310;Dennis Bergkamp;SD;46;25;SD;46;25;MP;50;35;SD;42;28
+200311;Thierry Henry;DC;58;19;DC;58;19;DC;52;18;DC;58;21
