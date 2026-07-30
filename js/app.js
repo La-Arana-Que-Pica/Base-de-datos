@@ -79,21 +79,26 @@ const POSITION_LABELS = {
 };
 
 const NATIONALITY_NAMES = {
-  '7':   'China',        '10':  'Indonesia',   '11':  'Irán',
+  '7':   'China',        '8':   'Hong Kong',    '9':   'India',
+  '10':  'Indonesia',   '11':  'Irán',
   '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
   '15':  'Corea del Norte', '16': 'Corea del Sur', '17': 'Kuwait',
-  '21':  'Malasia', '34':  'Siria', 
+  '21':  'Malasia', '32':  'Singapur', '34':  'Siria', 
   '19':  'Líbano',       '26':  'Omán',         '30':  'Qatar',
   '31':  'Arabia Saudita', '36': 'Tailandia',   '37':  'Emiratos Árabes Unidos',
-  '44':  'Argelia',      '45':  'Angola',       '48':  'Burkina Faso',
+  '38':  'Vietnam',
+  '44':  'Argelia',      '45':  'Angola',       '46':  'Benín',
+  '48':  'Burkina Faso', '49':  'Burundi',
   '50':  'Camerún',      '51':  'Cabo Verde',   '52':  'República Centroafricana',
   '55':  'Congo DR',     '56':  'Costa de Marfil', '58': 'Egipto',
   '62':  'Gabón',
   '59':  'Guinea Ecuatorial',      '63':  'Gambia',       '64':  'Ghana',
   '65':  'Guinea',       '66':  'Guinea-Bisáu', '70':  'Libia',
-  '73':  'Malí',         '76':  'Marruecos',    '77':  'Mozambique',
+  '71':  'Madagascar',   '73':  'Malí',         '74':  'Mauritania',
+  '76':  'Marruecos',    '77':  'Mozambique',
   '79':  'Níger',        '80':  'Nigeria',      '83':  'Senegal',
-  '87':  'Sudáfrica',    '91':  'Togo',         '92':  'Túnez',
+  '85':  'Sierra Leona', '87':  'Sudáfrica',    '90':  'Tanzania',
+  '91':  'Togo',         '92':  'Túnez',
   '94':  'Zambia',       '95':  'Zimbabue',     '110': 'Canadá',
   '112': 'Costa Rica',   '115': 'Rep. Dominicana', '120': 'Haití',
   '121': 'Honduras',     '122': 'Jamaica',      '124': 'México',
@@ -110,6 +115,7 @@ const NATIONALITY_NAMES = {
   '207': 'Finlandia',    '208': 'Francia',      '209': 'Georgia',
   '210': 'Alemania',     '211': 'Grecia',       '212': 'Hungría',
   '213': 'Islandia',     '214': 'Irlanda',      '215': 'Italia',
+  '217': 'Letonia',
   '219': 'Lituania',     '221': 'Macedonia del Norte', '223': 'Moldavia',
   '224': 'Países Bajos', '225': 'Irlanda del Norte', '226': 'Noruega',
   '227': 'Polonia',      '228': 'Portugal',     '229': 'Rumanía',
@@ -662,7 +668,13 @@ function _stateToUrl(state) {
  */
 function _urlToState() {
   const params = new URLSearchParams(window.location.search);
-  const view = params.get('view') || document.querySelector('meta[name="laqp-database-view"]')?.content;
+  let view = params.get('view') || document.querySelector('meta[name="laqp-database-view"]')?.content;
+  if (!view) {
+    const path = window.location.pathname.replace(/\/+$/, '/').toLowerCase();
+    if (path.endsWith('/database/v2/players/')) view = 'players';
+    if (path.endsWith('/database/v2/teams/')) view = 'teams';
+    if (path.endsWith('/database/v2/leagues/')) view = 'leagues';
+  }
   if (!view) return null;
   const state = { view };
   const leagueId = params.get('leagueId');
@@ -1257,14 +1269,33 @@ function toggleTeamFilters() {
 // ─── Views ────────────────────────────────────────────────────────────────────
 
 function hideAllViews() {
+  document.documentElement.classList.add('laqp-hydrated');
+  document.querySelectorAll('.js-prerender-fallback').forEach(el => {
+    el.hidden = true;
+  });
   document.querySelectorAll('#home-view, #players-view, #player-view, #search-view, #leagues-view, #teams-grid-view, #favorites-view').forEach(el => {
     el.classList.remove('active');
   });
   const loadingOverlay = document.getElementById('loading-overlay');
-  if (loadingOverlay) loadingOverlay.style.display = 'none';
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove('js-hydration-loader');
+    loadingOverlay.style.display = 'none';
+  }
+}
+
+function hasVisiblePrerenderedContent() {
+  return !!document.querySelector(
+    '#home-view.active > *, #players-view.active .js-prerender-fallback, #leagues-view.active .js-prerender-fallback, #teams-grid-view.active .js-prerender-fallback'
+  );
 }
 
 function showLoading(message = t('loading.database')) {
+  if (hasVisiblePrerenderedContent() && !document.documentElement.classList.contains('laqp-js')) {
+    document.documentElement.classList.add('laqp-hydrating');
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.style.display = 'none';
+    return;
+  }
   hideAllViews();
   const overlay = document.getElementById('loading-overlay');
   if (overlay) {
@@ -1512,6 +1543,10 @@ function showHome() {
   hideAllViews();
   const homeView = document.getElementById('home-view');
   if (!homeView) return;
+  if (!homeView.children.length) {
+    window.location.href = typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html';
+    return;
+  }
   homeView.classList.add('active');
 
   const teamsInLeaguesSet = _getTeamsInLeagues();

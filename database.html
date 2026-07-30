@@ -1,6 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
+  <script data-laqp-hydration-gate>document.documentElement.classList.add('laqp-js');window.setTimeout(function(){document.documentElement.classList.add('laqp-js-timeout');},6000);</script>
+  <script src="js/consent-mode.js"></script>
+  <base href="/">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
   <script>
@@ -12,17 +15,17 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Base de Datos PES 2018 Actualizada - Jugadores, Equipos y Stats</title>
-  <meta name="description" content="Consultá la base de datos de PES 2018 de LAqP con jugadores, equipos, ligas, medias, stats, posiciones, caras y datos conectados al Option File actualizado." />
+  <title>Base de Datos PES 2018 Actualizada - Stats, Caras y Plantillas</title>
+  <meta name="description" content="Consulta stats actualizados, caras, plantillas, equipos, ligas y tutoriales de edicion para PES 2018 actualizado. Jugadores modernos adaptados al juego." />
   <link rel="canonical" href="https://laqp.website/database.html" />
-  <meta property="og:title" content="Base de Datos PES 2018 Actualizada - Jugadores, Equipos y Stats" />
-  <meta property="og:description" content="Explorá jugadores, equipos, ligas, medias, stats y posiciones del Option File PES 2018 de LAqP." />
+  <meta property="og:title" content="Base de Datos PES 2018 Actualizada - Stats, Caras y Plantillas" />
+  <meta property="og:description" content="Stats, caras, plantillas, equipos y ligas actualizadas para editar PES 2018 con datos modernos." />
   <meta property="og:image" content="https://laqp.website/img/logo.png" />
   <meta property="og:url" content="https://laqp.website/database.html" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Base de Datos PES 2018 Actualizada - LAqP" />
-  <meta name="twitter:description" content="Jugadores, equipos, ligas, medias y stats del Option File PES 2018 actualizado." />
+  <meta name="twitter:title" content="Base de Datos PES 2018 Actualizada" />
+  <meta name="twitter:description" content="Stats, caras, plantillas y equipos modernos para PES 2018 actualizado." />
   <meta name="twitter:image" content="https://laqp.website/img/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="img/logo.webp" type="image/webp" />
@@ -54,7 +57,7 @@
       style="cursor:pointer"
     />
     <div class="header-title">
-      Base de datos Option File <span>PES 2018–2026</span>
+      PES 2018 Actualizado <span>Base de datos</span>
     </div>
     <nav class="header-nav" aria-label="Menu principal">
       <a href="downloads.html" class="header-nav-link header-nav-link-primary">Option Files</a>
@@ -85,20 +88,24 @@
     <main id="main">
 
       <!-- Loading overlay -->
-      <div id="loading-overlay">
+      <div id="loading-overlay" style="display:none">
         <div class="spinner"></div>
         <span class="loading-message" data-i18n="loading.database">Cargando base de datos...</span>
       </div>
 
       <!-- Home view -->
-      <div id="home-view">
+      <div id="home-view" class="active">
         <section class="db-dashboard">
           <div class="db-dashboard-main">
             <section class="db-hero-panel">
               <div class="db-hero-copy">
-                <span class="db-section-kicker">Base de Datos</span>
-                <h1>Toda la base de datos de PES 2018</h1>
-                <p>Accede a jugadores, equipos y ligas del Option File LAqP desde un panel mas ordenado.</p>
+                <span class="db-section-kicker">PES 2018 Actualizado</span>
+                <h1>Base de datos de stats y caras para PES 2018</h1>
+                <!-- LAQP_STATIC_DATABASE_INTRO_START -->
+
+                <p>Jugadores, equipos, ligas, stats, medias, plantillas, caras/minifaces y referencias de edicion para mantener PES 2018 actualizado con datos modernos. Busca un jugador, revisa sus stats y usa la ficha como guia para editarlo dentro del juego.</p>
+                <p class="db-static-note">Ultima actualizacion registrada: <time datetime="2026-07-06">06/07/2026</time>. Incluye 5.681 jugadores, 208 equipos y 18 ligas.</p>
+                  <!-- LAQP_STATIC_DATABASE_INTRO_END -->
               </div>
               <div class="db-home-search">
                 <span class="search-icon">🔍</span>
@@ -113,17 +120,17 @@
               <div class="db-stat-tiles">
                 <button class="db-stat-tile db-stat-green" type="button" onclick="showAllPlayers()">
                   <span>Jugadores</span>
-                  <strong id="stat-players">0</strong>
+                  <strong id="stat-players">5.681</strong>
                   <small>Ver todos</small>
                 </button>
                 <button class="db-stat-tile db-stat-blue" type="button" onclick="showTeamsView()">
                   <span>Equipos</span>
-                  <strong id="stat-teams">0</strong>
+                  <strong id="stat-teams">208</strong>
                   <small>Ver todos</small>
                 </button>
                 <button class="db-stat-tile db-stat-purple" type="button" onclick="showLeaguesView()">
                   <span>Ligas</span>
-                  <strong id="stat-leagues">0</strong>
+                  <strong id="stat-leagues">18</strong>
                   <small>Ver todas</small>
                 </button>
                 <a class="db-stat-tile db-stat-red" href="database/DTs/">
@@ -145,7 +152,51 @@
                   <h2>Jugadores destacados</h2>
                   <button type="button" onclick="showAllPlayers()">Ver todos</button>
                 </header>
-                <div class="db-feature-list" id="db-latest-players"></div>
+                <div class="db-feature-list" id="db-latest-players">
+                  <!-- LAQP_STATIC_PLAYERS_START -->
+
+                    <a class="db-feature-row" href="/player/v2/108/pedri-118381/">
+                      <img src="img/players/118381.webp" alt="Miniface de Pedri" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/player.webp'">
+                      <span><strong>Pedri</strong><small>FC BARCELONA · 5 · 22 años</small></span>
+                      <b>92</b>
+                    </a>
+                    <a class="db-feature-row" href="/player/v2/7/pedri-118381/">
+                      <img src="img/players/118381.webp" alt="Miniface de Pedri" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/player.webp'">
+                      <span><strong>Pedri</strong><small>ESPAÑA · 5 · 22 años</small></span>
+                      <b>92</b>
+                    </a>
+                    <a class="db-feature-row" href="/player/v2/101/gabriel-111207/">
+                      <img src="img/players/111207.webp" alt="Miniface de Gabriel" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/player.webp'">
+                      <span><strong>Gabriel</strong><small>ARSENAL FC · 1 · 27 años</small></span>
+                      <b>91</b>
+                    </a>
+                    <a class="db-feature-row" href="/player/v2/173/e-haaland-60527/">
+                      <img src="img/players/60527.webp" alt="Miniface de E. Haaland" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/player.webp'">
+                      <span><strong>E. Haaland</strong><small>MANCHESTER CITY · 12 · 25 años</small></span>
+                      <b>91</b>
+                    </a>
+                    <a class="db-feature-row" href="/player/v2/114/vitinha-118236/">
+                      <img src="img/players/118236.webp" alt="Miniface de Vitinha" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/player.webp'">
+                      <span><strong>Vitinha</strong><small>PARIS SAINT-GERMAIN · 5 · 25 años</small></span>
+                      <b>91</b>
+                    </a>
+                    <a class="db-feature-row" href="/player/v2/109/k-mbappe-110718/">
+                      <img src="img/players/110718.webp" alt="Miniface de K. Mbappé" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/player.webp'">
+                      <span><strong>K. Mbappé</strong><small>REAL MADRID · 12 · 26 años</small></span>
+                      <b>91</b>
+                    </a>
+                    <a class="db-feature-row" href="/player/v2/8/k-mbappe-110718/">
+                      <img src="img/players/110718.webp" alt="Miniface de K. Mbappé" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/player.webp'">
+                      <span><strong>K. Mbappé</strong><small>FRANCIA · 12 · 26 años</small></span>
+                      <b>91</b>
+                    </a>
+                    <a class="db-feature-row" href="/player/v2/6/vitinha-118236/">
+                      <img src="img/players/118236.webp" alt="Miniface de Vitinha" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/player.webp'">
+                      <span><strong>Vitinha</strong><small>PORTUGAL · 5 · 25 años</small></span>
+                      <b>91</b>
+                    </a>
+                  <!-- LAQP_STATIC_PLAYERS_END -->
+                </div>
               </article>
 
               <article class="db-panel">
@@ -153,7 +204,43 @@
                   <h2>Equipos destacados</h2>
                   <button type="button" onclick="showTeamsView()">Ver todos</button>
                 </header>
-                <div class="db-featured-teams" id="db-featured-teams"></div>
+                <div class="db-featured-teams" id="db-featured-teams">
+                  <!-- LAQP_STATIC_TEAMS_START -->
+
+                    <a class="team-mini-card" href="/team/v2/afc-bournemouth-4071/">
+                      <img src="img/teams/4071.webp" alt="Escudo de AFC BOURNEMOUTH" loading="lazy" width="44" height="44" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+                      <span>AFC BOURNEMOUTH</span>
+                    </a>
+                    <a class="team-mini-card" href="/team/v2/arsenal-fc-101/">
+                      <img src="img/teams/101.webp" alt="Escudo de ARSENAL FC" loading="lazy" width="44" height="44" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+                      <span>ARSENAL FC</span>
+                    </a>
+                    <a class="team-mini-card" href="/team/v2/aston-villa-107/">
+                      <img src="img/teams/107.webp" alt="Escudo de ASTON VILLA" loading="lazy" width="44" height="44" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+                      <span>ASTON VILLA</span>
+                    </a>
+                    <a class="team-mini-card" href="/team/v2/brentford-4180/">
+                      <img src="img/teams/4180.webp" alt="Escudo de BRENTFORD" loading="lazy" width="44" height="44" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+                      <span>BRENTFORD</span>
+                    </a>
+                    <a class="team-mini-card" href="/team/v2/brighton-and-hove-albion-377/">
+                      <img src="img/teams/377.webp" alt="Escudo de BRIGHTON &amp; HOVE ALBION" loading="lazy" width="44" height="44" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+                      <span>BRIGHTON &amp; HOVE ALBION</span>
+                    </a>
+                    <a class="team-mini-card" href="/team/v2/burnley-378/">
+                      <img src="img/teams/378.webp" alt="Escudo de BURNLEY" loading="lazy" width="44" height="44" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+                      <span>BURNLEY</span>
+                    </a>
+                    <a class="team-mini-card" href="/team/v2/chelsea-102/">
+                      <img src="img/teams/102.webp" alt="Escudo de CHELSEA" loading="lazy" width="44" height="44" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+                      <span>CHELSEA</span>
+                    </a>
+                    <a class="team-mini-card" href="/team/v2/crystal-palace-382/">
+                      <img src="img/teams/382.webp" alt="Escudo de CRYSTAL PALACE" loading="lazy" width="44" height="44" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+                      <span>CRYSTAL PALACE</span>
+                    </a>
+                  <!-- LAQP_STATIC_TEAMS_END -->
+                </div>
               </article>
             </section>
           </div>
@@ -164,7 +251,43 @@
                 <h2>Ligas destacadas</h2>
                 <button type="button" onclick="showLeaguesView()">Ver todas</button>
               </header>
-              <div id="db-featured-leagues"></div>
+              <div id="db-featured-leagues">
+                <!-- LAQP_STATIC_LEAGUES_START -->
+
+                  <a class="league-mini-row" href="/league/v2/premier-league-204/">
+                    <span>Premier League</span>
+                    <small>20 equipos</small>
+                  </a>
+                  <a class="league-mini-row" href="/league/v2/ligue-1-208/">
+                    <span>Ligue 1</span>
+                    <small>18 equipos</small>
+                  </a>
+                  <a class="league-mini-row" href="/league/v2/serie-a-215/">
+                    <span>Serie A</span>
+                    <small>20 equipos</small>
+                  </a>
+                  <a class="league-mini-row" href="/league/v2/la-liga-236/">
+                    <span>La Liga</span>
+                    <small>20 equipos</small>
+                  </a>
+                  <a class="league-mini-row" href="/league/v2/bundesliga-210/">
+                    <span>Bundesliga</span>
+                    <small>3 equipos</small>
+                  </a>
+                  <a class="league-mini-row" href="/league/v2/otras-ligas-europeas-9003/">
+                    <span>Otras ligas europeas</span>
+                    <small>1 equipos</small>
+                  </a>
+                  <a class="league-mini-row" href="/league/v2/brasileirao-146/">
+                    <span>Brasileirao</span>
+                    <small>20 equipos</small>
+                  </a>
+                  <a class="league-mini-row" href="/league/v2/liga-argentina-144/">
+                    <span>Liga Argentina</span>
+                    <small>28 equipos</small>
+                  </a>
+                  <!-- LAQP_STATIC_LEAGUES_END -->
+              </div>
             </article>
 
             <article class="db-panel db-side-favorites">
@@ -172,7 +295,19 @@
                 <h2>Favoritos</h2>
                 <button type="button" onclick="showFavoritesView()">Ver todos</button>
               </header>
-              <div id="db-favorite-players"></div>
+              <div id="db-favorite-players">
+                <!-- LAQP_STATIC_NOSCRIPT_LINKS_START -->
+
+                <noscript>
+                  <p>JavaScript esta desactivado. Podes entrar igual a los listados principales:</p>
+                  <ul>
+                    <li><a href="database/v2/players/">Jugadores actualizados de PES 2018</a></li>
+                    <li><a href="database/v2/teams/">Equipos y plantillas actualizadas</a></li>
+                    <li><a href="database/v2/leagues/">Ligas y competiciones actualizadas</a></li>
+                  </ul>
+                </noscript>
+                  <!-- LAQP_STATIC_NOSCRIPT_LINKS_END -->
+              </div>
             </article>
           </aside>
         </section>

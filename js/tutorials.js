@@ -209,7 +209,7 @@ function updateTutorialSchema(item, title, desc, videoId, thumb, date) {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
     name: title,
-    description: desc || 'Tutorial de PES 2018 del proyecto LAqP.',
+    description: desc || 'Tutorial para instalar, configurar o editar PES 2018 actualizado.',
     thumbnailUrl: [thumb],
     embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
     publisher: {

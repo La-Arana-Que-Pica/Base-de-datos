@@ -913,7 +913,7 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
         onerror="this.onerror=null;this.src='img/teams/default.webp'"
         alt="${safeTeamName}">
       <div>
-        <div class="view-title">${safeTeamName}</div>
+        <h1 class="view-title">${safeTeamName}</h1>
         <div class="view-subtitle">${escapeHtml(typeLabel)} · ${t('db.playerCount', { count: players.length })}</div>
         ${extraInfoHtml ? `<div class="team-extra-info">${extraInfoHtml}</div>` : ''}
       </div>
@@ -925,8 +925,13 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
 
     ${shirtNumbersHtml}`;
 
+  document.documentElement.classList.add('laqp-hydrated');
   content.style.display = 'block';
-  document.getElementById('loading-overlay').style.display = 'none';
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove('js-hydration-loader');
+    loadingOverlay.style.display = 'none';
+  }
 
   // Attach back button handler via DOM (avoids inline onclick)
   document.getElementById('btn-back').addEventListener('click', goBack);
@@ -1088,6 +1093,13 @@ async function boot() {
   const teamId = embeddedTeamId || params.get('id');
 
   if (!teamId) {
+    const content = document.getElementById('team-content');
+    if (content?.querySelector('.js-prerender-fallback')) {
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) loadingOverlay.style.display = 'none';
+      content.style.display = 'block';
+      return;
+    }
     showError(t('errors.noTeamParam'));
     return;
   }
@@ -1196,7 +1208,12 @@ async function boot() {
 // â”€â”€â”€ Error display â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function showError(message) {
-  document.getElementById('loading-overlay').style.display = 'none';
+  document.documentElement.classList.add('laqp-hydrated');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove('js-hydration-loader');
+    loadingOverlay.style.display = 'none';
+  }
   const content = document.getElementById('team-content');
   content.textContent = '';
 

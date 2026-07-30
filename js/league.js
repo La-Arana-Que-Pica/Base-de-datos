@@ -149,15 +149,20 @@ function renderLeaguePage(league, teams) {
         onerror="this.onerror=null;this.src='img/leagues/default.webp'"
         alt="${escapeHtml(league.name)}">
       <div>
-        <div class="view-title">${escapeHtml(league.name)}</div>
+        <h1 class="view-title">${escapeHtml(league.name)}</h1>
         <div class="view-subtitle">${t('db.teamCount', { count: teams.length })}</div>
       </div>
     </div>
 
     <div class="grid-cards">${cardsHtml}</div>`;
 
+  document.documentElement.classList.add('laqp-hydrated');
   content.style.display = 'block';
-  document.getElementById('loading-overlay').style.display = 'none';
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove('js-hydration-loader');
+    loadingOverlay.style.display = 'none';
+  }
   document.title = `${league.name} - ${t('common.database')} PES`;
   const leaguePath = typeof laqpLeagueUrl === 'function' ? laqpLeagueUrl(league.id, league.name) : `/league.html?id=${encodeURIComponent(league.id)}`;
   const leagueUrl = typeof laqpAbsoluteUrl === 'function' ? laqpAbsoluteUrl(leaguePath) : `https://laqp.website${leaguePath}`;
@@ -173,7 +178,12 @@ function renderLeaguePage(league, teams) {
 // ─── Error display ────────────────────────────────────────────────────────────
 
 function showError(message) {
-  document.getElementById('loading-overlay').style.display = 'none';
+  document.documentElement.classList.add('laqp-hydrated');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove('js-hydration-loader');
+    loadingOverlay.style.display = 'none';
+  }
   const content = document.getElementById('league-content');
   content.textContent = '';
 
@@ -202,6 +212,13 @@ async function boot() {
   const leagueId = embeddedLeagueId || params.get('id');
 
   if (!leagueId) {
+    const content = document.getElementById('league-content');
+    if (content?.querySelector('.js-prerender-fallback')) {
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) loadingOverlay.style.display = 'none';
+      content.style.display = 'block';
+      return;
+    }
     showError(t('errors.noLeagueParam'));
     return;
   }

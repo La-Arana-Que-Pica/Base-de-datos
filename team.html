@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
+  <script src="js/consent-mode.js"></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
   <script>
@@ -12,6 +13,7 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, follow" />
   <title>Equipo PES 2018 - Plantilla, Formación, Stats y Jugadores | LAqP</title>
   <meta name="description" content="Ficha de equipo de PES 2018 en LAqP con plantilla completa, formación, jugadores, medias, posiciones, entrenador y liga del Option File actualizado." />
   <link rel="canonical" href="https://laqp.website/team.html" />
@@ -55,13 +57,40 @@
   <div id="team-page">
 
     <!-- Loading overlay -->
-    <div id="loading-overlay">
+    <div id="loading-overlay" style="display:none">
       <div class="spinner"></div>
       <span class="loading-message" data-i18n="loading.team">Cargando equipo...</span>
     </div>
 
-    <!-- Team profile content (filled by team.js) -->
-    <div id="team-content" style="display:none"></div>
+    <!-- Team profile content (enhanced by team.js when an ID is present) -->
+    <div id="team-content">
+      <div class="js-prerender-fallback">
+        <section class="db-hero-panel">
+          <div class="db-hero-copy">
+            <span class="db-section-kicker">Base de datos</span>
+            <h1>Equipos PES 2018</h1>
+            <p>Directorio estatico de equipos incluidos en el Option File LAqP con escudos, ligas, plantillas y enlaces a paginas individuales ya prerenderizadas.</p>
+          </div>
+          <div class="db-stat-tiles">
+            <a class="db-stat-tile db-stat-blue" href="database/v2/teams/">
+              <span>Directorio</span>
+              <strong>Equipos</strong>
+              <small>Ver clubes y selecciones publicados.</small>
+            </a>
+            <a class="db-stat-tile db-stat-purple" href="database/v2/leagues/">
+              <span>Ligas</span>
+              <strong>Competencias</strong>
+              <small>Explorar equipos por liga.</small>
+            </a>
+            <a class="db-stat-tile db-stat-gold" href="database.html">
+              <span>Inicio</span>
+              <strong>Base LAqP</strong>
+              <small>Volver al panel principal.</small>
+            </a>
+          </div>
+        </section>
+      </div>
+    </div>
 
   </div>
 

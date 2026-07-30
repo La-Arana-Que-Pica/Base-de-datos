@@ -1,0 +1,10 @@
+{
+  "name": "laqp-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build estatico para LAqP.website en GitHub Pages.",
+  "scripts": {
+    "build": "node scripts/build-site.js",
+    "validate-site": "node scripts/validate-site.js"
+  }
+}

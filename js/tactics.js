@@ -111,7 +111,18 @@ function compareTacticsBySeason(a, b) {
 }
 
 function tacticsUrl(id) {
-  return `tactics.html?id=${encodeURIComponent(id)}`;
+  return `/tactics/${encodeURIComponent(id)}/`;
+}
+
+function requestedTacticId() {
+  const params = new URLSearchParams(window.location.search);
+  const queryId = params.get('id');
+  if (queryId) return queryId;
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  if ((parts[0] || '').toLowerCase() === 'tactics' && parts[1]) {
+    return decodeURIComponent(parts[1]);
+  }
+  return '';
 }
 
 function tacticImage(path, alt, className, fallback) {
@@ -611,7 +622,7 @@ function renderTacticDetail(tactic) {
         <a href="tactics.html">Ver todas</a>
       </div>
       <div class="history-related-grid">
-        ${related.map(item => `<a href="${tacticsUrl(item.id)}">${tacticImage(item.escudo, '', 'history-related-badge', TACTICS_FALLBACK_BADGE)}<span><strong>${tacticsEscape(item.equipo)}</strong><small>${tacticsEscape(item.temporada)} · ${tacticsEscape(tacticFormation(item))}</small></span></a>`).join('')}
+        ${related.map(item => `<a href="${tacticsUrl(item.id)}">${tacticImage(item.escudo, item.equipo, 'history-related-badge', TACTICS_FALLBACK_BADGE)}<span><strong>${tacticsEscape(item.equipo)}</strong><small>${tacticsEscape(item.temporada)} · ${tacticsEscape(tacticFormation(item))}</small></span></a>`).join('')}
       </div>
     </section>` : '';
   document.title = `${tactic.equipo} ${tactic.temporada} - Táctica PES 2018 | LAqP`;
@@ -667,7 +678,7 @@ async function initTactics() {
     const response = await fetch(TACTICS_CSV_PATH);
     if (!response.ok) throw new Error('No se pudieron cargar las tácticas.');
     historicalTactics = parseTacticsCSV(await response.text()).filter(tactic => tactic.id).sort(compareTacticsBySeason);
-    const requestedId = new URLSearchParams(window.location.search).get('id');
+    const requestedId = requestedTacticId();
     if (requestedId) {
       const tactic = historicalTactics.find(item => item.id === requestedId);
       if (!tactic) throw new Error(`No existe una táctica con el ID "${requestedId}".`);

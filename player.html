@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
+  <script src="js/consent-mode.js"></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
   <script>
@@ -12,6 +13,7 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, follow" />
   <title>Jugador PES 2018 - Stats, Cara, Posiciones y Equipo | LAqP</title>
   <meta name="description" content="Ficha de jugador de PES 2018 en la base de datos LAqP: media, stats, posición, equipo, nacionalidad, habilidades, cara y datos de apariencia." />
   <link rel="canonical" href="https://laqp.website/player.html" />
@@ -55,13 +57,40 @@
   <div id="player-page">
 
     <!-- Loading overlay -->
-    <div id="loading-overlay">
+    <div id="loading-overlay" style="display:none">
       <div class="spinner"></div>
       <span class="loading-message" data-i18n="loading.player">Cargando jugador...</span>
     </div>
 
-    <!-- Player profile content (filled by player.js) -->
-    <div id="player-content" style="display:none"></div>
+    <!-- Player profile content (enhanced by player.js when an ID is present) -->
+    <div id="player-content">
+      <div class="js-prerender-fallback">
+        <section class="db-hero-panel">
+          <div class="db-hero-copy">
+            <span class="db-section-kicker">Base de datos</span>
+            <h1>Jugadores PES 2018</h1>
+            <p>Directorio estatico de jugadores del Option File LAqP con medias, posiciones, equipos y enlaces a fichas individuales ya prerenderizadas.</p>
+          </div>
+          <div class="db-stat-tiles">
+            <a class="db-stat-tile db-stat-gold" href="database/v2/players/">
+              <span>Directorio</span>
+              <strong>Jugadores</strong>
+              <small>Ver todas las fichas publicadas.</small>
+            </a>
+            <a class="db-stat-tile db-stat-blue" href="database/v2/teams/">
+              <span>Equipos</span>
+              <strong>Plantillas</strong>
+              <small>Buscar jugadores por club o seleccion.</small>
+            </a>
+            <a class="db-stat-tile db-stat-purple" href="database.html">
+              <span>Inicio</span>
+              <strong>Base LAqP</strong>
+              <small>Volver al panel principal.</small>
+            </a>
+          </div>
+        </section>
+      </div>
+    </div>
 
   </div>
 

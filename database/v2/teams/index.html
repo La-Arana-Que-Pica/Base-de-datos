@@ -1,218 +1,1724 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <base href="/">
+  <script data-laqp-hydration-gate>document.documentElement.classList.add('laqp-js');window.setTimeout(function(){document.documentElement.classList.add('laqp-js-timeout');},6000);</script>
+  <script src="js/consent-mode.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="laqp-database-view" content="teams">
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-M7ZNDRZB27');
-  </script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Equipos PES 2018 - Base de datos LAqP</title>
-  <meta name="description" content="Explora todos los equipos publicados de PES 2018 con plantillas, medias, ligas y escudos." />
-  <link rel="canonical" href="https://laqp.website/database/v2/teams/" />
-  <meta property="og:title" content="Equipos PES 2018 - Base de datos LAqP" />
-  <meta property="og:description" content="Explora todos los equipos publicados de PES 2018 con plantillas, medias, ligas y escudos." />
-  <meta property="og:image" content="https://laqp.website/img/logo.png" />
-  <meta property="og:url" content="https://laqp.website/database/v2/teams/" />
-  <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Equipos PES 2018 - Base de datos LAqP" />
-  <meta name="twitter:description" content="Explora todos los equipos publicados de PES 2018 con plantillas, medias, ligas y escudos." />
-  <meta name="twitter:image" content="https://laqp.website/img/logo.png" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="icon" href="img/logo.webp" type="image/webp" />
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://laqp.website/" },
-      { "@type": "ListItem", "position": 2, "name": "Base de datos", "item": "https://laqp.website/database.html" }
-    ]
-  }
-  </script>
-  <!-- Preconnect for YouTube thumbnails / embeds (used in tutorials) -->
-  <link rel="preconnect" href="https://img.youtube.com" crossorigin />
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5301686002102491"
-     crossorigin="anonymous"></script>
+  <title>Equipos PES 2018 Actualizado - Plantillas y Stats</title>
+  <meta name="description" content="Equipos y plantillas actualizadas para PES 2018 con enlaces a jugadores, medias, posiciones y datos utiles para editar el juego.">
+  <link rel="canonical" href="https://laqp.website/database/v2/teams/">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="img/logo.webp" type="image/webp">
 </head>
 <body>
-
-  <!-- ── Header ── -->
   <header id="header">
-    <img
-      class="logo"
-      src="img/logo.webp"
-      onerror="this.onerror=null;this.src='img/logo.webp'"
-      alt="Logo"
-      onclick="goHome()"
-      style="cursor:pointer"
-    />
-    <div class="header-title">
-      Base de datos Option File <span>PES 2018–2026</span>
-    </div>
+    <a href="index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a>
+    <div class="header-title">PES 2018 Actualizado <span>Base de datos</span></div>
     <nav class="header-nav" aria-label="Menu principal">
-      <a href="downloads.html" class="header-nav-link header-nav-link-primary">Option Files</a>
+      <a href="downloads.html" class="header-nav-link">Option Files</a>
       <a href="tutorials.html" class="header-nav-link">Tutoriales</a>
       <a href="database.html" class="header-nav-link active">Base de datos</a>
     </nav>
     <div id="search-container">
-      <span class="search-icon">🔍</span>
-      <input
-        type="text"
-        id="search-input"
-        placeholder="Buscar jugadores..."
-        data-i18n-placeholder="search.players"
-        autocomplete="off"
-      />
+      <span class="search-icon" aria-hidden="true">&#128269;</span>
+      <input type="text" id="search-input" placeholder="Buscar jugadores..." data-i18n-placeholder="search.players" autocomplete="off">
     </div>
   </header>
-
-  <!-- ── Main layout ── -->
   <div id="layout">
-
-    <!-- Sidebar -->
-    <nav id="sidebar">
-      <!-- Built dynamically by JS -->
-    </nav>
-
-    <!-- Content area -->
+    <nav id="sidebar"></nav>
     <main id="main">
-
-      <!-- Loading overlay -->
-      <div id="loading-overlay">
+      <div id="loading-overlay" class="js-hydration-loader" style="display:none">
         <div class="spinner"></div>
         <span class="loading-message" data-i18n="loading.database">Cargando base de datos...</span>
       </div>
-
-      <!-- Home view -->
-      <div id="home-view">
-        <section class="db-dashboard">
-          <div class="db-dashboard-main">
-            <section class="db-hero-panel">
-              <div class="db-hero-copy">
-                <span class="db-section-kicker">Base de Datos</span>
-                <h1>Toda la base de datos de PES 2018</h1>
-                <p>Accede a jugadores, equipos y ligas del Option File LAqP desde un panel mas ordenado.</p>
-              </div>
-              <div class="db-home-search">
-                <span class="search-icon">🔍</span>
-                <input
-                  type="text"
-                  placeholder="Buscar jugador, equipo o liga..."
-                  autocomplete="off"
-                  onkeydown="if(event.key === 'Enter') runHomeDatabaseSearch(this.value)"
-                />
-                <button type="button" onclick="showAllPlayersAndFocusSearch()">Busqueda avanzada</button>
-              </div>
-              <div class="db-stat-tiles">
-                <button class="db-stat-tile db-stat-green" type="button" onclick="showAllPlayers()">
-                  <span>Jugadores</span>
-                  <strong id="stat-players">0</strong>
-                  <small>Ver todos</small>
-                </button>
-                <button class="db-stat-tile db-stat-blue" type="button" onclick="showTeamsView()">
-                  <span>Equipos</span>
-                  <strong id="stat-teams">0</strong>
-                  <small>Ver todos</small>
-                </button>
-                <button class="db-stat-tile db-stat-purple" type="button" onclick="showLeaguesView()">
-                  <span>Ligas</span>
-                  <strong id="stat-leagues">0</strong>
-                  <small>Ver todas</small>
-                </button>
-                <button class="db-stat-tile db-stat-gold" type="button" onclick="showFavoritesView()">
-                  <span>Favoritos</span>
-                  <strong id="stat-favorites">0</strong>
-                  <small>Ver guardados</small>
-                </button>
-              </div>
-            </section>
-
-            <section class="db-home-content-grid">
-              <article class="db-panel">
-                <header>
-                  <h2>Jugadores destacados</h2>
-                  <button type="button" onclick="showAllPlayers()">Ver todos</button>
-                </header>
-                <div class="db-feature-list" id="db-latest-players"></div>
-              </article>
-
-              <article class="db-panel">
-                <header>
-                  <h2>Equipos destacados</h2>
-                  <button type="button" onclick="showTeamsView()">Ver todos</button>
-                </header>
-                <div class="db-featured-teams" id="db-featured-teams"></div>
-              </article>
-            </section>
-          </div>
-
-          <aside class="db-dashboard-aside">
-            <article class="db-panel db-side-leagues">
-              <header>
-                <h2>Ligas destacadas</h2>
-                <button type="button" onclick="showLeaguesView()">Ver todas</button>
-              </header>
-              <div id="db-featured-leagues"></div>
-            </article>
-
-            <article class="db-panel db-side-favorites">
-              <header>
-                <h2>Favoritos</h2>
-                <button type="button" onclick="showFavoritesView()">Ver todos</button>
-              </header>
-              <div id="db-favorite-players"></div>
-            </article>
-          </aside>
-        </section>
-
+      <div id="home-view"></div>
+      <div id="league-teams-view"></div>
+      <div id="players-view"></div>
+      <div id="player-view"></div>
+      <div id="search-view"></div>
+      <div id="leagues-view"></div>
+      <div id="teams-grid-view" class="active"><div class="js-prerender-fallback">
+    <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Inicio</a><a href="database.html">Base de datos</a><span>Equipos</span></nav></div>
+    <div class="view-header">
+      <div>
+        <h1 class="view-title">Equipos</h1>
+        <div class="view-subtitle">208 equipos con plantillas modernas para PES 2018 actualizado</div>
       </div>
-
-      <!-- Players list view -->
-      <div id="players-view">
-        <!-- Filled dynamically -->
-      </div>
-
-      <!-- Individual player profile view -->
-      <div id="player-view">
-        <!-- Filled dynamically -->
-      </div>
-
-      <!-- Search results view -->
-      <div id="search-view">
-        <!-- Filled dynamically -->
-      </div>
-
-      <!-- Leagues grid view -->
-      <div id="leagues-view">
-        <!-- Filled dynamically -->
-      </div>
-
-      <!-- Teams grid view -->
-      <div id="teams-grid-view">
-        <!-- Filled dynamically -->
-      </div>
-
-      <!-- Favorites view -->
-      <div id="favorites-view">
-        <!-- Filled dynamically -->
-      </div>
-
+    </div>
+    <div class="grid-cards" id="teams-grid-cards">
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/afc-bournemouth-4071/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/4071.webp" alt="AFC BOURNEMOUTH" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">AFC BOURNEMOUTH</span>
+        <span class="grid-card-sub">Premier League - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/arsenal-fc-101/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">84</span></span>
+        <img class="grid-card-img" src="img/teams/101.webp" alt="ARSENAL FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ARSENAL FC</span>
+        <span class="grid-card-sub">Premier League - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/aston-villa-107/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">80</span></span>
+        <img class="grid-card-img" src="img/teams/107.webp" alt="ASTON VILLA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ASTON VILLA</span>
+        <span class="grid-card-sub">Premier League - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/brentford-4180/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/4180.webp" alt="BRENTFORD" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BRENTFORD</span>
+        <span class="grid-card-sub">Premier League - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/brighton-and-hove-albion-377/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/377.webp" alt="BRIGHTON &amp; HOVE ALBION" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BRIGHTON &amp; HOVE ALBION</span>
+        <span class="grid-card-sub">Premier League - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/burnley-378/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/378.webp" alt="BURNLEY" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BURNLEY</span>
+        <span class="grid-card-sub">Premier League - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/chelsea-102/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">81</span></span>
+        <img class="grid-card-img" src="img/teams/102.webp" alt="CHELSEA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CHELSEA</span>
+        <span class="grid-card-sub">Premier League - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/crystal-palace-382/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/382.webp" alt="CRYSTAL PALACE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CRYSTAL PALACE</span>
+        <span class="grid-card-sub">Premier League - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/everton-177/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/177.webp" alt="EVERTON" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">EVERTON</span>
+        <span class="grid-card-sub">Premier League - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/fulham-fc-178/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/178.webp" alt="FULHAM FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">FULHAM FC</span>
+        <span class="grid-card-sub">Premier League - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/leeds-united-104/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/104.webp" alt="LEEDS UNITED" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">LEEDS UNITED</span>
+        <span class="grid-card-sub">Premier League - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/liverpool-fc-103/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">84</span></span>
+        <img class="grid-card-img" src="img/teams/103.webp" alt="LIVERPOOL FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">LIVERPOOL FC</span>
+        <span class="grid-card-sub">Premier League - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/manchester-city-173/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">84</span></span>
+        <img class="grid-card-img" src="img/teams/173.webp" alt="MANCHESTER CITY" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">MANCHESTER CITY</span>
+        <span class="grid-card-sub">Premier League - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/manchester-united-100/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">80</span></span>
+        <img class="grid-card-img" src="img/teams/100.webp" alt="MANCHESTER UNITED" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">MANCHESTER UNITED</span>
+        <span class="grid-card-sub">Premier League - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/newcastle-united-106/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">79</span></span>
+        <img class="grid-card-img" src="img/teams/106.webp" alt="NEWCASTLE UNITED" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">NEWCASTLE UNITED</span>
+        <span class="grid-card-sub">Premier League - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/nottingham-forest-389/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/389.webp" alt="NOTTINGHAM FOREST" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">NOTTINGHAM FOREST</span>
+        <span class="grid-card-sub">Premier League - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/sunderland-396/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/396.webp" alt="SUNDERLAND" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SUNDERLAND</span>
+        <span class="grid-card-sub">Premier League - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/tottenham-hotspur-179/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">80</span></span>
+        <img class="grid-card-img" src="img/teams/179.webp" alt="TOTTENHAM HOTSPUR" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">TOTTENHAM HOTSPUR</span>
+        <span class="grid-card-sub">Premier League - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/west-ham-united-105/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/105.webp" alt="WEST HAM UNITED" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">WEST HAM UNITED</span>
+        <span class="grid-card-sub">Premier League - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/wolverhampton-wanderers-208/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/208.webp" alt="WOLVERHAMPTON WANDERERS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">WOLVERHAMPTON WANDERERS</span>
+        <span class="grid-card-sub">Premier League - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/paris-saint-germain-114/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">85</span></span>
+        <img class="grid-card-img" src="img/teams/114.webp" alt="PARIS SAINT-GERMAIN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PARIS SAINT-GERMAIN</span>
+        <span class="grid-card-sub">Ligue 1 - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/aj-auxerre-180/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/180.webp" alt="AJ AUXERRE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">AJ AUXERRE</span>
+        <span class="grid-card-sub">Ligue 1 - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/angers-sco-403/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/403.webp" alt="ANGERS SCO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ANGERS SCO</span>
+        <span class="grid-card-sub">Ligue 1 - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/as-monaco-112/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/112.webp" alt="AS MONACO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">AS MONACO</span>
+        <span class="grid-card-sub">Ligue 1 - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/fc-nantes-216/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/216.webp" alt="FC NANTES" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">FC NANTES</span>
+        <span class="grid-card-sub">Ligue 1 - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/fc-lorient-414/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/414.webp" alt="FC LORIENT" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">FC LORIENT</span>
+        <span class="grid-card-sub">Ligue 1 - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/fc-metz-4123/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/4123.webp" alt="FC METZ" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">FC METZ</span>
+        <span class="grid-card-sub">Ligue 1 - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/havre-ac-413/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/413.webp" alt="HAVRE AC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">HAVRE AC</span>
+        <span class="grid-card-sub">Ligue 1 - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/losc-lille-213/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/213.webp" alt="LOSC LILLE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">LOSC LILLE</span>
+        <span class="grid-card-sub">Ligue 1 - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ogc-nice-217/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/217.webp" alt="OGC NICE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">OGC NICE</span>
+        <span class="grid-card-sub">Ligue 1 - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/olympique-de-marseille-113/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/113.webp" alt="OLYMPIQUE DE MARSEILLE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">OLYMPIQUE DE MARSEILLE</span>
+        <span class="grid-card-sub">Ligue 1 - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/olympique-lyonnais-181/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/181.webp" alt="OLYMPIQUE LYONNAIS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">OLYMPIQUE LYONNAIS</span>
+        <span class="grid-card-sub">Ligue 1 - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/paris-fc-4211/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/4211.webp" alt="PARIS FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PARIS FC</span>
+        <span class="grid-card-sub">Ligue 1 - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/rc-lens-182/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/182.webp" alt="RC LENS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">RC LENS</span>
+        <span class="grid-card-sub">Ligue 1 - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/rc-strasbourg-alsace-4213/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/4213.webp" alt="RC STRASBOURG ALSACE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">RC STRASBOURG ALSACE</span>
+        <span class="grid-card-sub">Ligue 1 - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/stade-brestois-29-1329/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/1329.webp" alt="STADE BRESTOIS 29" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">STADE BRESTOIS 29</span>
+        <span class="grid-card-sub">Ligue 1 - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/stade-rennais-fc-218/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/218.webp" alt="STADE RENNAIS FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">STADE RENNAIS FC</span>
+        <span class="grid-card-sub">Ligue 1 - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/toulouse-fc-221/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/221.webp" alt="TOULOUSE FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">TOULOUSE FC</span>
+        <span class="grid-card-sub">Ligue 1 - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ac-milan-121/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">80</span></span>
+        <img class="grid-card-img" src="img/teams/121.webp" alt="AC MILAN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">AC MILAN</span>
+        <span class="grid-card-sub">Serie A - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/as-roma-125/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/125.webp" alt="AS ROMA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">AS ROMA</span>
+        <span class="grid-card-sub">Serie A - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/inter-119/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">82</span></span>
+        <img class="grid-card-img" src="img/teams/119.webp" alt="INTER" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">INTER</span>
+        <span class="grid-card-sub">Serie A - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/juventus-120/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">79</span></span>
+        <img class="grid-card-img" src="img/teams/120.webp" alt="JUVENTUS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">JUVENTUS</span>
+        <span class="grid-card-sub">Serie A - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ssc-napoli-327/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">81</span></span>
+        <img class="grid-card-img" src="img/teams/327.webp" alt="SSC NAPOLI" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SSC NAPOLI</span>
+        <span class="grid-card-sub">Serie A - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/atalanta-b-c-234/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/234.webp" alt="ATALANTA B.C." loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ATALANTA B.C.</span>
+        <span class="grid-card-sub">Serie A - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/bologna-fc-1909-186/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/186.webp" alt="BOLOGNA FC 1909" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BOLOGNA FC 1909</span>
+        <span class="grid-card-sub">Serie A - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/cagliari-calcio-320/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/320.webp" alt="CAGLIARI CALCIO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CAGLIARI CALCIO</span>
+        <span class="grid-card-sub">Serie A - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/como-317/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/317.webp" alt="COMO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">COMO</span>
+        <span class="grid-card-sub">Serie A - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/cremonese-4220/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/4220.webp" alt="CREMONESE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CREMONESE</span>
+        <span class="grid-card-sub">Serie A - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/acf-fiorentina-124/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/124.webp" alt="ACF FIORENTINA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ACF FIORENTINA</span>
+        <span class="grid-card-sub">Serie A - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/genoa-cfc-323/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/323.webp" alt="GENOA CFC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">GENOA CFC</span>
+        <span class="grid-card-sub">Serie A - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/hellas-verona-fc-336/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/336.webp" alt="HELLAS VERONA FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">HELLAS VERONA FC</span>
+        <span class="grid-card-sub">Serie A - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/s-s-lazio-122/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/122.webp" alt="S.S. LAZIO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">S.S. LAZIO</span>
+        <span class="grid-card-sub">Serie A - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/lecce-2377/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/2377.webp" alt="LECCE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">LECCE</span>
+        <span class="grid-card-sub">Serie A - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/parma-123/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/123.webp" alt="PARMA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PARMA</span>
+        <span class="grid-card-sub">Serie A - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/pisa-4240/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/4240.webp" alt="PISA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PISA</span>
+        <span class="grid-card-sub">Serie A - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/us-sassuolo-calcio-1919/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/1919.webp" alt="US SASSUOLO CALCIO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">US SASSUOLO CALCIO</span>
+        <span class="grid-card-sub">Serie A - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/torino-football-club-333/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/333.webp" alt="TORINO FOOTBALL CLUB" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">TORINO FOOTBALL CLUB</span>
+        <span class="grid-card-sub">Serie A - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/udinese-calcio-190/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/190.webp" alt="UDINESE CALCIO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">UDINESE CALCIO</span>
+        <span class="grid-card-sub">Serie A - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/athletic-club-258/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">79</span></span>
+        <img class="grid-card-img" src="img/teams/258.webp" alt="ATHLETIC CLUB" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ATHLETIC CLUB</span>
+        <span class="grid-card-sub">La Liga - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/atletico-de-madrid-172/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">81</span></span>
+        <img class="grid-card-img" src="img/teams/172.webp" alt="ATLÉTICO DE MADRID" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ATLÉTICO DE MADRID</span>
+        <span class="grid-card-sub">La Liga - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-osasuna-263/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/263.webp" alt="CA OSASUNA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA OSASUNA</span>
+        <span class="grid-card-sub">La Liga - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/deportivo-alaves-4145/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/4145.webp" alt="DEPORTIVO ALAVÉS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">DEPORTIVO ALAVÉS</span>
+        <span class="grid-card-sub">La Liga - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/elche-cf-4020/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/4020.webp" alt="ELCHE CF" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ELCHE CF</span>
+        <span class="grid-card-sub">La Liga - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/fc-barcelona-108/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">84</span></span>
+        <img class="grid-card-img" src="img/teams/108.webp" alt="FC BARCELONA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">FC BARCELONA</span>
+        <span class="grid-card-sub">La Liga - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/getafe-cf-362/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/362.webp" alt="GETAFE CF" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">GETAFE CF</span>
+        <span class="grid-card-sub">La Liga - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/girona-fc-2187/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/2187.webp" alt="GIRONA FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">GIRONA FC</span>
+        <span class="grid-card-sub">La Liga - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/levante-ud-366/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/366.webp" alt="LEVANTE UD" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">LEVANTE UD</span>
+        <span class="grid-card-sub">La Liga - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/rayo-vallecano-370/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/370.webp" alt="RAYO VALLECANO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">RAYO VALLECANO</span>
+        <span class="grid-card-sub">La Liga - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/rc-celta-195/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/195.webp" alt="RC CELTA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">RC CELTA</span>
+        <span class="grid-card-sub">La Liga - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/real-betis-balompie-194/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/194.webp" alt="REAL BETIS BALOMPIÉ" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">REAL BETIS BALOMPIÉ</span>
+        <span class="grid-card-sub">La Liga - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/real-madrid-109/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">84</span></span>
+        <img class="grid-card-img" src="img/teams/109.webp" alt="REAL MADRID" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">REAL MADRID</span>
+        <span class="grid-card-sub">La Liga - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/rcd-espanyol-259/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/259.webp" alt="RCD ESPANYOL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">RCD ESPANYOL</span>
+        <span class="grid-card-sub">La Liga - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/rcd-mallorca-4320/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/4320.webp" alt="RCD MALLORCA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">RCD MALLORCA</span>
+        <span class="grid-card-sub">La Liga - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/real-oviedo-4260/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/4260.webp" alt="REAL OVIEDO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">REAL OVIEDO</span>
+        <span class="grid-card-sub">La Liga - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/real-sociedad-196/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/196.webp" alt="REAL SOCIEDAD" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">REAL SOCIEDAD</span>
+        <span class="grid-card-sub">La Liga - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/sevilla-fc-265/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/265.webp" alt="SEVILLA FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SEVILLA FC</span>
+        <span class="grid-card-sub">La Liga - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/valencia-club-de-futbol-110/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/110.webp" alt="VALENCIA CLUB DE FÚTBOL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">VALENCIA CLUB DE FÚTBOL</span>
+        <span class="grid-card-sub">La Liga - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/villarreal-cf-267/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/267.webp" alt="VILLARREAL CF" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">VILLARREAL CF</span>
+        <span class="grid-card-sub">La Liga - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/bayer-04-leverkusen-2349/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/2349.webp" alt="BAYER 04 LEVERKUSEN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BAYER 04 LEVERKUSEN</span>
+        <span class="grid-card-sub">Bundesliga - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/bayern-munchen-2293/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">83</span></span>
+        <img class="grid-card-img" src="img/teams/2293.webp" alt="BAYERN MÜNCHEN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BAYERN MÜNCHEN</span>
+        <span class="grid-card-sub">Bundesliga - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/borussia-dortmund-126/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">80</span></span>
+        <img class="grid-card-img" src="img/teams/126.webp" alt="BORUSSIA DORTMUND" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BORUSSIA DORTMUND</span>
+        <span class="grid-card-sub">Bundesliga - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/gornik-zabrze-4021/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">68</span></span>
+        <img class="grid-card-img" src="img/teams/4021.webp" alt="GÓRNIK ZABRZE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">GÓRNIK ZABRZE</span>
+        <span class="grid-card-sub">Otras ligas europeas - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/atletico-mineiro-1245/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/1245.webp" alt="ATLÉTICO MINEIRO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ATLÉTICO MINEIRO</span>
+        <span class="grid-card-sub">Brasileirao - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ec-bahia-2453/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/2453.webp" alt="EC BAHIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">EC BAHIA</span>
+        <span class="grid-card-sub">Brasileirao - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/botafogo-1246/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/1246.webp" alt="BOTAFOGO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BOTAFOGO</span>
+        <span class="grid-card-sub">Brasileirao - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/chapecoense-4108/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/4108.webp" alt="CHAPECOENSE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CHAPECOENSE</span>
+        <span class="grid-card-sub">Brasileirao - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/sc-corinthians-paulista-1247/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/1247.webp" alt="SC CORINTHIANS PAULISTA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SC CORINTHIANS PAULISTA</span>
+        <span class="grid-card-sub">Brasileirao - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/cruzeiro-ec-274/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/274.webp" alt="CRUZEIRO EC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CRUZEIRO EC</span>
+        <span class="grid-card-sub">Brasileirao - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/c-r-flamengo-1248/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/1248.webp" alt="C.R. FLAMENGO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">C.R. FLAMENGO</span>
+        <span class="grid-card-sub">Brasileirao - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/fluminense-fc-1249/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/1249.webp" alt="FLUMINENSE FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">FLUMINENSE FC</span>
+        <span class="grid-card-sub">Brasileirao - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/atletico-paranaense-1930/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/1930.webp" alt="ATLÉTICO PARANAENSE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ATLÉTICO PARANAENSE</span>
+        <span class="grid-card-sub">Brasileirao - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/gremio-1250/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/1250.webp" alt="GRÊMIO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">GRÊMIO</span>
+        <span class="grid-card-sub">Brasileirao - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/sc-internacional-1252/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/1252.webp" alt="SC INTERNACIONAL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SC INTERNACIONAL</span>
+        <span class="grid-card-sub">Brasileirao - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/mirassol-2486/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/2486.webp" alt="MIRASSOL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">MIRASSOL</span>
+        <span class="grid-card-sub">Brasileirao - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/palmeiras-137/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/137.webp" alt="PALMEIRAS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PALMEIRAS</span>
+        <span class="grid-card-sub">Brasileirao - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/red-bull-brasil-5060/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/5060.webp" alt="RED BULL BRASIL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">RED BULL BRASIL</span>
+        <span class="grid-card-sub">Brasileirao - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/santos-f-c-1254/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/1254.webp" alt="SANTOS F.C." loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SANTOS F.C.</span>
+        <span class="grid-card-sub">Brasileirao - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/sao-paulo-fc-1255/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/1255.webp" alt="S�O PAULO FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">S�O PAULO FC</span>
+        <span class="grid-card-sub">Brasileirao - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/coritiba-fc-1931/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/1931.webp" alt="CORITIBA FC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CORITIBA FC</span>
+        <span class="grid-card-sub">Brasileirao - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/cr-vasco-da-gama-136/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/136.webp" alt="CR VASCO DA GAMA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CR VASCO DA GAMA</span>
+        <span class="grid-card-sub">Brasileirao - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/e-c-vitoria-1937/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/1937.webp" alt="E.C. VITÓRIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">E.C. VITÓRIA</span>
+        <span class="grid-card-sub">Brasileirao - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/remo-2493/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/2493.webp" alt="REMO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">REMO</span>
+        <span class="grid-card-sub">Brasileirao - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/aldosivi-4036/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">68</span></span>
+        <img class="grid-card-img" src="img/teams/4036.webp" alt="ALDOSIVI" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ALDOSIVI</span>
+        <span class="grid-card-sub">Liga Argentina - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/argentinos-juniors-1236/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/1236.webp" alt="ARGENTINOS JUNIORS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ARGENTINOS JUNIORS</span>
+        <span class="grid-card-sub">Liga Argentina - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/atletico-tucuman-2719/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/2719.webp" alt="ATLÉTICO TUCUMÁN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ATLÉTICO TUCUMÁN</span>
+        <span class="grid-card-sub">Liga Argentina - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-banfield-1927/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/1927.webp" alt="CA BANFIELD" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA BANFIELD</span>
+        <span class="grid-card-sub">Liga Argentina - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/barracas-central-4033/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/4033.webp" alt="BARRACAS CENTRAL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BARRACAS CENTRAL</span>
+        <span class="grid-card-sub">Liga Argentina - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-belgrano-de-cordoba-2536/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/2536.webp" alt="CA BELGRANO DE CÓRDOBA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA BELGRANO DE CÓRDOBA</span>
+        <span class="grid-card-sub">Liga Argentina - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-boca-juniors-139/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/139.webp" alt="CA BOCA JUNIORS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA BOCA JUNIORS</span>
+        <span class="grid-card-sub">Liga Argentina - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/central-cordoba-sde-4032/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/4032.webp" alt="CENTRAL CÓRDOBA SdE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CENTRAL CÓRDOBA SdE</span>
+        <span class="grid-card-sub">Liga Argentina - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/csd-defensa-y-justicia-2722/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/2722.webp" alt="CSD DEFENSA Y JUSTICIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CSD DEFENSA Y JUSTICIA</span>
+        <span class="grid-card-sub">Liga Argentina - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/deportivo-riestra-2499/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">68</span></span>
+        <img class="grid-card-img" src="img/teams/2499.webp" alt="DEPORTIVO RIESTRA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">DEPORTIVO RIESTRA</span>
+        <span class="grid-card-sub">Liga Argentina - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/estudiantes-de-la-plata-1238/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/1238.webp" alt="ESTUDIANTES DE LA PLATA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ESTUDIANTES DE LA PLATA</span>
+        <span class="grid-card-sub">Liga Argentina - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/gimnasia-la-plata-1239/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/1239.webp" alt="GIMNASIA LA PLATA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">GIMNASIA LA PLATA</span>
+        <span class="grid-card-sub">Liga Argentina - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-huracan-1922/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/1922.webp" alt="CA HURACÁN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA HURACÁN</span>
+        <span class="grid-card-sub">Liga Argentina - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-independiente-1240/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/1240.webp" alt="CA INDEPENDIENTE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA INDEPENDIENTE</span>
+        <span class="grid-card-sub">Liga Argentina - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/independiente-rivadavia-2498/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/2498.webp" alt="INDEPENDIENTE RIVADAVIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">INDEPENDIENTE RIVADAVIA</span>
+        <span class="grid-card-sub">Liga Argentina - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/instituto-de-cordoba-4035/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/4035.webp" alt="INSTITUTO DE CÓRDOBA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">INSTITUTO DE CÓRDOBA</span>
+        <span class="grid-card-sub">Liga Argentina - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-lanus-1929/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/1929.webp" alt="CA LANÚS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA LANÚS</span>
+        <span class="grid-card-sub">Liga Argentina - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/newell-s-old-boys-1241/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/1241.webp" alt="NEWELL&#39;S OLD BOYS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">NEWELL&#39;S OLD BOYS</span>
+        <span class="grid-card-sub">Liga Argentina - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/platense-4034/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/4034.webp" alt="PLATENSE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PLATENSE</span>
+        <span class="grid-card-sub">Liga Argentina - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/racing-club-1237/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/1237.webp" alt="RACING CLUB" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">RACING CLUB</span>
+        <span class="grid-card-sub">Liga Argentina - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-river-plate-138/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/138.webp" alt="CA RIVER PLATE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA RIVER PLATE</span>
+        <span class="grid-card-sub">Liga Argentina - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-rosario-central-1242/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/1242.webp" alt="CA ROSARIO CENTRAL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA ROSARIO CENTRAL</span>
+        <span class="grid-card-sub">Liga Argentina - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/san-lorenzo-1243/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/1243.webp" alt="SAN LORENZO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SAN LORENZO</span>
+        <span class="grid-card-sub">Liga Argentina - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/sarmiento-de-junin-4031/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/4031.webp" alt="SARMIENTO DE JUNÍN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SARMIENTO DE JUNÍN</span>
+        <span class="grid-card-sub">Liga Argentina - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-talleres-de-cordoba-5046/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/5046.webp" alt="CA TALLERES DE CÓRDOBA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA TALLERES DE CÓRDOBA</span>
+        <span class="grid-card-sub">Liga Argentina - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-tigre-1926/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/1926.webp" alt="CA TIGRE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA TIGRE</span>
+        <span class="grid-card-sub">Liga Argentina - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ca-union-de-santa-fe-2538/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/2538.webp" alt="CA UNIÓN DE SANTA FE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CA UNIÓN DE SANTA FE</span>
+        <span class="grid-card-sub">Liga Argentina - 29 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/velez-sarsfield-1244/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/1244.webp" alt="VÉLEZ SARSFIELD" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">VÉLEZ SARSFIELD</span>
+        <span class="grid-card-sub">Liga Argentina - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/colo-colo-1256/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/1256.webp" alt="COLO COLO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">COLO COLO</span>
+        <span class="grid-card-sub">Primera Chile - 23 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/universidad-de-chile-2209/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/2209.webp" alt="UNIVERSIDAD DE CHILE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">UNIVERSIDAD DE CHILE</span>
+        <span class="grid-card-sub">Primera Chile - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/coquimbo-unido-2491/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/2491.webp" alt="COQUIMBO UNIDO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">COQUIMBO UNIDO</span>
+        <span class="grid-card-sub">Primera Chile - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/universidad-catolica-2191/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/2191.webp" alt="UNIVERSIDAD CATÓLICA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">UNIVERSIDAD CATÓLICA</span>
+        <span class="grid-card-sub">Primera Chile - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/inter-miami-2478/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/2478.webp" alt="INTER MIAMI" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">INTER MIAMI</span>
+        <span class="grid-card-sub">CONCACAF Leagues Cup - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/bolivar-2695/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/2695.webp" alt="BOLÍVAR" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BOLÍVAR</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/always-ready-4000/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">67</span></span>
+        <img class="grid-card-img" src="img/teams/4000.webp" alt="ALWAYS READY" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ALWAYS READY</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/deportes-tolima-2490/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/2490.webp" alt="DEPORTES TOLIMA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">DEPORTES TOLIMA</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 25 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/independiente-santa-fe-2481/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/2481.webp" alt="INDEPENDIENTE SANTA FE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">INDEPENDIENTE SANTA FE</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/atletico-nacional-2193/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/2193.webp" alt="ATLÉTICO NACIONAL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ATLÉTICO NACIONAL</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 24 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/junior-4039/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/4039.webp" alt="JÚNIOR" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">JÚNIOR</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/millonarios-1258/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/1258.webp" alt="MILLONARIOS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">MILLONARIOS</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/barcelona-sc-4038/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/4038.webp" alt="BARCELONA SC" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BARCELONA SC</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/independiente-del-valle-2245/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/2245.webp" alt="INDEPENDIENTE DEL VALLE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">INDEPENDIENTE DEL VALLE</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ldu-quito-2483/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/2483.webp" alt="LDU QUITO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">LDU QUITO</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/cerro-porteno-4002/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/4002.webp" alt="CERRO PORTEÑO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CERRO PORTEÑO</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/libertad-4046/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/4046.webp" alt="LIBERTAD" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">LIBERTAD</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/olimpia-4045/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/4045.webp" alt="OLIMPIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">OLIMPIA</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 32 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/club-alianza-lima-2287/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/2287.webp" alt="CLUB ALIANZA LIMA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CLUB ALIANZA LIMA</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/sporting-cristal-2216/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/2216.webp" alt="SPORTING CRISTAL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SPORTING CRISTAL</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 31 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/universitario-2514/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/2514.webp" alt="UNIVERSITARIO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">UNIVERSITARIO</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/nacional-4003/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/4003.webp" alt="NACIONAL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">NACIONAL</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/penarol-4037/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/4037.webp" alt="PEÑAROL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PEÑAROL</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/universidad-central-2484/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">67</span></span>
+        <img class="grid-card-img" src="img/teams/2484.webp" alt="UNIVERSIDAD CENTRAL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">UNIVERSIDAD CENTRAL</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/deportivo-la-guaira-2494/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">67</span></span>
+        <img class="grid-card-img" src="img/teams/2494.webp" alt="DEPORTIVO LA GUAIRA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">DEPORTIVO LA GUAIRA</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/cusco-2473/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">68</span></span>
+        <img class="grid-card-img" src="img/teams/2473.webp" alt="CUSCO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CUSCO</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 27 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/independiente-medellin-2497/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/2497.webp" alt="INDEPENDIENTE MEDELLÍN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">INDEPENDIENTE MEDELLÍN</span>
+        <span class="grid-card-sub">Otros latinoamericanos - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/al-nassr-2406/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/2406.webp" alt="AL NASSR" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">AL NASSR</span>
+        <span class="grid-card-sub">Liga Saudi - 28 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/espana-7/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">84</span></span>
+        <img class="grid-card-img" src="img/teams/7.webp" alt="ESPAÑA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ESPAÑA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/alemania-14/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">83</span></span>
+        <img class="grid-card-img" src="img/teams/14.webp" alt="ALEMANIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ALEMANIA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/belgica-9/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">80</span></span>
+        <img class="grid-card-img" src="img/teams/9.webp" alt="BÉLGICA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BÉLGICA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/francia-8/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">85</span></span>
+        <img class="grid-card-img" src="img/teams/8.webp" alt="FRANCIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">FRANCIA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/italia-12/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">82</span></span>
+        <img class="grid-card-img" src="img/teams/12.webp" alt="ITALIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ITALIA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/inglaterra-5/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">82</span></span>
+        <img class="grid-card-img" src="img/teams/5.webp" alt="INGLATERRA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">INGLATERRA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/portugal-6/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">84</span></span>
+        <img class="grid-card-img" src="img/teams/6.webp" alt="PORTUGAL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PORTUGAL</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/holanda-10/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">81</span></span>
+        <img class="grid-card-img" src="img/teams/10.webp" alt="HOLANDA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">HOLANDA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/croacia-24/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">79</span></span>
+        <img class="grid-card-img" src="img/teams/24.webp" alt="CROACIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CROACIA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/suiza-11/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/11.webp" alt="SUIZA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SUIZA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/noruega-16/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/16.webp" alt="NORUEGA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">NORUEGA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/austria-21/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/21.webp" alt="AUSTRIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">AUSTRIA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/bosnia-herzegovina-1170/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/1170.webp" alt="BOSNIA-HERZEGOVINA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BOSNIA-HERZEGOVINA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/republica-checa-13/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/13.webp" alt="REPÚBLICA CHECA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">REPÚBLICA CHECA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/escocia-3/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/3.webp" alt="ESCOCIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ESCOCIA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/suecia-17/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/17.webp" alt="SUECIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SUECIA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/turquia-29/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/29.webp" alt="TURQUÍA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">TURQUÍA</span>
+        <span class="grid-card-sub">Selecciones de Europa - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/senegal-38/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/38.webp" alt="SENEGAL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SENEGAL</span>
+        <span class="grid-card-sub">Selecciones de África - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/marruecos-32/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/32.webp" alt="MARRUECOS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">MARRUECOS</span>
+        <span class="grid-card-sub">Selecciones de África - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/argelia-1040/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/1040.webp" alt="ARGELIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ARGELIA</span>
+        <span class="grid-card-sub">Selecciones de África - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/costa-de-marfil-1051/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/1051.webp" alt="COSTA DE MARFIL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">COSTA DE MARFIL</span>
+        <span class="grid-card-sub">Selecciones de África - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/egipto-34/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/34.webp" alt="EGIPTO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">EGIPTO</span>
+        <span class="grid-card-sub">Selecciones de África - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ghana-1058/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/1058.webp" alt="GHANA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">GHANA</span>
+        <span class="grid-card-sub">Selecciones de África - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/sudafrica-37/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/37.webp" alt="SUDÁFRICA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">SUDÁFRICA</span>
+        <span class="grid-card-sub">Selecciones de África - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/tunez-33/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/33.webp" alt="TÚNEZ" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">TÚNEZ</span>
+        <span class="grid-card-sub">Selecciones de África - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/estados-unidos-39/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">77</span></span>
+        <img class="grid-card-img" src="img/teams/39.webp" alt="ESTADOS UNIDOS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ESTADOS UNIDOS</span>
+        <span class="grid-card-sub">Selecciones de Norte y Centroamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/mexico-40/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/40.webp" alt="MÉXICO" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">MÉXICO</span>
+        <span class="grid-card-sub">Selecciones de Norte y Centroamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/panama-1113/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/1113.webp" alt="PANAMÁ" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PANAMÁ</span>
+        <span class="grid-card-sub">Selecciones de Norte y Centroamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/argentina-50/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">82</span></span>
+        <img class="grid-card-img" src="img/teams/50.webp" alt="ARGENTINA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ARGENTINA</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/bolivia-1128/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">68</span></span>
+        <img class="grid-card-img" src="img/teams/1128.webp" alt="BOLIVIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BOLIVIA</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/brasil-45/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">84</span></span>
+        <img class="grid-card-img" src="img/teams/45.webp" alt="BRASIL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">BRASIL</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/chile-47/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/47.webp" alt="CHILE" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">CHILE</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/colombia-44/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">78</span></span>
+        <img class="grid-card-img" src="img/teams/44.webp" alt="COLOMBIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">COLOMBIA</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/ecuador-51/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">76</span></span>
+        <img class="grid-card-img" src="img/teams/51.webp" alt="ECUADOR" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ECUADOR</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/paraguay-48/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/48.webp" alt="PARAGUAY" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PARAGUAY</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/peru-46/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/46.webp" alt="PERÚ" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">PERÚ</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/uruguay-49/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">79</span></span>
+        <img class="grid-card-img" src="img/teams/49.webp" alt="URUGUAY" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">URUGUAY</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/venezuela-1129/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/1129.webp" alt="VENEZUELA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">VENEZUELA</span>
+        <span class="grid-card-sub">Selecciones de Sudamérica - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/japon-52/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">75</span></span>
+        <img class="grid-card-img" src="img/teams/52.webp" alt="JAPÓN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">JAPÓN</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/corea-del-sur-53/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">74</span></span>
+        <img class="grid-card-img" src="img/teams/53.webp" alt="COREA DEL SUR" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">COREA DEL SUR</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/australia-57/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">71</span></span>
+        <img class="grid-card-img" src="img/teams/57.webp" alt="AUSTRALIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">AUSTRALIA</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/iran-55/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/55.webp" alt="IRÁN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">IRÁN</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/irak-1010/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">68</span></span>
+        <img class="grid-card-img" src="img/teams/1010.webp" alt="IRAK" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">IRAK</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/jordania-1011/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/1011.webp" alt="JORDANIA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">JORDANIA</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/qatar-1026/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/1026.webp" alt="QATAR" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">QATAR</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/arabia-saudita-56/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">72</span></span>
+        <img class="grid-card-img" src="img/teams/56.webp" alt="ARABIA SAUDITA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">ARABIA SAUDITA</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/uzbekistan-1184/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e59f01;color:#fff">69</span></span>
+        <img class="grid-card-img" src="img/teams/1184.webp" alt="UZBEKISTÁN" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">UZBEKISTÁN</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/nueva-zelanda-1141/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">70</span></span>
+        <img class="grid-card-img" src="img/teams/1141.webp" alt="NUEVA ZELANDA" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">NUEVA ZELANDA</span>
+        <span class="grid-card-sub">Selecciones de Asia/Oceanía - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/halcones-dorados-2703/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#e5dc00;color:#111">73</span></span>
+        <img class="grid-card-img" src="img/teams/2703.webp" alt="HALCONES DORADOS" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">HALCONES DORADOS</span>
+        <span class="grid-card-sub">Equipos especiales - 30 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a>
+      <a class="grid-card db-index-card db-team-card" href="/team/v2/metegol-2704/">
+        <span class="grid-card-ovr"><span class="team-avg-badge" style="background:#a8ff00;color:#111">87</span></span>
+        <img class="grid-card-img" src="img/teams/2704.webp" alt="METEGOL" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'">
+        <span class="grid-card-kicker">Equipo</span>
+        <span class="grid-card-name">METEGOL</span>
+        <span class="grid-card-sub">Equipos especiales - 26 jugadores</span>
+        <span class="grid-card-action">Ver plantel</span>
+      </a></div></div></div>
+      <div id="favorites-view"></div>
     </main>
   </div>
-
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/favorites.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
-

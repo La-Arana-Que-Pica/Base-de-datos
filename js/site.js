@@ -24,11 +24,13 @@ const LAQP_PRETTY_PATHS = {
   'contact.html': 'contact.html',
   'about.html': 'about.html',
   'acerca-de.html': 'acerca-de.html',
+  'cookies.html': 'cookies.html',
   'news.html': 'news.html',
   'faq.html': 'faq.html',
   'privacy-policy.html': 'privacy-policy.html',
   'terms.html': 'terms.html',
   'dmca.html': 'dmca.html',
+  '404.html': '404.html',
 };
 
 function laqpSlugify(value) {
@@ -79,11 +81,11 @@ function laqpDatabaseUrl(view) {
 }
 
 function laqpArticleUrl(articleId, title) {
-  return `articulo.html?id=${encodeURIComponent(articleId)}`;
+  return `/guia/${encodeURIComponent(articleId)}/`;
 }
 
 function laqpDownloadUrl(downloadId, title) {
-  return `downloads.html?id=${encodeURIComponent(downloadId)}`;
+  return `/download/${encodeURIComponent(downloadId)}/`;
 }
 
 function laqpAbsoluteUrl(path) {
@@ -101,8 +103,8 @@ function currentPageKey() {
   const first = (parts[0] || 'index.html').toLowerCase();
   const file = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
   if (first === 'index.html' || first === '') return 'index';
-  if (first === 'downloads' || file === 'downloads.html') return 'downloads';
-  if (first === 'guides' || first === 'article' || file === 'guias.html' || file === 'articulo.html') return 'guides';
+  if (first === 'downloads' || first === 'download' || file === 'downloads.html') return 'downloads';
+  if (first === 'guides' || first === 'guia' || first === 'article' || file === 'guias.html' || file === 'articulo.html') return 'guides';
   if (first === 'tutorials' || file === 'tutorials.html') return 'tutorials';
   if (first === 'rankings' || file === 'rankings.html') return 'rankings';
   if (first === 'tactics' || file === 'tactics.html') return 'tactics';
@@ -145,7 +147,7 @@ function renderHeaderBrand() {
       header.appendChild(title);
     }
   }
-  title.innerHTML = 'La Ara&ntilde;a Que Pica <span>LAqP.website</span>';
+  title.innerHTML = 'PES 2018 Actualizado <span>LAqP.website</span>';
 }
 
 function ensureMobileNavToggle(nav) {
@@ -229,14 +231,15 @@ function renderSiteFooter() {
   footer.innerHTML = `
     <div class="site-footer-inner">
       <div>
-        <div class="site-footer-title">La Araña Que Pica</div>
-        <div class="site-footer-copy">${siteText('footer.copy', 'LAqP.website: canal, Option Files, tutoriales y base de datos.')}</div>
+        <div class="site-footer-title">PES 2018 Actualizado</div>
+        <div class="site-footer-copy">${siteText('footer.copy', 'LAqP.website: stats, caras, plantillas, guias, tacticas, descargas y base de datos para mantener PES 2018 actualizado.')}</div>
       </div>
       <nav class="site-footer-links" aria-label="${siteText('footer.linksLabel', 'Enlaces utiles')}">
         <a href="contact.html">${siteText('footer.contact', 'Contacto')}</a>
-        <a href="about.html">${siteText('nav.about', 'Acerca de')}</a>
+        <a href="acerca-de.html">${siteText('nav.about', 'Acerca de')}</a>
         <a href="https://www.youtube.com/@L.A.q.P" target="_blank" rel="noopener noreferrer">YouTube</a>
         <a href="privacy-policy.html">${siteText('footer.privacy', 'Politica de privacidad')}</a>
+        <a href="cookies.html">Cookies</a>
         <a href="terms.html">Terminos</a>
         <a href="dmca.html">DMCA</a>
         <a href="faq.html">${siteText('footer.help', 'Ayuda / FAQ')}</a>
@@ -245,15 +248,146 @@ function renderSiteFooter() {
   document.body.appendChild(footer);
 }
 
+const LAQP_CONSENT_KEY = 'laqp_cookie_consent_v1';
+
+function getStoredConsent() {
+  try {
+    return JSON.parse(localStorage.getItem(LAQP_CONSENT_KEY) || 'null');
+  } catch {
+    return null;
+  }
+}
+
+function saveConsent(choice) {
+  const payload = {
+    choice,
+    analytics: choice === 'accept',
+    ads: choice === 'accept',
+    updatedAt: new Date().toISOString(),
+  };
+  try {
+    localStorage.setItem(LAQP_CONSENT_KEY, JSON.stringify(payload));
+  } catch {}
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
+  window.gtag('consent', 'update', {
+    analytics_storage: payload.analytics ? 'granted' : 'denied',
+    ad_storage: payload.ads ? 'granted' : 'denied',
+    ad_user_data: payload.ads ? 'granted' : 'denied',
+    ad_personalization: payload.ads ? 'granted' : 'denied',
+  });
+  document.querySelector('.cookie-consent')?.remove();
+}
+
+function applyConsentDefaults() {
+  const consent = getStoredConsent();
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
+  window.gtag('consent', 'default', {
+    analytics_storage: consent?.analytics ? 'granted' : 'denied',
+    ad_storage: consent?.ads ? 'granted' : 'denied',
+    ad_user_data: consent?.ads ? 'granted' : 'denied',
+    ad_personalization: consent?.ads ? 'granted' : 'denied',
+    wait_for_update: 500,
+  });
+}
+
+function renderCookieConsent() {
+  if (getStoredConsent() || document.querySelector('.cookie-consent')) return;
+  const banner = document.createElement('section');
+  banner.className = 'cookie-consent';
+  banner.setAttribute('aria-label', 'Aviso de cookies');
+  banner.innerHTML = `
+    <div class="cookie-consent-copy">
+      <strong>Cookies y anuncios</strong>
+      <p>LAqP usa cookies tecnicas para recordar preferencias y puede usar Google Analytics/AdSense para medicion y publicidad. Podes aceptar o rechazar las cookies no esenciales.</p>
+    </div>
+    <div class="cookie-consent-actions">
+      <a href="cookies.html">Ver detalles</a>
+      <button type="button" class="secondary" data-cookie-choice="reject">Rechazar</button>
+      <button type="button" data-cookie-choice="accept">Aceptar</button>
+    </div>`;
+  banner.querySelectorAll('[data-cookie-choice]').forEach(button => {
+    button.addEventListener('click', () => saveConsent(button.dataset.cookieChoice));
+  });
+  document.body.appendChild(banner);
+}
+
+function getDatabaseDirectoryView() {
+  const metaView = document.querySelector('meta[name="laqp-database-view"]')?.content;
+  if (metaView) return metaView;
+  const path = window.location.pathname.replace(/\/+$/, '/').toLowerCase();
+  if (path.endsWith('/database/v2/players/')) return 'players';
+  if (path.endsWith('/database/v2/teams/')) return 'teams';
+  if (path.endsWith('/database/v2/leagues/')) return 'leagues';
+  return '';
+}
+
+function getDatabaseDirectoryTarget(view) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('view', view);
+  const page = typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html';
+  return `${page}?${params.toString()}`;
+}
+
+function rescueDatabaseDirectoryPage() {
+  const view = getDatabaseDirectoryView();
+  if (!view) return;
+
+  const targetId = view === 'teams' ? 'teams-grid-view' : `${view}-view`;
+  const activeView = document.getElementById(targetId)?.classList.contains('active');
+  if (activeView) return;
+
+  document.documentElement.classList.add('laqp-js');
+
+  const main = document.getElementById('main');
+  const fallback = document.querySelector('.js-prerender-fallback') || document.querySelector('#main > .guides-library-panel');
+  const breadcrumbs = document.querySelector('#main > .breadcrumbs');
+  if (fallback) fallback.style.display = 'none';
+  if (breadcrumbs) breadcrumbs.style.display = 'none';
+
+  let loader = document.getElementById('loading-overlay');
+  if (!loader && main) {
+    loader = document.createElement('div');
+    loader.id = 'loading-overlay';
+    loader.innerHTML = '<div class="spinner"></div><span class="loading-message">Cargando base de datos...</span>';
+    main.prepend(loader);
+  }
+  if (loader) {
+    loader.classList.add('js-hydration-loader');
+    loader.style.display = 'flex';
+  }
+
+  const hasAppScript = Array.from(document.scripts).some(script => {
+    const src = script.getAttribute('src') || '';
+    return src.includes('js/app.js');
+  });
+  const hasInteractiveShell = !!document.getElementById(targetId);
+  const delay = hasAppScript && hasInteractiveShell ? 6000 : 250;
+
+  window.clearTimeout(window.__laqpDatabaseDirectoryRescueTimer);
+  window.__laqpDatabaseDirectoryRescueTimer = window.setTimeout(() => {
+    const hydrated = document.getElementById(targetId)?.classList.contains('active');
+    if (!hydrated) window.location.replace(getDatabaseDirectoryTarget(view));
+  }, delay);
+}
+
+applyConsentDefaults();
+
 document.addEventListener('DOMContentLoaded', () => {
   renderHeaderBrand();
   renderMainNav();
   renderLanguageSelector();
   renderSiteFooter();
+  renderCookieConsent();
   if (typeof applyI18nToDocument === 'function') applyI18nToDocument();
   if (typeof renderLanguagePrompt === 'function') {
     renderLanguagePrompt();
   }
+  rescueDatabaseDirectoryPage();
 });
+
+window.addEventListener('pageshow', rescueDatabaseDirectoryPage);
 
 window.renderLanguageSelector = renderLanguageSelector;

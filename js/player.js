@@ -218,21 +218,26 @@ const POSITION_LABELS = {
 };
 
 const NATIONALITY_NAMES = {
-  '7':   'China',        '10':  'Indonesia',   '11':  'Irán',
+  '7':   'China',        '8':   'Hong Kong',    '9':   'India',
+  '10':  'Indonesia',   '11':  'Irán',
   '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
   '15':  'Corea del Norte', '16': 'Corea del Sur', '17': 'Kuwait',
-  '21':  'Malasia', '34':  'Siria', 
+  '21':  'Malasia', '32':  'Singapur', '34':  'Siria', 
   '19':  'Líbano',       '26':  'Omán',         '30':  'Qatar',
   '31':  'Arabia Saudita', '36': 'Tailandia',   '37':  'Emiratos Árabes Unidos',
-  '44':  'Argelia',      '45':  'Angola',       '48':  'Burkina Faso',
+  '38':  'Vietnam',
+  '44':  'Argelia',      '45':  'Angola',       '46':  'Benín',
+  '48':  'Burkina Faso', '49':  'Burundi',
   '50':  'Camerún',      '51':  'Cabo Verde',   '52':  'República Centroafricana',
   '55':  'Congo DR',     '56':  'Costa de Marfil', '58': 'Egipto',
   '62':  'Gabón',
   '59':  'Guinea Ecuatorial',      '63':  'Gambia',       '64':  'Ghana',
   '65':  'Guinea',       '66':  'Guinea-Bisáu', '70':  'Libia',
-  '73':  'Malí',         '76':  'Marruecos',    '77':  'Mozambique',
+  '71':  'Madagascar',   '73':  'Malí',         '74':  'Mauritania',
+  '76':  'Marruecos',    '77':  'Mozambique',
   '79':  'Níger',        '80':  'Nigeria',      '83':  'Senegal',
-  '87':  'Sudáfrica',    '91':  'Togo',         '92':  'Túnez',
+  '85':  'Sierra Leona', '87':  'Sudáfrica',    '90':  'Tanzania',
+  '91':  'Togo',         '92':  'Túnez',
   '94':  'Zambia',       '95':  'Zimbabue',     '110': 'Canadá',
   '112': 'Costa Rica',   '115': 'Rep. Dominicana', '120': 'Haití',
   '121': 'Honduras',     '122': 'Jamaica',      '124': 'México',
@@ -249,6 +254,7 @@ const NATIONALITY_NAMES = {
   '207': 'Finlandia',    '208': 'Francia',      '209': 'Georgia',
   '210': 'Alemania',     '211': 'Grecia',       '212': 'Hungría',
   '213': 'Islandia',     '214': 'Irlanda',      '215': 'Italia',
+  '217': 'Letonia',
   '219': 'Lituania',     '221': 'Macedonia del Norte', '223': 'Moldavia',
   '224': 'Países Bajos', '225': 'Irlanda del Norte', '226': 'Noruega',
   '227': 'Polonia',      '228': 'Portugal',     '229': 'Rumanía',
@@ -1770,7 +1776,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
                 alt="${player['Name'] || ''}">
             </div>
             <div class="player-info-card-body">
-              <div class="player-info-card-name" title="${player['Name'] || ''}">${player['Name'] || t('player.unknown')}</div>
+              <h1 class="player-info-card-name" title="${player['Name'] || ''}">${player['Name'] || t('player.unknown')}</h1>
               ${typeLabel ? `<div class="player-info-card-type">${typeLabel}</div>` : ''}
               ${playsForNational ? `<div class="national-team-note">${t('player.alsoNational')}</div>` : ''}
               ${minifacePlayerName ? `<div class="profile-miniface-note">${t('player.miniface', { name: minifacePlayerName })}</div>` : ''}
@@ -1825,8 +1831,13 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
     </div>`;
 
+  document.documentElement.classList.add('laqp-hydrated');
   content.style.display = 'block';
-  document.getElementById('loading-overlay').style.display = 'none';
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove('js-hydration-loader');
+    loadingOverlay.style.display = 'none';
+  }
 
   // Update page title
   document.title = `${player['Name'] || t('player.unknown')} - ${t('common.database')} PES`;
@@ -1834,7 +1845,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
     ? laqpPlayerUrl(player['Id'], team.id, player['Name'])
     : `/player.html?id=${encodeURIComponent(player['Id'])}&team=${encodeURIComponent(team.id)}`;
   const playerUrl = typeof laqpAbsoluteUrl === 'function' ? laqpAbsoluteUrl(playerPath) : `https://laqp.website${playerPath}`;
-  const playerDescription = `${player['Name'] || 'Jugador'} en PES 2018 actualizado: media ${player['OverallStats'] || '-'}, posicion ${posDisplay || '-'}, equipo ${team.displayName}, stats, apariencia, fortalezas y jugadores similares.`;
+  const playerDescription = `${player['Name'] || 'Jugador'} para PES 2018 actualizado: media ${player['OverallStats'] || '-'}, posicion ${posDisplay || '-'}, equipo ${team.displayName}, stats, apariencia, cara/miniface y jugadores similares para editar el juego.`;
   const canonical = document.querySelector('link[rel="canonical"]');
   const metaDescription = document.querySelector('meta[name="description"]');
   const ogTitle = document.querySelector('meta[property="og:title"]');
@@ -1843,7 +1854,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   const ogImage = document.querySelector('meta[property="og:image"]');
   if (canonical) canonical.setAttribute('href', playerUrl);
   if (metaDescription) metaDescription.setAttribute('content', playerDescription);
-  if (ogTitle) ogTitle.setAttribute('content', `${player['Name'] || t('player.unknown')} PES 2018 - Stats y analisis`);
+  if (ogTitle) ogTitle.setAttribute('content', `${player['Name'] || t('player.unknown')} PES 2018 Actualizado - Stats y cara`);
   if (ogDescription) ogDescription.setAttribute('content', playerDescription);
   if (ogUrl) ogUrl.setAttribute('content', playerUrl);
   if (ogImage) ogImage.setAttribute('content', `https://laqp.website/img/players/${player['Id']}.webp`);
@@ -1910,6 +1921,13 @@ async function boot() {
   const teamId = embeddedTeamId || params.get('team');
 
   if (!playerId || !teamId) {
+    const content = document.getElementById('player-content');
+    if (content?.querySelector('.js-prerender-fallback')) {
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) loadingOverlay.style.display = 'none';
+      content.style.display = 'block';
+      return;
+    }
     showError(t('errors.noPlayerParams'));
     return;
   }
@@ -2071,7 +2089,12 @@ async function boot() {
 // ─── Error display ────────────────────────────────────────────────────────────
 
 function showError(message) {
-  document.getElementById('loading-overlay').style.display = 'none';
+  document.documentElement.classList.add('laqp-hydrated');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.classList.remove('js-hydration-loader');
+    loadingOverlay.style.display = 'none';
+  }
   const content = document.getElementById('player-content');
   content.textContent = '';
 

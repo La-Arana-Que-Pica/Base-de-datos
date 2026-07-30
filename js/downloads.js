@@ -113,6 +113,49 @@ function splitTags(value) {
   return String(value || '').split('|').map(tag => tag.trim()).filter(Boolean);
 }
 
+function getDownloadLinks(item) {
+  const links = [];
+  const addLink = (url, label) => {
+    const href = String(url || '').trim();
+    if (!href || href === '#') return;
+    links.push({
+      href,
+      label: String(label || `Parte ${links.length + 1}`).trim(),
+    });
+  };
+
+  const multiLinks = item.links || item.link_partes || item.partes || '';
+  String(multiLinks || '').split('|').forEach((entry, index) => {
+    const value = entry.trim();
+    if (!value) return;
+    const parts = value.split('::');
+    if (parts.length > 1) {
+      addLink(parts.slice(1).join('::'), parts[0]);
+      return;
+    }
+    addLink(value, `Parte ${index + 1}`);
+  });
+
+  ['1', '2', '3', '4', '5'].forEach(number => {
+    addLink(
+      item[`link_${number}`] || item[`link${number}`],
+      item[`link_${number}_label`] || item[`label_${number}`] || item[`parte_${number}_label`] || `Parte ${number}`,
+    );
+  });
+
+  if (!links.length) addLink(item.link || item.url, 'Descargar');
+  return links;
+}
+
+function renderDownloadButtons(item, className = '') {
+  const links = getDownloadLinks(item);
+  if (!links.length) return '<span class="download-btn download-btn-unavailable">Proximamente</span>';
+
+  return links.map(link => (
+    `<a class="download-btn${className}" href="${escapeHtml(link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)}</a>`
+  )).join('');
+}
+
 function platformCopy(platform) {
   const value = String(platform || '').toUpperCase();
   if (value.includes('PC')) return 'Compatible con PES 2018 en PC. Revisá la ruta de guardado y no mezcles archivos de otro parche sin copia de seguridad.';
@@ -139,10 +182,10 @@ function buildDownloadDetails(item) {
   const year = tags.find(tag => /^20\d{2}$/.test(tag)) || '2026';
 
   return {
-    intro: `${title} es una descarga del proyecto LAqP para mantener PES 2018 actualizado al ${year}. La idea no es solo reemplazar nombres: el pack ordena equipos, plantillas, kits y contenido editable para que el juego se sienta vigente sin perder estabilidad.`,
+    intro: `${title} es una descarga para mantener PES 2018 actualizado al ${year}. La idea no es solo reemplazar nombres: el pack ordena equipos, plantillas, kits y contenido editable para que el juego se sienta vigente sin perder estabilidad.`,
     features: isComplement
       ? ['Licencia equipos que no forman parte del Option File base.', 'Completa kits, escudos y datos editables pendientes.', 'Debe instalarse siguiendo el tutorial para respetar el orden correcto.']
-      : ['Plantillas actualizadas y equipos reorganizados para la temporada indicada.', 'Kits, escudos, nombres de equipos y competiciones revisados.', 'Base preparada para explorar jugadores, ligas y equipos desde LAqP.website.'],
+      : ['Plantillas actualizadas y equipos reorganizados para la temporada indicada.', 'Kits, escudos, nombres de equipos y competiciones revisados.', 'Base preparada para explorar jugadores, ligas, equipos, stats y caras de PES 2018.'],
     compatibility: platformCopy(platform),
     steps: [
       'Descargá el archivo correspondiente a tu plataforma.',
@@ -156,7 +199,7 @@ function buildDownloadDetails(item) {
       'Si las plantillas no coinciden, hacé una instalación limpia de datos editados.',
     ],
     changelog: [
-      `${version}: publicación preparada para ${platform || 'PES 2018'} dentro del ecosistema LAqP.`,
+      `${version}: publicacion preparada para ${platform || 'PES 2018'} dentro del sitio de PES 2018 actualizado.`,
       'Se recomienda mirar el tutorial relacionado antes de reemplazar archivos existentes.',
     ],
   };
@@ -212,12 +255,10 @@ function renderDownloadCard(item) {
   const version = escapeHtml(item.version || '');
   const game = escapeHtml(item.juego || item.game || '');
   const platform = escapeHtml(item.plataforma || item.platform || '');
-  const link = item.link || item.url || '#';
   const desc = escapeHtml(item.descripcion || item.description || '');
   const image = escapeHtml(assetPath(item.miniatura || item.thumbnail || item.image || item.imagen));
   const date = formatDownloadDate(item.fecha || item.date || '');
   const details = assetPath(item.detalles || item.details || '', '');
-  const isAvailable = link && link !== '#';
   const itemId = item.id || item.ID || '';
   const detailUrl = itemId
     ? (typeof laqpDownloadUrl === 'function' ? laqpDownloadUrl(itemId, title) : `downloads.html?id=${encodeURIComponent(itemId)}`)
@@ -243,9 +284,7 @@ function renderDownloadCard(item) {
       </div>
       <div class="download-card-footer">
         <a class="download-btn download-btn-secondary" href="${escapeHtml(detailUrl)}">Ver detalles</a>
-        ${isAvailable
-          ? `<a class="download-btn" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Descargar</a>`
-          : `<span class="download-btn download-btn-unavailable">Proximamente</span>`}
+        ${renderDownloadButtons(item)}
       </div>
     </article>`;
 }
@@ -255,11 +294,9 @@ function renderDownloadDetail(item) {
   const version = escapeHtml(item.version || '');
   const game = escapeHtml(item.juego || item.game || '');
   const platform = escapeHtml(item.plataforma || item.platform || '');
-  const link = item.link || item.url || '#';
   const desc = escapeHtml(item.descripcion || item.description || '');
   const image = escapeHtml(assetPath(item.miniatura || item.thumbnail || item.image || item.imagen));
   const tags = splitTags(item.tags);
-  const isAvailable = link && link !== '#';
   const date = formatDownloadDate(item.fecha || item.date || '');
 
   return `
@@ -284,9 +321,7 @@ function renderDownloadDetail(item) {
           <p>${desc}</p>
           ${tags.length ? `<div class="download-tag-row">${tags.map(tag => `<span>${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
           <div class="download-detail-actions">
-            ${isAvailable
-              ? `<a class="download-btn" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Descargar</a>`
-              : `<span class="download-btn download-btn-unavailable">Proximamente</span>`}
+            ${renderDownloadButtons(item)}
             <a class="download-btn download-btn-secondary" href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('tutorials.html') : 'tutorials.html'}">Tutoriales</a>
             <a class="download-btn download-btn-secondary" href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('downloads.html') : 'downloads.html'}">Volver</a>
           </div>

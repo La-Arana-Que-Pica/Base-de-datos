@@ -79,17 +79,58 @@ async function fetchText(url) {
   }
 }
 
+function getDownloadLinks(item) {
+  const links = [];
+  const addLink = (url, label) => {
+    const href = String(url || '').trim();
+    if (!href || href === '#') return;
+    links.push({
+      href,
+      label: String(label || `Parte ${links.length + 1}`).trim(),
+    });
+  };
+
+  const multiLinks = item.links || item.link_partes || item.partes || '';
+  String(multiLinks || '').split('|').forEach((entry, index) => {
+    const value = entry.trim();
+    if (!value) return;
+    const parts = value.split('::');
+    if (parts.length > 1) {
+      addLink(parts.slice(1).join('::'), parts[0]);
+      return;
+    }
+    addLink(value, `Parte ${index + 1}`);
+  });
+
+  ['1', '2', '3', '4', '5'].forEach(number => {
+    addLink(
+      item[`link_${number}`] || item[`link${number}`],
+      item[`link_${number}_label`] || item[`label_${number}`] || item[`parte_${number}_label`] || `Parte ${number}`,
+    );
+  });
+
+  if (!links.length) addLink(item.link || item.url, t('home.downloadAction'));
+  return links;
+}
+
+function renderFeaturedDownloadButtons(item) {
+  const links = getDownloadLinks(item);
+  if (!links.length) return `<span class="featured-of-btn featured-of-btn-soon">${t('home.soon')}</span>`;
+
+  return links.map(link => (
+    `<a class="featured-of-btn featured-of-btn-download" href="${escapeHtml(link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)}</a>`
+  )).join('');
+}
+
 function renderFeaturedCard(item) {
   // Fallback title keeps old CSV rows usable, but new rows should define `titulo`.
   const title = escapeHtml(item.titulo || item.nombre || item.title || item.name || item.juego || 'Option File');
   const version = escapeHtml(item.version || '');
   const game = escapeHtml(item.juego || '');
   const platform = escapeHtml(item.plataforma || item.platform || '');
-  const link = item.link || item.url || '#';
   const desc = escapeHtml(item.descripcion || item.description || '');
   const image = escapeHtml(assetPath(item.miniatura || item.thumbnail || item.image || item.imagen));
-  const details = assetPath(item.detalles || item.details || '', '');
-  const isAvailable = link && link !== '#';
+  const details = assetPath(item.detalles || item.details || (item.id || item.ID ? `download/${encodeURIComponent(item.id || item.ID)}/` : ''), '');
 
   return `
     <article class="featured-of-card">
@@ -104,9 +145,7 @@ function renderFeaturedCard(item) {
       ${platform ? `<div class="featured-of-platform"><span class="download-platform-badge">${platform}</span></div>` : ''}
       <p class="featured-of-desc">${desc || t('home.noDescription')}</p>
       <div class="featured-of-actions">
-        ${isAvailable
-          ? `<a class="featured-of-btn featured-of-btn-download" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${t('home.downloadAction')}</a>`
-          : `<span class="featured-of-btn featured-of-btn-soon">${t('home.soon')}</span>`}
+        ${renderFeaturedDownloadButtons(item)}
         ${details ? `<a class="featured-of-btn featured-of-btn-details" href="${escapeHtml(details)}">${t('home.details')}</a>` : ''}
       </div>
     </article>`;

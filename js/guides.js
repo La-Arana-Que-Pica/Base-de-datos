@@ -164,7 +164,9 @@ async function renderArticlePage() {
   if (!root) return;
 
   const params = new URLSearchParams(window.location.search);
-  const routeArticleId = typeof laqpFirstRoutePart === 'function' ? laqpFirstRoutePart('article', 'id') : null;
+  const routeArticleId = typeof laqpFirstRoutePart === 'function'
+    ? (laqpFirstRoutePart('guia', 'id') || laqpFirstRoutePart('article', 'id'))
+    : null;
   const articles = await getArticles();
   const article = articles.find(item => item.id === (routeArticleId || params.get('id'))) || articles[0];
   if (!article) {

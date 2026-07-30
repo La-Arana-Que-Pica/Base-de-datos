@@ -463,6 +463,19 @@ const IDEAL_POSITION_DEPTH = {
 const CONMEBOL_COUNTRIES = new Set(['144', '145', '146', '147', '148', '149', '150', '151', '152', '153']);
 const EUROPE_COUNTRIES = new Set(['194', '196', '197', '198', '199', '200', '201', '202', '203', '204', '207', '208', '209', '210', '211', '212', '213', '214', '215', '219', '221', '223', '224', '225', '226', '227', '228', '229', '230', '232', '234', '235', '236', '237', '238', '239', '241', '303', '304', '311']);
 const COUNTRY_NAMES = {
+  '7': 'China', '8': 'Hong Kong', '9': 'India', '10': 'Indonesia', '11': 'Iran',
+  '12': 'Irak', '13': 'Japon', '14': 'Jordania', '15': 'Corea del Norte',
+  '16': 'Corea del Sur', '17': 'Kuwait', '19': 'Libano', '21': 'Malasia',
+  '26': 'Oman', '30': 'Qatar', '31': 'Arabia Saudita', '32': 'Singapur',
+  '34': 'Siria', '36': 'Tailandia', '37': 'Emiratos Arabes Unidos', '38': 'Vietnam',
+  '44': 'Argelia', '45': 'Angola', '46': 'Benin', '48': 'Burkina Faso',
+  '49': 'Burundi', '50': 'Camerun', '51': 'Cabo Verde', '52': 'Republica Centroafricana',
+  '55': 'Congo DR', '56': 'Costa de Marfil', '58': 'Egipto', '59': 'Guinea Ecuatorial',
+  '62': 'Gabon', '63': 'Gambia', '64': 'Ghana', '65': 'Guinea',
+  '66': 'Guinea-Bisau', '70': 'Libia', '71': 'Madagascar', '73': 'Mali',
+  '74': 'Mauritania', '76': 'Marruecos', '77': 'Mozambique', '79': 'Niger',
+  '80': 'Nigeria', '83': 'Senegal', '85': 'Sierra Leona', '87': 'Sudafrica',
+  '90': 'Tanzania', '91': 'Togo', '92': 'Tunez', '94': 'Zambia', '95': 'Zimbabue',
   '144': 'Argentina', '145': 'Bolivia', '146': 'Brasil', '147': 'Chile', '148': 'Colombia',
   '149': 'Ecuador', '150': 'Paraguay', '151': 'Peru', '152': 'Uruguay', '153': 'Venezuela',
   '110': 'Canada', '112': 'Costa Rica', '120': 'Haiti', '121': 'Honduras', '122': 'Jamaica',
@@ -473,6 +486,7 @@ const COUNTRY_NAMES = {
   '202': 'Rep. Checa', '203': 'Dinamarca', '204': 'Inglaterra', '207': 'Finlandia',
   '208': 'Francia', '209': 'Georgia', '210': 'Alemania', '211': 'Grecia',
   '212': 'Hungria', '213': 'Islandia', '214': 'Irlanda', '215': 'Italia',
+  '217': 'Letonia',
   '219': 'Lituania', '221': 'Macedonia del Norte', '223': 'Moldavia', '224': 'Paises Bajos',
   '225': 'Irlanda del Norte', '226': 'Noruega', '227': 'Polonia', '228': 'Portugal',
   '229': 'Rumania', '230': 'Rusia', '232': 'Escocia', '234': 'Eslovaquia',
@@ -2313,7 +2327,7 @@ async function initScouting() {
     fetchText('database/All squads exported.csv'),
     fetchText('database/All leagues exported.csv'),
     fetchText('database/medias_corregidas.csv'),
-    fetchText('F%C3%B3rmula%20Medias/output/formulas_por_posicion.json'),
+    fetchText('assets/data/formulas_por_posicion.json'),
   ]);
 
   if (!playersText || !teamsText || !squadsText) {

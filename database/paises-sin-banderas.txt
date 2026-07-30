@@ -1,0 +1,41 @@
+Paises usados en la base que no tienen bandera
+Archivo esperado: img/flags/{id}.webp
+
+ID;Pais;Referencia encontrada
+7;China;Equipos: CHINA, HUANGYING QINGSHUN, JIANGSU SUNING FC, GUANGZHOU EVERGRANDE, SHANGHAI SIPG FC
+8;Hong Kong;Equipo: EASTERN SC
+9;India;Equipo: BHARSHAPUR
+11;Iran;Equipos: IRAN, SAYRAMSKAL, ZANGRHAN, ESTEGHLAL FC, ZOB AHAN FC
+12;Irak;Jugador: H. Abdulkareem / Equipo: IRAK
+14;Jordania;Jugador: M. Al Tamari / Equipo: JORDANIA
+15;Corea del Norte;Equipo: COREA DEL NORTE
+17;Kuwait;Equipo: KUWAIT
+19;Libano;Equipo: LIBANO
+26;Oman;Equipo: OMAN
+30;Qatar;Equipos: QATAR, QATOREJAN, AL RAYYAN SC, LEKHWIYA SC
+32;Singapur;Equipo: FONTANA CITY
+36;Tailandia;Jugador: E. Garnier / Equipos: TAILANDIA, KRUNGTHEP UNITED, MUANG THONG UNITED
+37;Emiratos Arabes Unidos;Equipos: EMIRATOS ARABES UNIDOS, ALMORFIDA, KHARIMSHARJAH, AL AIN SCC, AL JAZIRA SCC
+38;Vietnam;Equipo: HAIPHONG ATHLETIC
+46;Benin;Jugador: A. Tosin
+49;Burundi;Jugador: Y. Ndayishimiye
+71;Madagascar;Jugador: M. Acapandie
+74;Mauritania;Jugadores: J. Lefort, O. Ngom
+85;Sierra Leona;Jugador: J. Bah
+90;Tanzania;Jugador: M. Samatta
+217;Letonia;Jugador: D. Cirkin
+
+Paises nuevos agregados al mapa de nombres
+
+ID;Pais;Motivo
+8;Hong Kong;Antes aparecia como numero en filtros/listados
+9;India;Antes aparecia como numero en filtros/listados
+32;Singapur;Antes aparecia como numero en filtros/listados
+38;Vietnam;Antes aparecia como numero en filtros/listados
+46;Benin;Antes aparecia como numero en filtros/listados
+49;Burundi;Antes aparecia como numero en filtros/listados
+71;Madagascar;Antes aparecia como numero en filtros/listados
+74;Mauritania;Antes aparecia como numero en filtros/listados
+85;Sierra Leona;Antes aparecia como numero en filtros/listados
+90;Tanzania;Antes aparecia como numero en filtros/listados
+217;Letonia;Antes aparecia como numero en filtros/listados
