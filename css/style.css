@@ -36,6 +36,126 @@
   --header-height: 52px;
 }
 
+/* Advertising slots */
+.ad-slot {
+  width: 100%;
+  max-width: 100%;
+  margin: 30px auto;
+  overflow: hidden;
+  background: transparent;
+  text-align: center;
+  contain: layout;
+}
+
+.ad-slot__label {
+  display: block;
+  margin: 0 0 8px;
+  color: var(--color-text-muted, #8e9299);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ad-slot__content {
+  display: flex;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  align-items: flex-start;
+  justify-content: center;
+  transition: min-height 0.18s ease;
+}
+
+.ad-slot[data-ad-state="loading"][data-ad-variant="desktop"] .ad-slot__content {
+  min-height: 90px;
+}
+
+.ad-slot[data-ad-state="loading"][data-ad-variant="mobile"] .ad-slot__content {
+  min-height: 50px;
+}
+
+.ad-slot[data-ad-state="loading"][data-ad-variant="rectangle"] .ad-slot__content {
+  min-height: 250px;
+}
+
+.ad-slot[data-ad-state="loading"][data-ad-variant="native"] .ad-slot__content {
+  min-height: 120px;
+}
+
+.ad-slot[data-ad-state="disabled"],
+.ad-slot[data-ad-state="consent-blocked"],
+.ad-slot[data-ad-state="unsupported-width"],
+.ad-slot[data-ad-state="unsafe-late-render"],
+.ad-slot[data-ad-state="duplicate-blocked"],
+.ad-slot[data-ad-state="empty"],
+.ad-slot[data-ad-state="error"] {
+  display: none;
+  margin: 0;
+}
+
+.ad-slot iframe,
+.ad-slot img,
+.ad-slot object,
+.ad-slot embed {
+  max-width: none;
+}
+
+.ad-placement:empty {
+  display: none;
+}
+
+.ad-bootstrap {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: min(100%, 1400px);
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.ad-bootstrap .ad-slot {
+  width: calc(100vw - 64px);
+  max-width: 1336px;
+}
+
+.ad-bootstrap--database .ad-slot {
+  width: calc(100vw - var(--sidebar-width, 220px) - 48px);
+}
+
+@media (min-width: 769px) {
+  body:has(#layout) #main {
+    flex: 0 0 calc(100% - var(--sidebar-width));
+    width: calc(100% - var(--sidebar-width));
+    min-width: 0;
+  }
+}
+
+#laqp-ad-parking {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .ad-slot {
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
+
+  .ad-slot__label {
+    margin-bottom: 7px;
+    font-size: 0.58rem;
+  }
+
+  .ad-bootstrap .ad-slot,
+  .ad-bootstrap--database .ad-slot {
+    width: calc(100vw - 32px);
+  }
+}
+
 html {
   font-size: 82%;
 }
@@ -28695,5 +28815,969 @@ body:has(#rankings-page) #header .logo,
 
   .media-calculator-redesign .tool-value-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile navigation comfort pass */
+@media (max-width: 760px) {
+  :root {
+    --header-height: 58px;
+  }
+
+  #header,
+  body:has(#rankings-page) #header,
+  .landing-body #header {
+    height: var(--header-height) !important;
+    min-height: var(--header-height) !important;
+    gap: 8px !important;
+    overflow: hidden !important;
+    padding: 0 8px !important;
+  }
+
+  #header .logo,
+  body:has(#rankings-page) #header .logo,
+  .landing-body #header .logo {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  #header .header-title,
+  body:has(#rankings-page) #header .header-title,
+  .landing-body #header .header-title {
+    flex: 0 1 122px !important;
+    max-width: 122px !important;
+    font-size: 0.74rem !important;
+    line-height: 1.05 !important;
+  }
+
+  #header .header-title span,
+  body:has(#rankings-page) #header .header-title span,
+  .landing-body #header .header-title span {
+    display: none !important;
+  }
+
+  #header .header-menu-toggle,
+  body:has(#rankings-page) #header .header-menu-toggle,
+  .landing-body #header .header-menu-toggle,
+  #header #search-container,
+  #header > .language-switcher {
+    display: none !important;
+  }
+
+  #header .header-nav,
+  body:has(#rankings-page) .header-nav,
+  .landing-body .header-nav {
+    position: static !important;
+    display: flex !important;
+    flex: 1 1 auto !important;
+    align-self: center !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 2px 0 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    visibility: visible !important;
+    scrollbar-width: none !important;
+  }
+
+  #header .header-nav::-webkit-scrollbar,
+  body:has(#rankings-page) .header-nav::-webkit-scrollbar,
+  .landing-body .header-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #header .header-nav-link,
+  #header .header-nav-link-primary,
+  body:has(#rankings-page) .header-nav-link,
+  .landing-body .header-nav-link,
+  .landing-body .header-nav-link-primary {
+    flex: 0 0 auto !important;
+    min-height: 34px !important;
+    padding: 0 11px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: rgba(245, 245, 245, 0.82) !important;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  #header .header-nav-link.active,
+  #header .header-nav-link-primary.active,
+  body:has(#rankings-page) .header-nav-link.active,
+  .landing-body .header-nav-link.active,
+  .landing-body .header-nav-link-primary.active {
+    border-color: rgba(214, 168, 79, 0.46) !important;
+    background: rgba(214, 168, 79, 0.13) !important;
+    color: var(--color-highlight) !important;
+  }
+
+  #header .header-nav-link.active::after,
+  #header .header-nav-link-primary.active::after,
+  body:has(#rankings-page) .header-nav-link.active::after,
+  .landing-body .header-nav-link.active::after,
+  .landing-body .header-nav-link-primary.active::after {
+    content: none !important;
+  }
+
+  #layout {
+    margin-top: var(--header-height) !important;
+  }
+
+  #sidebar {
+    top: var(--header-height) !important;
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 7px !important;
+    padding: 7px 10px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    background: rgba(11, 11, 13, 0.98) !important;
+  }
+
+  #sidebar .sidebar-nav-section {
+    flex: 0 0 auto !important;
+  }
+
+  #sidebar .db-sidebar-btn {
+    min-height: 34px !important;
+    padding: 0 13px !important;
+    border-radius: 999px !important;
+    font-size: 0.72rem !important;
+  }
+
+  body:has(#layout) #main,
+  #player-page,
+  #team-page,
+  #league-page {
+    margin-left: 0 !important;
+    padding: 10px !important;
+  }
+
+  .db-dashboard {
+    gap: 10px !important;
+  }
+
+  .db-hero-panel {
+    padding: 12px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .db-section-kicker {
+    margin-bottom: 4px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .db-hero-copy h1 {
+    font-size: 1.18rem !important;
+  }
+
+  .db-hero-copy p {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.78rem !important;
+    line-height: 1.38 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .db-static-note {
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .db-home-search {
+    grid-template-columns: 22px minmax(180px, 1fr) auto !important;
+    gap: 7px !important;
+    overflow-x: auto !important;
+    padding: 7px !important;
+    scrollbar-width: none !important;
+  }
+
+  .db-home-search::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .db-home-search input {
+    height: 34px !important;
+  }
+
+  .db-home-search button {
+    grid-column: auto !important;
+    min-width: max-content !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+  }
+
+  .db-stat-tiles {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 8px !important;
+    margin: 10px -2px 0 !important;
+    overflow-x: auto !important;
+    padding: 0 2px 4px !important;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none !important;
+  }
+
+  .db-stat-tiles::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .db-stat-tile {
+    flex: 0 0 118px !important;
+    min-height: 76px !important;
+    padding: 9px 10px !important;
+    scroll-snap-align: start;
+  }
+
+  .db-stat-tile span {
+    font-size: 0.66rem !important;
+  }
+
+  .db-stat-tile strong {
+    font-size: 1.08rem !important;
+  }
+
+  .db-stat-tile small {
+    font-size: 0.64rem !important;
+  }
+
+  .db-home-content-grid,
+  .db-dashboard-aside {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 10px !important;
+    margin-right: -10px !important;
+    overflow-x: auto !important;
+    padding-right: 10px !important;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none !important;
+  }
+
+  .db-home-content-grid::-webkit-scrollbar,
+  .db-dashboard-aside::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .db-home-content-grid > .db-panel,
+  .db-dashboard-aside > .db-panel {
+    flex: 0 0 min(88vw, 360px) !important;
+    scroll-snap-align: start;
+  }
+
+  .db-featured-teams {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .db-feature-team {
+    min-height: 86px !important;
+    padding: 9px 7px !important;
+  }
+
+  .db-feature-team img {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .db-feature-team small {
+    display: none !important;
+  }
+
+  #db-featured-leagues {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .db-side-league,
+  .league-mini-row {
+    min-height: 54px !important;
+    padding: 8px !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  #leagues-view .view-header,
+  #teams-grid-view .view-header,
+  .team-filter-panel {
+    padding: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  #leagues-view .view-header,
+  #teams-grid-view .view-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  #leagues-view .view-title,
+  #teams-grid-view .view-title {
+    font-size: 1rem !important;
+  }
+
+  #leagues-view .view-subtitle,
+  #teams-grid-view .view-subtitle {
+    font-size: 0.74rem !important;
+  }
+
+  #leagues-view .grid-search-wrap {
+    margin-bottom: 10px !important;
+  }
+
+  #leagues-view .grid-search-input {
+    min-height: 38px !important;
+  }
+
+  #leagues-view .grid-cards,
+  #teams-grid-view .grid-cards {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    scroll-snap-type: none !important;
+  }
+
+  #leagues-view .grid-card,
+  #teams-grid-view .grid-card {
+    flex: initial !important;
+    min-height: 82px !important;
+    padding: 8px !important;
+    align-items: center !important;
+    display: grid !important;
+    grid-template-columns: 38px minmax(0, 1fr) auto !important;
+    gap: 7px !important;
+    text-align: left !important;
+  }
+
+  #leagues-view .grid-card-img,
+  #teams-grid-view .grid-card-img {
+    grid-row: 1 / span 3 !important;
+    width: 34px !important;
+    height: 34px !important;
+    margin: 0 !important;
+  }
+
+  #leagues-view .grid-card-kicker,
+  #teams-grid-view .grid-card-kicker,
+  #leagues-view .grid-card-action,
+  #teams-grid-view .grid-card-action {
+    display: none !important;
+  }
+
+  #leagues-view .grid-card-name,
+  #teams-grid-view .grid-card-name {
+    grid-column: 2 / -1 !important;
+    display: -webkit-box !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    font-size: 0.74rem !important;
+    line-height: 1.12 !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  #leagues-view .grid-card-sub,
+  #teams-grid-view .grid-card-sub {
+    grid-column: 2 / -1 !important;
+    margin: 0 !important;
+    font-size: 0.64rem !important;
+    line-height: 1.15 !important;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  #teams-grid-view .grid-card-ovr,
+  #leagues-view .db-team-card .grid-card-ovr {
+    position: static !important;
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    align-self: start !important;
+  }
+
+  #teams-grid-view .team-avg-badge,
+  #leagues-view .db-team-card .team-avg-badge {
+    min-width: 28px !important;
+    min-height: 22px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .team-filter-panel .filter-panel-head {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .team-filter-panel .filter-panel-title {
+    font-size: 0.84rem !important;
+  }
+
+  .team-filter-panel .filter-panel-subtitle {
+    display: none !important;
+  }
+
+  .team-filter-panel .filter-panel-actions {
+    width: auto !important;
+    display: flex !important;
+    gap: 6px !important;
+  }
+
+  .team-filter-panel .advanced-filter-toggle,
+  .team-filter-panel .adv-filter-reset {
+    flex: 0 0 auto !important;
+    min-height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 0.68rem !important;
+  }
+
+  #team-filter-body:not([hidden]) {
+    max-height: min(58vh, 420px) !important;
+    overflow-y: auto !important;
+    padding-right: 2px !important;
+  }
+
+  .team-filter-panel .adv-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .team-filter-panel .adv-filter-group {
+    min-width: 0 !important;
+  }
+
+  .team-filter-panel .adv-filter-group label {
+    font-size: 0.66rem !important;
+  }
+
+  .team-filter-panel input,
+  .team-filter-panel select {
+    min-height: 34px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .team-filter-panel .adv-filter-range {
+    grid-column: span 2 !important;
+  }
+
+  .active-filters {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    padding-bottom: 2px !important;
+    scrollbar-width: none !important;
+  }
+
+  .active-filters::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .active-filter-tags {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+  }
+
+  .pagination {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 50 !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    gap: 6px !important;
+    margin: 12px -10px -10px !important;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom)) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(8, 8, 10, 0.96) !important;
+    backdrop-filter: blur(10px);
+  }
+
+  .pagination .page-numbers {
+    display: flex !important;
+    max-width: 42vw !important;
+    gap: 5px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+  }
+
+  .pagination .page-numbers::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .pagination .page-btn {
+    min-width: 34px !important;
+    min-height: 34px !important;
+    padding: 0 9px !important;
+    border-radius: 999px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .pagination .page-nav {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 460px) {
+  #header .header-title,
+  body:has(#rankings-page) #header .header-title,
+  .landing-body #header .header-title {
+    flex-basis: 78px !important;
+    max-width: 78px !important;
+  }
+
+  #header .header-nav-link,
+  #header .header-nav-link-primary,
+  body:has(#rankings-page) .header-nav-link,
+  .landing-body .header-nav-link,
+  .landing-body .header-nav-link-primary {
+    min-height: 32px !important;
+    padding-inline: 10px !important;
+    font-size: 0.68rem !important;
+  }
+
+  #leagues-view .grid-cards,
+  #teams-grid-view .grid-cards {
+    gap: 7px !important;
+  }
+
+  #leagues-view .grid-card,
+  #teams-grid-view .grid-card {
+    min-height: 76px !important;
+    grid-template-columns: 32px minmax(0, 1fr) auto !important;
+    gap: 6px !important;
+    padding: 7px !important;
+  }
+
+  #leagues-view .grid-card-img,
+  #teams-grid-view .grid-card-img {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  #leagues-view .grid-card-name,
+  #teams-grid-view .grid-card-name {
+    font-size: 0.68rem !important;
+  }
+
+  #leagues-view .grid-card-sub,
+  #teams-grid-view .grid-card-sub {
+    font-size: 0.6rem !important;
+  }
+
+  .team-filter-panel .adv-filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .team-filter-panel .adv-filter-range {
+    grid-column: auto !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .league-static-detail .static-stats-table,
+  .team-static-detail .static-stats-table,
+  .player-static-detail .static-stats-table {
+    display: block !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  .league-static-detail .static-stats-table thead,
+  .team-static-detail .static-stats-table thead {
+    display: none !important;
+  }
+
+  .league-static-detail .static-stats-table tbody,
+  .team-static-detail .static-stats-table tbody,
+  .player-static-detail .static-stats-table tbody {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .league-static-detail .static-stats-table tr,
+  .team-static-detail .static-stats-table tr,
+  .player-static-detail .static-stats-table tr {
+    display: grid !important;
+    min-width: 0 !important;
+    padding: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+  }
+
+  .league-static-detail .static-stats-table td,
+  .team-static-detail .static-stats-table td,
+  .player-static-detail .static-stats-table th,
+  .player-static-detail .static-stats-table td {
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  .league-static-detail .static-stats-table td:first-child,
+  .team-static-detail .static-stats-table td:first-child {
+    min-width: 0 !important;
+  }
+
+  .league-static-detail .static-stats-table a,
+  .team-static-detail .static-stats-table a {
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    color: var(--color-text) !important;
+    font-size: 0.78rem !important;
+    line-height: 1.15 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .league-static-detail .static-stats-table td:not(:first-child),
+  .team-static-detail .static-stats-table td:not(:first-child) {
+    display: inline-flex !important;
+    margin-top: 5px !important;
+    color: var(--color-text-muted) !important;
+    font-size: 0.68rem !important;
+  }
+
+  .team-static-detail .static-stats-table tr {
+    grid-template-columns: minmax(0, 1fr) auto auto auto !important;
+    gap: 5px 6px !important;
+    align-items: center !important;
+  }
+
+  .team-static-detail .static-stats-table td:first-child {
+    grid-column: 1 / -1 !important;
+  }
+
+  .team-static-detail .static-stats-table td:nth-child(3) {
+    color: var(--color-highlight) !important;
+    font-weight: 900 !important;
+  }
+
+  .player-static-detail .static-stats-table tr {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 8px !important;
+    align-items: center !important;
+  }
+
+  .player-static-detail .static-stats-table th {
+    overflow: hidden !important;
+    color: var(--color-text-muted) !important;
+    background: transparent !important;
+    font-size: 0.68rem !important;
+    line-height: 1.15 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .player-static-detail .static-stats-table td {
+    color: var(--color-highlight) !important;
+    font-size: 0.82rem !important;
+    font-weight: 900 !important;
+  }
+
+  .download-detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+/* Compact catalog for the full tactics list. Popular tactics keep their own cards. */
+#history-tactics-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 10px !important;
+  overflow: visible !important;
+  scroll-snap-type: none !important;
+}
+
+#history-tactics-list .history-tactic-card {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-areas:
+    "cover summary"
+    "cover formation"
+    "cover actions";
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border-color: rgba(214, 168, 79, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+}
+
+#history-tactics-list .history-tactic-card:hover {
+  border-color: rgba(214, 168, 79, 0.42);
+  background: linear-gradient(135deg, rgba(214, 168, 79, 0.09), rgba(255, 255, 255, 0.02));
+}
+
+#history-tactics-list .history-tactic-cover {
+  grid-area: cover;
+  align-self: stretch;
+  min-height: 100%;
+}
+
+#history-tactics-list .history-tactic-cover-image {
+  opacity: 0.42;
+}
+
+#history-tactics-list .history-tactic-cover-shade {
+  background: linear-gradient(90deg, rgba(8, 8, 10, 0.12), rgba(8, 8, 10, 0.8));
+}
+
+#history-tactics-list .history-tactic-badge {
+  top: 50%;
+  left: 50%;
+  width: 56px;
+  height: 56px;
+  padding: 5px;
+  transform: translate(-50%, -50%);
+}
+
+#history-tactics-list .history-tactic-summary {
+  grid-area: summary;
+  padding: 12px 12px 6px;
+}
+
+#history-tactics-list .history-tactic-season {
+  font-size: 0.58rem;
+}
+
+#history-tactics-list .history-tactic-summary h2 {
+  display: -webkit-box;
+  margin: 4px 0 2px;
+  overflow: hidden;
+  font-size: 1rem;
+  line-height: 1.08;
+  text-overflow: clip;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+#history-tactics-list .history-tactic-summary > strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(214, 168, 79, 0.92);
+  font-size: 0.66rem;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+#history-tactics-list .history-tactic-summary p {
+  display: -webkit-box;
+  margin: 6px 0 0;
+  overflow: hidden;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+#history-tactics-list .history-tactic-summary .history-secondary-button,
+#history-tactics-list .history-tactic-section-label,
+#history-tactics-list .history-tactic-pitch {
+  display: none !important;
+}
+
+#history-tactics-list .history-tactic-formation {
+  grid-area: formation;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  padding: 0 12px 8px;
+  border: 0;
+}
+
+#history-tactics-list .history-tactic-formation > span {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border: 1px solid rgba(214, 168, 79, 0.24);
+  border-radius: 999px;
+  background: rgba(214, 168, 79, 0.08);
+  color: var(--color-highlight);
+  font-size: 0.62rem;
+}
+
+#history-tactics-list .history-tactic-actions {
+  grid-area: actions;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 0 12px 12px;
+  border: 0;
+}
+
+#history-tactics-list .history-tactic-settings {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+}
+
+#history-tactics-list .history-tactic-settings div {
+  min-width: 0;
+  max-width: 100%;
+  display: inline-flex;
+  grid-template-columns: none;
+  gap: 4px;
+  align-items: center;
+  padding: 5px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+#history-tactics-list .history-tactic-settings div:nth-child(n + 4) {
+  display: none;
+}
+
+#history-tactics-list .history-tactic-settings dt,
+#history-tactics-list .history-tactic-settings dd {
+  max-width: 92px;
+  overflow: hidden;
+  font-size: 0.58rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#history-tactics-list .history-tactic-settings dt {
+  color: rgba(214, 168, 79, 0.88);
+}
+
+#history-tactics-list .history-tactic-settings dd {
+  color: #fff;
+  font-weight: 900;
+  text-align: left;
+}
+
+#history-tactics-list .history-primary-button {
+  min-height: 30px;
+  margin-top: 0;
+  padding: 0 10px;
+  font-size: 0.58rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  #history-tactics-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  #history-tactics-list {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 8px !important;
+    overflow: visible !important;
+  }
+
+  #history-tactics-list .history-tactic-card {
+    flex: initial;
+    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-areas:
+      "cover summary"
+      "cover formation"
+      "cover actions";
+    grid-template-rows: auto;
+    min-height: 116px;
+    scroll-snap-align: unset;
+  }
+
+  #history-tactics-list .history-tactic-badge {
+    width: 44px;
+    height: 44px;
+    padding: 4px;
+  }
+
+  #history-tactics-list .history-tactic-summary {
+    padding: 9px 10px 4px;
+  }
+
+  #history-tactics-list .history-tactic-summary h2 {
+    font-size: 0.88rem;
+    -webkit-line-clamp: 1;
+  }
+
+  #history-tactics-list .history-tactic-summary > strong {
+    font-size: 0.6rem;
+  }
+
+  #history-tactics-list .history-tactic-summary p {
+    font-size: 0.64rem;
+    -webkit-line-clamp: 1;
+  }
+
+  #history-tactics-list .history-tactic-formation {
+    padding: 0 10px 6px;
+  }
+
+  #history-tactics-list .history-tactic-formation > span {
+    min-height: 22px;
+    padding-inline: 7px;
+    font-size: 0.58rem;
+  }
+
+  #history-tactics-list .history-tactic-actions {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    padding: 0 10px 10px;
+  }
+
+  #history-tactics-list .history-tactic-settings div:nth-child(n + 3) {
+    display: none;
+  }
+
+  #history-tactics-list .history-primary-button {
+    width: 100%;
+  }
+}
+
+/* Keep database ad placements in the intended flow when desktop wrappers use display: contents. */
+@media (min-width: 1161px) {
+  .db-dashboard {
+    grid-template-rows: auto auto auto auto;
+  }
+
+  .db-dashboard [data-ad-placement="database-top"] {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .db-dashboard .db-home-content-grid,
+  .db-dashboard .db-side-favorites {
+    grid-row: 3;
+  }
+
+  .db-dashboard [data-ad-placement="database-bottom"] {
+    grid-column: 1 / -1;
+    grid-row: 4;
   }
 }

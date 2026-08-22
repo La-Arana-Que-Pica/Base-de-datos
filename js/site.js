@@ -301,7 +301,7 @@ function renderCookieConsent() {
   banner.innerHTML = `
     <div class="cookie-consent-copy">
       <strong>Cookies y anuncios</strong>
-      <p>LAqP usa cookies tecnicas para recordar preferencias y puede usar Google Analytics/AdSense para medicion y publicidad. Podes aceptar o rechazar las cookies no esenciales.</p>
+      <p>LAqP usa cookies tecnicas para recordar preferencias y puede usar Google Analytics, Google AdSense y Adsterra para medicion y publicidad. Podes aceptar o rechazar las cookies no esenciales.</p>
     </div>
     <div class="cookie-consent-actions">
       <a href="cookies.html">Ver detalles</a>

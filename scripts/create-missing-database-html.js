@@ -109,6 +109,24 @@ function hydrationGateScript() {
   return `<script>document.documentElement.classList.add('laqp-js');window.setTimeout(function(){document.documentElement.classList.add('laqp-js-timeout');},6000);</script>`;
 }
 
+function adSlotMarkup(unit, placement, context = 'profile') {
+  const format = unit === 'responsive' ? 'responsive' : unit === 'rectangle' ? '300x250' : 'native';
+  return `<aside class="ad-slot" aria-label="Publicidad" data-ad-slot="${escapeHtml(placement)}" data-ad-unit="${unit}" data-ad-format="${format}" data-ad-context="${context}" data-ad-state="pending">
+    <span class="ad-slot__label">Publicidad</span>
+    <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
+  </aside>`;
+}
+
+function adPlacementMarkup(unit, placement) {
+  return `<div class="ad-placement" data-ad-placement="${escapeHtml(placement)}" data-ad-unit-target="${unit}"></div>`;
+}
+
+function adBootstrapMarkup(units, context = 'profile') {
+  return `<div class="ad-bootstrap ad-bootstrap--${context}" aria-hidden="true">${units
+    .map(({ unit, placement }) => adSlotMarkup(unit, placement, context))
+    .join('')}</div>`;
+}
+
 function prepareTemplate(fileName, options) {
   let html = fs.readFileSync(path.join(rootDir, fileName), 'utf8');
   html = html.replace(/<head>/, `<head>\n  <base href="/">\n  ${options.embeddedMeta || ''}`);
@@ -168,6 +186,7 @@ function playerHtml(player, team, pathname) {
   <meta name="twitter:image" content="${imageUrl}">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="img/logo.webp" type="image/webp">
+  <script src="js/ads.js"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -211,6 +230,7 @@ function playerHtml(player, team, pathname) {
             </div>
           </div>
         </header>
+        ${adPlacementMarkup('responsive', 'player-top')}
         <section class="download-detail-grid">
           <div>
             <h2>Datos principales</h2>
@@ -228,11 +248,18 @@ function playerHtml(player, team, pathname) {
             <table class="static-stats-table"><tbody>${statsRows}</tbody></table>
           </div>
         </section>
+        ${adPlacementMarkup('rectangle', 'player-mid')}
+        ${adPlacementMarkup('native', 'player-bottom')}
       </article>
       <noscript><p>Esta ficha contiene datos estaticos para editar el jugador en PES 2018 actualizado.</p></noscript>
       </div>
     </div>
   </div>
+  ${adBootstrapMarkup([
+    { unit: 'responsive', placement: 'player-top' },
+    { unit: 'rectangle', placement: 'player-mid' },
+    { unit: 'native', placement: 'player-bottom' },
+  ])}
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/favorites.js"></script>
@@ -280,6 +307,7 @@ function teamHtml(team, squadPlayers, pathname) {
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="img/logo.webp" type="image/webp">
+  <script src="js/ads.js"></script>
 </head>
 <body>
   <header id="header">
@@ -297,11 +325,19 @@ function teamHtml(team, squadPlayers, pathname) {
           <img src="img/teams/${escapeHtml(team.Id)}.webp" alt="Escudo de ${teamName}" width="120" height="120" loading="eager" onerror="this.onerror=null;this.src='img/teams/default.webp'">
           <div><h1>${teamName}</h1><p>${escapeHtml(description)}</p><p>${squadPlayers.length} jugadores detectados en la plantilla exportada.</p></div>
         </header>
+        ${adPlacementMarkup('responsive', 'team-top')}
+        ${adPlacementMarkup('rectangle', 'team-mid')}
         <section><h2>Plantilla</h2><table class="static-stats-table"><thead><tr><th>Jugador</th><th>Pos</th><th>Media</th><th>Edad</th></tr></thead><tbody>${rows}</tbody></table></section>
+        ${adPlacementMarkup('native', 'team-bottom')}
       </article>
       </div>
     </div>
   </div>
+  ${adBootstrapMarkup([
+    { unit: 'responsive', placement: 'team-top' },
+    { unit: 'rectangle', placement: 'team-mid' },
+    { unit: 'native', placement: 'team-bottom' },
+  ])}
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/favorites.js"></script>
@@ -341,6 +377,7 @@ function leagueHtml(league, leagueTeams, pathname) {
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="img/logo.webp" type="image/webp">
+  <script src="js/ads.js"></script>
 </head>
 <body>
   <header id="header">
@@ -361,11 +398,17 @@ function leagueHtml(league, leagueTeams, pathname) {
           <p>Esta pagina agrupa los equipos actualizados de ${leagueName} para PES 2018. Desde cada equipo podes abrir su plantilla completa, revisar medias, posiciones y enlaces hacia fichas individuales.</p>
           <p>Los datos funcionan como referencia para editar el juego: plantillas, stats, equipos, ligas y caras/minifaces cuando estan disponibles.</p>
         </section>
+        ${adPlacementMarkup('responsive', 'league-top')}
         <section><h2>Equipos</h2><table class="static-stats-table"><thead><tr><th>Equipo</th><th>ID</th><th>Nacionalidad</th></tr></thead><tbody>${rows}</tbody></table></section>
+        ${adPlacementMarkup('native', 'league-bottom')}
       </article>
       </div>
     </div>
   </div>
+  ${adBootstrapMarkup([
+    { unit: 'responsive', placement: 'league-top' },
+    { unit: 'native', placement: 'league-bottom' },
+  ])}
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/league.js"></script>

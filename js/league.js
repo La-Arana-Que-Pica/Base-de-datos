@@ -118,6 +118,7 @@ function teamAvgOvr(players) {
 
 function renderLeaguePage(league, teams) {
   const content = document.getElementById('league-content');
+  window.LAQPAds?.preserve(content);
 
   const cardsHtml = teams.map(t => {
     const avg = teamAvgOvr(t.players);
@@ -154,7 +155,14 @@ function renderLeaguePage(league, teams) {
       </div>
     </div>
 
-    <div class="grid-cards">${cardsHtml}</div>`;
+    <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
+
+    <div class="grid-cards">${cardsHtml}</div>
+
+    <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="native"></div>`;
+
+  window.LAQPAds?.placeAll(content);
+  window.LAQPAds?.monitorAll(content);
 
   document.documentElement.classList.add('laqp-hydrated');
   content.style.display = 'block';

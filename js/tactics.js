@@ -581,7 +581,7 @@ async function renderTacticsIndex() {
 
     <div class="history-list-heading">
       <div>
-        <span class="history-kicker">Colección LAqP</span>
+        <span class="history-kicker">Catalogo completo</span>
         <h2>Todas las tácticas</h2>
       </div>
       <strong id="history-tactics-status"></strong>

@@ -1736,6 +1736,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
        </button>`
     : '';
 
+  window.LAQPAds?.preserve(content);
   content.innerHTML = `
     <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
       <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html'}">${t('common.home')}</a>
@@ -1806,7 +1807,11 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
       </div>
 
+      <div class="ad-placement" data-ad-placement="player-top" data-ad-unit-target="responsive"></div>
+
       ${renderPlayerEditorial(player, team, pesPosition, similarPlayers)}
+
+      <div class="ad-placement" data-ad-placement="player-mid" data-ad-unit-target="rectangle"></div>
 
       <!-- Tabs -->
       <div class="profile-tabs">
@@ -1827,9 +1832,14 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
         </div>
       </div>
 
+      <div class="ad-placement" data-ad-placement="player-bottom" data-ad-unit-target="native"></div>
+
       ${renderSimilarPlayers(similarPlayers)}
 
     </div>`;
+
+  window.LAQPAds?.placeAll(content);
+  window.LAQPAds?.monitorAll(content);
 
   document.documentElement.classList.add('laqp-hydrated');
   content.style.display = 'block';

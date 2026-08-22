@@ -889,6 +889,7 @@ function _showLeaguesViewInternal() {
   hideAllViews();
   const view = document.getElementById('leagues-view');
   view.classList.add('active');
+  window.LAQPAds?.preserve(view);
 
   const cardsHtml = DB.leagues.map(renderLeagueGridCard).join('');
 
@@ -905,7 +906,11 @@ function _showLeaguesViewInternal() {
         placeholder="${t('db.searchLeague')}" autocomplete="off"
         oninput="filterLeaguesGrid(this.value)">
     </div>
-    <div class="grid-cards" id="leagues-grid-cards">${cardsHtml}</div>`;
+    <div class="ad-placement" data-ad-placement="directory-leagues-top" data-ad-unit-target="responsive"></div>
+    <div class="grid-cards" id="leagues-grid-cards">${cardsHtml}</div>
+    <div class="ad-placement" data-ad-placement="directory-leagues-bottom" data-ad-unit-target="native"></div>`;
+
+  window.LAQPAds?.placeAll(view);
 }
 
 function showLeaguesView() {
@@ -948,6 +953,7 @@ function _showLeagueTeamsViewInternal(leagueId) {
   hideAllViews();
   const view = document.getElementById('leagues-view');
   view.classList.add('active');
+  window.LAQPAds?.preserve(view);
 
   const cardsHtml = leagueTeams.map(renderTeamGridCard).join('');
 
@@ -964,7 +970,11 @@ function _showLeagueTeamsViewInternal(leagueId) {
       </div>
     </div>
     <button class="back-btn" onclick="showLeaguesView()" style="margin-bottom:16px">◀ Volver a Ligas</button>
-    <div class="grid-cards">${cardsHtml}</div>`;
+    <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
+    <div class="grid-cards">${cardsHtml}</div>
+    <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="native"></div>`;
+
+  window.LAQPAds?.placeAll(view);
 }
 
 // ─── Teams grid view ──────────────────────────────────────────────────────────
@@ -1150,6 +1160,7 @@ function _showTeamsViewInternal() {
   hideAllViews();
   const view = document.getElementById('teams-grid-view');
   view.classList.add('active');
+  window.LAQPAds?.preserve(view);
 
   view.innerHTML = `
     ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('common.teams') }])}
@@ -1160,10 +1171,13 @@ function _showTeamsViewInternal() {
       </div>
     </div>
     ${_buildTeamFiltersPanel()}
+    <div class="ad-placement" data-ad-placement="directory-teams-top" data-ad-unit-target="responsive"></div>
     <div class="grid-cards" id="teams-grid-cards"></div>
-    <div id="teams-grid-pagination"></div>`;
+    <div id="teams-grid-pagination"></div>
+    <div class="ad-placement" data-ad-placement="directory-teams-bottom" data-ad-unit-target="native"></div>`;
 
   _renderTeamsGridPage();
+  window.LAQPAds?.placeAll(view);
 }
 
 function showTeamsView() {
@@ -1548,6 +1562,7 @@ function showHome() {
     return;
   }
   homeView.classList.add('active');
+  window.LAQPAds?.placeAll(homeView);
 
   const teamsInLeaguesSet = _getTeamsInLeagues();
   const leagueCount = DB.leagues.length;
@@ -2421,6 +2436,7 @@ function _showAllPlayersInternal(resetPage) {
   hideAllViews();
   const view = document.getElementById('players-view');
   view.classList.add('active');
+  window.LAQPAds?.preserve(view);
 
   if (resetPage !== false) _allPlayersPage = 1;
   _prepareAllPlayersList();
@@ -2442,6 +2458,7 @@ function _showAllPlayersInternal(resetPage) {
       </div>
     </div>
     ${_buildFilterPanel()}
+    <div class="ad-placement" data-ad-placement="directory-players-top" data-ad-unit-target="responsive"></div>
     <div class="mobile-sort-controls" aria-label="${t('sort.players')}">
       <label for="mobile-player-sort-key">${t('sort.sort')}</label>
       <select id="mobile-player-sort-key" onchange="setMobilePlayerSort(this.value)">
@@ -2468,11 +2485,13 @@ function _showAllPlayersInternal(resetPage) {
         <tbody id="all-players-tbody"></tbody>
       </table>
     </div>
-    <div id="all-players-pagination"></div>`;
+    <div id="all-players-pagination"></div>
+    <div class="ad-placement" data-ad-placement="directory-players-bottom" data-ad-unit-target="native"></div>`;
 
 
   // Render the first page
   _renderPlayersPage();
+  window.LAQPAds?.placeAll(view);
 }
 
 function showAllPlayers(resetPage) {

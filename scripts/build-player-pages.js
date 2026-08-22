@@ -90,6 +90,7 @@ function pageHtml(player, team, pathname) {
   <meta name="twitter:image" content="${imageUrl}">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="img/logo.png" type="image/webp">
+  <script src="js/ads.js"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -113,6 +114,11 @@ function pageHtml(player, team, pathname) {
       <span class="loading-message" data-i18n="loading.player">Cargando jugador...</span>
     </div>
     <div id="player-content" style="display:none"></div>
+  </div>
+  <div class="ad-bootstrap ad-bootstrap--profile" aria-hidden="true">
+    <aside class="ad-slot" aria-label="Publicidad" data-ad-slot="player-top" data-ad-unit="responsive" data-ad-format="responsive" data-ad-context="profile" data-ad-state="pending"><span class="ad-slot__label">Publicidad</span><div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div></aside>
+    <aside class="ad-slot" aria-label="Publicidad" data-ad-slot="player-mid" data-ad-unit="rectangle" data-ad-format="300x250" data-ad-context="profile" data-ad-state="pending"><span class="ad-slot__label">Publicidad</span><div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div></aside>
+    <aside class="ad-slot" aria-label="Publicidad" data-ad-slot="player-bottom" data-ad-unit="native" data-ad-format="native" data-ad-context="profile" data-ad-state="pending"><span class="ad-slot__label">Publicidad</span><div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div></aside>
   </div>
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>

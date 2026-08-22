@@ -27,6 +27,24 @@ function ensureHydrationGate(html) {
   return html.replace('<head>', `<head>\n  ${hydrationGateScript()}`);
 }
 
+function adSlotMarkup(unit, placement, context = 'database') {
+  const format = unit === 'responsive' ? 'responsive' : unit === 'rectangle' ? '300x250' : 'native';
+  return `<aside class="ad-slot" aria-label="Publicidad" data-ad-slot="${escapeAttr(placement)}" data-ad-unit="${unit}" data-ad-format="${format}" data-ad-context="${context}" data-ad-state="pending">
+    <span class="ad-slot__label">Publicidad</span>
+    <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
+  </aside>`;
+}
+
+function adPlacementMarkup(unit, placement) {
+  return `<div class="ad-placement" data-ad-placement="${escapeAttr(placement)}" data-ad-unit-target="${unit}"></div>`;
+}
+
+function adBootstrapMarkup(units, context = 'database') {
+  return `<div class="ad-bootstrap ad-bootstrap--${context}" aria-hidden="true">${units
+    .map(({ unit, placement }) => adSlotMarkup(unit, placement, context))
+    .join('')}</div>`;
+}
+
 function wait(ms) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
@@ -959,6 +977,7 @@ function renderDatabaseListPages(data) {
   <link rel="canonical" href="${SITE_URL}/${canonicalPaths[view]}">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="img/logo.webp" type="image/webp">
+  <script src="js/ads.js"></script>
 </head>
 <body>
   <header id="header">
@@ -991,6 +1010,10 @@ function renderDatabaseListPages(data) {
       <div id="favorites-view"></div>
     </main>
   </div>
+  ${adBootstrapMarkup([
+    { unit: 'responsive', placement: `directory-${view}-top` },
+    { unit: 'native', placement: `directory-${view}-bottom` },
+  ])}
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/favorites.js"></script>
@@ -1008,6 +1031,7 @@ function renderDatabaseListPages(data) {
         <div class="view-subtitle">${directoryPlayers.length.toLocaleString('es-AR')} jugadores actualizados con stats, medias, equipos y referencias de edicion</div>
       </div>
     </div>
+    ${adPlacementMarkup('responsive', 'directory-players-top')}
     <div class="table-responsive">
       <table class="players-table players-table--directory">
         <thead><tr><th></th><th>Jugador</th><th>Equipo</th><th>Pos</th><th>Media</th><th>Edad</th></tr></thead>
@@ -1026,7 +1050,8 @@ function renderDatabaseListPages(data) {
           }).join('')}
         </tbody>
       </table>
-    </div>`;
+    </div>
+    ${adPlacementMarkup('native', 'directory-players-bottom')}`;
 
   const renderTeamCard = team => {
     const avg = teamAverage(team, data.squadByTeamId, data.playerById);
@@ -1059,7 +1084,9 @@ function renderDatabaseListPages(data) {
         <div class="view-subtitle">${data.publishedTeams.length.toLocaleString('es-AR')} equipos con plantillas modernas para PES 2018 actualizado</div>
       </div>
     </div>
-    <div class="grid-cards" id="teams-grid-cards">${data.publishedTeams.map(renderTeamCard).join('')}</div>`;
+    ${adPlacementMarkup('responsive', 'directory-teams-top')}
+    <div class="grid-cards" id="teams-grid-cards">${data.publishedTeams.map(renderTeamCard).join('')}</div>
+    ${adPlacementMarkup('native', 'directory-teams-bottom')}`;
 
   const renderLeagueCard = league => {
     const teamCount = String(league.team_ids || '').split(',').filter(Boolean).length;
@@ -1081,7 +1108,9 @@ function renderDatabaseListPages(data) {
         <div class="view-subtitle">${data.leagues.length.toLocaleString('es-AR')} ligas y competiciones ordenadas para PES 2018 actualizado</div>
       </div>
     </div>
-    <div class="grid-cards" id="leagues-grid-cards">${data.leagues.map(renderLeagueCard).join('')}</div>`;
+    ${adPlacementMarkup('responsive', 'directory-leagues-top')}
+    <div class="grid-cards" id="leagues-grid-cards">${data.leagues.map(renderLeagueCard).join('')}</div>
+    ${adPlacementMarkup('native', 'directory-leagues-bottom')}`;
 
   write('database/v2/players/index.html', shell(
     'players',
@@ -1320,7 +1349,7 @@ function renderTacticsIndexContent(data) {
     </div>
     <section id="history-popular-tactics-list" class="history-tactics-list history-popular-tactics-list" aria-label="Tacticas populares">${popular.map(renderPopularTacticStatic).join('')}</section>
     <div class="history-list-heading">
-      <div><span class="history-kicker">Coleccion LAqP</span><h2>Todas las tacticas</h2></div>
+      <div><span class="history-kicker">Catalogo completo</span><h2>Todas las tacticas</h2></div>
       <strong>${tactics.length} tacticas</strong>
     </div>
     <section id="history-tactics-list" class="history-tactics-list" aria-label="Listado de tacticas">${tactics.map(renderTacticCardStatic).join('')}</section>`;

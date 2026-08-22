@@ -1,6 +1,6 @@
 # Auditoria AdSense LAqP.website
 
-Fecha de auditoria: 2026-07-30
+Fecha de auditoria: 2026-08-22
 
 ## Problemas encontrados
 
