@@ -491,26 +491,25 @@
   margin: 0;
 }
 
-.ad-slot iframe,
-.ad-slot img,
-.ad-slot object,
-.ad-slot embed {
-  max-width: none;
-}
-
-.ad-slot iframe.ad-sandbox-frame {
+.ad-slot__content > iframe {
   position: relative !important;
   inset: auto !important;
   z-index: 0 !important;
   display: block;
   flex: 0 0 auto;
   max-width: 100%;
-  width: min(100%, 728px);
   margin: 0 auto;
   padding: 0;
   overflow: hidden;
   border: 0;
   background: transparent;
+}
+
+.ad-slot__content img,
+.ad-slot__content object,
+.ad-slot__content embed,
+.ad-slot__content > div {
+  max-width: 100%;
 }
 
 .ad-placement:empty {

@@ -9,10 +9,24 @@
     renderTimeoutMs: 10000,
     units: Object.freeze({
       responsive: Object.freeze({
-        desktop: Object.freeze({
-          format: 'iframe', key: '8a3fb93caf85fe0ba7fb51f68738589f', width: 728, height: 90,
-          src: 'https://www.highrevenueformat.com/8a3fb93caf85fe0ba7fb51f68738589f/invoke.js',
-        }),
+        desktop: Object.freeze([
+          Object.freeze({
+            format: 'iframe', key: '8a3fb93caf85fe0ba7fb51f68738589f', width: 728, height: 90,
+            src: 'https://mittengulped.com/8a3fb93caf85fe0ba7fb51f68738589f/invoke.js',
+          }),
+          Object.freeze({
+            format: 'iframe', key: '773a61a788f6eb62ac193612dd67ce6d', width: 728, height: 90,
+            src: 'https://mittengulped.com/773a61a788f6eb62ac193612dd67ce6d/invoke.js',
+          }),
+          Object.freeze({
+            format: 'iframe', key: 'f6c2dfca11f920a6f33d547a57042ebd', width: 728, height: 90,
+            src: 'https://mittengulped.com/f6c2dfca11f920a6f33d547a57042ebd/invoke.js',
+          }),
+          Object.freeze({
+            format: 'iframe', key: '15f06f812a82d88a666136d4084cdcc7', width: 728, height: 90,
+            src: 'https://mittengulped.com/15f06f812a82d88a666136d4084cdcc7/invoke.js',
+          }),
+        ]),
         mobile: Object.freeze({
           format: 'iframe', key: 'b1c24022cb90c506d235026f3c56738b', width: 320, height: 50,
           src: 'https://mittengulped.com/b1c24022cb90c506d235026f3c56738b/invoke.js',
@@ -21,7 +35,7 @@
       native: Object.freeze({
         format: 'native', key: '597f4baefd789b5a554a76a03af8bc9b',
         containerId: 'container-597f4baefd789b5a554a76a03af8bc9b', width: 728, height: 180,
-        minWidth: 280, maxHeight: 600,
+        minWidth: 280,
         src: 'https://mittengulped.com/597f4baefd789b5a554a76a03af8bc9b/invoke.js',
       }),
       rectangle: Object.freeze({
@@ -32,9 +46,10 @@
   });
 
   const renderedSlots = new Set();
-  const frameRecords = new WeakMap();
-  const recordsByToken = new Map();
-  let frameSequence = 0;
+  const slotRecords = new WeakMap();
+  const desktopAssignments = new WeakMap();
+  let desktopSequence = 0;
+  let providerQueue = Promise.resolve();
 
   function readConsent() {
     if (!CONFIG.requireAdConsent) return true;
@@ -56,150 +71,147 @@
     return Math.max(0, viewport - gutter);
   }
 
-  function frameToken() {
-    frameSequence += 1;
-    return `laqp-ad-${Date.now().toString(36)}-${frameSequence.toString(36)}`;
+  function desktopUnitFor(slot) {
+    let unit = desktopAssignments.get(slot);
+    if (unit) return unit;
+    const units = CONFIG.units.responsive.desktop;
+    unit = units[desktopSequence % units.length];
+    desktopSequence += 1;
+    desktopAssignments.set(slot, unit);
+    return unit;
   }
-
-  function bannerMarkup(unit) {
-    return ['<script>', 'atOptions = {', `  'key' : '${unit.key}',`, "  'format' : 'iframe',",
-      `  'height' : ${unit.height},`, `  'width' : ${unit.width},`, "  'params' : {}", '};',
-      '<\/script>', `<script src="${unit.src}"><\/script>`].join('\n');
-  }
-
-  function nativeMarkup(unit) {
-    return `<script async="async" data-cfasync="false" src="${unit.src}"><\/script><div id="${unit.containerId}"></div>`;
-  }
-
-  function sandboxDocument(unit, token) {
-    const selector = unit.format === 'native'
-      ? `#${unit.containerId} > *, iframe[src]:not([src="about:blank"]), object[data], embed[src], img[src]`
-      : 'iframe[src]:not([src="about:blank"]), object[data], embed[src], img[src]';
-    const bridge = `<script>
-      (() => {
-        const token = ${JSON.stringify(token)};
-        const nativeUnit = ${unit.format === 'native'};
-        const maxHeight = ${unit.maxHeight || unit.height};
-        let creativeReported = false;
-        const notify = (status, height) => parent.postMessage({ type: 'laqp-ad-status', token, status, height }, '*');
-        const measuredHeight = () => Math.min(maxHeight, Math.max(1, Math.ceil(Math.max(
-          document.body?.scrollHeight || 0, document.documentElement?.scrollHeight || 0
-        ))));
-        const inspect = () => {
-          if (!document.body?.querySelector(${JSON.stringify(selector)})) return;
-          const height = nativeUnit ? measuredHeight() : ${unit.height};
-          if (!creativeReported) {
-            creativeReported = true;
-            notify('creative', height);
-          } else if (nativeUnit) notify('resize', height);
-        };
-        addEventListener('error', event => {
-          if (event.target?.tagName === 'SCRIPT') notify('provider-error');
-        }, true);
-        const observer = new MutationObserver(inspect);
-        observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
-        addEventListener('DOMContentLoaded', inspect, { once: true });
-        if (nativeUnit && 'ResizeObserver' in window) new ResizeObserver(inspect).observe(document.documentElement);
-        const inspectionTimer = setInterval(inspect, 250);
-        setTimeout(() => clearInterval(inspectionTimer), ${CONFIG.renderTimeoutMs});
-      })();
-    <\/script>`;
-    const dimensions = unit.format === 'native'
-      ? `html, body { width: ${unit.width}px; min-height: 1px; } #${unit.containerId} { width: 100%; }`
-      : `html, body { width: ${unit.width}px; height: ${unit.height}px; }`;
-    const markup = unit.format === 'native' ? nativeMarkup(unit) : bannerMarkup(unit);
-    return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="referrer" content="strict-origin-when-cross-origin"><style>
-      html, body { margin: 0; padding: 0; overflow: hidden; background: transparent; }
-      ${dimensions}
-      iframe, img, object, embed { display: block; max-width: 100%; border: 0; }
-      </style></head><body>${bridge}${markup}</body></html>`;
-  }
-
-  function clearFrameRecord(slot) {
-    const record = frameRecords.get(slot);
-    if (!record) return;
-    if (record.timeoutId) global.clearTimeout(record.timeoutId);
-    recordsByToken.delete(record.token);
-    frameRecords.delete(slot);
-  }
-
-  function finish(slot, state, removeCreative = false) {
-    clearFrameRecord(slot);
-    if (removeCreative) slot.querySelector('.ad-slot__content')?.replaceChildren();
-    if (state !== 'loaded') delete slot.dataset.adCreative;
-    slot.dataset.adState = state;
-  }
-
-  function resizeFrame(record, height) {
-    if (record.unit.format !== 'native' || !Number.isFinite(Number(height))) return;
-    const nextHeight = Math.min(record.unit.maxHeight, Math.max(1, Math.ceil(Number(height))));
-    record.frame.height = String(nextHeight);
-    record.frame.style.height = `${nextHeight}px`;
-  }
-
-  function markLoaded(record, height) {
-    if (record.timeoutId) global.clearTimeout(record.timeoutId);
-    record.timeoutId = 0;
-    record.loaded = true;
-    record.slot.dataset.adCreative = 'true';
-    record.slot.dataset.adState = 'loaded';
-    resizeFrame(record, height);
-  }
-
-  function armFillTimeout(slot) {
-    const record = frameRecords.get(slot);
-    if (!record || record.timeoutId || record.loaded || slot.dataset.adState !== 'loading') return;
-    record.timeoutId = global.setTimeout(() => finish(slot, 'empty', true), CONFIG.renderTimeoutMs);
-  }
-
-  function createSandboxedFrame(unit, slot) {
-    const frame = document.createElement('iframe');
-    const token = frameToken();
-    const record = { frame, slot, token, unit, timeoutId: 0, loaded: false };
-    frame.className = 'ad-sandbox-frame';
-    frame.title = 'Publicidad';
-    frame.setAttribute('sandbox', 'allow-scripts allow-popups');
-    frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-    frame.setAttribute('scrolling', 'no');
-    frame.setAttribute('loading', 'eager');
-    frame.dataset.adSandbox = 'isolated';
-    frame.width = String(unit.width);
-    frame.height = String(unit.height);
-    frame.style.width = `${unit.width}px`;
-    frame.style.height = `${unit.height}px`;
-    frame.addEventListener('error', () => finish(slot, 'error', true), { once: true });
-    frameRecords.set(slot, record);
-    recordsByToken.set(token, record);
-    frame.srcdoc = sandboxDocument(unit, token);
-    armFillTimeout(slot);
-    return frame;
-  }
-
-  global.addEventListener('message', event => {
-    const message = event.data;
-    if (!message || message.type !== 'laqp-ad-status' || typeof message.token !== 'string') return;
-    const record = recordsByToken.get(message.token);
-    if (!record || event.source !== record.frame.contentWindow) return;
-    if (message.status === 'creative') markLoaded(record, message.height);
-    else if (message.status === 'resize' && record.loaded) resizeFrame(record, message.height);
-    else if (message.status === 'provider-error' && !record.loaded) finish(record.slot, 'error', true);
-  });
 
   function selectUnit(slot) {
     const availableWidth = safeAvailableWidth(slot);
     if (slot.dataset.adUnit === 'responsive') {
-      if (availableWidth >= CONFIG.units.responsive.desktop.width) return { name: 'desktop', unit: CONFIG.units.responsive.desktop };
+      const desktop = CONFIG.units.responsive.desktop[0];
+      if (availableWidth >= desktop.width) return { name: 'desktop', unit: desktopUnitFor(slot) };
       if (availableWidth >= CONFIG.units.responsive.mobile.width) return { name: 'mobile', unit: CONFIG.units.responsive.mobile };
       return null;
     }
     if (slot.dataset.adUnit === 'native') {
       if (availableWidth < CONFIG.units.native.minWidth) return null;
-      return { name: 'native', unit: { ...CONFIG.units.native, width: Math.min(CONFIG.units.native.width, availableWidth) } };
+      return { name: 'native', unit: CONFIG.units.native };
     }
     if (slot.dataset.adUnit === 'rectangle') {
       return availableWidth >= CONFIG.units.rectangle.width ? { name: 'rectangle', unit: CONFIG.units.rectangle } : null;
     }
     return null;
+  }
+
+  function clearRecord(slot) {
+    const record = slotRecords.get(slot);
+    if (!record) return;
+    if (record.timeoutId) global.clearTimeout(record.timeoutId);
+    if (record.pollId) global.clearInterval(record.pollId);
+    record.observer?.disconnect();
+    slotRecords.delete(slot);
+  }
+
+  function finish(slot, state, removeCreative = false) {
+    clearRecord(slot);
+    if (removeCreative) slot.querySelector('.ad-slot__content')?.replaceChildren();
+    if (state !== 'loaded') delete slot.dataset.adCreative;
+    slot.dataset.adState = state;
+  }
+
+  function frameContainsCreative(frame) {
+    try {
+      const body = frame.contentDocument?.body;
+      if (!body) return false;
+      return body.childElementCount > 0 || Boolean(body.textContent?.trim());
+    } catch {
+      return true;
+    }
+  }
+
+  function containsCreative(record) {
+    const content = record.slot.querySelector('.ad-slot__content');
+    if (!content) return false;
+    for (const frame of content.querySelectorAll('iframe')) {
+      if (frameContainsCreative(frame)) return true;
+    }
+    if (content.querySelector('object[data], embed[src], img[src]')) return true;
+    if (record.unit.format === 'native') {
+      const container = content.querySelector(`#${record.unit.containerId}`);
+      return Boolean(container?.childElementCount || container?.textContent?.trim());
+    }
+    return false;
+  }
+
+  function markLoaded(record) {
+    if (record.slot.dataset.adState !== 'loading' || !containsCreative(record)) return false;
+    record.slot.dataset.adCreative = 'true';
+    record.slot.dataset.adState = 'loaded';
+    clearRecord(record.slot);
+    return true;
+  }
+
+  function inspectSlot(slot) {
+    const record = slotRecords.get(slot);
+    if (record) markLoaded(record);
+  }
+
+  function monitorDirectCreative(record) {
+    record.observer = new MutationObserver(() => markLoaded(record));
+    record.observer.observe(record.slot, { childList: true, subtree: true, attributes: true });
+    record.pollId = global.setInterval(() => markLoaded(record), 250);
+    record.timeoutId = global.setTimeout(() => {
+      if (!markLoaded(record)) finish(record.slot, 'empty', true);
+    }, CONFIG.renderTimeoutMs);
+  }
+
+  function appendConfiguration(content, unit) {
+    const config = document.createElement('script');
+    config.dataset.adsterraConfig = unit.key;
+    config.textContent = `window.atOptions = ${JSON.stringify({
+      key: unit.key,
+      format: 'iframe',
+      height: unit.height,
+      width: unit.width,
+      params: {},
+    })};`;
+    content.appendChild(config);
+  }
+
+  function appendProviderScript(content, unit) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = unit.src;
+      script.async = false;
+      script.dataset.adsterraUnit = unit.key;
+      if (unit.format === 'native') {
+        script.async = true;
+        script.setAttribute('data-cfasync', 'false');
+      }
+      script.addEventListener('load', resolve, { once: true });
+      script.addEventListener('error', () => reject(new Error(`No se pudo cargar ${unit.src}`)), { once: true });
+      content.appendChild(script);
+    });
+  }
+
+  async function loadDirect(record) {
+    const { slot, unit } = record;
+    if (slotRecords.get(slot) !== record || slot.dataset.adState !== 'loading' || !readConsent()) return;
+    const content = slot.querySelector('.ad-slot__content');
+    if (!content) throw new Error('Contenedor publicitario ausente.');
+    content.replaceChildren();
+    if (unit.format === 'native') {
+      const container = document.createElement('div');
+      container.id = unit.containerId;
+      content.appendChild(container);
+    } else appendConfiguration(content, unit);
+    await appendProviderScript(content, unit);
+    inspectSlot(slot);
+  }
+
+  function enqueue(record) {
+    providerQueue = providerQueue
+      .then(() => loadDirect(record))
+      .catch(error => {
+        if (slotRecords.get(record.slot) === record) finish(record.slot, 'error', true);
+        console.warn('[LAqP Ads] No se pudo cargar la unidad publicitaria.', error);
+      });
   }
 
   function expectedUnit(placement) {
@@ -232,25 +244,23 @@
     const selected = selectUnit(slot);
     if (!selected) { slot.dataset.adState = 'unsupported-width'; return false; }
     if (renderedSlots.has(slot)) return false;
+    const content = slot.querySelector('.ad-slot__content');
+    if (!content) { slot.dataset.adState = 'error'; return false; }
+
     renderedSlots.add(slot);
     slot.dataset.adVariant = selected.name;
     slot.dataset.adProvider = CONFIG.provider;
     slot.dataset.adKey = selected.unit.key;
     slot.dataset.adState = 'loading';
-    try {
-      const content = slot.querySelector('.ad-slot__content');
-      if (!content) throw new Error('Contenedor publicitario ausente.');
-      content.replaceChildren(createSandboxedFrame(selected.unit, slot));
-      return true;
-    } catch (error) {
-      finish(slot, 'error', true);
-      console.warn('[LAqP Ads] No se pudo montar la unidad publicitaria.', error);
-      return false;
-    }
+    const record = { slot, unit: selected.unit, observer: null, pollId: 0, timeoutId: 0 };
+    slotRecords.set(slot, record);
+    monitorDirectCreative(record);
+    enqueue(record);
+    return true;
   }
 
   function monitorAll(root = document) {
-    root.querySelectorAll?.('.ad-slot[data-ad-state="loading"]').forEach(armFillTimeout);
+    root.querySelectorAll?.('.ad-slot[data-ad-state="loading"]').forEach(inspectSlot);
   }
 
   function renderAll(root = document) {
@@ -302,7 +312,7 @@
         render(slot);
       }
       target.replaceChildren(slot);
-      armFillTimeout(slot);
+      inspectSlot(slot);
     });
   }
 
@@ -311,7 +321,7 @@
   function removeAll() {
     renderedSlots.clear();
     document.querySelectorAll('.ad-slot[data-ad-unit]').forEach(slot => {
-      clearFrameRecord(slot);
+      clearRecord(slot);
       slot.querySelector('.ad-slot__content')?.replaceChildren();
       delete slot.dataset.adCreative;
       slot.dataset.adState = 'consent-blocked';

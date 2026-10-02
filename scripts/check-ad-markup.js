@@ -6,6 +6,9 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..');
 const EXPECTED_KEYS = new Set([
   '8a3fb93caf85fe0ba7fb51f68738589f',
+  '773a61a788f6eb62ac193612dd67ce6d',
+  'f6c2dfca11f920a6f33d547a57042ebd',
+  '15f06f812a82d88a666136d4084cdcc7',
   'b1c24022cb90c506d235026f3c56738b',
   '597f4baefd789b5a554a76a03af8bc9b',
   'd7f6b2bd0a3bdbc016d2bcff231bd9bd',
@@ -64,6 +67,10 @@ const runtime = fs.readFileSync(path.join(ROOT, 'js', 'ads.js'), 'utf8');
 const keys = new Set(runtime.match(/[0-9a-f]{32}/g) || []);
 if (keys.size !== EXPECTED_KEYS.size || [...keys].some(key => !EXPECTED_KEYS.has(key))) errors.push(`js/ads.js contiene keys inesperadas: ${[...keys].join(', ')}`);
 if (runtime.includes('window.open')) errors.push('js/ads.js no debe interceptar window.open.');
+for (const obsolete of ['sandboxDocument', 'createSandboxedFrame', 'srcdoc', 'ad-sandbox-frame', "setAttribute('sandbox'"]) {
+  if (runtime.includes(obsolete)) errors.push(`js/ads.js conserva infraestructura sandbox obsoleta: ${obsolete}`);
+}
+if (!runtime.includes('providerQueue') || !runtime.includes('script.async = false')) errors.push('js/ads.js no serializa explícitamente la carga de invoke.js.');
 if (!runtime.includes('width: 728') || !runtime.includes('height: 90') || !runtime.includes('width: 320') || !runtime.includes('height: 50') || !runtime.includes('width: 300') || !runtime.includes('height: 250')) errors.push('js/ads.js no contiene las dimensiones requeridas.');
 
 if (errors.length) {
