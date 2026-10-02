@@ -154,7 +154,7 @@
     frame.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-escape-sandbox');
     frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
     frame.setAttribute('scrolling', 'no');
-    frame.setAttribute('loading', slot.dataset.adPriority === 'high' ? 'eager' : 'lazy');
+    frame.setAttribute('loading', 'eager');
     frame.dataset.adSandbox = 'isolated';
     frame.width = String(unit.width);
     frame.height = String(unit.height);
@@ -166,6 +166,7 @@
     frameRecords.set(slot, record);
     recordsByToken.set(token, record);
     frame.srcdoc = sandboxDocument(unit, token);
+    armFillTimeout(slot);
     return frame;
   }
 
