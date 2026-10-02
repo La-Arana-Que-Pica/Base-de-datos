@@ -22,13 +22,10 @@ function ensureClubAdPlacements(club) {
   };
 
   if (!document.querySelector('[data-ad-placement="team-top"]')) {
-    club.querySelector('.club-hero')?.after(create('team-top', 'responsive'));
+    club.querySelector('.club-hero')?.after(create('team-top', 'banner'));
   }
   if (!document.querySelector('[data-ad-placement="team-mid"]')) {
-    club.querySelector('.club-roster')?.before(create('team-mid', 'native'));
-  }
-  if (!document.querySelector('[data-ad-placement="team-bottom"]')) {
-    club.after(create('team-bottom', 'rectangle'));
+    club.querySelector('.club-roster')?.before(create('team-mid', 'banner'));
   }
 
   window.LAQPAds?.placeAll(document);

@@ -9,9 +9,6 @@ const EXPECTED_KEYS = new Set([
   '773a61a788f6eb62ac193612dd67ce6d',
   'f6c2dfca11f920a6f33d547a57042ebd',
   '15f06f812a82d88a666136d4084cdcc7',
-  'b1c24022cb90c506d235026f3c56738b',
-  '597f4baefd789b5a554a76a03af8bc9b',
-  'd7f6b2bd0a3bdbc016d2bcff231bd9bd',
 ]);
 const errors = [];
 
@@ -53,8 +50,8 @@ function checkPage(file, assignments, allowDynamicPlacements = false) {
 
 const playerFiles = [path.join(ROOT, 'player.html'), ...files(path.join(ROOT, 'player', 'v2'))];
 const teamFiles = [path.join(ROOT, 'team.html'), ...files(path.join(ROOT, 'team', 'v2'))];
-const playerAssignments = { 'player-top': 'responsive', 'player-mid': 'native', 'player-bottom': 'rectangle' };
-const teamAssignments = { 'team-top': 'responsive', 'team-mid': 'native', 'team-bottom': 'rectangle' };
+const playerAssignments = { 'player-top': 'banner', 'player-stats': 'banner', 'player-mid': 'banner', 'player-bottom': 'banner' };
+const teamAssignments = { 'team-top': 'banner', 'team-mid': 'banner' };
 playerFiles.forEach(file => checkPage(file, playerAssignments, true));
 teamFiles.forEach(file => checkPage(file, teamAssignments));
 
@@ -62,6 +59,15 @@ const playerRuntime = fs.readFileSync(path.join(ROOT, 'js', 'player.js'), 'utf8'
 for (const name of Object.keys(playerAssignments)) {
   if (occurrences(playerRuntime, `data-ad-placement="${name}"`) !== 1) errors.push(`js/player.js: placement dinámico ${name} ausente o duplicado`);
 }
+
+const teamRuntime = fs.readFileSync(path.join(ROOT, 'js', 'team.js'), 'utf8');
+for (const name of Object.keys(teamAssignments)) {
+  if (occurrences(teamRuntime, `data-ad-placement="${name}"`) !== 1) errors.push(`js/team.js: placement dinámico ${name} ausente o duplicado`);
+}
+if (teamRuntime.includes('data-ad-placement="team-bottom"')) errors.push('js/team.js conserva el tercer slot de equipo eliminado.');
+
+const clubRuntime = fs.readFileSync(path.join(ROOT, 'js', 'club.js'), 'utf8');
+if (clubRuntime.includes('team-bottom') || clubRuntime.includes("'native'") || clubRuntime.includes("'rectangle'")) errors.push('js/club.js conserva formatos o posiciones publicitarias eliminados.');
 
 const runtime = fs.readFileSync(path.join(ROOT, 'js', 'ads.js'), 'utf8');
 const keys = new Set(runtime.match(/[0-9a-f]{32}/g) || []);
@@ -71,12 +77,15 @@ for (const obsolete of ['sandboxDocument', 'createSandboxedFrame', 'srcdoc', 'ad
   if (runtime.includes(obsolete)) errors.push(`js/ads.js conserva infraestructura sandbox obsoleta: ${obsolete}`);
 }
 if (!runtime.includes('providerQueue') || !runtime.includes('script.async = false')) errors.push('js/ads.js no serializa explícitamente la carga de invoke.js.');
-if (!runtime.includes('width: 728') || !runtime.includes('height: 90') || !runtime.includes('width: 320') || !runtime.includes('height: 50') || !runtime.includes('width: 300') || !runtime.includes('height: 250')) errors.push('js/ads.js no contiene las dimensiones requeridas.');
+if (!runtime.includes('width: 728') || !runtime.includes('height: 90')) errors.push('js/ads.js no contiene las dimensiones 728x90 requeridas.');
+for (const removed of ['width: 320', 'height: 50', 'width: 300', 'height: 250', "format: 'native'", "data-ad-unit=\"native\"", "data-ad-unit=\"rectangle\""]) {
+  if (runtime.includes(removed)) errors.push(`js/ads.js conserva un formato eliminado: ${removed}`);
+}
 
 if (errors.length) {
   console.error(errors.slice(0, 30).join('\n'));
   if (errors.length > 30) console.error(`... y ${errors.length - 30} errores más.`);
   process.exitCode = 1;
 } else {
-  console.log(`Verificación correcta: ${playerFiles.length} fichas de jugador y ${teamFiles.length} fichas de equipo con 3 posiciones (responsive, native y 300x250).`);
+  console.log(`Verificación correcta: ${playerFiles.length} fichas de jugador con 4 banners 728x90 y ${teamFiles.length} fichas de equipo con 2 banners 728x90.`);
 }

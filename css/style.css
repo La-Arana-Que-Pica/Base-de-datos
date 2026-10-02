@@ -462,20 +462,8 @@
   transition: min-height 0.18s ease;
 }
 
-.ad-slot[data-ad-state="loading"][data-ad-variant="desktop"] .ad-slot__content {
+.ad-slot[data-ad-state="loading"][data-ad-variant="banner"] .ad-slot__content {
   min-height: 90px;
-}
-
-.ad-slot[data-ad-state="loading"][data-ad-variant="mobile"] .ad-slot__content {
-  min-height: 50px;
-}
-
-.ad-slot[data-ad-state="loading"][data-ad-variant="native"] .ad-slot__content {
-  min-height: 180px;
-}
-
-.ad-slot[data-ad-state="loading"][data-ad-variant="rectangle"] .ad-slot__content {
-  min-height: 250px;
 }
 
 .ad-slot[data-ad-state="loaded"][data-ad-creative="true"] .ad-slot__label {
@@ -507,9 +495,12 @@
 
 .ad-slot__content img,
 .ad-slot__content object,
-.ad-slot__content embed,
-.ad-slot__content > div {
+.ad-slot__content embed {
   max-width: 100%;
+}
+
+.download-detail-grid > .ad-placement {
+  grid-column: 1 / -1;
 }
 
 .ad-placement:empty {

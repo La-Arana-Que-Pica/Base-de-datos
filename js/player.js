@@ -1937,7 +1937,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
       </div>
 
-      <div class="ad-placement" data-ad-placement="player-top" data-ad-unit-target="responsive"></div>
+      <div class="ad-placement" data-ad-placement="player-top" data-ad-unit-target="banner"></div>
       ${renderPlayerStrengths(player)}
       <nav class="player-page-nav" aria-label="Secciones del jugador"><a href="#player-summary">Resumen</a><a href="#player-statistics">Estadísticas</a><a href="#player-skills">Habilidades</a><a href="#player-appearance">Apariencia</a><a href="#player-technical">Datos PES</a></nav>
 
@@ -1947,6 +1947,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
           ${statsHtml}
         </div>
       </section>
+      <div class="ad-placement" data-ad-placement="player-stats" data-ad-unit-target="banner"></div>
       ${skillsHtml}
       <section class="profile-tabs" id="player-appearance" aria-labelledby="player-appearance-title">
         <h2 class="player-nav-section-title" id="player-appearance-title">${t('player.appearance')}</h2>
@@ -1958,7 +1959,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
         </div>
       </section>
       ${renderSquadContext(team, squadContext, clubUrl)}
-      <div class="ad-placement" data-ad-placement="player-mid" data-ad-unit-target="native"></div>
+      <div class="ad-placement" data-ad-placement="player-mid" data-ad-unit-target="banner"></div>
       ${renderPlayerEditorial(player, team, pesPosition, similarPlayers)}
       <section class="player-compare-section db-section" id="player-comparison" hidden>
         <div class="player-section-title">Comparar jugador</div>
@@ -1966,7 +1967,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
         <div id="player-compare-result"></div>
       </section>
 
-      <div class="ad-placement" data-ad-placement="player-bottom" data-ad-unit-target="rectangle"></div>
+      <div class="ad-placement" data-ad-placement="player-bottom" data-ad-unit-target="banner"></div>
 
       ${renderSimilarPlayers(similarPlayers)}
       ${renderPesTechnical(player, appearance)}

@@ -920,17 +920,15 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
       </div>
     </div>
 
-    <div class="ad-placement" data-ad-placement="team-top" data-ad-unit-target="responsive"></div>
+    <div class="ad-placement" data-ad-placement="team-top" data-ad-unit-target="banner"></div>
 
     ${pitchHtml}
 
-    <div class="ad-placement" data-ad-placement="team-mid" data-ad-unit-target="native"></div>
+    <div class="ad-placement" data-ad-placement="team-mid" data-ad-unit-target="banner"></div>
 
     ${carouselHtml}
 
-    ${shirtNumbersHtml}
-
-    <div class="ad-placement" data-ad-placement="team-bottom" data-ad-unit-target="rectangle"></div>`;
+    ${shirtNumbersHtml}`;
 
   window.LAQPAds?.placeAll(content);
   window.LAQPAds?.monitorAll(content);

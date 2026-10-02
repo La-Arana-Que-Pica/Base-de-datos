@@ -4,12 +4,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
-const AD_VERSION = '20261002d';
-const CSS_VERSION = '20261002c';
-const PLAYER_VERSION = '20261002b';
-const TEAM_VERSION = '20261002b';
-const CLUB_VERSION = '20261002b';
-const unitFor = name => name.endsWith('-top') ? 'responsive' : name.endsWith('-mid') ? 'native' : 'rectangle';
+const AD_VERSION = '20261002e';
+const CSS_VERSION = '20261002d';
+const PLAYER_VERSION = '20261002c';
+const TEAM_VERSION = '20261002c';
+const CLUB_VERSION = '20261002c';
+const PLAYER_SLOTS = ['player-top', 'player-stats', 'player-mid', 'player-bottom'];
+const TEAM_SLOTS = ['team-top', 'team-mid'];
+const unitFor = () => 'banner';
 const placement = name => `<div class="ad-placement" data-ad-placement="${name}" data-ad-unit-target="${unitFor(name)}"></div>`;
 const slot = name => `<aside class="ad-slot" aria-label="Publicidad" data-ad-slot="${name}" data-ad-unit="${unitFor(name)}" data-ad-format="${unitFor(name)}" data-ad-context="profile" data-ad-state="pending">
     <span class="ad-slot__label">Publicidad</span>
@@ -70,10 +72,21 @@ function normalizePlayer(html) {
     /src="js\/player\.js(?:\?v=[^"]*)?"/g,
     `src="js/player.js?v=${PLAYER_VERSION}"`,
   );
-  next = next
-    .replace(/\s*<div class="ad-placement" data-ad-placement="player-stats"[^>]*><\/div>/g, '')
-    .replace(/\s*<aside class="ad-slot"[^>]*data-ad-slot="player-stats"[\s\S]*?<\/aside>/g, '');
-  for (const name of ['player-top', 'player-mid', 'player-bottom']) next = normalizeAssignment(next, name);
+  if (!next.includes('data-ad-placement="player-stats"')) {
+    const beforeStats = /(\s*<div>\s*<h2>Estadísticas PES 2018<\/h2>)/;
+    if (beforeStats.test(next)) next = next.replace(beforeStats, `\n            ${placement('player-stats')}$1`);
+    else next = next.replace(
+      /(<div class="ad-placement" data-ad-placement="player-top"[^>]*><\/div>)/,
+      `$1\n        ${placement('player-stats')}`,
+    );
+  }
+  if (!next.includes('data-ad-slot="player-stats"')) {
+    next = next.replace(
+      /(<aside class="ad-slot"[^>]*data-ad-slot="player-mid")/,
+      `${slot('player-stats')}$1`,
+    );
+  }
+  for (const name of PLAYER_SLOTS) next = normalizeAssignment(next, name);
   return next;
 }
 
@@ -82,6 +95,9 @@ function normalizeTeam(html) {
     /src="js\/club\.js(?:\?v=[^"]*)?"/g,
     `src="js/club.js?v=${CLUB_VERSION}"`,
   ).replace(/src="js\/team\.js(?:\?v=[^"]*)?"/g, `src="js/team.js?v=${TEAM_VERSION}"`);
+  next = next
+    .replace(/\s*<div class="ad-placement" data-ad-placement="team-bottom"[^>]*><\/div>/g, '')
+    .replace(/\s*<aside class="ad-slot"[^>]*data-ad-slot="team-bottom"[\s\S]*?<\/aside>/g, '');
   if (!next.includes('data-ad-placement="team-top"')) {
     next = next.replace(
       /(<article class="club-detail"[\s\S]*?<header class="club-hero[\s\S]*?<\/header>)/,
@@ -94,7 +110,7 @@ function normalizeTeam(html) {
       `${placement('team-mid')}\n          $1`,
     );
   }
-  for (const name of ['team-top', 'team-mid', 'team-bottom']) next = normalizeAssignment(next, name);
+  for (const name of TEAM_SLOTS) next = normalizeAssignment(next, name);
   return next;
 }
 
