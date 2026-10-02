@@ -1,7 +1,6 @@
 /**
  * Home page.
- * Reads featured Option Files exclusively from database/descargas.csv.
- * Only rows with destacado exactly equal to "1" are rendered.
+ * Reads the structured Option Files source, with the legacy CSV as fallback.
  */
 
 'use strict';
@@ -90,6 +89,13 @@ function getDownloadLinks(item) {
     });
   };
 
+  if (Array.isArray(item.download_parts)) {
+    item.download_parts.forEach(part => {
+      if (part && typeof part === 'object') addLink(part.url || part.href, part.name || part.label);
+    });
+    if (links.length) return links;
+  }
+
   const multiLinks = item.links || item.link_partes || item.partes || '';
   String(multiLinks || '').split('|').forEach((entry, index) => {
     const value = entry.trim();
@@ -116,21 +122,23 @@ function getDownloadLinks(item) {
 function renderFeaturedDownloadButtons(item) {
   const links = getDownloadLinks(item);
   if (!links.length) return `<span class="featured-of-btn featured-of-btn-soon">${t('home.soon')}</span>`;
-
-  return links.map(link => (
-    `<a class="featured-of-btn featured-of-btn-download" href="${escapeHtml(link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)}</a>`
-  )).join('');
+  if (links.length === 1) {
+    return `<a class="featured-of-btn featured-of-btn-download" href="${escapeHtml(links[0].href)}" target="_blank" rel="noopener noreferrer">${t('home.downloadAction')}</a>`;
+  }
+  const slug = item.slug || item.id || item.ID || '';
+  return `<a class="featured-of-btn featured-of-btn-download" href="option-files/${encodeURIComponent(slug)}/descargar/">Ver descargas</a>`;
 }
 
 function renderFeaturedCard(item) {
   // Fallback title keeps old CSV rows usable, but new rows should define `titulo`.
   const title = escapeHtml(item.titulo || item.nombre || item.title || item.name || item.juego || 'Option File');
   const version = escapeHtml(item.version || '');
-  const game = escapeHtml(item.juego || '');
-  const platform = escapeHtml(item.plataforma || item.platform || '');
+  const game = escapeHtml(item.game || item.juego || '');
+  const platform = escapeHtml(Array.isArray(item.platforms) ? item.platforms.join(' / ') : (item.plataforma || item.platform || ''));
   const desc = escapeHtml(item.descripcion || item.description || '');
-  const image = escapeHtml(assetPath(item.miniatura || item.thumbnail || item.image || item.imagen));
-  const details = assetPath(item.detalles || item.details || (item.id || item.ID ? `download/${encodeURIComponent(item.id || item.ID)}/` : ''), '');
+  const image = escapeHtml(assetPath(item.cover || item.miniatura || item.thumbnail || item.image || item.imagen));
+  const slug = item.slug || item.id || item.ID || '';
+  const details = assetPath(item.detalles || item.details || (slug ? `option-files/${encodeURIComponent(slug)}/` : ''), '');
 
   return `
     <article class="featured-of-card">
@@ -145,8 +153,8 @@ function renderFeaturedCard(item) {
       ${platform ? `<div class="featured-of-platform"><span class="download-platform-badge">${platform}</span></div>` : ''}
       <p class="featured-of-desc">${desc || t('home.noDescription')}</p>
       <div class="featured-of-actions">
-        ${renderFeaturedDownloadButtons(item)}
         ${details ? `<a class="featured-of-btn featured-of-btn-details" href="${escapeHtml(details)}">${t('home.details')}</a>` : ''}
+        ${renderFeaturedDownloadButtons(item)}
       </div>
     </article>`;
 }
@@ -179,24 +187,41 @@ async function renderHomeGuides() {
     ? await loadLAQPArticles()
     : (window.LAQP_ARTICLES || []);
   if (!articles.length) return;
-  grid.innerHTML = articles.slice(0, 6).map(renderHomeGuide).join('');
+  const preferredIds = [
+    'instalar-option-file-pes-2018-2026',
+    'importar-kits-pes-2018',
+    'sistema-medias-pes-2018',
+  ];
+  const preferred = preferredIds
+    .map(id => articles.find(article => article.id === id))
+    .filter(Boolean);
+  grid.innerHTML = (preferred.length === 3 ? preferred : articles.slice(0, 3))
+    .map(renderHomeGuide)
+    .join('');
 }
 
 async function bootHome() {
   const section = document.getElementById('featured-of-section');
   if (!section) return;
 
-  const csvText = await fetchText('database/descargas.csv');
-  if (!csvText) {
-    section.style.display = 'none';
-    return;
+  let rows = [];
+  const jsonText = await fetchText('database/option-files.json');
+  if (jsonText) {
+    try {
+      const parsed = JSON.parse(jsonText);
+      if (Array.isArray(parsed)) rows = parsed;
+    } catch (error) {
+      console.warn('No se pudo interpretar option-files.json:', error);
+    }
+  }
+  if (!rows.length) {
+    const csvText = await fetchText('database/descargas.csv');
+    if (!csvText) return;
+    rows = parseCSV(csvText);
   }
 
-  const featured = uniqueById(parseCSV(csvText)).filter(row => String(row.destacado || '').trim() === '1');
-  if (!featured.length) {
-    section.style.display = 'none';
-    return;
-  }
+  const featured = uniqueById(rows).filter(row => row.featured === true || String(row.destacado || '').trim() === '1');
+  if (!featured.length) return;
 
   const grid = section.querySelector('#featured-of-grid');
   if (grid) grid.innerHTML = featured.map(renderFeaturedCard).join('');

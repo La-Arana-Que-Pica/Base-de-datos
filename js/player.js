@@ -124,25 +124,11 @@ function flagSrc(countryId) {
 }
 
 function statColorClass(value) {
-  const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-range-1';
-  if (v >= 95) return 'stat-range-6';
-  if (v >= 90) return 'stat-range-5';
-  if (v >= 80) return 'stat-range-4';
-  if (v >= 70) return 'stat-range-3';
-  if (v >= 60) return 'stat-range-2';
-  return 'stat-range-1';
+  return window.LAQPRating.classFor(value);
 }
 
 function statColor(value) {
-  const v = parseInt(value, 10);
-  if (isNaN(v)) return '#d33d35';
-  if (v >= 95) return '#00ff87';
-  if (v >= 90) return '#62ff51';
-  if (v >= 80) return '#a8ff00';
-  if (v >= 70) return '#e5dc00';
-  if (v >= 60) return '#e59f01';
-  return '#d33d35';
+  return window.LAQPRating.colorFor(value);
 }
 
 function statTextColor(hexColor) {
@@ -150,14 +136,7 @@ function statTextColor(hexColor) {
 }
 
 function overallColor(value) {
-  const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-range-1';
-  if (v >= 95) return 'stat-range-6';
-  if (v >= 90) return 'stat-range-5';
-  if (v >= 80) return 'stat-range-4';
-  if (v >= 70) return 'stat-range-3';
-  if (v >= 60) return 'stat-range-2';
-  return 'stat-range-1';
+  return window.LAQPRating.classFor(value);
 }
 
 function hexToRgba(hex, alpha) {
@@ -221,6 +200,10 @@ const NATIONALITY_NAMES = {
   '7':   'China',        '8':   'Hong Kong',    '9':   'India',
   '10':  'Indonesia',   '11':  'Irán',
   '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
+  '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
+  '54':  'Comoras',         '67':  'Kenia',        '98':  'Congo',
+  '29':  'Filipinas',         '28':  'Palestina',        '220':  'Luxemburgo',
+  '216':  'Kazajistán',         '205':  'Estonia',        '140':  'Curazao',
   '15':  'Corea del Norte', '16': 'Corea del Sur', '17': 'Kuwait',
   '21':  'Malasia', '32':  'Singapur', '34':  'Siria', 
   '19':  'Líbano',       '26':  'Omán',         '30':  'Qatar',
@@ -267,9 +250,39 @@ const NATIONALITY_NAMES = {
 
 function nationalityName(countryId) {
   if (!countryId) return '–';
-  return (typeof i18nLookup === 'function' ? i18nLookup('countries', String(countryId), '') : '')
+  const translated = typeof i18nLookup === 'function' ? i18nLookup('countries', String(countryId), '') : '';
+  return (translated && translated !== String(countryId) ? translated : '')
     || NATIONALITY_NAMES[String(countryId)]
     || countryId;
+}
+
+function applyPlayerContext(teamRow, hasPublicClub) {
+  const root = document.body;
+  root.classList.toggle('player-context', !!hasPublicClub);
+  for (const key of ['--db-context-primary', '--db-context-secondary', '--db-accent']) root.style.removeProperty(key);
+  if (!hasPublicClub) return;
+  const color = number => Math.round(number * 255 / 63);
+  const pesColor = prefix => {
+    const parts = ['R', 'G', 'B'].map(channel => Number(teamRow[`${prefix} ${channel}`]));
+    return parts.every(value => Number.isInteger(value) && value >= 0 && value <= 63) ? parts.map(color) : null;
+  };
+  const primary = pesColor('Team Color 1') || [174, 187, 201];
+  const secondary = pesColor('Team Color 2') || primary;
+  const saturation = value => Math.max(...value) - Math.min(...value);
+  const channel = value => { const linear = value / 255; return linear <= .04045 ? linear / 12.92 : ((linear + .055) / 1.055) ** 2.4; };
+  const luminance = value => value.reduce((sum, part, index) => sum + channel(part) * [.2126, .7152, .0722][index], 0);
+  const contrast = (a, b) => { const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (light + .05) / (dark + .05); };
+  let accent = saturation(primary) < 24 && saturation(secondary) > saturation(primary) + 20 ? secondary : primary;
+  if (contrast(accent, [22, 27, 34]) < 2 && contrast(secondary, [22, 27, 34]) > contrast(accent, [22, 27, 34])) accent = secondary;
+  const accentSource = accent;
+  for (let step = 0; step <= 100; step++) {
+    const adjusted = accentSource.map(value => Math.round(value + (255 - value) * step / 100));
+    if (contrast(adjusted, [22, 27, 34]) >= 4.5) { accent = adjusted; break; }
+  }
+  const rgb = value => `rgb(${value.join(', ')})`;
+  root.style.setProperty('--db-context-primary', rgb(primary));
+  root.style.setProperty('--db-context-secondary', rgb(secondary));
+  root.style.setProperty('--db-accent', rgb(accent));
 }
 
 // Team type → Spanish label
@@ -867,7 +880,7 @@ function drawRadar(canvasId, attrs) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(214, 168, 79, 0.22)';
+    ctx.fillStyle = 'rgba(33, 212, 194, 0.22)';
   ctx.fill();
   ctx.strokeStyle = '#e74c3c';
   ctx.lineWidth = 2;
@@ -1216,13 +1229,65 @@ function switchAppearanceSection(idx) {
   });
 }
 
-function switchTab(tabId) {
-  document.querySelectorAll('.profile-tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tabId);
-  });
-  document.querySelectorAll('.profile-tab-panel').forEach(panel => {
-    panel.classList.toggle('active', panel.id === tabId);
-  });
+let playerNavAbortController;
+function initPlayerPageNavigation(content) {
+  playerNavAbortController?.abort();
+  playerNavAbortController = new AbortController();
+  const { signal } = playerNavAbortController;
+  const nav = content.querySelector('.player-page-nav');
+  if (!nav) return;
+  const links = [...nav.querySelectorAll('a[href^="#"]')];
+  const sections = links.map(link => document.getElementById(link.hash.slice(1)));
+  const header = document.getElementById('header');
+  const offset = () => (header?.getBoundingClientRect().height || 0) + nav.getBoundingClientRect().height + 12;
+  const setActive = id => {
+    links.forEach(link => {
+      const active = link.hash === `#${id}`;
+      link.classList.toggle('is-active', active);
+      if (active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  };
+  const updateActive = () => {
+    const threshold = Math.max(offset() + 16, window.innerHeight * .35);
+    let current = sections[0]?.id;
+    sections.forEach(section => {
+      if (section && section.getBoundingClientRect().top <= threshold) current = section.id;
+    });
+    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4 && sections.at(-1)?.getBoundingClientRect().top < window.innerHeight) {
+      current = sections.at(-1).id;
+    }
+    if (current) setActive(current);
+  };
+  let scheduled = false;
+  window.addEventListener('scroll', () => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; updateActive(); });
+  }, { passive: true, signal });
+  window.addEventListener('resize', updateActive, { signal });
+  nav.addEventListener('click', event => {
+    const link = event.target.closest('a[href^="#"]');
+    if (!link || !nav.contains(link)) return;
+    const target = document.getElementById(link.hash.slice(1));
+    if (!target) return;
+    event.preventDefault();
+    if (target.tagName === 'DETAILS') target.open = true;
+    setActive(target.id);
+    const top = window.scrollY + target.getBoundingClientRect().top - offset();
+    window.scrollTo({ top: Math.max(0, top), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    history.replaceState(null, '', window.location.pathname + window.location.search + link.hash);
+  }, { signal });
+  updateActive();
+  if (location.hash && links.some(link => link.hash === location.hash)) {
+    const target = document.getElementById(location.hash.slice(1));
+    if (target?.tagName === 'DETAILS') target.open = true;
+    requestAnimationFrame(() => {
+      if (!target) return;
+      window.scrollTo({ top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset()), behavior: 'instant' });
+      setActive(target.id);
+    });
+  }
 }
 
 function selectPlayerPosition(pos) {
@@ -1665,8 +1730,8 @@ function renderSimilarPlayers(similarPlayers) {
             <article class="similar-player-card">
               <div class="similar-player-main">
                 <img class="similar-player-photo"
-                  src="img/players/${player['Id']}.webp"
-                  onerror="handleMinifaceError(this,'${player['Id']}')"
+                  data-player-id="${escapeHtml(player['Id'])}"
+                  data-miniface-current-src="img/players/${escapeHtml(player['Id'])}.webp"
                   alt="${escapeHtml(player['Name'] || '')}">
                 <div>
                   <div class="similar-player-name">${escapeHtml(player['Name'] || t('player.unknown'))}</div>
@@ -1678,14 +1743,106 @@ function renderSimilarPlayers(similarPlayers) {
                 <span style="background:${ovrColor};color:${statTextColor(ovrColor)}">${escapeHtml(ovr)}</span>
               </div>
               <a class="similar-player-link" href="${typeof laqpPlayerUrl === 'function' ? laqpPlayerUrl(player['Id'], team.id, player['Name']) : `player.html?id=${encodeURIComponent(player['Id'])}&team=${encodeURIComponent(team.id)}`}">${t('player.openCard')}</a>
+              <button type="button" class="similar-player-compare" onclick="openPlayerComparison('${escapeHtml(player['Id'])}')">Comparar</button>
             </article>`;
         }).join('')}
       </div>
     </section>`;
 }
 
+function renderPlayerStrengths(player) {
+  const strengths = STAT_COLUMNS_ORDERED.slice(0, 23)
+    .map((key, order) => ({ key, order, value: Number(player[key]) }))
+    .filter(item => Number.isFinite(item.value))
+    .sort((a, b) => b.value - a.value || a.order - b.order)
+    .slice(0, 3);
+  if (!strengths.length) return '';
+  return `<section class="player-strength-summary db-section" id="player-strengths">
+    <div class="player-section-title">Fortalezas</div>
+    <div class="player-strength-list">${strengths.map(item => `<div><span>${escapeHtml(translateStat(item.key))}</span><strong class="db-rating ${statColorClass(item.value)}">${item.value}</strong></div>`).join('')}</div>
+  </section>`;
+}
+
+function renderPesProfile(player, footDisplay, favBtnHtml, playsForNational, minifacePlayerName) {
+  const style = playingStyleLabel(player['PlayingStyle'] || '');
+  const fields = [
+    ['Estilo de juego', style && style !== '-' ? style : ''],
+    ['Forma', player['Form'] ? `${player['Form']} / 8` : ''],
+    ['Uso de pierna mala', player['Weak Foot Usage'] ? `${player['Weak Foot Usage']} / 4` : ''],
+    ['Precisión de pierna mala', player['Weak Foot Acc.'] ? `${player['Weak Foot Acc.']} / 4` : ''],
+    ['Resistencia a lesiones', player['Injury Resistance'] ? `${player['Injury Resistance']} / 3` : ''],
+    ['Pie dominante', footDisplay !== '–' ? footDisplay : ''],
+  ].filter(([, value]) => value);
+  return `<div class="player-header-card player-info-card db-module">
+    <div class="player-header-card-title">Perfil PES</div>
+    <dl class="player-pes-profile">${fields.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}</dl>
+    ${playsForNational ? `<p class="player-profile-note">${t('player.alsoNational')}</p>` : ''}
+    ${minifacePlayerName ? `<p class="player-profile-note">${t('player.miniface', { name: minifacePlayerName })}</p>` : ''}
+    ${favBtnHtml}
+  </div>`;
+}
+
+function renderSquadContext(team, context, clubUrl) {
+  if (!team.hasPublicPage || !context || !context.rank) return '';
+  const status = context.starter === true ? '<span>Titular en la formación inicial</span>'
+    : context.starter === false ? '<span>Fuera del XI inicial</span>' : '';
+  const peers = (context.competition || []).map(peer => `<li><a href="${escapeHtml(peer.url)}">${escapeHtml(peer.name)}</a><span>${escapeHtml(peer.position)}</span><strong class="db-rating ${statColorClass(peer.overall)}">${escapeHtml(peer.overall)}</strong></li>`).join('');
+  return `<section class="player-squad-context db-section" id="player-squad-context">
+    <div class="player-section-title">Contexto en el plantel</div>
+    <div class="player-squad-main"><strong>${escapeHtml(team.displayName)}</strong>${status}
+      ${context.positionRank ? `<span>${context.positionRank}.º ${escapeHtml(context.position)} por media</span>` : ''}
+      <span>${context.rank}.º por media en el equipo</span></div>
+    <div class="player-context-links"><a href="${escapeHtml(clubUrl)}#plantilla">Ver plantel</a><a href="${escapeHtml(clubUrl)}#formacion">Ver formación</a></div>
+    ${peers ? `<div class="player-context-competition"><h3>Competencia por posición</h3><ul>${peers}</ul></div>` : ''}
+  </section>`;
+}
+
+function renderPesTechnical(player, appearance) {
+  const fields = [
+    ['Player ID', player['Id']], ['Face ID', appearance?.['Id_Face']], ['Commentary ID', player['Commentary']],
+    ['Boots ID', appearance?.['Boots']], ['Gloves ID', appearance?.['Gloves']],
+    ['Celebración 1', player['Celebration 1']], ['Celebración 2', player['Celebration 2']],
+    ['Regate · cuerpo', player['Drib. Hunching']], ['Regate · brazos', player['Drib. Arm Move.']],
+    ['Carrera · cuerpo', player['Run. Hunching']], ['Carrera · brazos', player['Run. Arm Move.']],
+    ['Córner', player['Corner Kicks']], ['Tiro libre', player['Free Kicks']], ['Penal', player['Penalty Kick']],
+  ].filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '');
+  return `<details class="player-tech-details db-section" id="player-technical"><summary>Datos técnicos PES 2018</summary>
+    <dl>${fields.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}</dl></details>`;
+}
+
+let playerComparisonData = null;
+function openPlayerComparison(peerId) {
+  if (!playerComparisonData?.peers.length) return;
+  const section = document.getElementById('player-comparison');
+  const select = document.getElementById('player-compare-select');
+  if (!section || !select) return;
+  if (peerId && playerComparisonData.peers.some(item => item.player['Id'] === peerId)) select.value = peerId;
+  section.hidden = false;
+  updatePlayerComparison();
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updatePlayerComparison() {
+  const select = document.getElementById('player-compare-select');
+  const output = document.getElementById('player-compare-result');
+  const source = playerComparisonData?.source;
+  const peer = playerComparisonData?.peers.find(item => item.player['Id'] === select?.value)?.player;
+  if (!output || !source || !peer) return;
+  const a = computeRadarAttributes(source);
+  const b = computeRadarAttributes(peer);
+  const metrics = ['RIT', 'DRI', 'TIR', 'PAS', 'FIS', 'DEF'];
+  if (getPesPosition(source) === 'GK' || getPesPosition(peer) === 'GK') metrics.push('POR');
+  output.innerHTML = `<div class="player-compare-head"><strong>${escapeHtml(source['Name'])}</strong><span>vs</span><strong>${escapeHtml(peer['Name'])}</strong></div>
+    <div class="player-compare-metrics">
+      <div><strong>${escapeHtml(source['OverallStats'])}</strong><span>OVR</span><strong>${escapeHtml(peer['OverallStats'])}</strong></div>
+      <div><strong>${escapeHtml(translatePosition(getPesPosition(source)))}</strong><span>POS</span><strong>${escapeHtml(translatePosition(getPesPosition(peer)))}</strong></div>
+      ${metrics.map(key => `<div><strong>${a[key] ?? '–'}</strong><span>${key}</span><strong>${b[key] ?? '–'}</strong></div>`).join('')}
+    </div><div class="player-compare-radars"><canvas id="compare-radar-a" width="240" height="240" aria-label="Radar de ${escapeHtml(source['Name'])}"></canvas><canvas id="compare-radar-b" width="240" height="240" aria-label="Radar de ${escapeHtml(peer['Name'])}"></canvas></div>`;
+  drawRadar('compare-radar-a', a);
+  drawRadar('compare-radar-b', b);
+}
+
 function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal, similarPlayers = []) {
-  const ovrColor = statColor(player['OverallStats'] || '');
   const ovr = player['OverallStats'] || '–';
 
   const rawPos = player['POS'] || '';
@@ -1706,25 +1863,24 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   // Position pitch rendered in header (removed from stats tab)
   const positionPitchHtml = renderPositionPitch(player);
 
-  const dorsalHtml = dorsal
-    ? `<span class="player-info-card-dorsal">#${dorsal}</span>`
-    : '';
-
-  const statsHtml = `
-    <div class="stats-compact-layout">
-      <div class="stats-compact-left">
-        ${renderHabilidades(player)}
-      </div>
-      <div class="stats-compact-right">
-        ${renderEstiloDeJuego(player)}
-        ${renderHabilidadesJugador(player)}
-        ${renderEstilosJuegoCOM(player)}
-      </div>
-    </div>`;
+  const statsHtml = renderHabilidades(player);
+  const skillsHtml = `<section class="player-extra-skills db-section" id="player-skills">
+    <h2 class="player-nav-section-title">Habilidades</h2>
+    ${renderEstiloDeJuego(player)}${renderHabilidadesJugador(player)}${renderEstilosJuegoCOM(player)}
+  </section>`;
 
   const appearanceHtml = renderFaceData(appearance, player, baseCopyPlayerName, isScanned);
 
   const content = document.getElementById('player-content');
+  const clubUrl = typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`;
+  const clubName = team.hasPublicPage
+    ? `<a href="${clubUrl}">${escapeHtml(team.displayName)}</a>`
+    : `<span>${escapeHtml(team.displayName)}</span>`;
+  let squadContext = {};
+  try { squadContext = JSON.parse(document.body.dataset.playerContext || '{}'); } catch (_) { squadContext = {}; }
+  const heroFacts = [player['Age'] && `${player['Age']} años`, player['Height'] && `${player['Height']} cm`,
+    player['Weight'] && `${player['Weight']} kg`, footDisplay !== '–' && footDisplay].filter(Boolean);
+  const crest = team.hasPublicPage ? `<img class="player-hero-crest" src="img/teams/${escapeHtml(team.id)}.webp" alt="" onerror="this.onerror=null;this.src='img/teams/default.webp'">` : '';
 
   // Favorites button state for this player
   const favActive = (typeof isFavorite === 'function') && isFavorite(player['Id'], team.id);
@@ -1741,59 +1897,33 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
     <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
       <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html'}">${t('common.home')}</a>
       <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html'}">${t('common.database')}</a>
-      <a href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`}">${team.displayName}</a>
+      ${team.hasPublicPage ? `<a href="${clubUrl}">${escapeHtml(team.displayName)}</a>` : ''}
       <span>${player['Name'] || t('player.unknown')}</span>
     </nav></div>
     <button class="back-btn" onclick="goBack()">◀ ${t('common.back')}</button>
 
     <div class="player-profile-page">
+      <header class="player-hero db-hero" id="player-summary">
+        <div class="player-hero-face-wrap"><img class="player-hero-face" data-player-id="${escapeHtml(player['Id'])}" data-miniface-current-src="img/players/${escapeHtml(player['Id'])}.webp" alt="Miniface de ${escapeHtml(player['Name'] || '')}" width="112" height="124"></div>
+        <div class="player-hero-identity">
+          <p class="db-eyebrow">PES 2018 · Ficha de jugador</p>
+          <h1>${escapeHtml(player['Name'] || t('player.unknown'))}</h1>
+          <p class="player-hero-context">${crest}${clubName}<span><img class="player-hero-flag" src="${flagSrc(player['Country'])}" alt="" onerror="this.onerror=null;this.src='img/flags/default.webp'">${escapeHtml(nationalityName(player['Country']) || '')}</span>${dorsal ? `<span>#${escapeHtml(dorsal)}</span>` : ''}</p>
+          <p class="player-hero-facts">${heroFacts.map(value => `<span>${escapeHtml(value)}</span>`).join('')}</p>
+          ${squadContext.starter === true || squadContext.positionRank || squadContext.rank ? `<p class="player-hero-ranks">${squadContext.starter === true ? '<span>Titular</span>' : ''}${squadContext.positionRank ? `<span>${squadContext.positionRank}.º ${escapeHtml(squadContext.position)}</span>` : ''}${squadContext.rank ? `<span>${squadContext.rank}.º del plantel</span>` : ''}</p>` : ''}
+          ${typeLabel ? `<p class="player-hero-type">${escapeHtml(typeLabel)}</p>` : ''}
+        </div>
+        <div class="player-hero-rating"><strong class="db-rating ${statColorClass(ovr)}">${escapeHtml(ovr)}</strong><span>${escapeHtml(posDisplay || '–')}</span></div>
+        <div class="player-hero-tools"><div data-miniface-control-host></div>${similarPlayers.length ? '<button type="button" class="player-compare-trigger" onclick="openPlayerComparison()">Comparar jugador</button>' : ''}</div>
+      </header>
 
-      <!-- Header: three cards side by side -->
-      <div class="player-profile-header">
-
-        <!-- Column 1: Player info card -->
+      <div class="player-profile-header db-module-grid">
         <div class="player-header-info-col">
-          <div class="player-header-card player-info-card">
-            <div class="player-info-card-top" style="background:linear-gradient(135deg,${ovrColor}33 0%,${ovrColor}11 100%)">
-              <div class="player-info-card-ovr-block">
-                <span class="player-info-card-ovr" style="color:${ovrColor}">${ovr}</span>
-                <span class="player-info-card-pos" style="color:${positionGroupColor(pesPosition)}">${posDisplay || '–'}</span>
-              </div>
-              <div class="player-info-card-badge-col">
-                <img class="player-info-card-flag"
-                  src="${flagSrc(player['Country'])}"
-                  onerror="this.onerror=null;this.src='img/flags/default.webp'" alt="">
-                <img class="player-info-card-crest"
-                  src="img/teams/${team.id}.webp"
-                  onerror="this.onerror=null;this.src='img/teams/default.webp'"
-                  alt="${team.displayName}">
-                ${dorsalHtml}
-              </div>
-            </div>
-            <div class="player-info-card-photo-wrap">
-              <img class="player-info-card-photo"
-                src="img/players/${player['Id']}.webp"
-                onerror="handleMinifaceError(this,'${player['Id']}')"
-                alt="${player['Name'] || ''}">
-            </div>
-            <div class="player-info-card-body">
-              <h1 class="player-info-card-name" title="${player['Name'] || ''}">${player['Name'] || t('player.unknown')}</h1>
-              ${typeLabel ? `<div class="player-info-card-type">${typeLabel}</div>` : ''}
-              ${playsForNational ? `<div class="national-team-note">${t('player.alsoNational')}</div>` : ''}
-              ${minifacePlayerName ? `<div class="profile-miniface-note">${t('player.miniface', { name: minifacePlayerName })}</div>` : ''}
-              <div class="player-card-stats player-info-card-stats">
-                <div class="pcs"><span class="pcs-val">${player['Age'] || '–'}</span><span class="pcs-key">${t('common.age')}</span></div>
-                <div class="pcs"><span class="pcs-val">${player['Height'] || '–'} cm</span><span class="pcs-key">${t('common.heightShort')}</span></div>
-                <div class="pcs"><span class="pcs-val">${player['Weight'] || '–'} kg</span><span class="pcs-key">${t('common.weight')}</span></div>
-                <div class="pcs"><span class="pcs-val">${footDisplay}</span><span class="pcs-key">${t('common.foot')}</span></div>
-              </div>
-              ${favBtnHtml}
-            </div>
-          </div>
+          ${renderPesProfile(player, footDisplay, favBtnHtml, playsForNational, minifacePlayerName)}
         </div>
 
         <!-- Column 2: Radar chart card -->
-        <div class="player-header-card player-radar-card">
+        <div class="player-header-card player-radar-card db-module">
           <div class="player-header-card-title">${t('player.stats')}</div>
           <div class="player-header-radar-wrap">
             <canvas id="radar-canvas" width="240" height="240"></canvas>
@@ -1801,45 +1931,56 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
         </div>
 
         <!-- Column 3: Secondary positions pitch card -->
-        <div class="player-header-card player-positions-card">
+        <div class="player-header-card player-positions-card db-module">
           ${positionPitchHtml}
         </div>
 
       </div>
 
       <div class="ad-placement" data-ad-placement="player-top" data-ad-unit-target="responsive"></div>
+      ${renderPlayerStrengths(player)}
+      <nav class="player-page-nav" aria-label="Secciones del jugador"><a href="#player-summary">Resumen</a><a href="#player-statistics">Estadísticas</a><a href="#player-skills">Habilidades</a><a href="#player-appearance">Apariencia</a><a href="#player-technical">Datos PES</a></nav>
 
-      ${renderPlayerEditorial(player, team, pesPosition, similarPlayers)}
-
-      <div class="ad-placement" data-ad-placement="player-mid" data-ad-unit-target="rectangle"></div>
-
-      <!-- Tabs -->
-      <div class="profile-tabs">
-        <div class="profile-tab-bar">
-          <button class="profile-tab-btn active" data-tab="tab-stats" onclick="switchTab('tab-stats')">${t('player.stats')}</button>
-          <button class="profile-tab-btn" data-tab="tab-appearance" onclick="switchTab('tab-appearance')">${t('player.appearance')}</button>
-        </div>
-
+      <section class="profile-tabs" id="player-statistics" aria-labelledby="player-statistics-title">
+        <h2 class="player-nav-section-title" id="player-statistics-title">${t('player.stats')}</h2>
         <div id="tab-stats" class="profile-tab-panel active">
           ${statsHtml}
         </div>
-
-        <div id="tab-appearance" class="profile-tab-panel">
+      </section>
+      ${skillsHtml}
+      <section class="profile-tabs" id="player-appearance" aria-labelledby="player-appearance-title">
+        <h2 class="player-nav-section-title" id="player-appearance-title">${t('player.appearance')}</h2>
+        <div id="tab-appearance" class="profile-tab-panel active">
           <div class="appearance-info">
             ${t('player.appearanceInfo')}
           </div>
           ${appearanceHtml}
         </div>
-      </div>
+      </section>
+      ${renderSquadContext(team, squadContext, clubUrl)}
+      <div class="ad-placement" data-ad-placement="player-mid" data-ad-unit-target="responsive"></div>
+      ${renderPlayerEditorial(player, team, pesPosition, similarPlayers)}
+      <section class="player-compare-section db-section" id="player-comparison" hidden>
+        <div class="player-section-title">Comparar jugador</div>
+        <label>Jugador B <select id="player-compare-select" onchange="updatePlayerComparison()">${similarPlayers.map(({player: peer}) => `<option value="${escapeHtml(peer['Id'])}">${escapeHtml(peer['Name'])}</option>`).join('')}</select></label>
+        <div id="player-compare-result"></div>
+      </section>
 
-      <div class="ad-placement" data-ad-placement="player-bottom" data-ad-unit-target="native"></div>
+      <div class="ad-placement" data-ad-placement="player-bottom" data-ad-unit-target="responsive"></div>
 
       ${renderSimilarPlayers(similarPlayers)}
+      ${renderPesTechnical(player, appearance)}
 
     </div>`;
 
+  playerComparisonData = { source: player, peers: similarPlayers };
+  const control = document.querySelector('.miniface-mode-control');
+  const controlHost = content.querySelector('[data-miniface-control-host]');
+  if (control && controlHost) controlHost.append(control);
+  window.LAQPMinifaces?.refresh(content);
   window.LAQPAds?.placeAll(content);
   window.LAQPAds?.monitorAll(content);
+  initPlayerPageNavigation(content);
 
   document.documentElement.classList.add('laqp-hydrated');
   content.style.display = 'block';
@@ -1869,7 +2010,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   if (ogUrl) ogUrl.setAttribute('content', playerUrl);
   if (ogImage) ogImage.setAttribute('content', `https://laqp.website/img/players/${player['Id']}.webp`);
   if (window.location.pathname !== playerPath && typeof history.replaceState === 'function') {
-    history.replaceState(null, '', playerPath);
+    history.replaceState(null, '', playerPath + window.location.hash);
   }
 
   document.querySelectorAll('script[data-dynamic-schema="player"]').forEach(el => el.remove());
@@ -1964,14 +2105,10 @@ async function boot() {
   const { rows: appearanceRows } = appearancesText ? parseCSV(appearancesText) : { rows: [] };
   const { rows: squadRows } = squadsText ? parseCSV(squadsText) : { rows: [] };
   const { rows: leagueRows } = leaguesText ? parseCSV(leaguesText) : { rows: [] };
-  const validTeamIds = new Set();
-  leagueRows.forEach(row => {
-    String(row['team_ids'] || '').split(',').map(id => id.trim()).filter(Boolean).forEach(id => validTeamIds.add(id));
-  });
-  if (!validTeamIds.has(teamId)) {
-    showError(t('errors.teamNotPublished'));
-    return;
-  }
+  const publicTeamIds = new Set(leagueRows.flatMap(row => (row['team_ids'] || '').split(',').map(id => id.trim()).filter(Boolean)));
+  const validTeamIds = new Set(teamRows
+    .filter(row => publicTeamIds.has(row['Id']) && String(row['Name'] || '').trim() && row['Name'] !== '-')
+    .map(row => row['Id']));
 
   const teamSquadRow = squadRows.find(r => r['Id'] === teamId);
   const playerIsAssignedToRequestedTeam = !!teamSquadRow && Array.from({ length: 32 }, (_, idx) => teamSquadRow[`Player ${idx + 1}`])
@@ -2032,7 +2169,9 @@ async function boot() {
     rawName: teamRow['Name'] || teamId,
     displayName: toTitleCaseName(teamRow['Name'] || teamId),
     type: teamRow['Type'] || '0',
+    hasPublicPage: validTeamIds.has(teamId) && teamRow['Type'] !== '2',
   };
+  applyPlayerContext(teamRow, team.hasPublicPage);
   const typeLabel = teamTypeLabel(team.type);
 
   // Build appearance map and find this player's appearance data

@@ -82,6 +82,9 @@ const NATIONALITY_NAMES = {
   '7':   'China',        '8':   'Hong Kong',    '9':   'India',
   '10':  'Indonesia',   '11':  'Irán',
   '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
+  '54':  'Comoras',         '67':  'Kenia',        '98':  'Congo',
+  '29':  'Filipinas',         '28':  'Palestina',        '220':  'Luxemburgo',
+  '216':  'Kazajistán',         '205':  'Estonia',        '140':  'Curazao',
   '15':  'Corea del Norte', '16': 'Corea del Sur', '17': 'Kuwait',
   '21':  'Malasia', '32':  'Singapur', '34':  'Siria', 
   '19':  'Líbano',       '26':  'Omán',         '30':  'Qatar',
@@ -450,28 +453,14 @@ function flagSrc(countryId) {
  * Get color class for a stat value (0–99).
  */
 function statColorClass(value) {
-  const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-range-1';
-  if (v >= 95) return 'stat-range-6';
-  if (v >= 90) return 'stat-range-5';
-  if (v >= 80) return 'stat-range-4';
-  if (v >= 70) return 'stat-range-3';
-  if (v >= 60) return 'stat-range-2';
-  return 'stat-range-1';
+  return window.LAQPRating.classFor(value);
 }
 
 /**
  * Get color hex for canvas drawing based on stat value.
  */
 function statColor(value) {
-  const v = parseInt(value, 10);
-  if (isNaN(v)) return '#d33d35';
-  if (v >= 95) return '#00ff87';
-  if (v >= 90) return '#62ff51';
-  if (v >= 80) return '#a8ff00';
-  if (v >= 70) return '#e5dc00';
-  if (v >= 60) return '#e59f01';
-  return '#d33d35';
+  return window.LAQPRating.colorFor(value);
 }
 
 function statTextColor(hexColor) {
@@ -482,14 +471,7 @@ function statTextColor(hexColor) {
  * Compute overall badge color.
  */
 function overallColor(value) {
-  const v = parseInt(value, 10);
-  if (isNaN(v)) return 'stat-range-1';
-  if (v >= 95) return 'stat-range-6';
-  if (v >= 90) return 'stat-range-5';
-  if (v >= 80) return 'stat-range-4';
-  if (v >= 70) return 'stat-range-3';
-  if (v >= 60) return 'stat-range-2';
-  return 'stat-range-1';
+  return window.LAQPRating.classFor(value);
 }
 
 // ─── Boot / Indexer ───────────────────────────────────────────────────────────
@@ -518,6 +500,17 @@ async function boot() {
   const squadRows = parseCSV(squadsText);
   const appearanceRows = appearancesText ? parseCSV(appearancesText) : [];
 
+  // team_ids in the actual leagues export defines public club membership.
+  if (leaguesText) {
+    const leagueRows = parseCSV(leaguesText);
+    DB.leagues = leagueRows.map(row => ({
+      id: row['league_id'] || '',
+      name: row['league_name'] || '',
+      teamIds: (row['team_ids'] || '').split(',').map(s => s.trim()).filter(Boolean),
+    })).filter(l => l.id && l.name);
+  }
+  const publicTeamIds = new Set(DB.leagues.flatMap(league => league.teamIds));
+
   // Build global appearance map (playerId → appearanceData)
   const globalAppearanceMap = {};
   appearanceRows.forEach(row => {
@@ -530,7 +523,7 @@ async function boot() {
   const teamById = {};
   teamRows.forEach(teamRow => {
     const teamId = teamRow['Id'];
-    if (!teamId) return;
+    if (!teamId || !publicTeamIds.has(teamId)) return;
     const teamName = teamRow['Name'] || '';
     // Skip placeholder teams with no real name
     if (!teamName || teamName === '-') return;
@@ -552,23 +545,8 @@ async function boot() {
   // Sort teams alphabetically
   DB.teams.sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'));
 
-  // Build leagues from CSV
-  if (leaguesText) {
-    const leagueRows = parseCSV(leaguesText);
-    DB.leagues = leagueRows.map(row => ({
-      id: row['league_id'] || '',
-      name: row['league_name'] || '',
-      teamIds: (row['team_ids'] || '').split(',').map(s => s.trim()).filter(Boolean),
-    })).filter(l => l.id && l.name);
-  }
-
-  // Build normalized player map (playerId → normalized player row)
-  const validTeamIds = new Set();
-  DB.leagues.forEach(league => league.teamIds.forEach(id => validTeamIds.add(id)));
-  DB.teams = DB.teams.filter(team => validTeamIds.has(team.id));
-  Object.keys(teamById).forEach(teamId => {
-    if (!validTeamIds.has(teamId)) delete teamById[teamId];
-  });
+  // Only published teams enter search, autocomplete, navigation and counts.
+  const validTeamIds = new Set(DB.teams.map(team => team.id));
 
   const playerMap = {};
   playerRows.forEach(playerRow => {
@@ -908,7 +886,7 @@ function _showLeaguesViewInternal() {
     </div>
     <div class="ad-placement" data-ad-placement="directory-leagues-top" data-ad-unit-target="responsive"></div>
     <div class="grid-cards" id="leagues-grid-cards">${cardsHtml}</div>
-    <div class="ad-placement" data-ad-placement="directory-leagues-bottom" data-ad-unit-target="native"></div>`;
+    <div class="ad-placement" data-ad-placement="directory-leagues-bottom" data-ad-unit-target="responsive"></div>`;
 
   window.LAQPAds?.placeAll(view);
 }
@@ -972,7 +950,7 @@ function _showLeagueTeamsViewInternal(leagueId) {
     <button class="back-btn" onclick="showLeaguesView()" style="margin-bottom:16px">◀ Volver a Ligas</button>
     <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
     <div class="grid-cards">${cardsHtml}</div>
-    <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="native"></div>`;
+    <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="responsive"></div>`;
 
   window.LAQPAds?.placeAll(view);
 }
@@ -1073,8 +1051,7 @@ function _buildTeamFiltersPanel() {
   const leagues = DB.leagues
     .filter(l => l.name && l.teamIds.some(id => _teamsForGrid.some(t => t.id === id)))
     .sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  const countries = [...new Set(_teamsForGrid.map(t => _teamFilterValue(t, 'country')).filter(Boolean))]
-    .sort((a, b) => nationalityName(a).localeCompare(nationalityName(b), 'es'));
+  const countries = [...new Set(_teamsForGrid.filter(t => t.players.length > 0).map(t => _teamFilterValue(t, 'country')).filter(Boolean))];
   const types = [...new Set(_teamsForGrid.map(t => t.type).filter(t => TYPE_LABELS[t]))];
   const panelOpen = _teamFiltersOpen || _hasActiveTeamFilters();
 
@@ -1104,13 +1081,7 @@ function _buildTeamFiltersPanel() {
             ${leagues.map(l => `<option value="${l.id}"${_teamFilters.league === l.id ? ' selected' : ''}>${escapeHtml(l.name)}</option>`).join('')}
           </select>
         </div>
-        <div class="adv-filter-group">
-          <label>${t('common.country')}</label>
-          <select id="team-flt-country" onchange="onTeamFilterChange()">
-            <option value="">${t('common.allMasc')}</option>
-            ${countries.map(c => `<option value="${c}"${_teamFilters.country === c ? ' selected' : ''}>${escapeHtml(nationalityName(c))}</option>`).join('')}
-          </select>
-        </div>
+        ${window.LAQPCountryFilter.render({ ids: countries, selected: _teamFilters.country, nameFor: nationalityName, locale: getCurrentLanguage(), inputId: 'team-flt-country', label: t('common.country'), allLabel: t('common.allMasc') })}
         <div class="adv-filter-group">
           <label>${t('common.type')}</label>
           <select id="team-flt-type" onchange="onTeamFilterChange()">
@@ -1148,11 +1119,7 @@ function _applyTeamFilters() {
 /** Internal: render teams grid without saving nav state. */
 function _showTeamsViewInternal() {
   _setActiveSidebarNav('teams');
-  // Only show teams that belong to a league
-  const teamsInLeagues = new Set();
-  DB.leagues.forEach(l => l.teamIds.forEach(id => teamsInLeagues.add(id)));
-  const filteredTeams = DB.teams.filter(t => teamsInLeagues.has(t.id));
-  _teamsForGrid = filteredTeams;
+  _teamsForGrid = DB.teams.slice();
   _applyTeamFilters();
   _teamsGridPage = 1;
   if (_hasActiveTeamFilters()) _teamFiltersOpen = true;
@@ -1167,15 +1134,16 @@ function _showTeamsViewInternal() {
     <div class="view-header">
       <div>
         <div class="view-title">${t('common.teams')}</div>
-        <div class="view-subtitle" id="teams-grid-subtitle">${t('db.teamsWithLeague', { count: _teamsFilteredList.length })}</div>
+        <div class="view-subtitle" id="teams-grid-subtitle">${_teamsFilteredList.length} equipos</div>
       </div>
     </div>
     ${_buildTeamFiltersPanel()}
     <div class="ad-placement" data-ad-placement="directory-teams-top" data-ad-unit-target="responsive"></div>
     <div class="grid-cards" id="teams-grid-cards"></div>
     <div id="teams-grid-pagination"></div>
-    <div class="ad-placement" data-ad-placement="directory-teams-bottom" data-ad-unit-target="native"></div>`;
+    <div class="ad-placement" data-ad-placement="directory-teams-bottom" data-ad-unit-target="responsive"></div>`;
 
+  window.LAQPCountryFilter.mount(view.querySelector('[data-country-filter]'), () => onTeamFilterChange());
   _renderTeamsGridPage();
   window.LAQPAds?.placeAll(view);
 }
@@ -1206,7 +1174,7 @@ function _renderTeamsGridPage() {
   if (subtitle) {
     const totalPages = Math.ceil(total / TEAMS_PAGE_SIZE) || 1;
     if (total === _teamsForGrid.length) {
-      subtitle.textContent = `${total} equipos con liga asignada · página ${_teamsGridPage} de ${totalPages}`;
+      subtitle.textContent = `${total} equipos · página ${_teamsGridPage} de ${totalPages}`;
     } else {
       subtitle.textContent = `${total} equipo${total !== 1 ? 's' : ''} encontrado${total !== 1 ? 's' : ''} · página ${_teamsGridPage} de ${totalPages}`;
     }
@@ -1265,6 +1233,7 @@ function resetTeamFilters() {
   });
   _teamFiltersOpen = false;
   onTeamFilterChange();
+  window.LAQPCountryFilter.sync(document.querySelector('#teams-grid-view [data-country-filter]'));
   const body = document.getElementById('team-filter-body');
   const btn = document.getElementById('btn-toggle-team-filters');
   if (body) body.hidden = true;
@@ -1333,12 +1302,10 @@ function showHomeLegacy() {
   hideAllViews();
   document.getElementById('home-view').classList.add('active');
 
-  const teamsInLeaguesSet = _getTeamsInLeagues();
   const leagueCount = DB.leagues.length;
   document.getElementById('stat-leagues').textContent = leagueCount;
-  document.getElementById('stat-teams').textContent = DB.teams.filter(t => teamsInLeaguesSet.has(t.id)).length;
-  // Count unique players from teams that have a league assigned
-  const uniqueIds = new Set(DB.players.filter(p => teamsInLeaguesSet.has(p._team.id)).map(p => p.ID));
+  document.getElementById('stat-teams').textContent = DB.teams.length;
+  const uniqueIds = new Set(DB.players.map(p => p.ID));
   document.getElementById('stat-players').textContent = uniqueIds.size;
   // Show favorites count
   const favCount = getFavoritesCount();
@@ -1564,11 +1531,10 @@ function showHome() {
   homeView.classList.add('active');
   window.LAQPAds?.placeAll(homeView);
 
-  const teamsInLeaguesSet = _getTeamsInLeagues();
   const leagueCount = DB.leagues.length;
-  const teamCount = DB.teams.filter(team => teamsInLeaguesSet.has(team.id)).length;
+  const teamCount = DB.teams.length;
   const uniqueIds = new Set(DB.players
-    .filter(player => player && player._team && teamsInLeaguesSet.has(player._team.id))
+    .filter(player => player && player.ID)
     .map(player => player.ID));
   const playerCount = uniqueIds.size;
   const favCount = getFavoritesCount();
@@ -1736,9 +1702,6 @@ function _getTeamsInLeagues() {
  * under their club team (national team duplicate entries are skipped).
  */
 function _prepareAllPlayersList() {
-  // Build set of team IDs that belong to a league
-  const teamsInLeagues = _getTeamsInLeagues();
-
   // Collect all player IDs that have a club/special team entry
   const clubPlayerIds = new Set(
     DB.players.filter(p => p._team.type !== '2').map(p => p.ID)
@@ -1752,9 +1715,6 @@ function _prepareAllPlayersList() {
     seen.add(p.ID);
     return true;
   });
-
-  // Always hide players from teams that have no league assigned
-  unique = unique.filter(p => teamsInLeagues.has(p._team.id));
 
   // Hide type-1 (special) team players unless the toggle is active
   if (!_showSpecialPlayers) {
@@ -2150,27 +2110,21 @@ function _buildActiveFiltersSummary() {
 }
 
 function _buildFilterPanel() {
-  const teamsInLeagues = _getTeamsInLeagues();
-
   const clubPlayerIds = new Set(DB.players.filter(p => p._team.type !== '2').map(p => p.ID));
   const seen = new Set();
   const basePlayers = DB.players.filter(p => {
     if (p._team.type === '2' && clubPlayerIds.has(p.ID)) return false;
     if (seen.has(p.ID)) return false;
     seen.add(p.ID);
-    return teamsInLeagues.has(p._team.id);
+    return true;
   });
 
-  const nationalities = [...new Set(basePlayers.map(p => p.Nationality || '').filter(Boolean))]
-    .sort((a, b) => nationalityName(a).localeCompare(nationalityName(b), 'es'));
+  const nationalities = [...new Set(basePlayers.map(p => p.Nationality || '').filter(Boolean))];
   const clubTeams = DB.teams
-    .filter(t => t.type !== '2' && t.players.length > 0 && teamsInLeagues.has(t.id))
+    .filter(t => t.type !== '2' && t.players.length > 0)
     .sort((a, b) => a.displayName.localeCompare(b.displayName, 'es'));
 
   const f = _advFilters;
-  const natOptions = nationalities.map(n =>
-    `<option value="${n}"${f.nationality === n ? ' selected' : ''}>${nationalityName(n)}</option>`
-  ).join('');
   const clubOptions = clubTeams.map(t =>
     `<option value="${t.id}"${f.club === t.id ? ' selected' : ''}>${escapeHtml(t.displayName)}</option>`
   ).join('');
@@ -2235,13 +2189,7 @@ function _buildFilterPanel() {
               ${leagueOptions}
             </select>
           </div>
-          <div class="adv-filter-group">
-            <label>${t('common.nationality')}</label>
-            <select id="flt-nationality" onchange="onAdvFilterChange()">
-              <option value="">${t('common.allFem')}</option>
-              ${natOptions}
-            </select>
-          </div>
+          ${window.LAQPCountryFilter.render({ ids: nationalities, selected: f.nationality, nameFor: nationalityName, locale: getCurrentLanguage(), inputId: 'flt-nationality', label: t('common.nationality'), allLabel: t('common.allFem') })}
           <div class="adv-filter-group">
             <label>${t('common.position')}</label>
             <select id="flt-position" onchange="onAdvFilterChange()">
@@ -2396,6 +2344,7 @@ function resetAdvancedFilters() {
     if (el) el.value = '';
   });
   document.querySelectorAll('#flt-skills input[type="checkbox"]').forEach(el => { el.checked = false; });
+  window.LAQPCountryFilter.sync(document.querySelector('#players-view [data-country-filter]'));
   _advancedFiltersOpen = false;
   _playerFiltersOpen = false;
   onAdvFilterChange();
@@ -2486,9 +2435,9 @@ function _showAllPlayersInternal(resetPage) {
       </table>
     </div>
     <div id="all-players-pagination"></div>
-    <div class="ad-placement" data-ad-placement="directory-players-bottom" data-ad-unit-target="native"></div>`;
+    <div class="ad-placement" data-ad-placement="directory-players-bottom" data-ad-unit-target="responsive"></div>`;
 
-
+  window.LAQPCountryFilter.mount(view.querySelector('[data-country-filter]'), () => onAdvFilterChange());
   // Render the first page
   _renderPlayersPage();
   window.LAQPAds?.placeAll(view);
@@ -2826,7 +2775,7 @@ function drawRadar(canvasId, attrs) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(214, 168, 79, 0.22)';
+    ctx.fillStyle = 'rgba(33, 212, 194, 0.22)';
   ctx.fill();
   ctx.strokeStyle = '#e74c3c';
   ctx.lineWidth = 2;
@@ -3012,12 +2961,10 @@ function runSearch(query) {
 
   // Deduplicate by player ID: prefer club/special-team entries over national team entries
   const clubPlayerIds = new Set(DB.players.filter(p => p._team.type !== '2').map(p => p.ID));
-  const teamsInLeagues = _getTeamsInLeagues();
   const seenIds = new Set();
   const results = rawResults.filter(p => {
     if (p._team.type === '2' && clubPlayerIds.has(p.ID)) return false;
     if (seenIds.has(p.ID)) return false;
-    if (!teamsInLeagues.has(p._team.id)) return false;
     seenIds.add(p.ID);
     return true;
   });

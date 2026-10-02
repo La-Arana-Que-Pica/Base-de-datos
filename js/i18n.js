@@ -19,6 +19,7 @@ const I18N_MESSAGES = {
     'nav.downloads': 'Option Files',
     'nav.tutorials': 'Tutoriales',
     'nav.database': 'Base de Datos',
+    'nav.lineups': 'Alineaciones',
     'nav.dts': 'DTs',
     'nav.guides': 'Guías',
     'nav.scouting': 'Scouting',
@@ -189,6 +190,7 @@ const I18N_MESSAGES = {
     'nav.downloads': 'Option Files',
     'nav.tutorials': 'Tutorials',
     'nav.database': 'Database',
+    'nav.lineups': 'Lineups',
     'nav.dts': 'Managers',
     'nav.guides': 'Guides',
     'nav.scouting': 'Scouting',
@@ -359,6 +361,7 @@ const I18N_MESSAGES = {
     'nav.downloads': 'Option Files',
     'nav.tutorials': 'Tutoriais',
     'nav.database': 'Base de dados',
+    'nav.lineups': 'Escalações',
     'nav.dts': 'Treinadores',
     'nav.guides': 'Guias',
     'nav.scouting': 'Scouting',
@@ -529,6 +532,7 @@ const I18N_MESSAGES = {
     'nav.downloads': 'Option Files',
     'nav.tutorials': 'Tutorial',
     'nav.database': 'Database',
+    'nav.lineups': 'Formazioni',
     'nav.dts': 'Allenatori',
     'nav.guides': 'Guide',
     'nav.scouting': 'Scouting',
@@ -1352,6 +1356,56 @@ I18N_MAPS.tacticValues = {
     'pressuring.1': 'Conservativo',
   },
 };
+
+Object.assign(I18N_MESSAGES.es, {
+  'dts.coach': 'Director Técnico', 'dts.viewTactics': 'Ver tácticas', 'dts.viewTactic': 'Ver táctica',
+  'dts.viewCoach': 'Ver DT', 'dts.summary': 'Resumen', 'dts.tactics': 'Tácticas', 'dts.face': 'Cara PES',
+  'dts.hair': 'Peinado', 'dts.career': 'Carrera', 'dts.context': 'Contexto LAQP', 'dts.birth': 'Nacimiento',
+  'dts.realStatus': 'Situación actual', 'dts.preferredFormation': 'Formación habitual',
+  'dts.faceAvailable': 'Cara PES', 'dts.hairAvailable': 'Peinado', 'dts.recentCareer': 'Trayectoria reciente',
+  'dts.fullCareer': 'Ver carrera completa', 'dts.honors': 'Palmarés', 'dts.related': 'DTs relacionados',
+  'dts.tacticsIntro': 'Contextos históricos y actuales creados por LAQP.', 'dts.facePes': 'Cara PES 2018',
+  'dts.faceIntro': 'Preview y valores agrupados para copiar al editor.', 'dts.hairPes': 'Peinado PES 2018',
+  'dts.hairIntro': 'Solo los valores correspondientes al pelo y accesorios.',
+  'dts.careerIntro': 'Etapas como entrenador y otros cargos registrados.', 'dts.years': 'años',
+  'dts.tacticsCount': 'tácticas', 'dts.available': 'Disponible', 'dts.noData': 'Sin datos'
+});
+Object.assign(I18N_MESSAGES.en, {
+  'dts.coach': 'Head coach', 'dts.viewTactics': 'View tactics', 'dts.viewTactic': 'View tactic',
+  'dts.viewCoach': 'View coach', 'dts.summary': 'Summary', 'dts.tactics': 'Tactics', 'dts.face': 'PES face',
+  'dts.hair': 'Hairstyle', 'dts.career': 'Career', 'dts.context': 'LAQP context', 'dts.birth': 'Born',
+  'dts.realStatus': 'Current status', 'dts.preferredFormation': 'Preferred formation',
+  'dts.faceAvailable': 'PES face', 'dts.hairAvailable': 'Hairstyle', 'dts.recentCareer': 'Recent career',
+  'dts.fullCareer': 'View full career', 'dts.honors': 'Honours', 'dts.related': 'Related coaches',
+  'dts.tacticsIntro': 'Historic and current contexts created by LAQP.', 'dts.facePes': 'PES 2018 face',
+  'dts.faceIntro': 'Preview and grouped values ready for the editor.', 'dts.hairPes': 'PES 2018 hairstyle',
+  'dts.hairIntro': 'Only hair and accessory settings.', 'dts.careerIntro': 'Recorded coaching stages and other roles.',
+  'dts.years': 'years', 'dts.tacticsCount': 'tactics', 'dts.available': 'Available', 'dts.noData': 'No data'
+});
+Object.assign(I18N_MESSAGES.pt, {
+  'dts.coach': 'Treinador', 'dts.viewTactics': 'Ver táticas', 'dts.viewTactic': 'Ver tática',
+  'dts.viewCoach': 'Ver treinador', 'dts.summary': 'Resumo', 'dts.tactics': 'Táticas', 'dts.face': 'Rosto PES',
+  'dts.hair': 'Penteado', 'dts.career': 'Carreira', 'dts.context': 'Contexto LAQP', 'dts.birth': 'Nascimento',
+  'dts.realStatus': 'Situação atual', 'dts.preferredFormation': 'Formação habitual',
+  'dts.faceAvailable': 'Rosto PES', 'dts.hairAvailable': 'Penteado', 'dts.recentCareer': 'Carreira recente',
+  'dts.fullCareer': 'Ver carreira completa', 'dts.honors': 'Títulos', 'dts.related': 'Treinadores relacionados',
+  'dts.tacticsIntro': 'Contextos históricos e atuais criados pela LAQP.', 'dts.facePes': 'Rosto PES 2018',
+  'dts.faceIntro': 'Preview e valores agrupados para copiar no editor.', 'dts.hairPes': 'Penteado PES 2018',
+  'dts.hairIntro': 'Somente valores de cabelo e acessórios.', 'dts.careerIntro': 'Etapas como treinador e outros cargos registrados.',
+  'dts.years': 'anos', 'dts.tacticsCount': 'táticas', 'dts.available': 'Disponível', 'dts.noData': 'Sem dados'
+});
+Object.assign(I18N_MESSAGES.it, {
+  'dts.coach': 'Allenatore', 'dts.viewTactics': 'Vedi tattiche', 'dts.viewTactic': 'Vedi tattica',
+  'dts.viewCoach': 'Vedi allenatore', 'dts.summary': 'Riepilogo', 'dts.tactics': 'Tattiche', 'dts.face': 'Volto PES',
+  'dts.hair': 'Capelli', 'dts.career': 'Carriera', 'dts.context': 'Contesto LAQP', 'dts.birth': 'Nascita',
+  'dts.realStatus': 'Situazione attuale', 'dts.preferredFormation': 'Modulo preferito',
+  'dts.faceAvailable': 'Volto PES', 'dts.hairAvailable': 'Capelli', 'dts.recentCareer': 'Carriera recente',
+  'dts.fullCareer': 'Vedi carriera completa', 'dts.honors': 'Palmarès', 'dts.related': 'Allenatori correlati',
+  'dts.tacticsIntro': 'Contesti storici e attuali creati da LAQP.', 'dts.facePes': 'Volto PES 2018',
+  'dts.faceIntro': 'Anteprima e valori raggruppati per l’editor.', 'dts.hairPes': 'Capelli PES 2018',
+  'dts.hairIntro': 'Solo valori di capelli e accessori.', 'dts.careerIntro': 'Esperienze da allenatore e altri incarichi registrati.',
+  'dts.years': 'anni', 'dts.tacticsCount': 'tattiche', 'dts.available': 'Disponibile', 'dts.noData': 'Nessun dato'
+});
 
 function i18nNormalizeLang(lang) {
   const base = String(lang || '').toLowerCase().split('-')[0];

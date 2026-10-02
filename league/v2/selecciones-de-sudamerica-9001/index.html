@@ -4,24 +4,28 @@
   <base href="/">
   <script>document.documentElement.classList.add('laqp-js');window.setTimeout(function(){document.documentElement.classList.add('laqp-js-timeout');},6000);</script>
   <script src="js/consent-mode.js"></script>
+  <script src="js/minifaces.js"></script>
+  <script src="js/database-rating.js?v=20260924d"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="laqp-league-id" content="9001">
+  <meta name="laqp-league-name" content="Selecciones de Sudamérica">
   <title>Selecciones de Sudamérica PES 2018 Actualizado - Equipos y Plantillas</title>
   <meta name="description" content="Selecciones de Sudamérica para PES 2018 actualizado: 10 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.">
   <link rel="canonical" href="https://laqp.website/league/v2/selecciones-de-sudamerica-9001/">
   <meta property="og:title" content="Selecciones de Sudamérica PES 2018 Actualizado - Equipos y Plantillas">
   <meta property="og:description" content="Selecciones de Sudamérica para PES 2018 actualizado: 10 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.">
-  <meta property="og:image" content="https://laqp.website/img/logo.webp">
+  <meta property="og:image" content="https://laqp.website/img/leagues/9001.webp">
   <meta property="og:url" content="https://laqp.website/league/v2/selecciones-de-sudamerica-9001/">
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/database-system.css?v=20260924d">
   <link rel="icon" href="img/logo.webp" type="image/webp">
   <script src="js/ads.js"></script>
 </head>
-<body>
+<body class="database-product">
   <header id="header">
-    <a href="index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a>
+    <a href="/index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a>
     <div class="header-title">PES 2018 Actualizado <span>Ligas y plantillas</span></div>
     <nav class="header-nav" aria-label="Menu principal"></nav>
   </header>
@@ -29,81 +33,44 @@
     <div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message">Cargando liga...</span></div>
     <div id="league-content">
       <div class="js-prerender-fallback">
-      <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Inicio</a><a href="database.html">Base de datos</a><span>Selecciones de Sudamérica</span></nav>
-      <article class="db-panel league-static-detail">
-        <h1>Selecciones de Sudamérica</h1>
-        <p>Selecciones de Sudamérica para PES 2018 actualizado: 10 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.</p>
-        <section>
-          <h2>Que incluye esta liga</h2>
-          <p>Esta pagina agrupa los equipos actualizados de Selecciones de Sudamérica para PES 2018. Desde cada equipo podes abrir su plantilla completa, revisar medias, posiciones y enlaces hacia fichas individuales.</p>
-          <p>Los datos funcionan como referencia para editar el juego: plantillas, stats, equipos, ligas y caras/minifaces cuando estan disponibles.</p>
-        </section>
-        <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
-        <section><h2>Equipos</h2><table class="static-stats-table"><thead><tr><th>Equipo</th><th>ID</th><th>Nacionalidad</th></tr></thead><tbody>
-              <tr>
-                <td><a href="/team/v2/argentina-50/">ARGENTINA</a></td>
-                <td>50</td>
-                <td>144</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/bolivia-1128/">BOLIVIA</a></td>
-                <td>1128</td>
-                <td>145</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/brasil-45/">BRASIL</a></td>
-                <td>45</td>
-                <td>146</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/chile-47/">CHILE</a></td>
-                <td>47</td>
-                <td>147</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/colombia-44/">COLOMBIA</a></td>
-                <td>44</td>
-                <td>148</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/ecuador-51/">ECUADOR</a></td>
-                <td>51</td>
-                <td>149</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/paraguay-48/">PARAGUAY</a></td>
-                <td>48</td>
-                <td>150</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/peru-46/">PERÚ</a></td>
-                <td>46</td>
-                <td>151</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/uruguay-49/">URUGUAY</a></td>
-                <td>49</td>
-                <td>152</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/venezuela-1129/">VENEZUELA</a></td>
-                <td>1129</td>
-                <td>153</td>
-              </tr></tbody></table></section>
-        <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="native"></div>
-      </article>
+        <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Inicio</a><a href="database.html">Base de datos</a><span>Selecciones de Sudamérica</span></nav>
+        <article class="league-static-detail">
+          <header class="league-hero db-hero">
+            <img src="img/leagues/9001.webp" alt="Logo de Selecciones de Sudamérica" width="120" height="120" loading="eager" onerror="this.onerror=null;this.src='img/leagues/default.webp'">
+            <div>
+              <p class="db-eyebrow">Base de datos · Liga</p>
+              <h1>Selecciones de Sudamérica</h1>
+              <div class="db-hero-summary"><span>10 equipos</span><span>260 jugadores</span><span>Media 74</span></div>
+            </div>
+          </header>
+          <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
+          <section class="db-section league-clubs">
+            <div class="db-section-heading"><h2>Equipos</h2><span>10 clubes</span></div>
+            <div class="db-club-grid"><a class="db-club-row" href="/team/v2/argentina-50/"><img src="img/teams/50.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>ARGENTINA</strong><small>26 jugadores</small></span><span class="db-rating stat-range-4">84</span></a>
+<a class="db-club-row" href="/team/v2/bolivia-1128/"><img src="img/teams/1128.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>BOLIVIA</strong><small>26 jugadores</small></span><span class="db-rating stat-range-2">68</span></a>
+<a class="db-club-row" href="/team/v2/brasil-45/"><img src="img/teams/45.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>BRASIL</strong><small>26 jugadores</small></span><span class="db-rating stat-range-4">84</span></a>
+<a class="db-club-row" href="/team/v2/chile-47/"><img src="img/teams/47.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>CHILE</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">73</span></a>
+<a class="db-club-row" href="/team/v2/colombia-44/"><img src="img/teams/44.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>COLOMBIA</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">78</span></a>
+<a class="db-club-row" href="/team/v2/ecuador-51/"><img src="img/teams/51.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>ECUADOR</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">76</span></a>
+<a class="db-club-row" href="/team/v2/paraguay-48/"><img src="img/teams/48.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>PARAGUAY</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">76</span></a>
+<a class="db-club-row" href="/team/v2/peru-46/"><img src="img/teams/46.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>PERÚ</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">72</span></a>
+<a class="db-club-row" href="/team/v2/uruguay-49/"><img src="img/teams/49.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>URUGUAY</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">78</span></a>
+<a class="db-club-row" href="/team/v2/venezuela-1129/"><img src="img/teams/1129.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>VENEZUELA</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">72</span></a></div>
+          </section>
+          <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="responsive"></div>
+        </article>
       </div>
     </div>
   </div>
   <div class="ad-bootstrap ad-bootstrap--profile" aria-hidden="true"><aside class="ad-slot" aria-label="Publicidad" data-ad-slot="league-top" data-ad-unit="responsive" data-ad-format="responsive" data-ad-context="profile" data-ad-state="pending">
     <span class="ad-slot__label">Publicidad</span>
     <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
-  </aside><aside class="ad-slot" aria-label="Publicidad" data-ad-slot="league-bottom" data-ad-unit="native" data-ad-format="native" data-ad-context="profile" data-ad-state="pending">
+  </aside><aside class="ad-slot" aria-label="Publicidad" data-ad-slot="league-bottom" data-ad-unit="responsive" data-ad-format="responsive" data-ad-context="profile" data-ad-state="pending">
     <span class="ad-slot__label">Publicidad</span>
     <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
   </aside></div>
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
-  <script src="js/league.js"></script>
+  <script src="js/league.js?v=20260924d"></script>
 </body>
 </html>

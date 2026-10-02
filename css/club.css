@@ -1,0 +1,190 @@
+/* Scoped to generated club pages. */
+.club-page #team-page { max-width: 1200px; }
+.club-detail { color: #edf0f4; --club-muted: #b3bcc8; --club-line: #303842; --club-surface: #161b22; }
+.club-builder-cta { display: inline-flex; width: fit-content; margin-top: 10px; padding: 7px 10px; border: 1px solid var(--team-accent, #21d4c2); border-radius: 2px; color: var(--team-accent, #21d4c2); font-size: 12px; font-weight: 800; text-decoration: none; }
+.club-builder-cta:hover { background: color-mix(in srgb, var(--team-accent, #21d4c2) 13%, transparent); }
+.club-detail * { box-sizing: border-box; }
+.club-detail [hidden] { display: none !important; }
+.club-detail h1, .club-detail h2, .club-detail h3, .club-detail p { margin: 0; }
+.club-detail h2 { font-size: 1.05rem; font-weight: 700; letter-spacing: .015em; }
+.club-detail h3 { font-size: .76rem; text-transform: uppercase; letter-spacing: .08em; color: var(--club-muted); margin: 22px 0 10px; }
+.club-detail a { color: inherit; text-decoration: none; }
+.club-detail a:hover { color: var(--team-accent); }
+.club-detail button, .club-detail input { font: inherit; }
+.club-detail button { border: 0; border-radius: 0; background: transparent; color: var(--club-muted); cursor: pointer; }
+.club-detail button:focus-visible, .club-detail a:focus-visible, .club-detail input:focus-visible { outline: 2px solid var(--team-accent); outline-offset: 4px; }
+.club-detail button[aria-pressed="true"] { color: var(--team-accent); border-bottom-color: var(--team-accent); }
+.club-hero { display: flex; align-items: center; gap: 28px; padding: 32px 24px; border-top: 3px solid var(--team-primary); border-bottom: 1px solid var(--club-line); position: relative; background: linear-gradient(110deg, color-mix(in srgb, var(--team-primary) 14%, #161b22), #161b22 65%); }
+.club-hero::after { content: ''; position: absolute; top: -3px; right: 0; height: 3px; width: 28%; background: var(--team-secondary); }
+.club-crest { flex: 0 0 128px; display: grid; place-items: center; min-height: 128px; background: radial-gradient(ellipse, color-mix(in srgb, var(--team-secondary) 18%, transparent), transparent 72%); }
+.club-crest img { width: 112px; height: 112px; object-fit: contain; filter: drop-shadow(0 5px 10px #0005); }
+.club-identity { min-width: 0; }
+.club-eyebrow { font-size: .67rem; text-transform: uppercase; letter-spacing: .17em; color: var(--club-muted); margin-bottom: 9px !important; }
+.club-identity h1 { font-size: clamp(1.4rem, 3.4vw, 2.35rem); line-height: 1.15; overflow-wrap: anywhere; }
+.club-meta, .club-summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+.club-meta { font-size: .8rem; margin-top: 12px; color: var(--club-muted); }
+.club-summary { font-size: .85rem; margin-top: 20px; }
+.club-summary > span + span { border-left: 1px solid #66707c; padding-left: 16px; }
+.club-summary strong { font-size: 1.15rem; }
+.club-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(260px, 1fr); gap: 40px; align-items: start; }
+.club-section { padding: 26px 0; border-bottom: 1px solid var(--club-line); min-width: 0; }
+.club-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.club-section-heading > span { color: var(--club-muted); font-size: .78rem; }
+.club-formation-tabs, .club-filters { display: flex; gap: 14px; flex-wrap: wrap; }
+.club-formation-tabs button, .club-filters button { padding: 9px 0; border-bottom: 2px solid transparent; font-size: .8rem; min-height: 36px; }
+.club-pitch { position: relative; aspect-ratio: .78; width: 100%; max-width: 550px; margin: auto; border: 1px solid #637e72; background: repeating-linear-gradient(0deg, #203b30 0%, #203b30 10%, #243f34 10%, #243f34 20%); overflow: hidden; }
+.club-pitch::before { content: ''; position: absolute; inset: 3%; border: 1px solid #75948588; }
+.club-pitch-half { position: absolute; left: 3%; right: 3%; top: 50%; border-top: 1px solid #75948588; }
+.club-pitch-circle { position: absolute; width: 24%; aspect-ratio: 1; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid #75948588; border-radius: 50%; }
+.club-pitch-area { position: absolute; width: 58%; height: 16%; left: 21%; border: 1px solid #75948588; }
+.club-pitch-area-top { top: 3%; }.club-pitch-area-bottom { bottom: 3%; }
+.club-pitch-player { position: absolute; width: 20%; transform: translate(-50%, -50%); text-align: center; display: flex; flex-direction: column; align-items: center; line-height: 1.1; transition: left .3s ease, top .3s ease; z-index: 1; }
+.club-pitch-player:hover, .club-pitch-player:focus-visible { z-index: 2; }
+.club-face { object-fit: contain; }
+.club-pitch-player .club-face { width: 42px; height: 42px; filter: drop-shadow(0 2px 2px #0008); }
+.club-pitch-name { display: block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: .69rem; font-weight: 600; color: #fff; background: #101b16e8; padding: 3px 4px; }
+.club-pitch-player:hover .club-pitch-name, .club-pitch-player:focus-visible .club-pitch-name { max-width: none; overflow: visible; }
+.club-pitch-position { font-size: .58rem; color: #dae8df; background: #101b16e8; padding: 2px 4px; }
+.club-caption { color: var(--club-muted); font-size: .73rem; margin-top: 12px !important; }
+.club-coach-profile { display: flex; align-items: center; gap: 18px; margin-top: 20px; }
+.club-coach-profile img { width: 72px; height: 84px; object-fit: contain; }
+.club-coach-profile strong { font-size: 1.05rem; }
+.club-coach-profile p { font-size: .8rem; color: var(--club-muted); margin: 5px 0 8px; }
+.club-text-link { font-size: .8rem; color: var(--team-accent) !important; }
+.club-facts { margin: 16px 0 0; font-size: .8rem; }
+.club-facts > div { display: flex; justify-content: space-between; gap: 18px; padding: 7px 0; }
+.club-facts dt { color: var(--club-muted); }
+.club-facts dd { margin: 0; text-align: right; }
+.club-advanced { padding-left: 18px; font-size: .8rem; line-height: 1.7; }
+.club-roster-tools { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.club-detail .miniface-mode-control { padding: 0; border: 0; color: var(--club-muted); gap: 8px; }
+.club-detail .miniface-mode-control button, .club-detail .miniface-mode-label { font-size: 13px; }
+.club-detail .miniface-mode-control .miniface-mode-label { color: var(--club-muted); }
+.club-detail .miniface-mode-control button.is-active { color: var(--team-accent); }
+.club-roster-search { margin: 16px 0; }
+.club-roster-search label { font-size: .78rem; color: var(--club-muted); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.club-roster-search input { background: var(--club-surface); color: #edf0f4; border: 1px solid #4a5563; border-radius: 0; padding: 8px 10px; max-width: 100%; }
+.club-roster-table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .85rem; }
+.club-roster-table th { text-align: left; color: var(--club-muted); background: #161b22; }
+.club-roster-table th, .club-roster-table td { padding: 9px 8px; border-bottom: 1px solid var(--club-line); }
+.club-roster-table th:first-child { width: 56px; }
+.club-roster-table th:nth-child(2) { width: 48px; }
+.club-roster-table th:nth-child(4), .club-roster-table th:nth-child(5), .club-roster-table th:nth-child(6) { width: 70px; }
+.club-roster-table th button { text-align: left; padding: 7px 0; font-weight: 600; }
+.club-roster-table [aria-sort="ascending"] button, .club-roster-table [aria-sort="descending"] button { color: var(--team-accent); }
+.club-roster-table td:nth-child(3) { overflow-wrap: anywhere; font-weight: 600; }
+.club-roster-table td .club-face { width: 40px; height: 40px; vertical-align: middle; }
+.club-number { color: var(--club-muted); font-variant-numeric: tabular-nums; }
+.club-overall { font-weight: 700; }
+.club-position { font-size: .75rem; color: #c8d3df; }
+.club-bottom { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; }
+.club-kits { display: flex; gap: 20px 28px; flex-wrap: wrap; }
+.club-kit-colors { display: flex; gap: 8px; }
+.club-kit-part { display: flex; flex-direction: column; gap: 7px; width: 60px; }
+.club-kit-part i { height: 14px; border: 1px solid #77808c; }
+.club-kit-part small { font-size: .62rem; color: var(--club-muted); }
+.club-rivals > div { display: flex; flex-direction: column; gap: 16px; margin-top: 22px; }
+.club-rivals a { display: flex; align-items: center; gap: 12px; font-size: .82rem; }
+.club-rivals img { object-fit: contain; }
+.club-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* The shared stylesheet scales the root font down. Keep club data legible. */
+.club-detail h2 { font-size: max(18px, 1.05rem); }
+.club-detail h3, .club-eyebrow, .club-caption { font-size: max(12px, .76rem); }
+.club-meta, .club-facts, .club-text-link, .club-advanced, .club-rivals a,
+.club-coach-profile p, .club-roster-search label, .club-formation-tabs button,
+.club-filters button, .club-position { font-size: max(13px, .8rem); }
+.club-summary, .club-roster-table { font-size: max(14px, .85rem); }
+.club-coach-profile strong { font-size: max(17px, 1.05rem); }
+.club-pitch-name { font-size: max(11px, .69rem); }
+.club-pitch-position, .club-kit-part small { font-size: max(10px, .62rem); }
+html:not(.club-js) .club-js-control, html:not(.club-js) .club-detail img[data-player-id] { display: none; }
+@media (max-width: 800px) {
+  .club-layout, .club-bottom { grid-template-columns: 1fr; gap: 0; }
+  .club-side { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  .club-coach { grid-column: 1 / -1; }
+}
+@media (max-width: 500px) {
+  .club-hero { gap: 14px; padding: 22px 10px; align-items: flex-start; }
+  .club-crest { flex-basis: 66px; min-height: 76px; }
+  .club-crest img { width: 64px; height: 76px; }
+  .club-meta { font-size: .72rem; gap: 7px 12px; }
+  .club-summary { gap: 9px; font-size: .73rem; }
+  .club-summary > span + span { padding-left: 9px; }
+  .club-summary strong { font-size: .9rem; }
+  .club-side { display: block; }
+  .club-pitch-player .club-face { width: 32px; height: 32px; }
+  .club-pitch-name { font-size: 10px; }
+  .club-roster-table { font-size: 12px; }
+  .club-roster-table th, .club-roster-table td { padding: 7px 3px; }
+  .club-roster-table th:first-child { width: 34px; }
+  .club-roster-table th:nth-child(2) { width: 25px; }
+  .club-roster-table th:nth-child(4) { width: 34px; }
+  .club-roster-table th:nth-child(5) { width: 49px; }
+  .club-roster-table th:nth-child(6) { width: 40px; }
+  .club-roster-table td .club-face { width: 30px; height: 34px; }
+  .club-roster-tools { align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) { .club-pitch-player { transition: none; } }
+
+/* Compact information-first layout: tactics, pitch, roles. */
+.club-detail { --db-accent: var(--team-accent); }
+.club-hero { border-top-color: var(--team-accent); background: linear-gradient(105deg, color-mix(in srgb, var(--team-primary) 25%, #161b22), color-mix(in srgb, var(--team-secondary) 8%, #161b22) 60%, #161b22); }
+.club-hero::after { background: var(--team-secondary); }
+.club-stadium { margin-top: 10px !important; color: #d6dde6; font-size: 14px; }
+.club-summary { margin-top: 14px; }
+.club-detail > .club-coach { display: flex; align-items: center; gap: 26px; padding: 15px 20px; border-left: 3px solid var(--team-accent); background: color-mix(in srgb, var(--team-primary) 7%, #1a2027); }
+.club-detail > .club-coach h2 { flex: 0 0 180px; }
+.club-detail > .club-coach .club-coach-profile { margin: 0; }
+.club-detail > .club-coach img { width: 45px; height: 52px; }
+.club-layout { grid-template-areas: "tactic pitch roles"; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px) minmax(0, 1fr); gap: 22px; }
+.club-layout > .club-formation { grid-area: pitch; }
+.club-layout > .club-tactics { grid-area: tactic; }
+.club-layout > .club-roles { grid-area: roles; }
+.club-layout > .club-right-rail { grid-area: roles; min-width: 0; align-self: stretch; display: flex; flex-direction: column; border-top: 2px solid color-mix(in srgb, var(--team-accent) 60%, #35404b); background: linear-gradient(180deg, color-mix(in srgb, var(--team-primary) 7%, #1a2027), #14191f 180px); }
+.club-layout > .club-right-rail > .club-section { padding: 18px 12px 20px; border: 0; background: transparent; }
+.club-layout > .club-right-rail > .club-section + .club-section { border-top: 1px solid color-mix(in srgb, var(--team-accent) 22%, #303842); }
+.club-layout > .club-right-rail .club-section h2 { border-left: 3px solid var(--team-accent); padding-left: 10px; }
+.club-layout > .club-right-rail .club-kits { gap: 14px 12px; }
+.club-layout > .club-right-rail .club-kit-part { width: 51px; }
+.club-layout > .club-right-rail .club-rivals > div { margin-top: 12px; }
+.club-layout > .club-section { border-top: 2px solid color-mix(in srgb, var(--team-accent) 60%, #35404b); border-bottom: 0; padding: 18px 12px 20px; background: linear-gradient(180deg, color-mix(in srgb, var(--team-primary) 7%, #1a2027), #14191f 180px); }
+.club-layout > .club-section { align-self: stretch; height: 100%; }
+.club-layout h2, .club-roster h2, .club-bottom h2 { border-left: 3px solid var(--team-accent); padding-left: 10px; }
+.club-layout .club-section-heading { margin-bottom: 10px; }
+.club-formation-tabs { gap: 8px; }
+.club-formation-tabs button { font-size: 12px; }
+.club-pitch { width: min(100%, 380px); max-width: 380px; border-color: color-mix(in srgb, var(--team-accent) 50%, #526b60); }
+.club-pitch-player { width: 22%; }
+.club-pitch-player .club-face { width: clamp(27px, 3vw, 34px); height: clamp(27px, 3vw, 34px); }
+.club-pitch-name { font-size: 10px; }
+.club-pitch-position { font-size: 9px; }
+.club-facts > div { border-bottom: 1px solid #ffffff0c; }
+.club-facts dt { flex: 0 0 45%; }
+.club-facts dd { overflow-wrap: anywhere; }
+.club-roster { border-top: 2px solid var(--team-accent); margin-top: 8px; }
+.club-roster-table tbody tr:hover { background: color-mix(in srgb, var(--team-primary) 13%, #171c22); }
+.club-roster-table th { border-bottom: 2px solid color-mix(in srgb, var(--team-accent) 50%, #303842); }
+.club-rating { display: inline-flex; align-items: center; justify-content: center; min-width: 33px; padding: 4px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.club-rating.stat-range-2 { color: #111; }
+.club-roster-table th button { white-space: nowrap; }
+.club-sort-indicator { display: inline-block; min-width: 8px; color: var(--team-accent); }
+.club-bottom > .club-section { border-top: 2px solid color-mix(in srgb, var(--team-accent) 55%, #303842); }
+.club-rivals > div { gap: 10px; }
+.club-rivals a, .club-rivals span { display: block; border-left: 2px solid var(--team-accent); padding: 5px 0 5px 12px; font-size: 14px; }
+.club-rivals span { border-left-color: #48515b; color: var(--club-muted); }
+@media (max-width: 1100px) {
+  .club-layout { grid-template-areas: "tactic pitch" "roles roles"; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); }
+}
+@media (max-width: 800px) {
+  .club-layout { grid-template-areas: "pitch" "tactic" "roles"; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .club-layout > .club-section { padding: 16px 12px; }
+  .club-detail > .club-coach { gap: 14px; }
+  .club-detail > .club-coach h2 { flex-basis: 150px; }
+}
+@media (max-width: 500px) {
+  .club-detail > .club-coach { display: block; }
+  .club-detail > .club-coach .club-coach-profile { margin-top: 10px; }
+  .club-pitch { width: min(100%, 380px); }
+  .club-pitch-player .club-face { width: 27px; height: 27px; }
+  .club-roster-table th:nth-child(2) { width: 27px; }
+}

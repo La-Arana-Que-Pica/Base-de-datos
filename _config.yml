@@ -1,0 +1,5 @@
+# GitHub Pages publica desde la raiz para conservar todas las URLs actuales.
+# Todo el material que no pertenece al runtime público está centralizado aquí y
+# no debe copiarse al sitio generado por Jekyll.
+exclude:
+  - Herramientas

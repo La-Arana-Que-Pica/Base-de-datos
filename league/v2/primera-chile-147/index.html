@@ -4,24 +4,28 @@
   <base href="/">
   <script>document.documentElement.classList.add('laqp-js');window.setTimeout(function(){document.documentElement.classList.add('laqp-js-timeout');},6000);</script>
   <script src="js/consent-mode.js"></script>
+  <script src="js/minifaces.js"></script>
+  <script src="js/database-rating.js?v=20260924d"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="laqp-league-id" content="147">
+  <meta name="laqp-league-name" content="Primera Chile">
   <title>Primera Chile PES 2018 Actualizado - Equipos y Plantillas</title>
   <meta name="description" content="Primera Chile para PES 2018 actualizado: 4 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.">
   <link rel="canonical" href="https://laqp.website/league/v2/primera-chile-147/">
   <meta property="og:title" content="Primera Chile PES 2018 Actualizado - Equipos y Plantillas">
   <meta property="og:description" content="Primera Chile para PES 2018 actualizado: 4 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.">
-  <meta property="og:image" content="https://laqp.website/img/logo.webp">
+  <meta property="og:image" content="https://laqp.website/img/leagues/147.webp">
   <meta property="og:url" content="https://laqp.website/league/v2/primera-chile-147/">
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/database-system.css?v=20260924d">
   <link rel="icon" href="img/logo.webp" type="image/webp">
   <script src="js/ads.js"></script>
 </head>
-<body>
+<body class="database-product">
   <header id="header">
-    <a href="index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a>
+    <a href="/index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a>
     <div class="header-title">PES 2018 Actualizado <span>Ligas y plantillas</span></div>
     <nav class="header-nav" aria-label="Menu principal"></nav>
   </header>
@@ -29,51 +33,38 @@
     <div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message">Cargando liga...</span></div>
     <div id="league-content">
       <div class="js-prerender-fallback">
-      <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Inicio</a><a href="database.html">Base de datos</a><span>Primera Chile</span></nav>
-      <article class="db-panel league-static-detail">
-        <h1>Primera Chile</h1>
-        <p>Primera Chile para PES 2018 actualizado: 4 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.</p>
-        <section>
-          <h2>Que incluye esta liga</h2>
-          <p>Esta pagina agrupa los equipos actualizados de Primera Chile para PES 2018. Desde cada equipo podes abrir su plantilla completa, revisar medias, posiciones y enlaces hacia fichas individuales.</p>
-          <p>Los datos funcionan como referencia para editar el juego: plantillas, stats, equipos, ligas y caras/minifaces cuando estan disponibles.</p>
-        </section>
-        <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
-        <section><h2>Equipos</h2><table class="static-stats-table"><thead><tr><th>Equipo</th><th>ID</th><th>Nacionalidad</th></tr></thead><tbody>
-              <tr>
-                <td><a href="/team/v2/colo-colo-1256/">COLO COLO</a></td>
-                <td>1256</td>
-                <td>147</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/universidad-de-chile-2209/">UNIVERSIDAD DE CHILE</a></td>
-                <td>2209</td>
-                <td>147</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/coquimbo-unido-2491/">COQUIMBO UNIDO</a></td>
-                <td>2491</td>
-                <td>147</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/universidad-catolica-2191/">UNIVERSIDAD CATÓLICA</a></td>
-                <td>2191</td>
-                <td>147</td>
-              </tr></tbody></table></section>
-        <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="native"></div>
-      </article>
+        <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Inicio</a><a href="database.html">Base de datos</a><span>Primera Chile</span></nav>
+        <article class="league-static-detail">
+          <header class="league-hero db-hero">
+            <img src="img/leagues/147.webp" alt="Logo de Primera Chile" width="120" height="120" loading="eager" onerror="this.onerror=null;this.src='img/leagues/default.webp'">
+            <div>
+              <p class="db-eyebrow">Base de datos · Liga</p>
+              <h1>Primera Chile</h1>
+              <div class="db-hero-summary"><span>4 equipos</span><span>104 jugadores</span><span>Media 68</span></div>
+            </div>
+          </header>
+          <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
+          <section class="db-section league-clubs">
+            <div class="db-section-heading"><h2>Equipos</h2><span>4 clubes</span></div>
+            <div class="db-club-grid"><a class="db-club-row" href="/team/v2/colo-colo-1256/"><img src="img/teams/1256.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>COLO COLO</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">72</span></a>
+<a class="db-club-row" href="/team/v2/universidad-de-chile-2209/"><img src="img/teams/2209.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>UNIVERSIDAD DE CHILE</strong><small>24 jugadores</small></span><span class="db-rating stat-range-3">70</span></a>
+<a class="db-club-row" href="/team/v2/coquimbo-unido-2491/"><img src="img/teams/2491.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>COQUIMBO UNIDO</strong><small>27 jugadores</small></span><span class="db-rating stat-range-3">70</span></a>
+<a class="db-club-row" href="/team/v2/universidad-catolica-2191/"><img src="img/teams/2191.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>UNIVERSIDAD CATÓLICA</strong><small>27 jugadores</small></span><span class="db-rating stat-range-3">72</span></a></div>
+          </section>
+          <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="responsive"></div>
+        </article>
       </div>
     </div>
   </div>
   <div class="ad-bootstrap ad-bootstrap--profile" aria-hidden="true"><aside class="ad-slot" aria-label="Publicidad" data-ad-slot="league-top" data-ad-unit="responsive" data-ad-format="responsive" data-ad-context="profile" data-ad-state="pending">
     <span class="ad-slot__label">Publicidad</span>
     <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
-  </aside><aside class="ad-slot" aria-label="Publicidad" data-ad-slot="league-bottom" data-ad-unit="native" data-ad-format="native" data-ad-context="profile" data-ad-state="pending">
+  </aside><aside class="ad-slot" aria-label="Publicidad" data-ad-slot="league-bottom" data-ad-unit="responsive" data-ad-format="responsive" data-ad-context="profile" data-ad-state="pending">
     <span class="ad-slot__label">Publicidad</span>
     <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
   </aside></div>
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
-  <script src="js/league.js"></script>
+  <script src="js/league.js?v=20260924d"></script>
 </body>
 </html>

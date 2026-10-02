@@ -1,0 +1,6 @@
+player_id;club_id;fecha_inicio;fecha_fin;tipo;source;notes
+115044;138;2015-01-01;2020-01-01;formado_en;curated_seed;Surgió y jugó en River
+115044;138;2018-01-01;2020-01-01;exjugador;curated_seed;Paso importante por Primera
+60246;139;2012-01-01;2024-01-01;formado_en;curated_seed;Formado e identificado con Boca
+114523;1245;2021-01-01;;exjugador;curated_seed;Experiencia actual en Brasil
+60168;1242;2007-01-01;2015-01-01;formado_en;curated_seed;Formado en Rosario Central

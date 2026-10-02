@@ -4,24 +4,28 @@
   <base href="/">
   <script>document.documentElement.classList.add('laqp-js');window.setTimeout(function(){document.documentElement.classList.add('laqp-js-timeout');},6000);</script>
   <script src="js/consent-mode.js"></script>
+  <script src="js/minifaces.js"></script>
+  <script src="js/database-rating.js?v=20260924d"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="laqp-league-id" content="210">
+  <meta name="laqp-league-name" content="Bundesliga">
   <title>Bundesliga PES 2018 Actualizado - Equipos y Plantillas</title>
-  <meta name="description" content="Bundesliga para PES 2018 actualizado: 3 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.">
+  <meta name="description" content="Bundesliga para PES 2018 actualizado: 18 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.">
   <link rel="canonical" href="https://laqp.website/league/v2/bundesliga-210/">
   <meta property="og:title" content="Bundesliga PES 2018 Actualizado - Equipos y Plantillas">
-  <meta property="og:description" content="Bundesliga para PES 2018 actualizado: 3 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.">
-  <meta property="og:image" content="https://laqp.website/img/logo.webp">
+  <meta property="og:description" content="Bundesliga para PES 2018 actualizado: 18 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.">
+  <meta property="og:image" content="https://laqp.website/img/leagues/210.webp">
   <meta property="og:url" content="https://laqp.website/league/v2/bundesliga-210/">
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/database-system.css?v=20260924d">
   <link rel="icon" href="img/logo.webp" type="image/webp">
   <script src="js/ads.js"></script>
 </head>
-<body>
+<body class="database-product">
   <header id="header">
-    <a href="index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a>
+    <a href="/index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a>
     <div class="header-title">PES 2018 Actualizado <span>Ligas y plantillas</span></div>
     <nav class="header-nav" aria-label="Menu principal"></nav>
   </header>
@@ -29,46 +33,52 @@
     <div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message">Cargando liga...</span></div>
     <div id="league-content">
       <div class="js-prerender-fallback">
-      <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Inicio</a><a href="database.html">Base de datos</a><span>Bundesliga</span></nav>
-      <article class="db-panel league-static-detail">
-        <h1>Bundesliga</h1>
-        <p>Bundesliga para PES 2018 actualizado: 3 equipos, plantillas modernas, escudos, stats y enlaces a jugadores editables.</p>
-        <section>
-          <h2>Que incluye esta liga</h2>
-          <p>Esta pagina agrupa los equipos actualizados de Bundesliga para PES 2018. Desde cada equipo podes abrir su plantilla completa, revisar medias, posiciones y enlaces hacia fichas individuales.</p>
-          <p>Los datos funcionan como referencia para editar el juego: plantillas, stats, equipos, ligas y caras/minifaces cuando estan disponibles.</p>
-        </section>
-        <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
-        <section><h2>Equipos</h2><table class="static-stats-table"><thead><tr><th>Equipo</th><th>ID</th><th>Nacionalidad</th></tr></thead><tbody>
-              <tr>
-                <td><a href="/team/v2/bayer-04-leverkusen-2349/">BAYER 04 LEVERKUSEN</a></td>
-                <td>2349</td>
-                <td>210</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/bayern-munchen-2293/">BAYERN MÜNCHEN</a></td>
-                <td>2293</td>
-                <td>204</td>
-              </tr>
-              <tr>
-                <td><a href="/team/v2/borussia-dortmund-126/">BORUSSIA DORTMUND</a></td>
-                <td>126</td>
-                <td>228</td>
-              </tr></tbody></table></section>
-        <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="native"></div>
-      </article>
+        <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Inicio</a><a href="database.html">Base de datos</a><span>Bundesliga</span></nav>
+        <article class="league-static-detail">
+          <header class="league-hero db-hero">
+            <img src="img/leagues/210.webp" alt="Logo de Bundesliga" width="120" height="120" loading="eager" onerror="this.onerror=null;this.src='img/leagues/default.webp'">
+            <div>
+              <p class="db-eyebrow">Base de datos · Liga</p>
+              <h1>Bundesliga</h1>
+              <div class="db-hero-summary"><span>18 equipos</span><span>505 jugadores</span><span>Media 72</span></div>
+            </div>
+          </header>
+          <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
+          <section class="db-section league-clubs">
+            <div class="db-section-heading"><h2>Equipos</h2><span>18 clubes</span></div>
+            <div class="db-club-grid"><a class="db-club-row" href="/team/v2/bayer-04-leverkusen-2349/"><img src="img/teams/2349.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>BAYER 04 LEVERKUSEN</strong><small>28 jugadores</small></span><span class="db-rating stat-range-3">79</span></a>
+<a class="db-club-row" href="/team/v2/bayern-munchen-2293/"><img src="img/teams/2293.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>BAYERN MÜNCHEN</strong><small>24 jugadores</small></span><span class="db-rating stat-range-4">84</span></a>
+<a class="db-club-row" href="/team/v2/borussia-dortmund-126/"><img src="img/teams/126.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>BORUSSIA DORTMUND</strong><small>29 jugadores</small></span><span class="db-rating stat-range-4">81</span></a>
+<a class="db-club-row" href="/team/v2/1-fc-koln-2354/"><img src="img/teams/2354.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>1. FC KÖLN</strong><small>28 jugadores</small></span><span class="db-rating stat-range-3">74</span></a>
+<a class="db-club-row" href="/team/v2/1-fc-union-berlin-2297/"><img src="img/teams/2297.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>1. FC UNION BERLIN</strong><small>30 jugadores</small></span><span class="db-rating stat-range-3">74</span></a>
+<a class="db-club-row" href="/team/v2/1-fsv-mainz-05-2300/"><img src="img/teams/2300.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>1. FSV MAINZ 05</strong><small>25 jugadores</small></span><span class="db-rating stat-range-3">75</span></a>
+<a class="db-club-row" href="/team/v2/b-monchengladbach-2348/"><img src="img/teams/2348.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>B. MÖNCHENGLADBACH</strong><small>30 jugadores</small></span><span class="db-rating stat-range-3">75</span></a>
+<a class="db-club-row" href="/team/v2/eintracht-frankfurt-4025/"><img src="img/teams/4025.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>EINTRACHT FRANKFURT</strong><small>25 jugadores</small></span><span class="db-rating stat-range-3">75</span></a>
+<a class="db-club-row" href="/team/v2/fc-augsburg-2301/"><img src="img/teams/2301.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>FC AUGSBURG</strong><small>29 jugadores</small></span><span class="db-rating stat-range-3">74</span></a>
+<a class="db-club-row" href="/team/v2/fc-schalke-04-184/"><img src="img/teams/184.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>FC SCHALKE 04</strong><small>30 jugadores</small></span><span class="db-rating stat-range-3">73</span></a>
+<a class="db-club-row" href="/team/v2/hamburger-sv-2298/"><img src="img/teams/2298.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>HAMBURGER SV</strong><small>27 jugadores</small></span><span class="db-rating stat-range-3">74</span></a>
+<a class="db-club-row" href="/team/v2/rasen-ballsport-leipzig-5010/"><img src="img/teams/5010.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>RASEN BALLSPORT LEIPZIG</strong><small>28 jugadores</small></span><span class="db-rating stat-range-3">78</span></a>
+<a class="db-club-row" href="/team/v2/sc-freiburg-2344/"><img src="img/teams/2344.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>SC FREIBURG</strong><small>28 jugadores</small></span><span class="db-rating stat-range-3">75</span></a>
+<a class="db-club-row" href="/team/v2/sc-paderborn-07-2352/"><img src="img/teams/2352.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>SC PADERBORN 07</strong><small>30 jugadores</small></span><span class="db-rating stat-range-3">70</span></a>
+<a class="db-club-row" href="/team/v2/sv-elversberg-2345/"><img src="img/teams/2345.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>SV ELVERSBERG</strong><small>27 jugadores</small></span><span class="db-rating stat-range-3">70</span></a>
+<a class="db-club-row" href="/team/v2/sv-werder-bremen-2351/"><img src="img/teams/2351.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>SV WERDER BREMEN</strong><small>31 jugadores</small></span><span class="db-rating stat-range-3">74</span></a>
+<a class="db-club-row" href="/team/v2/tsg-1899-hoffenheim-2346/"><img src="img/teams/2346.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>TSG 1899 HOFFENHEIM</strong><small>28 jugadores</small></span><span class="db-rating stat-range-3">77</span></a>
+<a class="db-club-row" href="/team/v2/vfb-stuttgart-2355/"><img src="img/teams/2355.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>VfB STUTTGART</strong><small>28 jugadores</small></span><span class="db-rating stat-range-3">78</span></a></div>
+          </section>
+          <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="responsive"></div>
+        </article>
       </div>
     </div>
   </div>
   <div class="ad-bootstrap ad-bootstrap--profile" aria-hidden="true"><aside class="ad-slot" aria-label="Publicidad" data-ad-slot="league-top" data-ad-unit="responsive" data-ad-format="responsive" data-ad-context="profile" data-ad-state="pending">
     <span class="ad-slot__label">Publicidad</span>
     <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
-  </aside><aside class="ad-slot" aria-label="Publicidad" data-ad-slot="league-bottom" data-ad-unit="native" data-ad-format="native" data-ad-context="profile" data-ad-state="pending">
+  </aside><aside class="ad-slot" aria-label="Publicidad" data-ad-slot="league-bottom" data-ad-unit="responsive" data-ad-format="responsive" data-ad-context="profile" data-ad-state="pending">
     <span class="ad-slot__label">Publicidad</span>
     <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
   </aside></div>
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
-  <script src="js/league.js"></script>
+  <script src="js/league.js?v=20260924d"></script>
 </body>
 </html>

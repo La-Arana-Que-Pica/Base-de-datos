@@ -91,7 +91,7 @@ function renderNewsItem(item) {
 async function bootNews() {
   const [newsText, downloadsText, tutorialsText] = await Promise.all([
     fetchText('database/novedades.csv'),
-    fetchText('database/descargas.csv'),
+    fetchText('database/option-files.json'),
     fetchText('database/tutoriales.csv'),
   ]);
 
@@ -113,16 +113,18 @@ async function bootNews() {
   }
 
   if (downloadsText) {
-    parseCSV(downloadsText)
-      .filter(row => String(row.destacado || '').trim() === '1')
+    let downloads = [];
+    try { downloads = JSON.parse(downloadsText); } catch { downloads = []; }
+    downloads
+      .filter(row => row.featured === true)
       .slice(0, 3)
       .forEach(row => {
         items.push({
           type: 'Option File',
-          title: row.titulo || `${row.juego || 'Option File'} ${row.version || ''}`.trim(),
-          description: row.descripcion || t('news.featuredAvailable'),
-          meta: row.plataforma || '',
-          href: typeof laqpPageUrl === 'function' ? laqpPageUrl('downloads.html') : 'downloads.html',
+          title: row.title || 'Option File',
+          description: row.description || t('news.featuredAvailable'),
+          meta: Array.isArray(row.platforms) ? row.platforms.join(' / ') : '',
+          href: `/option-files/${encodeURIComponent(row.slug || row.id)}/`,
           cta: t('news.viewDownload'),
         });
       });
@@ -145,13 +147,15 @@ async function bootNews() {
   }
 
   if (!items.length && downloadsText) {
-    parseCSV(downloadsText).slice(-3).reverse().forEach(row => {
+    let downloads = [];
+    try { downloads = JSON.parse(downloadsText); } catch { downloads = []; }
+    downloads.slice(-3).reverse().forEach(row => {
       items.push({
         type: 'Option File',
-        title: `${row.juego || 'Option File'} ${row.version || ''}`.trim(),
-        description: row.descripcion || t('news.fileAvailable'),
-        meta: row.plataforma || '',
-        href: typeof laqpPageUrl === 'function' ? laqpPageUrl('downloads.html') : 'downloads.html',
+        title: row.title || 'Option File',
+        description: row.description || t('news.fileAvailable'),
+        meta: Array.isArray(row.platforms) ? row.platforms.join(' / ') : '',
+        href: `/option-files/${encodeURIComponent(row.slug || row.id)}/`,
         cta: t('news.viewDownload'),
       });
     });

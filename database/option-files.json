@@ -1,0 +1,223 @@
+[
+  {
+    "id": "of_pes2018_2026_v2_ps4",
+    "slug": "pes-2018-option-file-2026-v2-ps4-ps5",
+    "title": "PES 2018 Option File 2026 V2",
+    "subtitle": "La actualización de temporada para jugar PES 2018 con plantillas, ligas y selecciones renovadas en consolas.",
+    "version": "V2",
+    "game": "PES 2018",
+    "season": "2026",
+    "date": "2026-07-05",
+    "platforms": ["PS4", "PS5"],
+    "cover": "/assets/images/option-files/OF PES 2018 al 2026 V2.png",
+    "description": "Option File actualizado a la temporada 2026 para PES 2018. Suma Ligue 1, Serie A y 17 selecciones nuevas al contenido de la V1.",
+    "intro": "Esta V2 amplía la base publicada para la temporada 2026 y está pensada para quienes quieren renovar el juego sin perder la identidad de PES 2018. Antes de importar, hacé una copia de seguridad de tus datos editados.",
+    "download_parts": [
+      {
+        "name": "Archivo completo",
+        "url": "https://sharemods.com/f4jz8dlwa55q/OF_PES_2018_al_2026_V2_LAqP_PS4-PS5.rar.html"
+      }
+    ],
+    "tutorial": "/guia/instalar-option-file-pes-2018-2026/",
+    "features": [
+      "Contenido de la V1 revisado para la nueva publicación.",
+      "Ligue 1 y Serie A incorporadas.",
+      "17 selecciones nuevas.",
+      "Plantillas y fichajes actualizados para la temporada 2026."
+    ],
+    "highlights": [
+      {"value": "17", "label": "selecciones nuevas"},
+      {"value": "2", "label": "ligas añadidas"},
+      {"value": "2026", "label": "temporada"}
+    ],
+    "leagues": ["Premier League", "LaLiga", "Serie A", "Ligue 1", "Liga Argentina", "Brasileirão", "Copa Libertadores"],
+    "compatibility": "Compatible con PES 2018 de PS4 y con la versión de PS4 ejecutada en PS5. La importación se realiza mediante la carpeta WEPES.",
+    "installation_notes": [
+      "Hacé una copia de seguridad de los datos editados antes de importar.",
+      "Usá una memoria USB en formato compatible y respetá la estructura de la carpeta WEPES.",
+      "Seguí el orden del tutorial para evitar equipos o imágenes duplicadas."
+    ],
+    "common_issues": [
+      {"title": "Faltan kits o escudos", "text": "Revisá el espacio disponible para imágenes y volvé a importar los archivos que hayan fallado."},
+      {"title": "Aparecen equipos duplicados", "text": "La causa más frecuente es importar sobre otra base. Restaurá la copia de seguridad y realizá una instalación limpia."}
+    ],
+    "faq": [
+      {"question": "¿Funciona en PS5?", "answer": "Sí, usando la versión de PS4 de PES 2018 ejecutada en PS5."},
+      {"question": "¿Tengo que instalar la V1 primero?", "answer": "Consultá el tutorial enlazado antes de importar: allí se indica el orden recomendado para esta publicación."}
+    ],
+    "related_downloads": ["of_pes2018_2026_v1_ps4", "of_pes2018_2026_v2_pc", "of_pes2018_complemento"],
+    "featured": true,
+    "status": "Disponible",
+    "category": "Option File"
+  },
+  {
+    "id": "of_pes2018_2026_v2_pc",
+    "slug": "pes-2018-option-file-2026-v2-pc",
+    "title": "PES 2018 Option File 2026 V2",
+    "subtitle": "Una edición ampliada para PC con el contenido de la V1, nuevas ligas y 17 selecciones adicionales.",
+    "version": "V2",
+    "game": "PES 2018",
+    "season": "2026",
+    "date": "2026-07-05",
+    "platforms": ["PC"],
+    "cover": "/assets/images/option-files/OF PES 2018 al 2026 V2.png",
+    "description": "Option File actualizado a la temporada 2026 para PES 2018. Incluye las mismas ligas de la V1 más Ligue 1, Serie A y 17 selecciones nuevas.",
+    "intro": "La edición para PC reúne la actualización 2026 en un paquete dividido en partes para facilitar la distribución. Descargá todas las partes en la misma carpeta antes de comenzar la extracción.",
+    "download_parts": [
+      {
+        "name": "Parte 1",
+        "url": "https://sharemods.com/lh9fzg4xm96w/OF_PES_2018_al_2026_V2_LAqP_PC_Parte_1.rar.html"
+      },
+      {
+        "name": "Parte 2",
+        "url": "https://sharemods.com/ov9nnz2ruztf/OF_PES_2018_al_2026_V2_LAqP_PC_Parte_2.rar.html"
+      }
+    ],
+    "tutorial": "/guia/instalar-option-file-pes-2018-2026/",
+    "features": [
+      "Plantillas y fichajes revisados para la temporada 2026.",
+      "Ligue 1 y Serie A incorporadas.",
+      "17 selecciones nuevas.",
+      "Contenido editable preparado para PES 2018 en PC."
+    ],
+    "highlights": [
+      {"value": "17", "label": "selecciones nuevas"},
+      {"value": "2", "label": "partes de descarga"},
+      {"value": "PC", "label": "plataforma"}
+    ],
+    "leagues": ["Premier League", "LaLiga", "Serie A", "Ligue 1", "Liga Argentina", "Brasileirão", "Copa Libertadores"],
+    "compatibility": "Compatible con PES 2018 en PC. No mezcles estos archivos con otra base o parche sin comprobar antes su compatibilidad y conservar una copia de seguridad.",
+    "installation_notes": [
+      "Descargá las dos partes antes de extraer los archivos.",
+      "Mantené ambas partes en la misma carpeta y comenzá la extracción desde la Parte 1.",
+      "Seguí el tutorial para ubicar correctamente los archivos de guardado."
+    ],
+    "common_issues": [
+      {"title": "La extracción pide la siguiente parte", "text": "Comprobá que las dos partes estén completas, tengan su nombre original y estén en la misma carpeta."},
+      {"title": "El juego no muestra los cambios", "text": "Verificá la ruta del archivo de edición y que corresponda al usuario con el que ejecutás el juego."}
+    ],
+    "faq": [
+      {"question": "¿Puedo descargar solamente una parte?", "answer": "No. Las partes forman un único paquete y todas son necesarias para extraerlo."},
+      {"question": "¿Debo extraer cada parte por separado?", "answer": "No. Colocá todas las partes juntas e iniciá la extracción desde la Parte 1."}
+    ],
+    "related_downloads": ["of_pes2018_2026_v2_ps4", "of_pes2018_2026_v1_pc", "of_pes2018_complemento"],
+    "featured": true,
+    "status": "Disponible",
+    "category": "Option File"
+  },
+  {
+    "id": "of_pes2018_2026_v1_ps4",
+    "slug": "pes-2018-option-file-2026-v1-ps4-ps5",
+    "title": "PES 2018 Option File 2026 V1",
+    "subtitle": "La primera actualización 2026 para consolas, con Libertadores, plantillas y fichajes renovados.",
+    "version": "V1",
+    "game": "PES 2018",
+    "season": "2026",
+    "date": "2026-05-03",
+    "platforms": ["PS4", "PS5"],
+    "cover": "/assets/images/option-files/OF PES 2018 al 2026 V1.png",
+    "description": "Incluye la base del parche 2025, equipos de la Copa Libertadores 2026 y fichajes actualizados.",
+    "intro": "La V1 abre la temporada 2026 en consolas con una base estable para seguir ampliando el juego.",
+    "download_parts": [{"name": "Archivo completo", "url": "https://sharemods.com/x6qke1yn3a8d/OF_PES_2018_to_2026_V1_by_LAqP___40_PS4-PS5__41_.rar.html"}],
+    "tutorial": "/guia/instalar-option-file-pes-2018-2026/",
+    "features": ["Equipos de la Copa Libertadores 2026.", "Plantillas y fichajes actualizados.", "Base de ligas heredada de la edición 2025."],
+    "compatibility": "Compatible con PES 2018 de PS4 y con la versión de PS4 ejecutada en PS5 mediante importación WEPES.",
+    "installation_notes": ["Conservá una copia de seguridad.", "Importá los archivos siguiendo el orden del tutorial."],
+    "related_downloads": ["of_pes2018_2026_v2_ps4", "of_pes2018_2026_v1_pc", "of_pes2018_complemento"],
+    "featured": false,
+    "status": "Disponible",
+    "category": "Option File"
+  },
+  {
+    "id": "of_pes2018_2026_v1_pc",
+    "slug": "pes-2018-option-file-2026-v1-pc",
+    "title": "PES 2018 Option File 2026 V1",
+    "subtitle": "La base 2026 para PC con plantillas, minifaces, caras y ambientación actualizadas.",
+    "version": "V1",
+    "game": "PES 2018",
+    "season": "2026",
+    "date": "2026-05-03",
+    "platforms": ["PC"],
+    "cover": "/assets/images/option-files/OF PES 2018 al 2026 V1.png",
+    "description": "Incluye plantillas actualizadas, Copa Libertadores 2026, fichajes, minifaces, caras escaneadas y soundtrack modificado.",
+    "intro": "Esta V1 funciona como punto de partida de la temporada 2026 para la edición de PC.",
+    "download_parts": [{"name": "Archivo completo", "url": "https://sharemods.com/vpt7uimh8ukn/OF_PES_2018_to_2026_V1_by_LAqP___40_PC__41_.rar.html"}],
+    "tutorial": "/guia/instalar-option-file-pes-2018-2026/",
+    "features": ["Plantillas y fichajes 2026.", "Minifaces y caras escaneadas.", "Soundtrack modificado.", "Compatibilidad con cánticos descargables por separado."],
+    "compatibility": "Compatible con PES 2018 en PC. Revisá la ruta de guardado y evitá mezclarlo con otro parche sin copia de seguridad.",
+    "installation_notes": ["Conservá una copia de seguridad.", "Verificá la ruta de guardado antes de reemplazar archivos."],
+    "related_downloads": ["of_pes2018_2026_v2_pc", "of_pes2018_2026_v1_ps4", "of_pes2018_complemento"],
+    "featured": false,
+    "status": "Disponible",
+    "category": "Option File"
+  },
+  {
+    "id": "of_pes2018_complemento",
+    "slug": "pes-2018-option-file-complemento",
+    "title": "PES 2018 Option File Complemento",
+    "subtitle": "El paquete adicional que licencia equipos no incluidos en el Option File base.",
+    "version": "Complemento",
+    "game": "PES 2018",
+    "season": "2025",
+    "date": "2025-10-12",
+    "platforms": ["PC", "PS4", "PS5"],
+    "cover": "/assets/images/option-files/OF COMPLEMENTO.png",
+    "description": "Complemento para licenciar equipos que no vienen incluidos en el Option File base.",
+    "intro": "Este archivo no reemplaza al Option File principal. Instalalo solamente después de revisar el tutorial y confirmar que corresponde a tu base.",
+    "download_parts": [{"name": "Archivo completo", "url": "https://sharemods.com/cuse8xuzlmsv/OF_Complmento_kits_PES_2018_al_2025_by_LAqP.rar.html"}],
+    "tutorial": "/guia/instalar-option-file-pes-2018-2026/",
+    "features": ["Licencia equipos pendientes.", "Completa kits, escudos y datos editables.", "Funciona como complemento del Option File base."],
+    "compatibility": "Disponible para PC, PS4 y PS5. Debe combinarse con una base compatible.",
+    "installation_notes": ["Instalá primero el Option File base.", "Mirá el tutorial antes de importar este complemento."],
+    "related_downloads": ["of_pes2018_2026_v2_pc", "of_pes2018_2026_v2_ps4"],
+    "featured": true,
+    "status": "Disponible",
+    "category": "Complemento"
+  },
+  {
+    "id": "of_pes2018_2025_v5_ps4",
+    "slug": "pes-2018-option-file-2025-v5-ps4-ps5",
+    "title": "PES 2018 Option File 2025 V5",
+    "subtitle": "La quinta edición 2025 para PS4 y PS5 con ligas, Libertadores y selecciones actualizadas.",
+    "version": "V5",
+    "game": "PES 2018",
+    "season": "2025",
+    "date": "2025-01-01",
+    "platforms": ["PS4", "PS5"],
+    "cover": "/assets/images/option-files/OF V 5.png",
+    "description": "Incluye Premier League, LaLiga, Liga Argentina, Brasileirão, Copa Libertadores, selecciones sudamericanas y equipos europeos.",
+    "intro": "Una edición consolidada de la temporada 2025 para quienes prefieren mantener esa base en consolas.",
+    "download_parts": [{"name": "Archivo completo", "url": "https://sharemods.com/3rfvwrfyglf9/OF_PES_2018_al_2025_V5_PS4-PS5_by_LAqP.rar.html"}],
+    "tutorial": "/guia/instalar-option-file-pes-2018-2026/",
+    "leagues": ["Premier League", "LaLiga", "Liga Argentina", "Brasileirão", "Copa Libertadores"],
+    "compatibility": "Compatible con PES 2018 de PS4 y con la versión de PS4 ejecutada en PS5.",
+    "installation_notes": ["Conservá una copia de seguridad.", "Importá mediante la carpeta WEPES."],
+    "related_downloads": ["of_pes2018_2025_v5_pc", "of_pes2018_2026_v1_ps4"],
+    "featured": false,
+    "status": "Disponible",
+    "category": "Option File"
+  },
+  {
+    "id": "of_pes2018_2025_v5_pc",
+    "slug": "pes-2018-option-file-2025-v5-pc",
+    "title": "PES 2018 Option File 2025 V5",
+    "subtitle": "La quinta edición 2025 para PC con las principales ligas y equipos de la temporada.",
+    "version": "V5",
+    "game": "PES 2018",
+    "season": "2025",
+    "date": "2025-01-01",
+    "platforms": ["PC"],
+    "cover": "/assets/images/option-files/OF V 5.png",
+    "description": "Incluye Premier League, LaLiga, Liga Argentina, Brasileirão, Copa Libertadores, selecciones sudamericanas y equipos europeos.",
+    "intro": "Una edición consolidada de la temporada 2025 para PES 2018 en PC.",
+    "download_parts": [{"name": "Archivo completo", "url": "https://sharemods.com/mue0fixi0mpf/OF_PES_2018_al_2025_V5_PC_by_LAqP.rar.html"}],
+    "tutorial": "/guia/instalar-option-file-pes-2018-2026/",
+    "leagues": ["Premier League", "LaLiga", "Liga Argentina", "Brasileirão", "Copa Libertadores"],
+    "compatibility": "Compatible con PES 2018 en PC. No mezcles los archivos con otra base sin comprobar su compatibilidad.",
+    "installation_notes": ["Conservá una copia de seguridad.", "Verificá la ruta de guardado antes de reemplazar archivos."],
+    "related_downloads": ["of_pes2018_2025_v5_ps4", "of_pes2018_2026_v1_pc"],
+    "featured": false,
+    "status": "Disponible",
+    "category": "Option File"
+  }
+]

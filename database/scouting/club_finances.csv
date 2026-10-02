@@ -1,0 +1,4 @@
+club_id;typical_transfer_min;typical_transfer_max;exceptional_transfer_max;average_wage;high_wage;estimated_wage_ceiling;financial_power;prestige;confidence;source
+138;1000000;10000000;25000000;18000;35000;60000;78;82;estimated;curated_seed
+139;1000000;9000000;22000000;18000;35000;60000;77;82;estimated;curated_seed
+4220;300000;3500000;9000000;12000;25000;40000;48;56;estimated;curated_seed

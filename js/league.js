@@ -67,14 +67,11 @@ function toTitleCaseName(value) {
 }
 
 function statColor(value) {
-  const v = parseInt(value, 10);
-  if (isNaN(v)) return '#d33d35';
-  if (v >= 95) return '#00ff87';
-  if (v >= 90) return '#62ff51';
-  if (v >= 80) return '#a8ff00';
-  if (v >= 70) return '#e5dc00';
-  if (v >= 60) return '#e59f01';
-  return '#d33d35';
+  return window.LAQPRating.colorFor(value);
+}
+
+function dbRatingClass(value) {
+  return window.LAQPRating.classFor(value);
 }
 
 function statTextColor(hexColor) {
@@ -123,18 +120,21 @@ function renderLeaguePage(league, teams) {
   const cardsHtml = teams.map(t => {
     const avg = teamAvgOvr(t.players);
     const avgHtml = avg !== null
-      ? `<div class="grid-card-ovr"><span class="team-avg-badge" style="background:${statColor(avg)};color:${statTextColor(statColor(avg))}">${avg}</span></div>`
+      ? `<span class="db-rating ${dbRatingClass(avg)}">${avg}</span>`
       : '';
     return `
-      <div class="grid-card" onclick="window.location.href='${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(t.id, t.displayName) : `team.html?id=${encodeURIComponent(t.id)}`}'">
-        <img class="grid-card-img"
+      <a class="db-club-row" href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(t.id, t.displayName) : `team.html?id=${encodeURIComponent(t.id)}`}">
+        <img
           src="img/teams/${escapeHtml(t.id)}.webp"
           onerror="this.onerror=null;this.src='img/teams/default.webp'"
-          alt="${escapeHtml(t.displayName)}">
-        <div class="grid-card-name">${escapeHtml(t.displayName)}</div>
+          alt="" width="46" height="46" loading="lazy">
+        <span class="db-club-row-copy"><strong>${escapeHtml(t.displayName)}</strong><small>${t.players.length} jugadores</small></span>
         ${avgHtml}
-      </div>`;
+      </a>`;
   }).join('');
+  const allScores = teams.flatMap(team => team.players.map(player => Number(player['OverallStats']))).filter(value => Number.isFinite(value) && value > 0 && value <= 99);
+  const leagueAverage = allScores.length ? `<span>Media ${Math.round(allScores.reduce((sum, value) => sum + value, 0) / allScores.length)}</span>` : '';
+  const playerCount = teams.reduce((sum, team) => sum + team.players.length, 0);
 
   content.innerHTML = `
     <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
@@ -144,22 +144,23 @@ function renderLeaguePage(league, teams) {
     </nav></div>
     <button class="back-btn" onclick="window.location.href='${typeof laqpDatabaseUrl === 'function' ? laqpDatabaseUrl('leagues') : 'database.html?view=leagues'}'">${t('common.backToLeagues')}</button>
 
-    <div class="view-header">
-      <img class="grid-card-img" style="width:56px;height:56px;object-fit:contain"
+    <header class="league-hero db-hero">
+      <img width="112" height="112"
         src="img/leagues/${escapeHtml(league.id)}.webp"
         onerror="this.onerror=null;this.src='img/leagues/default.webp'"
         alt="${escapeHtml(league.name)}">
       <div>
-        <h1 class="view-title">${escapeHtml(league.name)}</h1>
-        <div class="view-subtitle">${t('db.teamCount', { count: teams.length })}</div>
+        <p class="db-eyebrow">Base de datos · Liga</p>
+        <h1>${escapeHtml(league.name)}</h1>
+        <div class="db-hero-summary"><span>${teams.length} equipos</span><span>${playerCount} jugadores</span>${leagueAverage}</div>
       </div>
-    </div>
+    </header>
 
     <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
 
-    <div class="grid-cards">${cardsHtml}</div>
+    <section class="db-section league-clubs"><div class="db-section-heading"><h2>Equipos</h2><span>${teams.length} clubes</span></div><div class="db-club-grid">${cardsHtml}</div></section>
 
-    <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="native"></div>`;
+    <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="responsive"></div>`;
 
   window.LAQPAds?.placeAll(content);
   window.LAQPAds?.monitorAll(content);
@@ -217,6 +218,7 @@ function showError(message) {
 async function boot() {
   const params = new URLSearchParams(window.location.search);
   const embeddedLeagueId = document.querySelector('meta[name="laqp-league-id"]')?.content || '';
+  const embeddedLeagueName = document.querySelector('meta[name="laqp-league-name"]')?.content || '';
   const leagueId = embeddedLeagueId || params.get('id');
 
   if (!leagueId) {
@@ -250,7 +252,13 @@ async function boot() {
   const leagueRows = parseLeaguesCSV(leaguesText);
 
   // Find this league
-  const leagueRow = leagueRows.find(l => (l['league_id'] || '') === leagueId);
+  // league_id=31 is currently shared by two competitions. Generated pages also
+  // embed the name so both URLs hydrate with the correct row instead of always
+  // selecting the first occurrence of that ID.
+  const leagueRow = leagueRows.find(l =>
+    (l['league_id'] || '') === leagueId &&
+    (!embeddedLeagueName || (l['league_name'] || '') === embeddedLeagueName)
+  ) || leagueRows.find(l => (l['league_id'] || '') === leagueId);
   if (!leagueRow) {
     showError(t('errors.leagueNotFound', { id: leagueId }));
     return;

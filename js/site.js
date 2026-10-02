@@ -1,15 +1,16 @@
 'use strict';
 
 const SITE_NAV_ITEMS = [
-  { href: 'index.html', labelKey: 'nav.home', fallback: 'Inicio', key: 'index' },
-  { href: 'database.html', labelKey: 'nav.database', fallback: 'Base de Datos', key: 'database' },
-  { href: 'database/DTs/', labelKey: 'nav.dts', fallback: 'DTs', key: 'dts' },
-  { href: 'rankings.html', labelKey: 'nav.scouting', fallback: 'Scouting', key: 'rankings' },
-  { href: 'tactics.html', labelKey: 'nav.tactics', fallback: 'Tacticas', key: 'tactics' },
-  { href: 'guias.html', labelKey: 'nav.guides', fallback: 'Guías', key: 'guides' },
-  { href: 'tutorials.html', labelKey: 'nav.tutorials', fallback: 'Tutoriales', key: 'tutorials' },
-  { href: 'calculadora-medias.html', labelKey: 'nav.calculator', fallback: 'Calculadora', key: 'calculator' },
-  { href: 'downloads.html', labelKey: 'nav.downloads', fallback: 'Option Files', key: 'downloads' },
+  { href: '/index.html', labelKey: 'nav.home', fallback: 'Inicio', key: 'index' },
+  { href: '/database.html', labelKey: 'nav.database', fallback: 'Base de Datos', key: 'database' },
+  { href: '/alineaciones.html', labelKey: 'nav.lineups', fallback: 'Alineaciones', key: 'lineups' },
+  { href: '/database/DTs/', labelKey: 'nav.dts', fallback: 'DTs', key: 'dts' },
+  { href: '/rankings.html', labelKey: 'nav.scouting', fallback: 'Scouting', key: 'rankings' },
+  { href: '/tactics.html', labelKey: 'nav.tactics', fallback: 'Tacticas', key: 'tactics' },
+  { href: '/guias.html', labelKey: 'nav.guides', fallback: 'Guías', key: 'guides' },
+  { href: '/tutorials.html', labelKey: 'nav.tutorials', fallback: 'Tutoriales', key: 'tutorials' },
+  { href: '/calculadora-medias.html', labelKey: 'nav.calculator', fallback: 'Calculadora', key: 'calculator' },
+  { href: '/downloads.html', labelKey: 'nav.downloads', fallback: 'Option Files', key: 'downloads' },
 ];
 
 const LAQP_PRETTY_PATHS = {
@@ -21,6 +22,7 @@ const LAQP_PRETTY_PATHS = {
   'tactics.html': 'tactics.html',
   'calculadora-medias.html': 'calculadora-medias.html',
   'database.html': 'database.html',
+  'alineaciones.html': 'alineaciones.html',
   'contact.html': 'contact.html',
   'about.html': 'about.html',
   'acerca-de.html': 'acerca-de.html',
@@ -88,6 +90,10 @@ function laqpDownloadUrl(downloadId, title) {
   return `/download/${encodeURIComponent(downloadId)}/`;
 }
 
+function laqpOptionFileUrl(slug) {
+  return `/option-files/${encodeURIComponent(slug)}/`;
+}
+
 function laqpAbsoluteUrl(path) {
   return `https://laqp.website${path.startsWith('/') ? path : `/${path}`}`;
 }
@@ -103,7 +109,7 @@ function currentPageKey() {
   const first = (parts[0] || 'index.html').toLowerCase();
   const file = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
   if (first === 'index.html' || first === '') return 'index';
-  if (first === 'downloads' || first === 'download' || file === 'downloads.html') return 'downloads';
+  if (first === 'downloads' || first === 'download' || first === 'option-files' || file === 'downloads.html') return 'downloads';
   if (first === 'guides' || first === 'guia' || first === 'article' || file === 'guias.html' || file === 'articulo.html') return 'guides';
   if (first === 'tutorials' || file === 'tutorials.html') return 'tutorials';
   if (first === 'rankings' || file === 'rankings.html') return 'rankings';
@@ -113,6 +119,7 @@ function currentPageKey() {
   if (first === 'database' || file === 'database.html') {
     return 'database';
   }
+  if (first === 'alineaciones' || file === 'alineaciones.html') return 'lineups';
   if (first === 'player' || file === 'player.html') return 'database';
   if (first === 'team' || file === 'team.html') return 'database';
   if (first === 'league' || file === 'league.html') return 'database';
@@ -136,6 +143,11 @@ function renderMainNav() {
 function renderHeaderBrand() {
   const header = document.querySelector('#header');
   if (!header) return;
+  const logoLink = header.querySelector('.header-logo-link');
+  if (logoLink) {
+    logoLink.setAttribute('href', '/index.html');
+    logoLink.setAttribute('aria-label', 'Volver al inicio de LAqP.website');
+  }
   let title = header.querySelector('.header-title');
   if (!title) {
     title = document.createElement('div');
@@ -277,6 +289,7 @@ function saveConsent(choice) {
     ad_user_data: payload.ads ? 'granted' : 'denied',
     ad_personalization: payload.ads ? 'granted' : 'denied',
   });
+  document.dispatchEvent(new CustomEvent('laqp:consentchange', { detail: payload }));
   document.querySelector('.cookie-consent')?.remove();
 }
 
@@ -301,7 +314,7 @@ function renderCookieConsent() {
   banner.innerHTML = `
     <div class="cookie-consent-copy">
       <strong>Cookies y anuncios</strong>
-      <p>LAqP usa cookies tecnicas para recordar preferencias y puede usar Google Analytics, Google AdSense y Adsterra para medicion y publicidad. Podes aceptar o rechazar las cookies no esenciales.</p>
+      <p>LAqP usa cookies tecnicas para recordar preferencias y puede usar Google Analytics y Adsterra para medicion y publicidad. Podes aceptar o rechazar las cookies no esenciales.</p>
     </div>
     <div class="cookie-consent-actions">
       <a href="cookies.html">Ver detalles</a>

@@ -8,11 +8,6 @@
     consentStorageKey: 'laqp_cookie_consent_v1',
     renderTimeoutMs: 10000,
     units: Object.freeze({
-      native: Object.freeze({
-        format: 'native',
-        key: '597f4baefd789b5a554a76a03af8bc9b',
-        src: 'https://pl30976527.profitableratecpmnetwork.com/597f4baefd789b5a554a76a03af8bc9b/invoke.js',
-      }),
       desktop: Object.freeze({
         format: 'iframe',
         key: '8a3fb93caf85fe0ba7fb51f68738589f',
@@ -27,17 +22,10 @@
         height: 50,
         src: 'https://www.highrevenueformat.com/b1c24022cb90c506d235026f3c56738b/invoke.js',
       }),
-      rectangle: Object.freeze({
-        format: 'iframe',
-        key: 'd7f6b2bd0a3bdbc016d2bcff231bd9bd',
-        width: 300,
-        height: 250,
-        src: 'https://www.highrevenueformat.com/d7f6b2bd0a3bdbc016d2bcff231bd9bd/invoke.js',
-      }),
     }),
   });
 
-  const renderedUnits = new Set();
+  const renderedSlots = new Set();
   const observers = new WeakMap();
 
   function readConsent() {
@@ -78,25 +66,101 @@
     ].join('\n');
   }
 
-  function nativeMarkup(unit) {
-    return [
-      `<script async="async" data-cfasync="false" src="${unit.src}"><\/script>`,
-      `<div id="container-${unit.key}"><\/div>`,
-    ].join('\n');
+  function sandboxDocument(unit) {
+    const markup = bannerMarkup(unit);
+    const compatibilityBridge = `<script>
+      (() => {
+        const memory = new Map();
+        const storage = Object.freeze({
+          get length() { return memory.size; },
+          clear() { memory.clear(); },
+          getItem(key) { return memory.has(String(key)) ? memory.get(String(key)) : null; },
+          key(index) { return [...memory.keys()][Number(index)] || null; },
+          removeItem(key) { memory.delete(String(key)); },
+          setItem(key, value) { memory.set(String(key), String(value)); }
+        });
+
+        try {
+          Object.defineProperty(document, 'cookie', {
+            configurable: false,
+            get: () => '',
+            set: () => true
+          });
+        } catch {}
+        for (const name of ['localStorage', 'sessionStorage']) {
+          try {
+            Object.defineProperty(window, name, {
+              configurable: false,
+              get: () => storage
+            });
+          } catch {}
+        }
+
+        const browserOpen = window.open.bind(window);
+        const userActivatedOpen = (...args) => navigator.userActivation?.isActive
+          ? browserOpen(...args)
+          : null;
+        try {
+          Object.defineProperty(window, 'open', {
+            configurable: false,
+            writable: false,
+            value: userActivatedOpen
+          });
+        } catch {
+          window.open = userActivatedOpen;
+        }
+
+        addEventListener('click', event => {
+          if (event.isTrusted) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }, true);
+      })();
+    <\/script>`;
+    return `<!doctype html>
+      <html lang="es">
+        <head>
+          <meta charset="utf-8">
+          <meta name="referrer" content="strict-origin-when-cross-origin">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https:; style-src 'unsafe-inline' https:; img-src https: data:; frame-src https:; connect-src https:; media-src https: blob:; font-src https: data:; base-uri 'none'; form-action 'none'">
+          <style>
+            html, body { width: 100%; margin: 0; padding: 0; overflow: hidden; background: transparent; }
+            body { min-height: 1px; text-align: center; }
+            iframe, img, object, embed { max-width: 100%; border: 0; }
+          </style>
+        </head>
+        <body>${compatibilityBridge}${markup}</body>
+      </html>`;
+  }
+
+  function createSandboxedFrame(unit, slot) {
+    const frame = document.createElement('iframe');
+
+    frame.className = 'ad-sandbox-frame';
+    frame.title = 'Publicidad';
+    frame.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-escape-sandbox');
+    frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+    frame.setAttribute('scrolling', 'no');
+    frame.setAttribute('loading', slot.dataset.adPriority === 'high' ? 'eager' : 'lazy');
+    frame.dataset.adSandbox = 'isolated';
+    frame.width = String(unit.width);
+    frame.height = String(unit.height);
+    frame.style.width = `${unit.width}px`;
+    frame.style.height = `${unit.height}px`;
+    frame.addEventListener('load', () => {
+      if (slot.dataset.adState === 'loading') setState(slot, 'loaded');
+    }, { once: true });
+    frame.addEventListener('error', () => setState(slot, 'error'), { once: true });
+    frame.srcdoc = sandboxDocument(unit);
+    return frame;
   }
 
   function selectUnit(slot) {
-    const requested = slot.dataset.adUnit;
-    if (requested === 'responsive') {
-      const available = safeAvailableWidth(slot);
-      if (available >= CONFIG.units.desktop.width) return { name: 'desktop', unit: CONFIG.units.desktop };
-      if (available >= CONFIG.units.mobile.width) return { name: 'mobile', unit: CONFIG.units.mobile };
-      return null;
-    }
-    const unit = CONFIG.units[requested];
-    if (!unit) return null;
-    if (unit.width && safeAvailableWidth(slot) < unit.width) return null;
-    return { name: requested, unit };
+    if (slot.dataset.adUnit !== 'responsive') return null;
+    const available = safeAvailableWidth(slot);
+    if (available >= CONFIG.units.desktop.width) return { name: 'desktop', unit: CONFIG.units.desktop };
+    if (available >= CONFIG.units.mobile.width) return { name: 'mobile', unit: CONFIG.units.mobile };
+    return null;
   }
 
   function setState(slot, state) {
@@ -105,7 +169,7 @@
 
   function render(slot) {
     if (!(slot instanceof Element) || !slot.matches('.ad-slot[data-ad-unit]')) return false;
-    if (slot.dataset.adState && slot.dataset.adState !== 'pending') return false;
+    if (slot.dataset.adState && !['pending', 'consent-blocked'].includes(slot.dataset.adState)) return false;
 
     if (!CONFIG.enabled) {
       setState(slot, 'disabled');
@@ -115,31 +179,23 @@
       setState(slot, 'consent-blocked');
       return false;
     }
-    if (document.readyState !== 'loading') {
-      setState(slot, 'unsafe-late-render');
-      return false;
-    }
-
     const selected = selectUnit(slot);
     if (!selected) {
       setState(slot, 'unsupported-width');
       return false;
     }
 
-    const uniquenessKey = slot.dataset.adUnit === 'responsive' ? 'responsive' : selected.name;
-    if (renderedUnits.has(uniquenessKey)) {
-      setState(slot, 'duplicate-blocked');
-      return false;
-    }
-
-    renderedUnits.add(uniquenessKey);
+    if (renderedSlots.has(slot)) return false;
+    renderedSlots.add(slot);
     slot.dataset.adVariant = selected.name;
     slot.dataset.adProvider = CONFIG.provider;
     slot.dataset.adKey = selected.unit.key;
     setState(slot, 'loading');
 
     try {
-      document.write(selected.name === 'native' ? nativeMarkup(selected.unit) : bannerMarkup(selected.unit));
+      const content = slot.querySelector('.ad-slot__content');
+      if (!content) throw new Error('Contenedor publicitario ausente.');
+      content.replaceChildren(createSandboxedFrame(selected.unit, slot));
       return true;
     } catch (error) {
       setState(slot, 'error');
@@ -149,10 +205,9 @@
   }
 
   function creativeExists(slot) {
-    if (slot.querySelector('iframe, object, embed, video')) return true;
+    if (slot.querySelector('.ad-sandbox-frame')) return true;
     if (slot.querySelector('.ad-slot__content > a[href], .ad-slot__content img')) return true;
-    const nativeContainer = slot.querySelector('[id^="container-"]');
-    return Boolean(nativeContainer && (nativeContainer.children.length || nativeContainer.textContent.trim()));
+    return false;
   }
 
   function monitor(slot) {
@@ -185,6 +240,12 @@
     root.querySelectorAll?.('.ad-slot[data-ad-state="loading"]').forEach(monitor);
   }
 
+  function renderAll(root = document) {
+    root.querySelectorAll?.('.ad-slot[data-ad-unit]').forEach(slot => {
+      if (!slot.dataset.adState || ['pending', 'consent-blocked'].includes(slot.dataset.adState)) render(slot);
+    });
+  }
+
   function parkingArea() {
     let parking = document.getElementById('laqp-ad-parking');
     if (parking) return parking;
@@ -205,9 +266,11 @@
   function placeAll(root = document) {
     root.querySelectorAll?.('[data-ad-placement][data-ad-unit-target]').forEach(target => {
       const unitName = target.dataset.adUnitTarget;
-      const slot = document.querySelector(`.ad-slot[data-ad-unit="${unitName}"]`);
+      const placement = target.dataset.adPlacement;
+      const slots = Array.from(document.querySelectorAll('.ad-slot[data-ad-unit]'));
+      const slot = slots.find(candidate => candidate.dataset.adSlot === placement)
+        || slots.find(candidate => candidate.dataset.adUnit === unitName && candidate.closest('#laqp-ad-parking'));
       if (!slot) return;
-      slot.dataset.adSlot = target.dataset.adPlacement;
       target.replaceChildren(slot);
       monitor(slot);
     });
@@ -217,6 +280,30 @@
     return Boolean(document.querySelector('.ad-slot[data-ad-state="consent-blocked"]'));
   }
 
+  function removeAll() {
+    renderedSlots.clear();
+    document.querySelectorAll('.ad-slot[data-ad-unit]').forEach(slot => {
+      const record = observers.get(slot);
+      if (record) {
+        record.observer.disconnect();
+        global.clearTimeout(record.timeoutId);
+        observers.delete(slot);
+      }
+      slot.querySelector('.ad-slot__content')?.replaceChildren();
+      setState(slot, 'consent-blocked');
+    });
+  }
+
+  document.addEventListener('laqp:consentchange', event => {
+    if (event.detail?.ads === true) {
+      renderAll(document);
+      placeAll(document);
+      monitorAll(document);
+    } else {
+      removeAll();
+    }
+  });
+
   global.LAQPAds = Object.freeze({
     config: CONFIG,
     hasBlockedConsentSlots,
@@ -224,9 +311,12 @@
     placeAll,
     preserve,
     render,
+    renderAll,
+    removeAll,
   });
 
   document.addEventListener('DOMContentLoaded', () => {
+    renderAll(document);
     monitorAll(document);
     global.setTimeout(() => {
       if (!document.documentElement.classList.contains('laqp-hydrated')) placeAll(document);

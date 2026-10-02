@@ -1,0 +1,4 @@
+player_id;club_id;tipo_vinculo;intensidad;fuente;notas
+108129;139;hincha;85;user_spec;Afinidad pública indicada para el caso de validación
+114523;138;simpatizante;45;user_spec;Afinidad declarada indicada para el caso de validación
+60168;1242;identificacion;90;user_spec;Vínculo personal indicado para el caso de validación

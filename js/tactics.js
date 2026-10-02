@@ -1,6 +1,7 @@
 'use strict';
 
 const TACTICS_CSV_PATH = 'database/tacticas.csv';
+const TACTICS_METADATA_PATH = 'database/tacticas-metadata.csv';
 const TACTICS_TEAMS_PATH = 'database/tacticas/teams';
 const TACTICS_FALLBACK_COVER = 'assets/images/home-banner-main-2.png';
 const TACTICS_FALLBACK_BADGE = 'img/teams/default.webp';
@@ -22,6 +23,62 @@ const TACTIC_POPULAR_IDS = [
 let historicalTactics = [];
 let filteredTactics = [];
 let visibleTacticsCount = TACTICS_PAGE_SIZE;
+let tacticsRenderRevision = 0;
+
+// Compatibilidad durante despliegues en los que el navegador conserve una
+// versión anterior de country-filter.js. El mapeo país → continente sigue
+// perteneciendo exclusivamente al módulo compartido.
+const TACTIC_CONTINENT_FALLBACK_LABELS = {
+  europe: 'Europa',
+  'south-america': 'Sudamérica',
+  'north-america': 'Norteamérica / Centroamérica / Caribe',
+  africa: 'África',
+  asia: 'Asia',
+  oceania: 'Oceanía',
+  other: 'Otros',
+};
+
+const TACTIC_FILTER_DEFINITIONS = [
+  { key: 'formacion', label: 'Formación', value: tactic => tacticFormation(tactic) },
+  { key: 'temporada', label: 'Temporada', value: tactic => tactic.temporada || '', sort: (a, b) => tacticSeasonStart({ temporada: b }) - tacticSeasonStart({ temporada: a }) },
+  { key: 'entrenador', label: 'Entrenador', value: tactic => tactic.entrenador || '' },
+];
+
+const TACTIC_TECHNICAL_FILTERS = [
+  { key: 'estilo_ataque', label: 'Ataque' },
+  { key: 'construccion', label: 'Construcción' },
+  { key: 'zona_ataque', label: 'Zona de ataque' },
+  { key: 'posicionamiento', label: 'Posicionamiento' },
+  { key: 'estilo_defensivo', label: 'Defensa' },
+  { key: 'zona_contencion', label: 'Zona defensiva' },
+  { key: 'presion', label: 'Presión' },
+];
+
+// Reglas deliberadamente conservadoras: cada etiqueta se apoya en parámetros
+// PES explícitos y no en el texto editorial de la tarjeta.
+const TACTIC_DERIVED_STYLE_RULES = [
+  { key: 'posesion', label: 'Posesión', matches: tactic => tactic.estilo_ataque === 'Posesión' },
+  { key: 'contraataque', label: 'Contraataque', matches: tactic => tactic.estilo_ataque === 'Contraataque' },
+  { key: 'juego-directo', label: 'Juego directo', matches: tactic => tactic.construccion === 'Pase largo' },
+  { key: 'ataque-bandas', label: 'Ataque por bandas', matches: tactic => tactic.zona_ataque === 'Banda' },
+  { key: 'juego-interior', label: 'Juego interior', matches: tactic => tactic.zona_ataque === 'Centro' },
+  { key: 'presion-alta', label: 'Presión alta', matches: tactic => tactic.estilo_defensivo === 'Presión en primera línea' && tacticNumber(tactic.linea_defensiva) >= 7 },
+  { key: 'bloque-bajo', label: 'Bloque bajo', matches: tactic => tactic.estilo_defensivo === 'Defensa total' && tacticNumber(tactic.linea_defensiva) <= 4 },
+  { key: 'defensa-agresiva', label: 'Defensa agresiva', matches: tactic => tactic.presion === 'Agresiva' },
+  { key: 'equipo-compacto', label: 'Equipo compacto', matches: tactic => tacticNumber(tactic.compacidad) >= 8 },
+];
+
+const tacticFilterState = {
+  query: '',
+  team: null,
+  formacion: '',
+  temporada: '',
+  entrenador: '',
+  styles: new Set(),
+  instructions: new Set(),
+  onlyAdvanced: false,
+  sort: 'recent',
+};
 
 const TACTIC_PHASES = [
   { key: 'inicial', label: 'Inicial', formationKey: 'formacion' },
@@ -459,43 +516,183 @@ function renderPopularTacticCard(tactic) {
     </article>`;
 }
 
-function uniqueTacticValues(key) {
-  return [...new Set(historicalTactics.map(item => item[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+function normalizeTacticSearch(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
 }
 
-function renderFilterSelect(key, label) {
+function tacticInstructionBase(value) {
+  return String(value || '').split(':')[0].trim();
+}
+
+function tacticAdvancedInstructions(tactic) {
+  return [
+    ['offense', tactic.ataque_avanzada_1],
+    ['offense', tactic.ataque_avanzada_2],
+    ['defense', tactic.defensa_avanzada_1],
+    ['defense', tactic.defensa_avanzada_2],
+  ].filter(([, value]) => String(value || '').trim()).map(([group, value]) => ({ group, value: tacticInstructionBase(value) }));
+}
+
+function tacticContinent(tactic) {
+  return window.LAQPCountryFilter?.continentFor(tactic.pais_id) || 'other';
+}
+
+function prepareTacticFilterData(tactic) {
+  tactic.filterData = {
+    continent: tacticContinent(tactic),
+    instructions: tacticAdvancedInstructions(tactic),
+    derivedStyles: new Set(TACTIC_DERIVED_STYLE_RULES.filter(rule => rule.matches(tactic)).map(rule => rule.key)),
+    search: normalizeTacticSearch([
+      tactic.equipo, tactic.apodo, tactic.temporada, tactic.entrenador, tactic.pais,
+      tacticFormation(tactic), tactic.descripcion, tactic.estilo, tactic.claves,
+      ...tacticAdvancedInstructions(tactic).map(item => item.value),
+    ].filter(Boolean).join(' ')),
+  };
+  return tactic;
+}
+
+function tacticMatchesFilters(tactic, state = tacticFilterState) {
+  const query = normalizeTacticSearch(state.query);
+  if (query && !tactic.filterData.search.includes(query)) return false;
+  if (state.team) {
+    const { type, value } = state.team;
+    if (type === 'continent' && tactic.filterData.continent !== value) return false;
+    if (type === 'country' && tactic.pais !== value) return false;
+    if (type === 'team' && tactic.equipo !== value) return false;
+  }
+  if (state.formacion && tacticFormation(tactic) !== state.formacion) return false;
+  if (state.temporada && tactic.temporada !== state.temporada) return false;
+  if (state.entrenador && tactic.entrenador !== state.entrenador) return false;
+  if (state.onlyAdvanced && !tactic.filterData.instructions.length) return false;
+  if (![...state.styles].every(token => {
+    if (token.startsWith('derived:')) return tactic.filterData.derivedStyles.has(token.slice(8));
+    const [, field, ...valueParts] = token.split(':');
+    return tactic[field] === valueParts.join(':');
+  })) return false;
+  const instructions = new Set(tactic.filterData.instructions.map(item => `${item.group}:${item.value}`));
+  return [...state.instructions].every(token => instructions.has(token));
+}
+
+function uniqueFilterValues(getter, sorter) {
+  const values = [...new Set(historicalTactics.map(getter).filter(Boolean))];
+  return values.sort(sorter || ((a, b) => String(a).localeCompare(String(b), 'es', { sensitivity: 'base', numeric: true })));
+}
+
+function renderSingleFilter(definition) {
+  const values = uniqueFilterValues(definition.value, definition.sort);
+  if (!values.length) return '';
   return `
-    <label class="history-filter">
-      <span>${label}</span>
-      <select data-tactic-filter="${key}">
-        <option value="">Todas</option>
-        ${uniqueTacticValues(key).map(value => `<option value="${tacticsEscape(value)}">${tacticsEscape(key === 'formacion' ? normalizeFormationLabel(value) : value)}</option>`).join('')}
-      </select>
-    </label>`;
+    <div class="history-filter-popover" data-filter-popover="${definition.key}">
+      <button class="history-filter-trigger" type="button" aria-expanded="false"><span>${definition.label}</span><b data-filter-count="${definition.key}"></b><i aria-hidden="true">⌄</i></button>
+      <div class="history-filter-menu history-filter-options" hidden>
+        <button type="button" data-filter-single="${definition.key}" data-value="">Todas</button>
+        ${values.map(value => `<button type="button" data-filter-single="${definition.key}" data-value="${tacticsEscape(value)}">${tacticsEscape(value)}</button>`).join('')}
+      </div>
+    </div>`;
 }
 
-function tacticFilterValue(tactic, key) {
-  if (key === 'decada') return tactic.epoca || '';
-  if (key === 'zona') return tactic.region || '';
-  if (key === 'tipo') return tactic.estilo_ataque || '';
-  if (key === 'equipo') return tactic.equipo || '';
-  return tactic[key] || '';
+function teamTaxonomy() {
+  const continents = new Map();
+  historicalTactics.forEach(tactic => {
+    const continent = tactic.filterData.continent;
+    if (!continents.has(continent)) continents.set(continent, new Map());
+    const countries = continents.get(continent);
+    const country = tactic.pais || 'Sin país';
+    if (!countries.has(country)) countries.set(country, new Set());
+    countries.get(country).add(tactic.equipo);
+  });
+  return continents;
 }
 
-function uniqueTacticFilterValues(key) {
-  return [...new Set(historicalTactics.map(item => tacticFilterValue(item, key)).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, 'es'));
-}
-
-function renderSimpleFilterSelect(key, label) {
+function renderTeamFilter() {
+  const taxonomy = teamTaxonomy();
+  const continentOrder = window.LAQPCountryFilter?.continentOrder || [...taxonomy.keys()];
+  const allTeams = uniqueFilterValues(tactic => tactic.equipo);
   return `
-    <label class="history-filter">
-      <span>${label}</span>
-      <select data-tactic-filter="${key}">
-        <option value="">Todas</option>
-        ${uniqueTacticFilterValues(key).map(value => `<option value="${tacticsEscape(value)}">${tacticsEscape(value)}</option>`).join('')}
-      </select>
-    </label>`;
+    <div class="history-filter-popover history-team-filter" data-filter-popover="team">
+      <button class="history-filter-trigger" type="button" aria-expanded="false"><span>Equipo</span><b data-filter-count="team"></b><i aria-hidden="true">⌄</i></button>
+      <div class="history-filter-menu history-team-menu" hidden>
+        <label class="history-team-search"><span class="sr-only">Buscar equipo</span><input type="search" data-team-search placeholder="Buscar equipo..." autocomplete="off"></label>
+        <button class="history-team-all" type="button" data-team-type="" data-value="" data-label="Todos los equipos">Todos los equipos</button>
+        <div class="history-team-tree">
+          ${continentOrder.filter(key => taxonomy.has(key)).map(continent => {
+            const countries = taxonomy.get(continent);
+            const continentLabel = window.LAQPCountryFilter?.continentLabel?.(continent, 'es') || TACTIC_CONTINENT_FALLBACK_LABELS[continent] || TACTIC_CONTINENT_FALLBACK_LABELS.other;
+            return `<details class="history-team-continent"><summary>${tacticsEscape(continentLabel)}<small>${[...countries.values()].reduce((sum, teams) => sum + teams.size, 0)}</small></summary>
+              <button type="button" data-team-type="continent" data-value="${continent}" data-label="${tacticsEscape(continentLabel)}">Todo ${tacticsEscape(continentLabel)}</button>
+              ${[...countries.entries()].sort(([a], [b]) => a.localeCompare(b, 'es')).map(([country, teams]) => `<details class="history-team-country"><summary>${tacticsEscape(country)}<small>${teams.size}</small></summary>
+                <button type="button" data-team-type="country" data-value="${tacticsEscape(country)}" data-label="${tacticsEscape(country)}">Todo ${tacticsEscape(country)}</button>
+                ${[...teams].sort((a, b) => a.localeCompare(b, 'es')).map(team => `<button type="button" data-team-type="team" data-value="${tacticsEscape(team)}" data-label="${tacticsEscape(team)}">${tacticsEscape(team)}</button>`).join('')}
+              </details>`).join('')}
+            </details>`;
+          }).join('')}
+        </div>
+        <div class="history-team-results" hidden>
+          ${allTeams.map(team => {
+            const tactic = historicalTactics.find(item => item.equipo === team);
+            return `<button type="button" data-team-type="team" data-value="${tacticsEscape(team)}" data-label="${tacticsEscape(team)}"><strong>${tacticsEscape(team)}</strong><small>${tacticsEscape(tactic?.pais || '')}</small></button>`;
+          }).join('')}
+          <p hidden>No se encontraron equipos.</p>
+        </div>
+      </div>
+    </div>`;
+}
+
+function styleToken(field, value) {
+  return `technical:${field}:${value}`;
+}
+
+function renderStyleFilter() {
+  const derived = TACTIC_DERIVED_STYLE_RULES.filter(rule => historicalTactics.some(tactic => tactic.filterData.derivedStyles.has(rule.key)));
+  return `
+    <div class="history-filter-popover" data-filter-popover="styles">
+      <button class="history-filter-trigger" type="button" aria-expanded="false"><span>Estilo</span><b data-filter-count="styles"></b><i aria-hidden="true">⌄</i></button>
+      <div class="history-filter-menu history-filter-sections" hidden>
+        <section><h3>Lectura rápida</h3>${derived.map(rule => `<label><input type="checkbox" data-style-token="derived:${rule.key}" data-label="${tacticsEscape(rule.label)}"><span>${tacticsEscape(rule.label)}</span></label>`).join('')}</section>
+        ${TACTIC_TECHNICAL_FILTERS.map(field => {
+          const values = uniqueFilterValues(tactic => tactic[field.key]);
+          if (!values.length) return '';
+          return `<section><h3>${tacticsEscape(field.label)}</h3>${values.map(value => `<label><input type="checkbox" data-style-token="${tacticsEscape(styleToken(field.key, value))}" data-label="${tacticsEscape(value)}"><span>${tacticsEscape(value)}</span></label>`).join('')}</section>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function renderInstructionsFilter() {
+  const instructionValues = group => [...new Set(historicalTactics.flatMap(tactic => tactic.filterData.instructions.filter(item => item.group === group).map(item => item.value)))]
+    .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+  const valuesByGroup = { offense: instructionValues('offense'), defense: instructionValues('defense') };
+  return `
+    <div class="history-filter-popover" data-filter-popover="instructions">
+      <button class="history-filter-trigger" type="button" aria-expanded="false"><span>Instrucciones</span><b data-filter-count="instructions"></b><i aria-hidden="true">⌄</i></button>
+      <div class="history-filter-menu history-filter-sections" hidden>
+        <label class="history-filter-only"><input type="checkbox" data-only-advanced><span>Solo tácticas con instrucciones avanzadas</span></label>
+        ${[['offense', 'Ofensivas'], ['defense', 'Defensivas']].map(([group, label]) => `<section><h3>${label}</h3>${valuesByGroup[group].map(value => `<label><input type="checkbox" data-instruction-token="${group}:${tacticsEscape(value)}" data-label="${tacticsEscape(value)}"><span>${tacticsEscape(value)}</span></label>`).join('')}</section>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderTacticSearchTools() {
+  return `
+    <section class="history-search-panel" aria-label="Buscador y filtros de tácticas">
+      <div class="history-search-row">
+        <label class="history-main-search"><span class="sr-only">Buscar táctica</span><input id="history-tactic-search" type="search" placeholder="Buscar táctica, equipo, entrenador..." autocomplete="off"><i aria-hidden="true">⌕</i></label>
+        <button id="history-mobile-filter-toggle" class="history-mobile-filter-toggle" type="button" aria-expanded="false"><span>Filtros</span><b id="history-mobile-filter-count"></b></button>
+        <label class="history-sort"><span>Ordenar por</span><select id="history-tactic-sort"><option value="recent">Más recientes</option><option value="team">Equipo A-Z</option><option value="formation">Formación</option></select></label>
+      </div>
+      <div id="history-filter-panel" class="history-filter-bar">
+        <div class="history-mobile-filter-head"><strong>Filtrar tácticas</strong><button type="button" data-close-filters aria-label="Cerrar filtros">×</button></div>
+        ${renderTeamFilter()}
+        ${renderSingleFilter(TACTIC_FILTER_DEFINITIONS[0])}
+        ${renderStyleFilter()}
+        ${renderInstructionsFilter()}
+        ${renderSingleFilter(TACTIC_FILTER_DEFINITIONS[1])}
+        ${renderSingleFilter(TACTIC_FILTER_DEFINITIONS[2])}
+        <button id="clear-tactic-filters" class="history-clear-button" type="button">Limpiar</button>
+        <button class="history-apply-mobile" type="button" data-close-filters>Ver resultados</button>
+      </div>
+      <div class="history-active-filters"><span>Filtros activos:</span><div id="history-active-filter-list"></div></div>
+    </section>`;
 }
 
 async function ensureTacticPlayers(tactics) {
@@ -507,6 +704,7 @@ async function ensureTacticPlayers(tactics) {
 }
 
 async function renderVisibleTactics() {
+  const revision = ++tacticsRenderRevision;
   const list = document.querySelector('#history-tactics-list');
   const status = document.querySelector('#history-tactics-status');
   const loadMore = document.querySelector('#history-load-more');
@@ -514,14 +712,15 @@ async function renderVisibleTactics() {
 
   const visible = filteredTactics.slice(0, visibleTacticsCount);
   await ensureTacticPlayers(visible);
+  if (revision !== tacticsRenderRevision) return;
   list.innerHTML = visible.length
     ? visible.map(renderTacticCard).join('')
     : '<div class="history-empty-state">No hay tácticas que coincidan con esos filtros.</div>';
 
   if (status) {
     status.textContent = filteredTactics.length
-      ? `${visible.length} de ${filteredTactics.length} ${filteredTactics.length === 1 ? 'táctica' : 'tácticas'}`
-      : '0 tácticas';
+      ? `${filteredTactics.length} ${filteredTactics.length === 1 ? 'táctica encontrada' : 'tácticas encontradas'}`
+      : '0 tácticas encontradas';
   }
 
   if (loadMore) {
@@ -541,14 +740,205 @@ async function renderPopularTactics() {
 }
 
 function applyTacticFilters(resetCount = true) {
-  const filters = [...document.querySelectorAll('[data-tactic-filter]')]
-    .map(select => [select.dataset.tacticFilter, select.value])
-    .filter(([, value]) => value);
   filteredTactics = historicalTactics
-    .filter(tactic => filters.every(([key, value]) => tacticFilterValue(tactic, key) === value))
-    .sort(compareTacticsBySeason);
+    .filter(tactic => tacticMatchesFilters(tactic));
+  const comparators = {
+    recent: compareTacticsBySeason,
+    team: (a, b) => String(a.equipo).localeCompare(String(b.equipo), 'es', { sensitivity: 'base' }) || compareTacticsBySeason(a, b),
+    formation: (a, b) => tacticFormation(a).localeCompare(tacticFormation(b), 'es', { numeric: true }) || String(a.equipo).localeCompare(String(b.equipo), 'es'),
+  };
+  filteredTactics.sort(comparators[tacticFilterState.sort] || comparators.recent);
   if (resetCount) visibleTacticsCount = TACTICS_PAGE_SIZE;
+  syncTacticFilterUI();
   renderVisibleTactics();
+}
+
+function activeTacticFilters() {
+  const filters = [];
+  if (tacticFilterState.team) filters.push({ kind: 'team', label: tacticFilterState.team.label });
+  TACTIC_FILTER_DEFINITIONS.forEach(definition => {
+    if (tacticFilterState[definition.key]) filters.push({ kind: definition.key, label: tacticFilterState[definition.key] });
+  });
+  tacticFilterState.styles.forEach(token => {
+    const input = document.querySelector(`[data-style-token="${CSS.escape(token)}"]`);
+    filters.push({ kind: 'style', value: token, label: input?.dataset.label || token });
+  });
+  tacticFilterState.instructions.forEach(token => {
+    const input = document.querySelector(`[data-instruction-token="${CSS.escape(token)}"]`);
+    filters.push({ kind: 'instruction', value: token, label: input?.dataset.label || token });
+  });
+  if (tacticFilterState.onlyAdvanced) filters.push({ kind: 'advanced', label: 'Con instrucciones avanzadas' });
+  return filters;
+}
+
+function syncTacticFilterUI() {
+  const active = activeTacticFilters();
+  const list = document.querySelector('#history-active-filter-list');
+  if (list) list.innerHTML = active.map(item => `<button type="button" data-remove-filter="${tacticsEscape(item.kind)}"${item.value ? ` data-value="${tacticsEscape(item.value)}"` : ''}>${tacticsEscape(item.label)}<span aria-hidden="true">×</span></button>`).join('');
+  document.querySelector('.history-active-filters')?.classList.toggle('has-filters', active.length > 0);
+  document.querySelector('#clear-tactic-filters')?.toggleAttribute('disabled', !active.length && !tacticFilterState.query);
+  const mobileCount = document.querySelector('#history-mobile-filter-count');
+  if (mobileCount) mobileCount.textContent = active.length ? String(active.length) : '';
+
+  document.querySelectorAll('[data-filter-count]').forEach(element => {
+    const key = element.dataset.filterCount;
+    let count = 0;
+    if (key === 'team') count = tacticFilterState.team ? 1 : 0;
+    else if (key === 'styles') count = tacticFilterState.styles.size;
+    else if (key === 'instructions') count = tacticFilterState.instructions.size + Number(tacticFilterState.onlyAdvanced);
+    else count = tacticFilterState[key] ? 1 : 0;
+    element.textContent = count ? String(count) : '';
+    element.closest('.history-filter-trigger')?.classList.toggle('has-selection', count > 0);
+  });
+  document.querySelectorAll('[data-filter-single]').forEach(button => button.classList.toggle('is-selected', tacticFilterState[button.dataset.filterSingle] === button.dataset.value));
+  document.querySelectorAll('[data-team-type]').forEach(button => button.classList.toggle('is-selected', !!tacticFilterState.team && tacticFilterState.team.type === button.dataset.teamType && tacticFilterState.team.value === button.dataset.value));
+  document.querySelectorAll('[data-style-token]').forEach(input => { input.checked = tacticFilterState.styles.has(input.dataset.styleToken); });
+  document.querySelectorAll('[data-instruction-token]').forEach(input => { input.checked = tacticFilterState.instructions.has(input.dataset.instructionToken); });
+  const onlyAdvanced = document.querySelector('[data-only-advanced]');
+  if (onlyAdvanced) onlyAdvanced.checked = tacticFilterState.onlyAdvanced;
+  const popular = document.querySelector('#history-popular-section');
+  if (popular) popular.hidden = Boolean(active.length || tacticFilterState.query);
+}
+
+function closeTacticMenus(except) {
+  document.querySelectorAll('.history-filter-popover.is-open').forEach(popover => {
+    if (popover === except) return;
+    popover.classList.remove('is-open');
+    popover.querySelector('.history-filter-trigger')?.setAttribute('aria-expanded', 'false');
+    const menu = popover.querySelector('.history-filter-menu');
+    if (menu) menu.hidden = true;
+  });
+}
+
+function closeMobileFilters() {
+  const panel = document.querySelector('#history-filter-panel');
+  panel?.classList.remove('is-mobile-open');
+  document.body.classList.remove('history-filters-open');
+  document.querySelector('#history-mobile-filter-toggle')?.setAttribute('aria-expanded', 'false');
+}
+
+function resetTeamSearch() {
+  const search = document.querySelector('[data-team-search]');
+  const menu = search?.closest('.history-team-menu');
+  if (search) search.value = '';
+  if (!menu) return;
+  const tree = menu.querySelector('.history-team-tree');
+  const results = menu.querySelector('.history-team-results');
+  if (tree) tree.hidden = false;
+  if (results) results.hidden = true;
+  results?.querySelectorAll('button').forEach(button => { button.hidden = false; });
+  const empty = results?.querySelector('p');
+  if (empty) empty.hidden = true;
+}
+
+function clearTacticFilters() {
+  tacticFilterState.query = '';
+  tacticFilterState.team = null;
+  tacticFilterState.formacion = '';
+  tacticFilterState.temporada = '';
+  tacticFilterState.entrenador = '';
+  tacticFilterState.styles.clear();
+  tacticFilterState.instructions.clear();
+  tacticFilterState.onlyAdvanced = false;
+  const search = document.querySelector('#history-tactic-search');
+  if (search) search.value = '';
+  resetTeamSearch();
+  applyTacticFilters();
+}
+
+function removeTacticFilter(kind, value) {
+  if (kind === 'team') tacticFilterState.team = null;
+  else if (kind === 'style') tacticFilterState.styles.delete(value);
+  else if (kind === 'instruction') tacticFilterState.instructions.delete(value);
+  else if (kind === 'advanced') tacticFilterState.onlyAdvanced = false;
+  else if (Object.hasOwn(tacticFilterState, kind)) tacticFilterState[kind] = '';
+  applyTacticFilters();
+}
+
+function bindTacticFilters() {
+  const searchPanel = document.querySelector('.history-search-panel');
+  if (!searchPanel) return;
+  searchPanel.addEventListener('click', event => {
+    const trigger = event.target.closest('.history-filter-trigger');
+    if (trigger) {
+      const popover = trigger.closest('.history-filter-popover');
+      const opening = !popover.classList.contains('is-open');
+      closeTacticMenus(popover);
+      popover.classList.toggle('is-open', opening);
+      trigger.setAttribute('aria-expanded', String(opening));
+      popover.querySelector('.history-filter-menu').hidden = !opening;
+      if (opening) popover.querySelector('input[type="search"]')?.focus();
+      return;
+    }
+    const team = event.target.closest('[data-team-type]');
+    if (team) {
+      tacticFilterState.team = team.dataset.value ? { type: team.dataset.teamType, value: team.dataset.value, label: team.dataset.label } : null;
+      resetTeamSearch();
+      closeTacticMenus();
+      applyTacticFilters();
+      return;
+    }
+    const single = event.target.closest('[data-filter-single]');
+    if (single) {
+      tacticFilterState[single.dataset.filterSingle] = single.dataset.value;
+      closeTacticMenus();
+      applyTacticFilters();
+      return;
+    }
+    const remove = event.target.closest('[data-remove-filter]');
+    if (remove) { removeTacticFilter(remove.dataset.removeFilter, remove.dataset.value || ''); return; }
+    if (event.target.closest('#clear-tactic-filters')) { clearTacticFilters(); return; }
+    if (event.target.closest('#history-mobile-filter-toggle')) {
+      const panel = document.querySelector('#history-filter-panel');
+      const open = !panel.classList.contains('is-mobile-open');
+      panel.classList.toggle('is-mobile-open', open);
+      document.body.classList.toggle('history-filters-open', open);
+      document.querySelector('#history-mobile-filter-toggle').setAttribute('aria-expanded', String(open));
+      return;
+    }
+    if (event.target.closest('[data-close-filters]')) closeMobileFilters();
+  });
+  searchPanel.addEventListener('input', event => {
+    if (event.target.matches('#history-tactic-search')) {
+      tacticFilterState.query = event.target.value;
+      applyTacticFilters();
+      return;
+    }
+    if (event.target.matches('[data-team-search]')) {
+      const query = normalizeTacticSearch(event.target.value);
+      const menu = event.target.closest('.history-team-menu');
+      menu.querySelector('.history-team-tree').hidden = Boolean(query);
+      const results = menu.querySelector('.history-team-results');
+      results.hidden = !query;
+      let matches = 0;
+      results.querySelectorAll('button').forEach(button => {
+        button.hidden = !normalizeTacticSearch(button.dataset.value).includes(query);
+        if (!button.hidden) matches += 1;
+      });
+      results.querySelector('p').hidden = matches > 0;
+    }
+  });
+  searchPanel.addEventListener('change', event => {
+    if (event.target.matches('#history-tactic-sort')) {
+      tacticFilterState.sort = event.target.value;
+      applyTacticFilters(false);
+    } else if (event.target.matches('[data-style-token]')) {
+      tacticFilterState.styles[event.target.checked ? 'add' : 'delete'](event.target.dataset.styleToken);
+      applyTacticFilters();
+    } else if (event.target.matches('[data-instruction-token]')) {
+      tacticFilterState.instructions[event.target.checked ? 'add' : 'delete'](event.target.dataset.instructionToken);
+      applyTacticFilters();
+    } else if (event.target.matches('[data-only-advanced]')) {
+      tacticFilterState.onlyAdvanced = event.target.checked;
+      applyTacticFilters();
+    }
+  });
+  document.addEventListener('click', event => {
+    if (!event.target.closest('.history-filter-popover')) closeTacticMenus();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { closeTacticMenus(); closeMobileFilters(); }
+  });
 }
 
 async function renderTacticsIndex() {
@@ -563,26 +953,22 @@ async function renderTacticsIndex() {
       </div>
     </section>
 
-    <section class="history-filter-bar" aria-label="Filtros de tácticas">
-      ${renderSimpleFilterSelect('decada', 'Época')}
-      ${renderSimpleFilterSelect('zona', 'Zona')}
-      ${renderSimpleFilterSelect('tipo', 'Tipo')}
-      ${renderSimpleFilterSelect('equipo', 'Equipo')}
-      <button id="clear-tactic-filters" class="history-clear-button" type="button">Limpiar filtros</button>
-    </section>
+    ${renderTacticSearchTools()}
 
-    <div class="history-list-heading">
-      <div>
-        <span class="history-kicker">Más vistas</span>
-        <h2>Tácticas populares</h2>
+    <div id="history-popular-section">
+      <div class="history-list-heading">
+        <div>
+          <span class="history-kicker">Más vistas</span>
+          <h2>Tácticas populares</h2>
+        </div>
       </div>
+      <section id="history-popular-tactics-list" class="history-tactics-list history-popular-tactics-list" aria-label="Tácticas populares"></section>
     </div>
-    <section id="history-popular-tactics-list" class="history-tactics-list history-popular-tactics-list" aria-label="Tácticas populares"></section>
 
     <div class="history-list-heading">
       <div>
-        <span class="history-kicker">Catalogo completo</span>
-        <h2>Todas las tácticas</h2>
+        <span class="history-kicker">Catálogo completo</span>
+        <h2>Resultados</h2>
       </div>
       <strong id="history-tactics-status"></strong>
     </div>
@@ -598,14 +984,10 @@ async function renderTacticsIndex() {
       <div><strong>Siempre ampliable</strong><span>Más equipos históricos para recrear.</span></div>
     </section>`;
 
-  document.querySelectorAll('[data-tactic-filter]').forEach(select => select.addEventListener('change', applyTacticFilters));
+  bindTacticFilters();
   document.querySelector('#history-load-more')?.addEventListener('click', () => {
     visibleTacticsCount += TACTICS_PAGE_SIZE;
     renderVisibleTactics();
-  });
-  document.querySelector('#clear-tactic-filters')?.addEventListener('click', () => {
-    document.querySelectorAll('[data-tactic-filter]').forEach(select => { select.value = ''; });
-    applyTacticFilters();
   });
   await renderPopularTactics();
   applyTacticFilters();
@@ -613,6 +995,14 @@ async function renderTacticsIndex() {
 
 function renderTacticDetail(tactic) {
   const target = document.querySelector('#tactics-content');
+  // El generador resuelve la identidad estable del DT. Conservarla durante la
+  // hidratación evita degradar el enlace prerenderizado a texto plano.
+  const managerUrl = target.dataset.laqpManagerUrl || '';
+  const managerMarkup = tactic.entrenador
+    ? ` · ${managerUrl
+      ? `<a class="history-manager-link" href="${tacticsEscape(managerUrl)}">${tacticsEscape(tactic.entrenador)}</a>`
+      : tacticsEscape(tactic.entrenador)}`
+    : '';
   const keys = tacticsList(tactic.claves);
   const related = historicalTactics.filter(item => item.id !== tactic.id).sort(compareTacticsBySeason).slice(0, 3);
   const relatedMarkup = related.length ? `
@@ -635,7 +1025,7 @@ function renderTacticDetail(tactic) {
       <div class="history-detail-copy">
         ${tacticImage(tactic.escudo, `Escudo de ${tactic.equipo}`, 'history-detail-badge', TACTICS_FALLBACK_BADGE)}
         <div>
-          <span class="history-kicker">${tacticsEscape(tactic.temporada)} · ${tacticsEscape(tactic.region)}</span>
+          <span class="history-kicker">${tacticsEscape(tactic.temporada)} · ${tacticsEscape(tactic.pais || tactic.region)}${managerMarkup}</span>
           <h1>${tacticsEscape(tactic.equipo)}</h1>
           <strong>${tacticsEscape(tactic.apodo)}</strong>
           <p>${tacticsEscape(tactic.descripcion)}</p>
@@ -675,9 +1065,18 @@ async function loadTacticPlayers(tactic) {
 async function initTactics() {
   const loading = document.querySelector('#tactics-loading');
   try {
-    const response = await fetch(TACTICS_CSV_PATH);
+    const [response, metadataResponse] = await Promise.all([
+      fetch(TACTICS_CSV_PATH),
+      fetch(TACTICS_METADATA_PATH).catch(() => null),
+    ]);
     if (!response.ok) throw new Error('No se pudieron cargar las tácticas.');
-    historicalTactics = parseTacticsCSV(await response.text()).filter(tactic => tactic.id).sort(compareTacticsBySeason);
+    const metadataRows = metadataResponse?.ok ? parseTacticsCSV(await metadataResponse.text()) : [];
+    const metadataById = new Map(metadataRows.filter(item => item.id).map(item => [item.id, item]));
+    historicalTactics = parseTacticsCSV(await response.text())
+      .filter(tactic => tactic.id)
+      .map(tactic => ({ ...tactic, ...(metadataById.get(tactic.id) || {}) }))
+      .sort(compareTacticsBySeason)
+      .map(prepareTacticFilterData);
     const requestedId = requestedTacticId();
     if (requestedId) {
       const tactic = historicalTactics.find(item => item.id === requestedId);

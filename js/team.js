@@ -924,13 +924,13 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
 
     ${pitchHtml}
 
-    <div class="ad-placement" data-ad-placement="team-mid" data-ad-unit-target="rectangle"></div>
+    <div class="ad-placement" data-ad-placement="team-mid" data-ad-unit-target="responsive"></div>
 
     ${carouselHtml}
 
     ${shirtNumbersHtml}
 
-    <div class="ad-placement" data-ad-placement="team-bottom" data-ad-unit-target="native"></div>`;
+    <div class="ad-placement" data-ad-placement="team-bottom" data-ad-unit-target="responsive"></div>`;
 
   window.LAQPAds?.placeAll(content);
   window.LAQPAds?.monitorAll(content);
@@ -1136,18 +1136,11 @@ async function boot() {
   const { rows: formationRows } = formationsText ? parseCSV(formationsText) : { rows: [] };
   const { rows: coachRows } = coachsText ? parseCSV(coachsText) : { rows: [] };
   const { rows: leagueRows } = leaguesText ? parseCSV(leaguesText) : { rows: [] };
-  const validTeamIds = new Set();
-  leagueRows.forEach(row => {
-    String(row['team_ids'] || '').split(',').map(id => id.trim()).filter(Boolean).forEach(id => validTeamIds.add(id));
-  });
-  if (!validTeamIds.has(teamId)) {
-    showError(t('errors.teamNotPublished'));
-    return;
-  }
 
   // Find the team
   const teamRow = teamRows.find(t => t['Id'] === teamId);
-  if (!teamRow || !String(teamRow['Name'] || '').trim() || teamRow['Name'] === '-') {
+  const publishedTeamIds = new Set(leagueRows.flatMap(row => (row['team_ids'] || '').split(',').map(id => id.trim()).filter(Boolean)));
+  if (!teamRow || !publishedTeamIds.has(teamId) || !String(teamRow['Name'] || '').trim() || teamRow['Name'] === '-') {
     showError(t('errors.teamNotFound', { id: teamId }));
     return;
   }

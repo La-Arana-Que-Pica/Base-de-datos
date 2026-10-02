@@ -7,7 +7,7 @@ const RANK_POSITION_LABELS = {
 };
 
 const SORT_OPTIONS = [
-  ['fit', 'Mejor'],
+  ['fit', 'Recomendados'],
   ['meta', 'Mas meta'],
   ['young', 'Joven'],
   ['regional', 'Realista'],
@@ -466,6 +466,10 @@ const COUNTRY_NAMES = {
   '7': 'China', '8': 'Hong Kong', '9': 'India', '10': 'Indonesia', '11': 'Iran',
   '12': 'Irak', '13': 'Japon', '14': 'Jordania', '15': 'Corea del Norte',
   '16': 'Corea del Sur', '17': 'Kuwait', '19': 'Libano', '21': 'Malasia',
+  '12':  'Irak',         '13':  'Japón',        '14':  'Jordania',
+  '54':  'Comoras',         '67':  'Kenia',        '98':  'Congo',
+  '29':  'Filipinas',         '28':  'Palestina',        '220':  'Luxemburgo',
+  '216':  'Kazajistán',         '205':  'Estonia',        '140':  'Curazao',
   '26': 'Oman', '30': 'Qatar', '31': 'Arabia Saudita', '32': 'Singapur',
   '34': 'Siria', '36': 'Tailandia', '37': 'Emiratos Arabes Unidos', '38': 'Vietnam',
   '44': 'Argelia', '45': 'Angola', '46': 'Benin', '48': 'Burkina Faso',
@@ -497,6 +501,7 @@ const COUNTRY_NAMES = {
 
 let scoutingDataset = null;
 let scoutingFormulas = null;
+let scoutingMarketData = null;
 let scoutingState = {
   leagueId: '',
   teamId: '',
@@ -821,6 +826,7 @@ function buildDataset(players, teams, squads, leagues, correctedRows) {
       type: team.Type || '0',
       leagueId: league.id,
       leagueName: league.name,
+      rivals: [team.Rival1, team.Rival2, team.Rival3].map(String).filter(id => id && id !== '262143'),
       squad: [],
     });
     const created = teamMap.get(team.Id);
@@ -1321,6 +1327,13 @@ function fitLabel(score) {
 }
 
 function transferDifficulty(item, club) {
+  if (item.realism) {
+    const score = item.realism.score;
+    if (score < 30) return { label: 'Prácticamente imposible', className: 'unrealistic', score };
+    if (score < 60) return { label: 'Poco realista', className: 'hard', score };
+    if (score < 80) return { label: 'Ambicioso', className: 'medium', score };
+    return { label: 'Realista', className: 'easy', score };
+  }
   const player = item.player;
   const overall = stat(player, 'OverallStats');
   const diff = overall - (club.avgOverall || 70);
@@ -1355,6 +1368,8 @@ function scoutingTags(item, club) {
   if (item.multiPositionCount >= 2) tags.push('Polifuncional');
   if (difficulty.className === 'hard') tags.push('Dificil de fichar');
   if (difficulty.className === 'unrealistic') tags.push('Poco realista');
+  if (item.realism?.score >= 80) tags.push('Realista');
+  if (item.realism?.relationshipBonus >= 10) tags.push('Vínculo con el club');
   return [...new Set(tags)].slice(0, 5);
 }
 
@@ -1393,7 +1408,7 @@ function calculateScoutingFitScore(player, club, prototypeId, clubAnalysis = ana
     ? (META_PROFILES[profileId]?.tag || 'Scouting')
     : (getPrototypeOptionsForPosition(scoutingState.position).find(item => item.id === scoutingState.profile)?.label || META_PROFILES[profileId]?.tag || 'Scouting');
 
-  return {
+  const item = {
     player,
     club,
     profileId,
@@ -1412,6 +1427,13 @@ function calculateScoutingFitScore(player, club, prototypeId, clubAnalysis = ana
     metaDiff: meta - overall,
     reason: '',
   };
+  if (scoutingMarketData && window.ScoutingRealism) {
+    item.realism = window.ScoutingRealism.evaluate({ player, buyer: club, sportingFit: fit, data: scoutingMarketData });
+    item.recommendationScore = Math.min(item.realism.score, Math.round(item.realism.score * 0.62 + fit * 0.38));
+  } else {
+    item.recommendationScore = Math.round(fit);
+  }
+  return item;
 }
 
 function passesFilters(item, club) {
@@ -1443,10 +1465,10 @@ function sortedRecommendations(items) {
     }
     if (sort === 'meta') return b.meta - a.meta || b.fit - a.fit;
     if (sort === 'young') return (stat(a.player, 'Age') || 99) - (stat(b.player, 'Age') || 99) || b.fit - a.fit;
-    if (sort === 'regional') return b.regionalFit - a.regionalFit || b.fit - a.fit;
+    if (sort === 'regional') return (b.realism?.score || b.regionalFit) - (a.realism?.score || a.regionalFit) || b.fit - a.fit;
     if (sort === 'undervalued') return b.metaDiff - a.metaDiff || b.fit - a.fit;
     if (sort === 'overall') return stat(b.player, 'OverallStats') - stat(a.player, 'OverallStats') || b.fit - a.fit;
-    return b.fit - a.fit || b.squadNeedFit - a.squadNeedFit || b.meta - a.meta;
+    return (b.recommendationScore || b.fit) - (a.recommendationScore || a.fit) || (b.realism?.score || 0) - (a.realism?.score || 0) || b.squadNeedFit - a.squadNeedFit || b.meta - a.meta;
   });
 }
 
@@ -1755,6 +1777,12 @@ function renderClubAnalysis(club) {
   const recommendedType = club.region === 'south-america'
     ? `jugadores sudamericanos de media ${club.recommendedRange[0]}-${club.recommendedRange[1]}`
     : `jugadores de media ${club.recommendedRange[0]}-${club.recommendedRange[1]} acordes al mercado`;
+  const marketProfile = scoutingMarketData?.getProfile(club);
+  const finance = scoutingMarketData?.getFinance(club);
+  const frequentMarkets = (marketProfile?.frequent_nationalities || []).slice(0, 4).map(countryName);
+  const rareMarkets = (marketProfile?.low_frequency_nationalities || []).slice(0, 3).map(countryName);
+  const policyLabels = (marketProfile?.policies || []).slice(0, 3).map(value => String(value).replace(/_/g, ' '));
+  const ageWindow = marketProfile ? `${marketProfile.age_min}–${marketProfile.age_max}` : `${Math.max(18, club.avgAge - 5)}–${club.avgAge + 3}`;
 
   return `
     <section class="club-analysis-panel">
@@ -1767,14 +1795,17 @@ function renderClubAnalysis(club) {
       <div><span>Media plantel</span><strong>${club.avgOverall}</strong><small>Top 11: ${club.startersAvg}</small></div>
       <div><span>Edad promedio</span><strong>${club.avgAge || '-'}</strong><small>${club.squad.length} jugadores</small></div>
       <div><span>Nivel estimado</span><strong>${rankEscape(club.level.label)}</strong><small>${rankEscape(analysis.formation)}</small></div>
+      ${finance ? `<div><span>Poder económico</span><strong>${finance.financial_power >= 75 ? 'Alto regional' : finance.financial_power >= 55 ? 'Medio' : 'Limitado'}</strong><small>${finance.confidence === 'estimated' ? 'Modelo estimado' : 'Dato curado'}</small></div>` : ''}
+      <div><span>Edad habitual</span><strong>${rankEscape(ageWindow)}</strong><small>${rankEscape(policyLabels.join(' · ') || 'Perfil flexible')}</small></div>
       <div class="club-analysis-copy">
         <span>Lectura del plantel</span>
         <p>Fortalezas: ${listText(strengths, 'sin una linea dominante')}. En ${rankEscape(analysis.formation)}, ${wideNeed ? 'faltan variantes por banda' : 'prioriza las necesidades marcadas'}.</p>
       </div>
       <div class="club-analysis-copy">
-        <span>Tipo de fichajes recomendados</span>
-        <p>${rankEscape(recommendedType)} con buen encaje tactico.</p>
+        <span>Perfil de mercado</span>
+        <p>${rankEscape(recommendedType)}. Mercados frecuentes: ${rankEscape(frequentMarkets.join(', ') || 'perfil de liga')}.${rareMarkets.length ? ` Poco frecuentes: ${rankEscape(rareMarkets.join(', '))}.` : ''}</p>
       </div>
+      ${finance ? `<div class="club-analysis-copy"><span>Estructura económica estimada</span><p>Precio habitual hasta ${formatMoney(finance.typical_transfer_max)} · máximo excepcional ${formatMoney(finance.exceptional_transfer_max)} · techo salarial ${formatWage(finance.estimated_wage_ceiling)}.</p></div>` : ''}
       <div class="club-analysis-links">
         <span>Enlaces internos</span>
         <p>
@@ -1794,7 +1825,27 @@ function renderClubAnalysis(club) {
           }).join('') : '<em>No hay necesidades fuertes; podes buscar variantes por perfil.</em>'}
         </p>
       </div>
-    </section>`;
+  </section>`;
+}
+
+function formatMoney(value, currency = 'EUR') {
+  const amount = Number(value || 0);
+  if (!amount) return 'Sin dato';
+  const symbol = currency === 'EUR' ? '€' : `${currency} `;
+  if (amount >= 1_000_000) return `${symbol}${(amount / 1_000_000).toLocaleString('es-AR', { maximumFractionDigits: 1 })} M`;
+  return `${symbol}${Math.round(amount / 1000)} K`;
+}
+
+function formatWage(value, currency = 'EUR') {
+  const amount = Number(value || 0);
+  return amount ? `${formatMoney(amount, currency)}/sem.` : 'Sin dato';
+}
+
+function renderRealismReasons(item) {
+  const reasons = item.realism?.reasons || [];
+  if (!reasons.length) return '<p class="scouting-reason">Realismo calculado con los datos disponibles.</p>';
+  const icons = { positive: '✓', negative: '△', block: '⛔' };
+  return `<ul class="scouting-reason-list">${reasons.slice(0, 5).map(entry => `<li class="is-${rankEscape(entry.tone)}"><b>${icons[entry.tone] || '•'}</b><span><strong>${rankEscape(entry.label)}</strong><small>${rankEscape(entry.detail || '')}</small></span></li>`).join('')}</ul>`;
 }
 
 function renderPlayerCard(item, index) {
@@ -1813,6 +1864,8 @@ function renderPlayerCard(item, index) {
   const metaRounded = Math.round(item.meta);
   const targetLabel = RANK_POSITION_LABELS[item.targetPosition || pos] || item.targetPosition || pos;
   const difficultyWidth = difficulty.className === 'easy' ? 32 : difficulty.className === 'medium' ? 58 : difficulty.className === 'hard' ? 78 : 92;
+  const realism = item.realism;
+  const realismScore = realism?.score ?? Math.max(0, 100 - difficultyWidth);
 
   return `
     <article class="scouting-recommendation-card${index === 0 && !scoutingState.offset ? ' is-featured' : ''}">
@@ -1831,25 +1884,24 @@ function renderPlayerCard(item, index) {
             <span>${rankEscape(RANK_POSITION_LABELS[pos] || pos)}</span>
           </div>
         </div>
-        <div class="scouting-fit-ring" style="--fit:${fitRounded}">
-          <strong>${fitRounded}%</strong>
-          <span>Encaje</span>
+        <div class="scouting-score-pair">
+          <div class="scouting-fit-ring scouting-realism-ring" style="--fit:${realismScore}"><strong>${realismScore}%</strong><span>Realismo</span></div>
+          <div class="scouting-fit-ring" style="--fit:${fitRounded}"><strong>${fitRounded}%</strong><span>Encaje</span></div>
         </div>
       </div>
       <div class="scouting-number-row">
-        <span><small>Media</small><strong>${overall || '-'}</strong></span>
+        <span><small>OVR</small><strong>${overall || '-'}</strong></span>
         <span><small>Edad</small><strong>${age}</strong></span>
+        <span><small>Valor estimado</small><strong>${realism ? formatMoney(realism.marketValue, realism.currency) : '—'}</strong></span>
+        <span><small>Salario ${realism?.wageConfidence === 'estimated' ? 'estimado' : ''}</small><strong>${realism ? formatWage(realism.wage, realism.currency) : '—'}</strong></span>
       </div>
       <div class="scouting-tag-row">${renderTagChips(item.tags)}</div>
-      <p class="scouting-reason">${rankEscape(shortScoutingReason(item, item.club))}</p>
-      <div class="scouting-difficulty">
-        <span>Dificultad</span>
-        <i><b style="width:${difficultyWidth}%"></b></i>
-        <em class="${rankEscape(difficulty.className)}">${rankEscape(difficulty.label)}</em>
-      </div>
+      <div class="scouting-category scouting-category-${rankEscape(difficulty.className)}"><span>Realismo del fichaje</span><strong>${rankEscape(realism?.category || difficulty.label)}</strong></div>
+      ${renderRealismReasons(item)}
       <div class="scouting-projection">${rankEscape(projectedText)}</div>
       <div class="meta-card-actions scouting-card-actions">
-        <a href="${link}">Ver jugador</a>
+        <a href="${link}">Ver ficha</a>
+        <button type="button" onclick="compareScoutingPlayer('${rankEscape(player.Id)}')">Comparar</button>
         <button type="button" onclick="toggleSavedScout('${rankEscape(player.Id)}')">${saved ? 'Guardado' : 'Guardar'}</button>
       </div>
     </article>`;
@@ -1911,7 +1963,7 @@ function renderScoutingTable(items) {
               <td>${rankEscape(player.teamName || 'Sin club')}</td>
               <td>${rankEscape(countryName(player.Country))}</td>
               <td><strong>${Math.round(item.fit)}%</strong></td>
-              <td>${rankEscape((item.difficulty || transferDifficulty(item, item.club)).label)}</td>
+              <td><strong>${item.realism?.score ?? '-'}%</strong> · ${rankEscape(item.realism?.category || (item.difficulty || transferDifficulty(item, item.club)).label)}</td>
               <td>${rankEscape((item.tags || []).join(', '))}</td>
             </tr>`;
           }).join('')}
@@ -2075,6 +2127,21 @@ function renderScoutedListPanel(items, club) {
     </section>`;
 }
 
+function renderDiscoverySections(items, club) {
+  const definitions = [
+    ['Recomendados para tu club', item => item.realism?.score >= 70],
+    ['Jóvenes con potencial', item => stat(item.player, 'Age') <= 23 && item.fit >= 62],
+    ['Oportunidades de mercado', item => item.realism && item.realism.marketValue <= item.realism.finance.typical_transfer_max && item.realism.score >= 55],
+    ['Cesiones posibles (estimado)', item => stat(item.player, 'Age') <= 23 && item.realism?.score >= 55 && stat(item.player, 'OverallStats') <= (item.player.teamId ? (scoutingMarketData?.teams.get(String(item.player.teamId))?.avgOverall || 99) : 99) - 2],
+    ['Regresos posibles', item => item.realism?.relationshipBonus >= 8],
+    ['Fichajes ambiciosos', item => item.realism?.score >= 60 && item.realism?.score < 80 && item.fit >= 72],
+    ['Joyas poco conocidas', item => item.metaDiff >= 2 && stat(item.player, 'OverallStats') <= club.avgOverall + 1 && item.realism?.score >= 50],
+  ];
+  const groups = definitions.map(([title, predicate]) => [title, items.filter(predicate).slice(0, 3)]).filter(([, rows]) => rows.length);
+  if (!groups.length) return '';
+  return `<section class="scouting-discovery"><div class="scouting-section-heading"><span>Explorar el mercado</span><h2>Otras formas de descubrir</h2><p>Todas las listas usan el mismo motor de realismo y sus topes económicos.</p></div><div class="scouting-discovery-grid">${groups.map(([title, rows]) => `<article><h3>${rankEscape(title)}</h3>${rows.map(item => `<button type="button" onclick="compareScoutingPlayer('${rankEscape(item.player.Id)}')"><img src="img/players/${rankEscape(item.player.Id)}.webp" onerror="this.onerror=null;this.src='img/players/default.webp'" alt=""><span><strong>${rankEscape(item.player.Name)}</strong><small>${rankEscape(item.player.teamName)} · ${Math.round(item.fit)}% encaje</small></span><b>${item.realism?.score ?? '-'}%</b></button>`).join('')}</article>`).join('')}</div></section>`;
+}
+
 function applyScoutingMarquees() {
   requestAnimationFrame(() => {
     document.querySelectorAll('#rankings-page .scouting-marquee').forEach(box => {
@@ -2118,6 +2185,7 @@ function renderResults() {
               ${renderComparisonPanel(club, items)}
               ${renderScoutedListPanel(items, club)}
             </div>
+            ${renderDiscoverySections(items, club)}
           </div>` : `
           <section class="scouting-empty-state">
             <h2>Elegir liga y equipo para empezar</h2>
@@ -2321,13 +2389,20 @@ async function initScouting() {
   const content = document.getElementById('rankings-content');
   if (!content) return;
 
-  const [playersText, teamsText, squadsText, leaguesText, correctedText, formulasText] = await Promise.all([
+  const [playersText, teamsText, squadsText, leaguesText, correctedText, formulasText, marketValuesText, wagesText, financesText, rivalriesText, historyText, affinitiesText, profilesText] = await Promise.all([
     fetchText('database/All players exported.csv'),
     fetchText('database/All teams exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All leagues exported.csv'),
     fetchText('database/medias_corregidas.csv'),
     fetchText('assets/data/formulas_por_posicion.json'),
+    fetchText('database/scouting/market_values.csv'),
+    fetchText('database/scouting/player_wages.csv'),
+    fetchText('database/scouting/club_finances.csv'),
+    fetchText('database/scouting/club_rivalries.csv'),
+    fetchText('database/scouting/player_history.csv'),
+    fetchText('database/scouting/player_affinities.csv'),
+    fetchText('database/scouting/club_market_profiles.csv'),
   ]);
 
   if (!playersText || !teamsText || !squadsText) {
@@ -2345,6 +2420,25 @@ async function initScouting() {
     leaguesText ? parseCSV(leaguesText) : [],
     correctedText ? parseCSV(correctedText) : []
   );
+
+  if (window.ScoutingData) {
+    scoutingMarketData = window.ScoutingData.create({
+      teams: scoutingDataset.teams,
+      players: scoutingDataset.players,
+      marketValues: marketValuesText ? parseCSV(marketValuesText) : [],
+      wages: wagesText ? parseCSV(wagesText) : [],
+      finances: financesText ? parseCSV(financesText) : [],
+      rivalries: rivalriesText ? parseCSV(rivalriesText) : [],
+      history: historyText ? parseCSV(historyText) : [],
+      affinities: affinitiesText ? parseCSV(affinitiesText) : [],
+      profiles: profilesText ? parseCSV(profilesText) : [],
+    });
+  }
+
+  const clubCount = document.getElementById('scouting-club-count');
+  const playerCount = document.getElementById('scouting-player-count');
+  if (clubCount) clubCount.textContent = scoutingDataset.teams.length.toLocaleString('es-AR');
+  if (playerCount) playerCount.textContent = scoutingDataset.players.length.toLocaleString('es-AR');
 
   renderResults();
   if (loading) loading.style.display = 'none';
