@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
-const AD_VERSION = '20261002e';
-const CSS_VERSION = '20261002d';
+const AD_VERSION = '20261002f';
+const CSS_VERSION = '20261002e';
 const PLAYER_VERSION = '20261002c';
 const TEAM_VERSION = '20261002c';
 const CLUB_VERSION = '20261002c';

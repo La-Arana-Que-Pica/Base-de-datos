@@ -67,10 +67,19 @@
 
   function selectUnit(slot) {
     const availableWidth = safeAvailableWidth(slot);
-    if (slot.dataset.adUnit === 'banner' && availableWidth >= 728) {
-      return { name: 'banner', unit: bannerUnitFor(slot) };
-    }
-    return null;
+    if (slot.dataset.adUnit !== 'banner' || availableWidth <= 0) return null;
+    const unit = bannerUnitFor(slot);
+    return { name: 'banner', unit, availableWidth };
+  }
+
+  function updateBannerScale(slot, unit, availableWidth = safeAvailableWidth(slot)) {
+    if (!unit || availableWidth <= 0) return;
+    const scale = Math.min(1, availableWidth / unit.width);
+    slot.style.setProperty('--ad-scale', String(scale));
+    slot.style.setProperty('--ad-render-width', `${unit.width}px`);
+    slot.style.setProperty('--ad-render-height', `${unit.height}px`);
+    slot.style.setProperty('--ad-display-height', `${Math.ceil(unit.height * scale)}px`);
+    slot.dataset.adScaled = scale < 1 ? 'true' : 'false';
   }
 
   function clearRecord(slot) {
@@ -211,6 +220,7 @@
     slot.dataset.adProvider = CONFIG.provider;
     slot.dataset.adKey = selected.unit.key;
     slot.dataset.adState = 'loading';
+    updateBannerScale(slot, selected.unit, selected.availableWidth);
     const record = { slot, unit: selected.unit, observer: null, pollId: 0, timeoutId: 0 };
     slotRecords.set(slot, record);
     monitorDirectCreative(record);
@@ -271,6 +281,7 @@
         render(slot);
       }
       target.replaceChildren(slot);
+      updateBannerScale(slot, bannerAssignments.get(slot));
       inspectSlot(slot);
     });
   }
@@ -306,4 +317,15 @@
       if (!document.documentElement.classList.contains('laqp-hydrated')) placeAll(document);
     }, 6200);
   });
+
+  let resizeRequest = 0;
+  global.addEventListener('resize', () => {
+    if (resizeRequest) global.cancelAnimationFrame(resizeRequest);
+    resizeRequest = global.requestAnimationFrame(() => {
+      resizeRequest = 0;
+      document.querySelectorAll('.ad-slot[data-ad-unit="banner"]').forEach(slot => {
+        updateBannerScale(slot, bannerAssignments.get(slot));
+      });
+    });
+  }, { passive: true });
 }(window));

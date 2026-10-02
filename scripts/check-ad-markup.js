@@ -77,10 +77,15 @@ for (const obsolete of ['sandboxDocument', 'createSandboxedFrame', 'srcdoc', 'ad
   if (runtime.includes(obsolete)) errors.push(`js/ads.js conserva infraestructura sandbox obsoleta: ${obsolete}`);
 }
 if (!runtime.includes('providerQueue') || !runtime.includes('script.async = false')) errors.push('js/ads.js no serializa explícitamente la carga de invoke.js.');
+if (runtime.includes('availableWidth >= 728')) errors.push('js/ads.js vuelve a bloquear banners en viewports menores a 728px.');
+if (!runtime.includes('updateBannerScale') || !runtime.includes("--ad-scale")) errors.push('js/ads.js no aplica el escalado visual responsive del banner 728x90.');
 if (!runtime.includes('width: 728') || !runtime.includes('height: 90')) errors.push('js/ads.js no contiene las dimensiones 728x90 requeridas.');
 for (const removed of ['width: 320', 'height: 50', 'width: 300', 'height: 250', "format: 'native'", "data-ad-unit=\"native\"", "data-ad-unit=\"rectangle\""]) {
   if (runtime.includes(removed)) errors.push(`js/ads.js conserva un formato eliminado: ${removed}`);
 }
+
+const stylesheet = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+if (!stylesheet.includes('transform: scale(var(--ad-scale, 1))') || !stylesheet.includes('height: var(--ad-display-height, 90px)')) errors.push('css/style.css no contiene el wrapper escalable requerido para mobile.');
 
 if (errors.length) {
   console.error(errors.slice(0, 30).join('\n'));
