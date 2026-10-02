@@ -437,7 +437,7 @@
 }
 
 .ad-slot__label {
-  display: block;
+  display: none;
   margin: 0 0 8px;
   color: var(--color-text-muted, #8e9299);
   font-size: 0.62rem;
@@ -464,8 +464,8 @@
   min-height: 90px;
 }
 
-.ad-slot[data-ad-state="loading"][data-ad-variant="mobile"] .ad-slot__content {
-  min-height: 50px;
+.ad-slot[data-ad-state="loaded"][data-ad-creative="true"] .ad-slot__label {
+  display: block;
 }
 
 .ad-slot[data-ad-state="disabled"],

@@ -1947,6 +1947,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
           ${statsHtml}
         </div>
       </section>
+      <div class="ad-placement" data-ad-placement="player-stats" data-ad-unit-target="responsive"></div>
       ${skillsHtml}
       <section class="profile-tabs" id="player-appearance" aria-labelledby="player-appearance-title">
         <h2 class="player-nav-section-title" id="player-appearance-title">${t('player.appearance')}</h2>
