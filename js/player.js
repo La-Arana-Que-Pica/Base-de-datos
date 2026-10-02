@@ -1947,7 +1947,6 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
           ${statsHtml}
         </div>
       </section>
-      <div class="ad-placement" data-ad-placement="player-stats" data-ad-unit-target="responsive"></div>
       ${skillsHtml}
       <section class="profile-tabs" id="player-appearance" aria-labelledby="player-appearance-title">
         <h2 class="player-nav-section-title" id="player-appearance-title">${t('player.appearance')}</h2>
@@ -1959,7 +1958,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
         </div>
       </section>
       ${renderSquadContext(team, squadContext, clubUrl)}
-      <div class="ad-placement" data-ad-placement="player-mid" data-ad-unit-target="responsive"></div>
+      <div class="ad-placement" data-ad-placement="player-mid" data-ad-unit-target="native"></div>
       ${renderPlayerEditorial(player, team, pesPosition, similarPlayers)}
       <section class="player-compare-section db-section" id="player-comparison" hidden>
         <div class="player-section-title">Comparar jugador</div>
@@ -1967,7 +1966,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
         <div id="player-compare-result"></div>
       </section>
 
-      <div class="ad-placement" data-ad-placement="player-bottom" data-ad-unit-target="responsive"></div>
+      <div class="ad-placement" data-ad-placement="player-bottom" data-ad-unit-target="rectangle"></div>
 
       ${renderSimilarPlayers(similarPlayers)}
       ${renderPesTechnical(player, appearance)}

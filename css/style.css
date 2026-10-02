@@ -457,11 +457,25 @@
   overflow: hidden;
   align-items: flex-start;
   justify-content: center;
+  border-radius: 8px;
+  background: var(--color-surface, #101820);
   transition: min-height 0.18s ease;
 }
 
 .ad-slot[data-ad-state="loading"][data-ad-variant="desktop"] .ad-slot__content {
   min-height: 90px;
+}
+
+.ad-slot[data-ad-state="loading"][data-ad-variant="mobile"] .ad-slot__content {
+  min-height: 50px;
+}
+
+.ad-slot[data-ad-state="loading"][data-ad-variant="native"] .ad-slot__content {
+  min-height: 180px;
+}
+
+.ad-slot[data-ad-state="loading"][data-ad-variant="rectangle"] .ad-slot__content {
+  min-height: 250px;
 }
 
 .ad-slot[data-ad-state="loaded"][data-ad-creative="true"] .ad-slot__label {

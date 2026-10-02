@@ -4,12 +4,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
-const AD_VERSION = '20261002b';
-const CSS_VERSION = '20261002a';
-const PLAYER_VERSION = '20261002a';
-const CLUB_VERSION = '20261002a';
-const placement = name => `<div class="ad-placement" data-ad-placement="${name}" data-ad-unit-target="responsive"></div>`;
-const slot = name => `<aside class="ad-slot" aria-label="Publicidad" data-ad-slot="${name}" data-ad-unit="responsive" data-ad-format="responsive" data-ad-context="profile" data-ad-state="pending">
+const AD_VERSION = '20261002c';
+const CSS_VERSION = '20261002b';
+const PLAYER_VERSION = '20261002b';
+const TEAM_VERSION = '20261002b';
+const CLUB_VERSION = '20261002b';
+const unitFor = name => name.endsWith('-top') ? 'responsive' : name.endsWith('-mid') ? 'native' : 'rectangle';
+const placement = name => `<div class="ad-placement" data-ad-placement="${name}" data-ad-unit-target="${unitFor(name)}"></div>`;
+const slot = name => `<aside class="ad-slot" aria-label="Publicidad" data-ad-slot="${name}" data-ad-unit="${unitFor(name)}" data-ad-format="${unitFor(name)}" data-ad-context="profile" data-ad-state="pending">
     <span class="ad-slot__label">Publicidad</span>
     <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
   </aside>`;
@@ -55,19 +57,23 @@ function versionSharedAssets(html) {
   );
 }
 
+function normalizeAssignment(html, name) {
+  const unitName = unitFor(name);
+  return html
+    .replace(new RegExp(`(data-ad-placement="${name}"[^>]*data-ad-unit-target=")[^"]+`, 'g'), `$1${unitName}`)
+    .replace(new RegExp(`(data-ad-slot="${name}"[^>]*data-ad-unit=")[^"]+`, 'g'), `$1${unitName}`)
+    .replace(new RegExp(`(data-ad-slot="${name}"[^>]*data-ad-unit="[^"]+"[^>]*data-ad-format=")[^"]+`, 'g'), `$1${unitName}`);
+}
+
 function normalizePlayer(html) {
   let next = versionSharedAssets(html).replace(
     /src="js\/player\.js(?:\?v=[^"]*)?"/g,
     `src="js/player.js?v=${PLAYER_VERSION}"`,
   );
-  if (!next.includes('data-ad-placement="player-stats"')) {
-    const anchor = placement('player-mid');
-    next = next.replace(anchor, `${placement('player-stats')}\n          ${anchor}`);
-  }
-  if (!next.includes('data-ad-slot="player-stats"')) {
-    const anchor = '<aside class="ad-slot" aria-label="Publicidad" data-ad-slot="player-mid"';
-    next = next.replace(anchor, `${slot('player-stats')}<${anchor.slice(1)}`);
-  }
+  next = next
+    .replace(/\s*<div class="ad-placement" data-ad-placement="player-stats"[^>]*><\/div>/g, '')
+    .replace(/\s*<aside class="ad-slot"[^>]*data-ad-slot="player-stats"[\s\S]*?<\/aside>/g, '');
+  for (const name of ['player-top', 'player-mid', 'player-bottom']) next = normalizeAssignment(next, name);
   return next;
 }
 
@@ -75,7 +81,7 @@ function normalizeTeam(html) {
   let next = versionSharedAssets(html).replace(
     /src="js\/club\.js(?:\?v=[^"]*)?"/g,
     `src="js/club.js?v=${CLUB_VERSION}"`,
-  );
+  ).replace(/src="js\/team\.js(?:\?v=[^"]*)?"/g, `src="js/team.js?v=${TEAM_VERSION}"`);
   if (!next.includes('data-ad-placement="team-top"')) {
     next = next.replace(
       /(<article class="club-detail"[\s\S]*?<header class="club-hero[\s\S]*?<\/header>)/,
@@ -88,6 +94,7 @@ function normalizeTeam(html) {
       `${placement('team-mid')}\n          $1`,
     );
   }
+  for (const name of ['team-top', 'team-mid', 'team-bottom']) next = normalizeAssignment(next, name);
   return next;
 }
 

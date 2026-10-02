@@ -13,22 +13,22 @@ function compareRosterRows(a, b, key, direction, collator) {
 if (typeof module !== 'undefined') module.exports = { compareRosterRows };
 
 function ensureClubAdPlacements(club) {
-  const create = name => {
+  const create = (name, unitName) => {
     const placement = document.createElement('div');
     placement.className = 'ad-placement';
     placement.dataset.adPlacement = name;
-    placement.dataset.adUnitTarget = 'responsive';
+    placement.dataset.adUnitTarget = unitName;
     return placement;
   };
 
   if (!document.querySelector('[data-ad-placement="team-top"]')) {
-    club.querySelector('.club-hero')?.after(create('team-top'));
+    club.querySelector('.club-hero')?.after(create('team-top', 'responsive'));
   }
   if (!document.querySelector('[data-ad-placement="team-mid"]')) {
-    club.querySelector('.club-roster')?.before(create('team-mid'));
+    club.querySelector('.club-roster')?.before(create('team-mid', 'native'));
   }
   if (!document.querySelector('[data-ad-placement="team-bottom"]')) {
-    club.after(create('team-bottom'));
+    club.after(create('team-bottom', 'rectangle'));
   }
 
   window.LAQPAds?.placeAll(document);

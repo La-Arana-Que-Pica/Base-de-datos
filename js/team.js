@@ -924,13 +924,13 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
 
     ${pitchHtml}
 
-    <div class="ad-placement" data-ad-placement="team-mid" data-ad-unit-target="responsive"></div>
+    <div class="ad-placement" data-ad-placement="team-mid" data-ad-unit-target="native"></div>
 
     ${carouselHtml}
 
     ${shirtNumbersHtml}
 
-    <div class="ad-placement" data-ad-placement="team-bottom" data-ad-unit-target="responsive"></div>`;
+    <div class="ad-placement" data-ad-placement="team-bottom" data-ad-unit-target="rectangle"></div>`;
 
   window.LAQPAds?.placeAll(content);
   window.LAQPAds?.monitorAll(content);
