@@ -68,6 +68,16 @@ function uniqueById(rows) {
   });
 }
 
+function optionSlug(item) {
+  const explicit = String(item.slug || '').trim();
+  if (explicit) return explicit;
+  const title = item.titulo || item.nombre || item.title || item.name || item.juego || 'option-file';
+  const platform = Array.isArray(item.platforms) ? item.platforms.join(' ') : (item.plataforma || item.platform || '');
+  return `${title} ${platform}`
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
 async function fetchText(url) {
   try {
     const resp = await fetch(url);
@@ -125,7 +135,7 @@ function renderFeaturedDownloadButtons(item) {
   if (links.length === 1) {
     return `<a class="featured-of-btn featured-of-btn-download" href="${escapeHtml(links[0].href)}" target="_blank" rel="noopener noreferrer">${t('home.downloadAction')}</a>`;
   }
-  const slug = item.slug || item.id || item.ID || '';
+  const slug = optionSlug(item);
   return `<a class="featured-of-btn featured-of-btn-download" href="option-files/${encodeURIComponent(slug)}/descargar/">Ver descargas</a>`;
 }
 
@@ -137,7 +147,7 @@ function renderFeaturedCard(item) {
   const platform = escapeHtml(Array.isArray(item.platforms) ? item.platforms.join(' / ') : (item.plataforma || item.platform || ''));
   const desc = escapeHtml(item.descripcion || item.description || '');
   const image = escapeHtml(assetPath(item.cover || item.miniatura || item.thumbnail || item.image || item.imagen));
-  const slug = item.slug || item.id || item.ID || '';
+  const slug = optionSlug(item);
   const details = assetPath(item.detalles || item.details || (slug ? `option-files/${encodeURIComponent(slug)}/` : ''), '');
 
   return `
@@ -204,21 +214,11 @@ async function bootHome() {
   const section = document.getElementById('featured-of-section');
   if (!section) return;
 
-  let rows = [];
-  const jsonText = await fetchText('database/option-files.json');
-  if (jsonText) {
-    try {
-      const parsed = JSON.parse(jsonText);
-      if (Array.isArray(parsed)) rows = parsed;
-    } catch (error) {
-      console.warn('No se pudo interpretar option-files.json:', error);
-    }
-  }
-  if (!rows.length) {
-    const csvText = await fetchText('database/descargas.csv');
-    if (!csvText) return;
-    rows = parseCSV(csvText);
-  }
+  // El HTML ya fue generado desde el CSV. Si hay que hidratarlo, usar siempre
+  // ese mismo CSV para no reemplazarlo con un option-files.json desactualizado.
+  const csvText = await fetchText('database/descargas.csv');
+  if (!csvText) return;
+  const rows = parseCSV(csvText);
 
   const featured = uniqueById(rows).filter(row => row.featured === true || String(row.destacado || '').trim() === '1');
   if (!featured.length) return;

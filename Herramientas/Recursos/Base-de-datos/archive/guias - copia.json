@@ -1,0 +1,600 @@
+[
+  {
+    "id": "instalar-option-file-pes-2018-2026",
+    "category": "Option Files",
+    "title": "Como instalar Option Files en PES 2018 actualizado al 2026",
+    "description": "Guia completa para instalar el Option File de PES 2018 en PS4, PS5 y PC, con orden recomendado, errores comunes y controles posteriores.",
+    "date": "2026-05-12",
+    "readTime": "9 min",
+    "image": "assets/images/option-files/OF PES 2018 al 2026 V1.png",
+    "related": [
+      "actualizar-pes-2018-al-2026",
+      "importar-kits-pes-2018",
+      "sider-y-cpk-pes-2018"
+    ],
+    "sections": [
+      {
+        "heading": "Antes de empezar",
+        "body": [
+          "Un Option File cambia equipos, kits, escudos, entrenadores, plantillas y competiciones desde los datos editables del juego. En PES 2018 es importante instalarlo con el juego cerrado, respetar la plataforma correcta y revisar si la descarga es base, complemento o actualizacion.",
+          "La version 2026 de LAqP esta pensada para mantener vivo PES 2018 con plantillas actuales, Libertadores, ligas sudamericanas y equipos europeos relevantes. Si venis de una version vieja, conviene hacer copia de seguridad de tus datos editados antes de importar."
+        ]
+      },
+      {
+        "heading": "Instalacion en PS4 y PS5",
+        "list": [
+          "Formatea un pendrive en FAT32 o exFAT y crea una carpeta llamada WEPES.",
+          "Extrae el Option File descargado y copia dentro de WEPES los archivos .ted e imagenes.",
+          "En PES 2018 entra en Editar, Gestion de datos, Importar/Exportar e Importar equipo.",
+          "Marca los equipos del pack y activa las opciones indicadas por el tutorial cuando correspondan.",
+          "Importa primero el Option File base y despues el complemento si lo estas usando.",
+          "Revisa escudos, ligas y plantillas antes de iniciar Liga Master o amistosos."
+        ]
+      },
+      {
+        "heading": "Instalacion en PC",
+        "body": [
+          "En PC el proceso depende de tu carpeta de guardado y de si usas contenido adicional como canticos, relator o archivos CPK. Para un Option File estandar, la prioridad es colocar los datos editados en la ruta correcta del juego y evitar mezclar packs incompatibles.",
+          "Cuando una descarga indica que incluye minifaces, caras escaneadas o soundtrack, lee el changelog antes de reemplazar archivos. Eso reduce errores visuales y ayuda a saber que parte pertenece al Option File y que parte corresponde a un mod externo."
+        ]
+      },
+      {
+        "heading": "Problemas comunes",
+        "list": [
+          "Si faltan kits, revisa que la carpeta WEPES este bien escrita y que las imagenes no superen el limite de importacion.",
+          "Si un equipo queda duplicado, importaste sobre una estructura distinta a la esperada.",
+          "Si aparecen plantillas viejas, borra datos editados anteriores o instala primero el pack base.",
+          "Si el juego se queda cargando, prueba importar por tandas y no todo el contenido a la vez."
+        ]
+      }
+    ],
+    "faq": [
+      [
+        "Sirve en PS5?",
+        "Si, usando la version de PS4 del juego en PS5 y el sistema de importacion de PES 2018."
+      ],
+      [
+        "Tengo que borrar todo antes?",
+        "No siempre, pero si venis de otro parche o de una version muy vieja, una instalacion limpia suele evitar conflictos."
+      ],
+      [
+        "El complemento es obligatorio?",
+        "No para todos. El complemento sirve para licenciar equipos fuera del pack base o completar contenido especifico."
+      ]
+    ]
+  },
+  {
+    "id": "actualizar-pes-2018-al-2026",
+    "category": "Actualizacion 2026",
+    "title": "Como actualizar PES 2018 al 2026 sin perder estabilidad",
+    "description": "Metodo recomendado para pasar de PES 2018 base o de un parche antiguo a una experiencia actualizada con plantillas, ligas, kits y equipos modernos.",
+    "date": "2026-05-15",
+    "readTime": "8 min",
+    "image": "assets/images/home-banner.png",
+    "related": [
+      "instalar-option-file-pes-2018-2026",
+      "mejores-mods-pes-2018",
+      "sistema-medias-pes-2018"
+    ],
+    "sections": [
+      {
+        "heading": "Que significa actualizar PES 2018",
+        "body": [
+          "Actualizar PES 2018 al 2026 no es solo cambiar camisetas. Una actualizacion completa combina plantillas, equipos ascendidos, competiciones, jugadores creados, medias revisadas, dorsales, nacionalidades, caras, minifaces y en algunos casos sonidos o estadios.",
+          "La clave para que el juego siga estable es no mezclar demasiadas fuentes. Usar un pack coherente evita equipos rotos, jugadores repetidos y errores de competicion."
+        ]
+      },
+      {
+        "heading": "Orden recomendado",
+        "list": [
+          "Actualiza el juego y datapacks oficiales antes de instalar contenido editado.",
+          "Crea una copia del archivo de datos editados.",
+          "Instala el Option File principal.",
+          "Instala complementos solo si estan pensados para esa misma version.",
+          "Comprueba equipos grandes, ligas principales y selecciones.",
+          "Despues recien empieza una Liga Master nueva."
+        ]
+      },
+      {
+        "heading": "Que revisar despues",
+        "body": [
+          "Mira si los equipos tienen escudo, uniforme local/visitante, nombre correcto, entrenador y jugadores esperados. Despues revisa jugadores importantes: edad, altura, pie, media, posiciones y habilidades. Esta revision parece menor, pero detecta rapido una importacion incompleta.",
+          "Tambien conviene entrar a la base de datos de LAqP para comparar plantillas y encontrar jugadores por equipo, liga o posicion antes de armar torneos."
+        ]
+      }
+    ],
+    "faq": [
+      [
+        "Puedo actualizar una partida ya empezada?",
+        "Algunos cambios visuales pueden verse, pero plantillas y competiciones suelen requerir una partida nueva."
+      ],
+      [
+        "Necesito internet para jugar?",
+        "No para usar el contenido ya importado, salvo que estes descargando archivos o viendo tutoriales."
+      ]
+    ]
+  },
+  {
+    "id": "importar-kits-pes-2018",
+    "category": "Edicion",
+    "title": "Como importar kits en PES 2018 y evitar errores de uniforme",
+    "description": "Explicacion clara sobre formatos, slots, orden de importacion y problemas frecuentes al cargar camisetas en PES 2018.",
+    "date": "2026-05-16",
+    "readTime": "7 min",
+    "image": "img/logo.webp",
+    "related": [
+      "instalar-option-file-pes-2018-2026",
+      "consejos-crear-caras-pes-2018-editor-interno",
+      "sider-y-cpk-pes-2018"
+    ],
+    "sections": [
+      {
+        "heading": "Formatos y limites",
+        "body": [
+          "Los kits de PES 2018 se importan como imagenes asignadas a cada equipo. El limite de imagenes disponibles depende de la plataforma y de la calidad elegida. Por eso los packs bien armados priorizan equipos principales y evitan cargar contenido duplicado.",
+          "Si el juego informa que no hay espacio, borra kits viejos desde el menu de imagenes antes de importar de nuevo."
+        ]
+      },
+      {
+        "heading": "Buenas practicas",
+        "list": [
+          "Usa kits del mismo pack para mantener colores y estilo coherentes.",
+          "Importa primero equipos completos, no camisetas sueltas sin referencia.",
+          "Verifica local, visitante, arquero y dorsal despues de importar.",
+          "Evita renombrar archivos si el tutorial del pack depende de nombres concretos."
+        ]
+      }
+    ],
+    "faq": [
+      [
+        "Por que aparece una camiseta blanca?",
+        "Generalmente falta la imagen, esta mal asignada o se alcanzo el limite de importacion."
+      ],
+      [
+        "Puedo mezclar kits de otros parches?",
+        "Si, pero aumenta el riesgo de duplicados y equipos con estilos inconsistentes."
+      ]
+    ]
+  },
+  {
+    "id": "consejos-crear-caras-pes-2018-editor-interno",
+    "category": "Edicion",
+    "title": "Consejos para crear caras en PES 2018 con el editor interno",
+    "description": "Consejos personales para mejorar la creacion de caras en PES 2018 usando el editor interno del juego.",
+    "date": "2026-05-23",
+    "readTime": "11 min",
+    "image": "assets/images/guias/consejos-caras.png",
+    "related": [
+      "importar-kits-pes-2018",
+      "sistema-medias-pes-2018",
+      "mejores-mods-pes-2018"
+    ],
+    "sections": [
+      {
+        "heading": "Crear caras lleva practica",
+        "body": [
+          "Crear caras en PES no es algo que se aprende de un dia para el otro. No es simplemente mover un par de valores, elegir un peinado parecido y listo. Es un proceso que lleva practica, paciencia y, sobre todo, aprender a mirar bien los detalles de cada jugador.",
+          "En esta guia comparto consejos personales que fui aprendiendo con el tiempo usando el editor interno del juego. No son reglas obligatorias, porque cada uno puede tener su propio estilo, pero si son cosas que ayudan mucho para conseguir mejores resultados."
+        ]
+      },
+      {
+        "heading": "Elegir una buena imagen de referencia",
+        "body": [
+          "Para mi, este es uno de los puntos mas importantes. Antes de tocar cualquier valor en el editor, hay que elegir bien la imagen de referencia.",
+          "Lo ideal es usar una imagen donde el jugador este de frente, sin sonreir, sin gestos raros, con buena iluminacion y con el rostro lo mas natural posible. Esto es clave porque en el juego el jugador normalmente aparece con una expresion neutra.",
+          "Cuando una persona sonrie, la cara cambia bastante: los ojos se achican, la nariz puede parecer distinta, los cachetes se levantan y la boca se deforma. Si intentamos copiar eso en el editor, la cara puede quedar rara cuando el jugador aparece serio dentro del juego.",
+          "Siempre que se pueda, conviene buscar una foto frontal y neutral. Parece un detalle menor, pero puede cambiar completamente el resultado final."
+        ],
+        "list": [
+          "De frente.",
+          "Sin sonrisa marcada.",
+          "Sin gestos raros.",
+          "Con buena luz.",
+          "Con el rostro natural."
+        ],
+        "figure": {
+          "caption": "Lo ideal es usar una imagen frontal y con expresion neutra. Las sonrisas y gestos pueden deformar ojos, nariz, boca y cachetes.",
+          "image": "assets/images/guias/consejos-caras/imagen-referencia.webp",
+          "alt": "Referencia correcta e incorrecta para crear caras en PES 2018",
+          "size": "small"
+        }
+      },
+      {
+        "heading": "Elegir bien el color y la textura de piel",
+        "body": [
+          "Otro error muy comun es elegir el color de piel mirando solamente si el jugador es mas claro o mas oscuro. En PES no importa solo el tono: tambien importa mucho la textura de la piel.",
+          "En jugadores de tez clara, muchas veces no conviene elegir simplemente el color mas blanco posible. Hay tonos que tienen una textura mas suave y natural, mientras que otros pueden hacer que la cara se vea demasiado rara, brillante o artificial.",
+          "Personalmente, para jugadores de piel clara suelo fijarme mas en como queda la textura dentro del juego que en el color exacto. El tercer tono de piel mas claro, por ejemplo, suele tener una textura mas suave que los primeros dos y en muchos casos puede quedar mejor.",
+          "Tambien recomiendo evitar bastante el segundo color de piel. Tiene una textura medio rara y un tono algo amarillento, por lo que solo lo usaria en casos muy especificos, como algunos jugadores asiaticos."
+        ],
+        "figure": {
+          "caption": "El editor interno de PES tiene limitaciones. Por eso conviene aprender a usar bien cada parametro en lugar de intentar copiar todo exactamente.",
+          "image": "assets/images/guias/consejos-caras/color-piel.webp",
+          "alt": "Editor interno de PES 2018 para ajustar color y textura de piel",
+          "size": "small"
+        }
+      },
+      {
+        "heading": "No abusar de los colores de pelo por defecto",
+        "body": [
+          "Otro detalle que cambia bastante la calidad de una cara es el color del pelo. Recomiendo evitar, en lo posible, los colores de pelo por defecto, sobre todo en tonos negros y marrones, porque muchas veces quedan demasiado planos o no combinan bien con la cara.",
+          "Para pelo negro suelo usar una configuracion parecida a R1 / V1 / A0. Para pelo marron, una base que suele funcionar bastante bien es R4 / V2 / A1. Obviamente depende del jugador, de la iluminacion y del peinado, pero estos valores pueden servir como punto de partida."
+        ],
+        "list": [
+          "Pelo negro: R1 / V1 / A0.",
+          "Pelo marron: R4 / V2 / A1.",
+          "Ajustar siempre segun jugador, iluminacion y peinado."
+        ]
+      },
+      {
+        "heading": "Entender que la practica lo es todo",
+        "body": [
+          "Crear caras lleva practica. Al principio uno puede sentir que todas las caras le quedan parecidas, o que por mas que toque valores nunca termina de parecerse al jugador. Eso es normal.",
+          "Con el tiempo empezas a entender mejor como funciona el editor, que tipo de ojos quedan mejor, que nariz sirve para cada jugador, cuando conviene exagerar un rasgo y cuando es mejor dejarlo mas simple. Tambien empezas a crear tus propias reglas: que mandibula usas, que labios te gustan mas, que tonos de piel evitas y que peinados funcionan mejor.",
+          "Ese criterio no aparece de un dia para el otro. Se construye haciendo muchas caras, equivocandose y comparando resultados. Basicamente, es como cocinar fideos: al principio te quedan pegados, despues ya te haces el chef italiano. Bueno, mas o menos. Tampoco nos agrandemos."
+        ]
+      },
+      {
+        "heading": "No complicarse demasiado con el fisico",
+        "body": [
+          "En mi caso, no suelo modificar demasiado el cuerpo de los jugadores. Generalmente dejo valores bastante cercanos a los que vienen por defecto, salvo que el jugador tenga una caracteristica fisica muy marcada.",
+          "Si tocas demasiado el cuerpo, se puede deformar y quedar raro dentro del juego. A veces uno quiere hacerlo mas ancho, mas flaco, mas alto o mas fuerte, pero el resultado termina viendose artificial. Para mi, lo mas importante esta en la cara. El fisico se puede ajustar un poco, pero sin volverse loco."
+        ]
+      },
+      {
+        "heading": "Cuidado con los labios tipo 5",
+        "body": [
+          "Un error que veo bastante es usar el tipo de labio superior o inferior 5 para intentar imitar una sonrisa. El problema es que esos labios no sirven para cualquier jugador: son muy especificos.",
+          "Si los usas mal, la cara puede quedar con una expresion rara, como si el jugador estuviera sonriendo todo el tiempo o haciendo una mueca. Esto muchas veces viene del primer error: usar una mala imagen de referencia. Si elegis una foto donde el jugador esta sonriendo, despues vas a intentar copiar esa sonrisa en el editor.",
+          "Hay jugadores donde puede funcionar. Ronaldinho, por ejemplo, es un caso donde ese tipo de labio puede tener sentido por la forma natural de su boca y su expresion caracteristica. Pero en la mayoria de los jugadores conviene tener cuidado."
+        ]
+      },
+      {
+        "heading": "Darle mas importancia a las orejas",
+        "body": [
+          "Las orejas parecen un detalle menor, pero no lo son tanto. Es verdad que el editor de PES es bastante limitado en este aspecto, porque solo deja modificar pocos parametros. Pero justamente por eso hay que usarlos bien.",
+          "Como no se puede copiar exactamente la forma de la oreja, recomiendo enfocarse mas en el tamaño, que tan separadas estan de la cabeza y la altura o posicion general. No hace falta volverse loco intentando que sean identicas, porque el editor no da para tanto.",
+          "Si el jugador tiene orejas muy grandes, muy pegadas o muy salidas, conviene prestarles atencion porque pueden ayudar mucho al parecido general."
+        ],
+        "list": [
+          "Tamaño.",
+          "Separacion respecto de la cabeza.",
+          "Altura o posicion general."
+        ]
+      },
+      {
+        "heading": "No intentar copiar absolutamente todo",
+        "body": [
+          "El editor interno de PES tiene limites, y hay que aceptarlos. No siempre se puede hacer una cara identica. A veces no existe el peinado perfecto, la nariz exacta o los ojos que necesitas.",
+          "En esos casos, lo mejor es intentar capturar lo mas reconocible del jugador: la forma de la cabeza, el peinado, la barba, los ojos, la nariz, la mandibula, el color de piel o la expresion general.",
+          "A veces una cara no es perfecta en todos los detalles, pero si captura bien la esencia del jugador, dentro del partido se ve mucho mejor de lo que parece en el editor."
+        ]
+      },
+      {
+        "heading": "Probar la cara dentro del partido",
+        "body": [
+          "No revises la cara solamente en el editor. Muchas veces una cara parece buena ahi, pero despues dentro del partido se ve distinta por la iluminacion, la camara o las animaciones.",
+          "Siempre conviene probarla en el juego, aunque sea en un partido rapido o en una repeticion. Ahi te das cuenta de si el color de piel quedo bien, si la barba se ve demasiado oscura, si los ojos quedaron raros, si el peinado funciona y si la cara se reconoce desde lejos.",
+          "El editor sirve para crear, pero el resultado real se ve dentro del partido."
+        ],
+        "list": [
+          "Color de piel en iluminacion real.",
+          "Barba y pelo dentro del motor del juego.",
+          "Ojos y expresion con animaciones.",
+          "Reconocimiento del jugador desde lejos."
+        ]
+      },
+      {
+        "heading": "Conclusion",
+        "body": [
+          "Crear caras en PES 2018 con el editor interno requiere practica, paciencia y buen ojo. No hay una formula magica para que todas las caras salgan bien, pero si hay detalles que pueden mejorar muchisimo el resultado.",
+          "Para mi, lo mas importante es elegir una buena imagen de referencia, usar bien los tonos de piel, no abusar de ciertos rasgos como los labios tipo 5, prestar atencion a detalles como las orejas y, sobre todo, practicar mucho.",
+          "Estos consejos son personales y estan basados en mi forma de crear caras. No significa que sean la unica manera de hacerlo, pero pueden servir como punto de partida para quienes recien empiezan o quieren mejorar sus resultados. Mientras mas caras hagas, mejor vas a entender el editor y mas facil te va a resultar reconocer que valores funcionan para cada jugador."
+        ]
+      }
+    ],
+    "faq": [
+      [
+        "Cual es la mejor foto para crear una cara en PES 2018?",
+        "Una foto frontal, con buena luz y expresion neutra. Las sonrisas o gestos raros pueden confundir al copiar ojos, boca, nariz y cachetes."
+      ],
+      [
+        "Conviene modificar mucho el fisico del jugador?",
+        "No siempre. Salvo que el jugador tenga un rasgo fisico muy marcado, suele ser mejor ajustar poco el cuerpo para evitar deformaciones raras dentro del juego."
+      ],
+      [
+        "Por que hay que probar la cara dentro del partido?",
+        "Porque la iluminacion, la camara y las animaciones pueden hacer que una cara se vea distinta a como aparece en el editor interno."
+      ]
+    ]
+  },
+  {
+    "id": "sistema-medias-pes-2018",
+    "category": "Base de datos",
+    "title": "Como funciona el sistema de medias en PES 2018",
+    "description": "Analisis de overall, posiciones y stats clave para entender por que un jugador rinde mejor en una zona que en otra.",
+    "date": "2026-05-18",
+    "readTime": "10 min",
+    "image": "img/logo.webp",
+    "related": [
+      "rankings-pes-2018",
+      "actualizar-pes-2018-al-2026",
+      "consejos-crear-caras-pes-2018-editor-interno"
+    ],
+    "sections": [
+      {
+        "heading": "La media no lo explica todo",
+        "body": [
+          "La media general sirve como resumen, pero PES 2018 depende mucho de la posicion, el estilo y los stats concretos. Un extremo con 78 de media puede ser mas peligroso que un delantero de 82 si tiene aceleracion, drible y control corporal altos.",
+          "Por eso las fichas de LAqP muestran radar, posiciones aptas, habilidades y jugadores similares. La idea es evaluar perfiles, no solo ordenar por numero."
+        ]
+      },
+      {
+        "heading": "Stats importantes por rol",
+        "list": [
+          "Delanteros: definicion, actitud ofensiva, potencia de tiro, velocidad y cabezazo.",
+          "Mediocampistas: pase al ras, control de balon, resistencia, recuperacion y contacto fisico.",
+          "Defensores: defensa, recuperacion, contacto fisico, salto y cabezazo.",
+          "Arqueros: reflejos, cobertura, atajar, despejar y capacidad de portero."
+        ]
+      }
+    ],
+    "faq": [
+      [
+        "La mejor media siempre es el mejor jugador?",
+        "No necesariamente. Para elegir bien hay que mirar posicion, stats fuertes y uso tactico."
+      ],
+      [
+        "Por que cambia la media por posicion?",
+        "Porque el juego pondera diferentes atributos segun el puesto elegido."
+      ]
+    ]
+  },
+  {
+    "id": "mejores-mods-pes-2018",
+    "category": "Mods",
+    "title": "Mejores mods para PES 2018 en 2026",
+    "description": "Tipos de mods utiles para complementar un Option File: faces, minifaces, kits, relatos, estadios, canticos y mejoras visuales.",
+    "date": "2026-05-19",
+    "readTime": "7 min",
+    "image": "assets/images/option-files/OF V 5.png",
+    "related": [
+      "sider-y-cpk-pes-2018",
+      "actualizar-pes-2018-al-2026",
+      "importar-kits-pes-2018"
+    ],
+    "sections": [
+      {
+        "heading": "Mods que mas valor agregan",
+        "body": [
+          "Los mods mas utiles son los que mejoran immersion sin romper la estructura del Option File. Faces, minifaces, kits, canticos, relatores y estadios pueden transformar PES 2018, pero deben instalarse con criterio para no mezclar versiones incompatibles.",
+          "En PC hay mas libertad porque se pueden usar CPK, Sider y reemplazos de archivos. En consola, el enfoque suele estar en Option Files y contenido importable desde el editor."
+        ]
+      },
+      {
+        "heading": "Prioridad recomendada",
+        "list": [
+          "Option File base estable.",
+          "Complemento oficial de la misma version.",
+          "Kits y escudos faltantes.",
+          "Minifaces y caras importantes.",
+          "Canticos, relatores o soundtrack.",
+          "Estadios y graficos avanzados solo si sabes revertir cambios."
+        ]
+      }
+    ],
+    "faq": [
+      [
+        "Los mods sirven en consola?",
+        "Algunos contenidos editables si, pero Sider, CPK y reemplazos avanzados son de PC."
+      ],
+      [
+        "Conviene instalar todo junto?",
+        "No. Es mejor probar por etapas y revisar que el juego siga estable."
+      ]
+    ]
+  },
+  {
+    "id": "sider-y-cpk-pes-2018",
+    "category": "PC",
+    "title": "Sider y CPK en PES 2018: diferencias y uso recomendado",
+    "description": "Explicacion sencilla de los metodos de modding en PC para entender que hace cada tipo de archivo y cuando conviene usarlo.",
+    "date": "2026-05-20",
+    "readTime": "9 min",
+    "image": "assets/images/home-banner.png",
+    "related": [
+      "diferencia-option-file-parche-pes",
+      "mejores-mods-pes-2018",
+      "instalar-option-file-pes-2018-2026"
+    ],
+    "sections": [
+      {
+        "heading": "Diferencia principal",
+        "body": [
+          "Un CPK empaqueta contenido para que el juego lo lea como parte de sus datos. Sider, en cambio, permite cargar contenido externo de forma mas flexible segun modulos y configuraciones. Ambos metodos pueden convivir, pero necesitan orden.",
+          "Para usuarios nuevos, lo mas importante es no reemplazar archivos sin copia de seguridad y seguir instrucciones pensadas para PES 2018, no para otra entrega."
+        ]
+      },
+      {
+        "heading": "Uso recomendado",
+        "list": [
+          "Usa Option File para datos editables: equipos, jugadores, kits y competiciones.",
+          "Usa CPK para paquetes cerrados y probados.",
+          "Usa Sider cuando el mod lo requiera y venga con instrucciones claras.",
+          "Documenta cada cambio para poder deshacerlo si aparece un error."
+        ]
+      }
+    ],
+    "faq": [
+      [
+        "Sider reemplaza al Option File?",
+        "No. Cumplen funciones distintas y muchas instalaciones usan ambos."
+      ],
+      [
+        "Un CPK incorrecto puede romper el juego?",
+        "Puede provocar errores, cierres o contenido visual mal cargado. Por eso conviene hacer copias."
+      ]
+    ]
+  },
+  {
+    "id": "rankings-pes-2018",
+    "category": "Rankings",
+    "title": "Como usar los rankings de jugadores de PES 2018",
+    "description": "Guia para interpretar rankings por posicion, velocidad, edad, nacionalidad y liga dentro de la base de datos LAqP.",
+    "date": "2026-05-21",
+    "readTime": "6 min",
+    "image": "img/logo.webp",
+    "related": [
+      "sistema-medias-pes-2018",
+      "diferencia-option-file-parche-pes",
+      "actualizar-pes-2018-al-2026",
+      "instalar-option-file-pes-2018-2026"
+    ],
+    "sections": [
+      {
+        "heading": "Para que sirven",
+        "body": [
+          "Los rankings ayudan a descubrir jugadores utiles sin depender solo de nombres famosos. Podes buscar delanteros rapidos, juveniles con buena media, argentinos destacados o perfiles por liga para armar plantillas equilibradas.",
+          "La lectura correcta combina ranking, ficha individual, equipo, edad, posicion y jugadores similares. Asi la base de datos se vuelve una herramienta de scouting para PES 2018."
+        ]
+      },
+      {
+        "heading": "Como elegir mejor",
+        "list": [
+          "Abre la ficha del jugador para revisar stats clave.",
+          "Mira jugadores similares antes de decidir.",
+          "Compara edad y posicion secundaria.",
+          "Usa rankings por liga si queres fichajes realistas."
+        ]
+      }
+    ],
+    "faq": [
+      [
+        "Los rankings se actualizan solos?",
+        "Se calculan desde los CSV de la base de datos cargados por la web."
+      ],
+      [
+        "Puedo usarlos para Liga Master?",
+        "Si, son utiles para buscar perfiles por edad, velocidad, posicion o nacionalidad."
+      ]
+    ]
+  },
+  {
+    "id": "diferencia-option-file-parche-pes",
+    "category": "Option Files",
+    "title": "Diferencia entre Option File y Parche en PES: cual conviene usar?",
+    "description": "Conoce la diferencia entre un Option File y un parche en PES. Te explicamos que modifica cada uno, sus limitaciones, compatibilidad con PS4, PS5 y PC, y cual conviene usar.",
+    "date": "2026-05-23",
+    "readTime": "8 min",
+    "image": "assets/images/guias/parches-vs-option-files.png",
+    "related": [
+      "instalar-option-file-pes-2018-2026",
+      "sider-y-cpk-pes-2018",
+      "mejores-mods-pes-2018"
+    ],
+    "sections": [
+      {
+        "heading": "La diferencia principal",
+        "body": [
+          "Dentro de la comunidad de PES es muy comun escuchar hablar de Option Files y parches, pero no siempre queda clara la diferencia entre una cosa y la otra. A simple vista pueden parecer lo mismo, porque ambos sirven para actualizar el juego, agregar equipos, corregir nombres, poner kits reales y mejorar la experiencia.",
+          "Sin embargo, tecnicamente funcionan de formas muy distintas. La diferencia principal es esta: un Option File utiliza las herramientas que ya trae el propio juego, mientras que un parche modifica directamente los archivos internos del PES."
+        ]
+      },
+      {
+        "heading": "Que es un Option File",
+        "body": [
+          "Un Option File es una forma de compartir contenido creado desde el editor interno del juego. Se basa en una herramienta que el propio KONAMI incluye en PES para que la comunidad pueda editar equipos, competiciones, jugadores, uniformes, escudos y otros elementos sin tocar los archivos originales.",
+          "La idea original de los Option Files es permitir que los usuarios puedan licenciar equipos genericos, corregir nombres falsos, agregar escudos reales, importar kits y crear ligas dentro de competiciones genericas como PLA, PEU y PAS.",
+          "Por eso un Option File es ideal para consolas como PS4 y PS5: se instala desde el propio juego mediante el menu de edicion. No hace falta modificar archivos internos ni tener la consola liberada. En resumen, trabaja dentro de los limites que permite el editor de PES."
+        ]
+      },
+      {
+        "heading": "Que se puede modificar con un Option File",
+        "body": [
+          "Con un Option File se puede transformar bastante el juego sin instalar nada raro. Por eso son tan populares en PS4, PS5 y tambien en PC."
+        ],
+        "list": [
+          "Cambiar nombres de equipos.",
+          "Cambiar nombres de competiciones.",
+          "Importar escudos.",
+          "Importar kits.",
+          "Editar planteles.",
+          "Modificar jugadores y stats.",
+          "Editar formaciones.",
+          "Crear equipos en ligas genericas.",
+          "Importar entrenadores, estadios e imagenes cuando el juego lo permite."
+        ]
+      },
+      {
+        "heading": "Que es un parche",
+        "body": [
+          "Un parche va mucho mas alla. A diferencia de un Option File, no se limita al editor interno, sino que puede modificar directamente archivos del juego.",
+          "Esto permite cambiar elementos que normalmente no se podrian editar desde PES: caras escaneadas, minifaces reales, menus nuevos, musica personalizada, estadios modificados, marcadores, canticos y muchas otras cosas.",
+          "Por eso los parches suelen ser mas completos y flexibles, pero tambien requieren mas conocimiento tecnico. No es simplemente importar equipos desde el juego: muchas veces hay que instalar archivos, reemplazar carpetas, usar CPK, Sider u otras herramientas de modding."
+        ]
+      },
+      {
+        "heading": "Que puede modificar un parche que un Option File no puede",
+        "body": [
+          "La gran ventaja de los parches es que permiten una personalizacion muchisimo mas profunda, especialmente en PC."
+        ],
+        "list": [
+          "Caras escaneadas o faces reales.",
+          "Minifaces de jugadores.",
+          "Uniformes de equipos licenciados.",
+          "Dorsales, fonts y numeros personalizados.",
+          "Menu del juego.",
+          "Soundtrack o musica del menu.",
+          "Estadios.",
+          "Scoreboards o marcadores por competicion.",
+          "Canticos de hinchadas.",
+          "Balones, botines y guantes.",
+          "Graficos de competiciones.",
+          "Gameplay, aunque requiere conocimientos mas avanzados."
+        ]
+      },
+      {
+        "heading": "Por que no usar siempre un parche",
+        "body": [
+          "Porque los parches tienen una limitacion importante: normalmente solo son compatibles con PC. En PS4 y PS5, si la consola no esta liberada, no se pueden modificar los archivos internos del juego.",
+          "Por eso, en consolas, lo mas normal y seguro es usar Option Files. En PC, en cambio, si se puede acceder a los archivos del juego y modificar mas cosas. Ahi aparecen parches mucho mas completos, con cambios visuales y tecnicos imposibles de aplicar en consola mediante un Option File."
+        ]
+      },
+      {
+        "heading": "Diferencia resumida",
+        "body": [
+          "Un Option File es una actualizacion hecha con el editor del juego. Sirve para cambiar equipos, jugadores, kits, escudos, ligas y planteles dentro de los limites que permite KONAMI.",
+          "Un parche es una modificacion mas profunda del juego. Permite cambiar archivos internos, agregar contenido externo y modificar cosas que el editor normal no deja tocar."
+        ]
+      },
+      {
+        "heading": "Cual conviene usar",
+        "body": [
+          "Depende de la plataforma y de lo que estes buscando. Si jugas en PS4 o PS5, lo mas recomendable es usar un Option File, porque es el metodo mas seguro, practico y compatible.",
+          "Si jugas en PC, podes usar tanto un Option File como un parche. El Option File sirve para tener equipos y planteles actualizados de forma simple, mientras que un parche permite llevar el juego mucho mas lejos con faces, minifaces, menus, estadios, canticos, marcadores y otros cambios avanzados."
+        ]
+      },
+      {
+        "heading": "Conclusion",
+        "body": [
+          "En resumen, un Option File es una herramienta pensada para editar el juego desde adentro, usando las funciones que KONAMI ya permite. Es mas limitado, pero tambien mas simple, seguro y compatible con consolas.",
+          "Un parche, en cambio, modifica directamente los archivos del juego. Ofrece mucha mas libertad, pero requiere mas conocimientos y normalmente funciona en PC. Los dos sirven para actualizar PES, pero no hacen lo mismo: el Option File es la opcion mas practica para la mayoria de usuarios, mientras que el parche es la alternativa mas completa para quienes juegan en PC y quieren una experiencia mucho mas modificada."
+        ]
+      }
+    ],
+    "faq": [
+      [
+        "Un Option File y un parche son lo mismo?",
+        "No. Un Option File usa el editor interno de PES, mientras que un parche modifica archivos internos del juego."
+      ],
+      [
+        "Que conviene usar en PS4 o PS5?",
+        "En consolas lo mas recomendable es usar Option Files, porque se instalan desde el juego y no requieren modificar archivos internos."
+      ],
+      [
+        "En PC conviene Option File o parche?",
+        "Depende del objetivo. El Option File es mas simple para actualizar equipos y planteles; el parche permite cambios mas profundos como faces, estadios, menus, marcadores y canticos."
+      ]
+    ]
+  }
+]
