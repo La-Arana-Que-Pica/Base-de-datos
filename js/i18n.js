@@ -1674,6 +1674,34 @@ Object.entries(PES2018_OFFICIAL.maps || {}).forEach(([group, languages]) => {
     else I18N_MAPS[group][lang] = Object.assign(I18N_MAPS[group][lang] || {}, values);
   });
 });
+// El TXT de nombres españoles de la Database es la fuente de verdad para ES.
+// Se aplica después del diccionario oficial para no alterar EN/PT/IT.
+const SPANISH_OVERRIDES = PES2018_OFFICIAL.spanishOverrides || {};
+Object.entries(SPANISH_OVERRIDES).forEach(([group, values]) => {
+  if (!values || (typeof values !== 'object')) return;
+  I18N_MAPS[group] = I18N_MAPS[group] || {};
+  if (Array.isArray(values)) I18N_MAPS[group].es = values;
+  else I18N_MAPS[group].es = Object.assign(I18N_MAPS[group].es || {}, values);
+});
+// Algunas definiciones de apariencia usan ahora el texto exacto del TXT
+// español como clave estable. Conservamos sus equivalentes en los otros
+// idiomas para que el cambio de idioma no deje etiquetas sin traducir.
+const APPEARANCE_ENUM_ALIASES = {
+  'Color uniforme': { en: 'Kit color', pt: 'Cor do uniforme', it: 'Colore kit' },
+  'Verano: No/Invierno: No': { en: 'O: No / I: No', pt: 'V: Não / I: Não', it: 'E: No / I: No' },
+  'Verano: No/Invierno: Largo': { en: 'O: No / I: Long', pt: 'V: Não / I: Longo', it: 'E: No / I: Lungo' },
+  'Verano: Corto/Invierno: Corto': { en: 'O: Short / I: Short', pt: 'V: Curto / I: Curto', it: 'E: Corto / I: Corto' },
+  'Verano: Corto/Invierno: Largo': { en: 'O: Short / I: Long', pt: 'V: Curto / I: Longo', it: 'E: Corto / I: Lungo' },
+  'Playera int. manga larga': { en: 'Long-sleeved inner shirt', pt: 'Camisa interna manga longa', it: 'Maglia interna manica lunga' },
+  'cuello tortuga': { en: 'Turtleneck', pt: 'Gola alta', it: 'Collo alto' },
+};
+Object.entries(APPEARANCE_ENUM_ALIASES).forEach(([spanish, translations]) => {
+  Object.entries(translations).forEach(([lang, value]) => {
+    I18N_MAPS.appearanceEnums = I18N_MAPS.appearanceEnums || {};
+    I18N_MAPS.appearanceEnums[lang] = I18N_MAPS.appearanceEnums[lang] || {};
+    I18N_MAPS.appearanceEnums[lang][spanish] = value;
+  });
+});
 
 function i18nNormalizeLang(lang) {
   const base = String(lang || '').toLowerCase().split('-')[0];

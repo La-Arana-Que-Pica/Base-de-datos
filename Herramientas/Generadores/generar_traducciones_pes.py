@@ -15,6 +15,7 @@ from pathlib import Path
 
 FILES = {"es": "ESP.txt", "en": "ENG.txt", "pt": "POR.txt", "it": "ITA.txt"}
 DEFAULT_SOURCE = Path(r"D:\Agustín\Herramientas PES 2018\PES 2018 Editor V3.3 by ejogc327\Languages")
+DEFAULT_SPANISH_REFERENCE = Path(r"C:\Users\Agus\OneDrive\Documentos\Traducciones stats pes.txt")
 
 
 def _read(path: Path) -> list[str]:
@@ -62,7 +63,111 @@ def _source_dir(explicit: str | Path | None = None) -> Path:
     )
 
 
-def build_official_dictionary(source_dir: Path) -> dict:
+def _spanish_reference_path(explicit: str | Path | None = None) -> Path | None:
+    """Encuentra el TXT de nombres españoles definido por el usuario.
+
+    El archivo se incorpora al diccionario generado, por lo que el sitio no
+    depende de que el TXT esté disponible en producción. La variable de
+    entorno permite regenerar en otra máquina sin modificar este generador.
+    """
+    candidates = [
+        Path(explicit).expanduser() if explicit else None,
+        Path(os.environ["LAQP_SPANISH_TRANSLATIONS_FILE"]).expanduser()
+        if os.environ.get("LAQP_SPANISH_TRANSLATIONS_FILE") else None,
+        DEFAULT_SPANISH_REFERENCE,
+    ]
+    return next((candidate.resolve() for candidate in candidates if candidate and candidate.is_file()), None)
+
+
+def _parse_spanish_reference(path: Path | None) -> dict:
+    """Parsea los mappings del TXT sin convertirlos a traducciones propias."""
+    if not path:
+        return {}
+    sections = {
+        "Habilidad": "stats",
+        "Posiciones": "positions",
+        "Estilos de juego": "playingStyles",
+        "Habilidades de jugador": "playerSkills",
+        "Estilos de juego COM": "comStyles",
+    }
+    result = {
+        "stats": {}, "positions": {}, "playingStyles": {},
+        "playerSkills": [], "comStyles": [], "appearanceFields": {},
+        "appearanceEnums": {},
+    }
+    section = ""
+    for raw in path.read_text(encoding="utf-8-sig").splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if "--->" not in line:
+            section = line.rstrip(":")
+            continue
+        source, target = (part.strip() for part in line.split("--->", 1))
+        source = re.sub(r"\s+", " ", source)
+        # El texto entre paréntesis son reglas de representación, no parte
+        # del nombre del campo.
+        clean_target = re.sub(r"\s*\(.*$", "", target).strip().rstrip(",")
+        group = sections.get(section)
+        if group == "stats":
+            result[group][source] = clean_target
+        elif group == "positions":
+            result[group][source] = clean_target
+        elif group == "playingStyles":
+            result[group][source] = clean_target
+        elif group in ("playerSkills", "comStyles"):
+            result[group].append([source, clean_target])
+        elif section not in ("Cara", "Color de pier/Propor. cabeza", "Ojos", "Frente/Cejas", "Nariz", "Boca",
+                             "Vello facial", "Mejillas/Maxilar/Mentón", "Orejas",
+                             "Peinado", "General", "Delante", "Lateral/Atrás",
+                             "Color de pelo/Accesorios", "Físico", "Forma de vestir",
+                             "Movimiento", "Drible", "Animac. carrera", "Animac. disparo",
+                             "Celebración de goles"):
+            continue
+        result["appearanceFields"][source] = clean_target
+        # Extrae reglas enumeradas exactamente como están escritas en el TXT.
+        enum = {}
+        for match in re.finditer(r"(?:^|[,\(])\s*(\d+|True|False)\s*=\s*([^,)]+)", target):
+            enum[match.group(1)] = match.group(2).strip()
+        enum_target = re.sub(r"\s+y\s+(\d+)\s+es\s+", r", \1 es ", target)
+        for match in re.finditer(r"(?:^|[,\(])\s*(\d+)\s+es\s+([^,)]+)", enum_target):
+            enum[match.group(1)] = match.group(2).strip()
+        if "0, -" in target:
+            enum.setdefault("0", "-")
+        if enum:
+            # appearanceEnums recibe el texto que generan las definiciones
+            # de player.js, no el número crudo. Cada etiqueta es identidad en
+            # español; los alias históricos se agregan abajo.
+            result["appearanceEnums"].update({label: label for label in enum.values()})
+
+    # Nombres de columnas que el exportador de apariencia escribe con
+    # pequeñas variantes históricas. Se mantienen como alias, sin tocar los
+    # datos originales.
+    aliases = {
+        "Wrist Tape Colour": "Wrist Tape Colou",
+        "Sleeves Shirttail": "Shirttail",
+        "Drib. Hunching": "Drib. - Hunching",
+        "Drib. Arm Move.": "Drib. - Arm Move.",
+        "Run. Hunching": "Run. - Hunching",
+        "Run. Arm Move.": "Run. - Arm Move.",
+    }
+    for source, target in aliases.items():
+        if source in result["appearanceFields"]:
+            result["appearanceFields"][target] = result["appearanceFields"][source]
+    result["appearanceEnums"].update({
+        "Sí": "Si",
+        "Color del Kit": "Color uniforme",
+        "V: No / I: No": "Verano: No/Invierno: No",
+        "V: No / I: Largo": "Verano: No/Invierno: Largo",
+        "V: Corto / I: Corto": "Verano: Corto/Invierno: Corto",
+        "V: Corto / I: Largo": "Verano: Corto/Invierno: Largo",
+        "Playera interior manga larga": "Playera int. manga larga",
+        "Cuello tortuga": "cuello tortuga",
+    })
+    return result
+
+
+def build_official_dictionary(source_dir: Path, spanish_reference: str | Path | None = None) -> dict:
     parsed = {lang: _sections(_read(source_dir / filename)) for lang, filename in FILES.items()}
     counts = {lang: len(sections) for lang, sections in parsed.items()}
     if len(set(counts.values())) != 1:
@@ -141,6 +246,7 @@ def build_official_dictionary(source_dir: Path) -> dict:
             if index < len(strategy):
                 messages[lang][key] = strategy[index]
 
+    reference = _parse_spanish_reference(_spanish_reference_path(spanish_reference))
     return {
         "meta": {
             "source": "PES 2018 Editor V3.3 by ejogc327",
@@ -157,13 +263,17 @@ def build_official_dictionary(source_dir: Path) -> dict:
             "tacticValues": tactic_values,
         },
         "messages": messages,
+        # Este bloque sólo reemplaza el idioma español en i18n.js. Los mapas
+        # oficiales de EN/PT/IT continúan saliendo de sus TXT respectivos.
+        "spanishOverrides": reference,
     }
 
 
-def generate_pes2018_translations(project_root: Path, source_dir: str | Path | None = None) -> Path:
+def generate_pes2018_translations(project_root: Path, source_dir: str | Path | None = None,
+                                  spanish_reference: str | Path | None = None) -> Path:
     source = _source_dir(source_dir)
     target = project_root / "js" / "pes2018-translations.js"
-    payload = build_official_dictionary(source)
+    payload = build_official_dictionary(source, spanish_reference)
     content = (
         "'use strict';\n\n"
         "// Generado desde los archivos oficiales del PES 2018 Editor. No editar a mano.\n"
@@ -179,9 +289,10 @@ def generate_pes2018_translations(project_root: Path, source_dir: str | Path | N
 def main() -> int:
     parser = argparse.ArgumentParser(description="Genera las traducciones oficiales de PES 2018 para LAqP.website.")
     parser.add_argument("--source-dir", help="Carpeta que contiene ESP.txt, ENG.txt, POR.txt e ITA.txt.")
+    parser.add_argument("--spanish-reference", help="TXT con los nombres españoles exactos de la Base de Datos.")
     parser.add_argument("--project-root", default=str(Path(__file__).resolve().parents[2]))
     args = parser.parse_args()
-    target = generate_pes2018_translations(Path(args.project_root).resolve(), args.source_dir)
+    target = generate_pes2018_translations(Path(args.project_root).resolve(), args.source_dir, args.spanish_reference)
     print(f"Traducciones PES 2018 actualizadas: {target}")
     return 0
 

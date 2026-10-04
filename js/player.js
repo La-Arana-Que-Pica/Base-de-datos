@@ -725,7 +725,7 @@ const APPEARANCE_SECTIONS = [
         fields: [
           { col: 'Boots',              label: 'Calzado',                       imageKey: 'boots', imagePath: 'img/boots', bootDisplay: true, zeroLabel: 'Botines por defecto' },
           { col: 'Wrist taping',       label: 'Vendaje',                       enum: { '0': 'No', '1': 'Derecha', '2': 'Izquierda', '3': 'Ambos' } },
-          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' }, enum: { '1': 'Color del Kit', '2': 'Blanco', '3': 'Negro', '4': 'Beige', '9': 'Beige', '10': 'Blanco' } },
+          { col: 'Wrist Tape Colou',   label: 'Color vendaje muñeca',          conditionalDash: { col: 'Wrist taping', value: '0' }, enum: { '0': 'Color uniforme', '1': 'Blanco', '2': 'Negro', '3': 'Beige' } },
           { col: 'Ankle Taping',       label: 'Vendaje tobillo',               enum: { '0': 'No', '1': 'Sí' } },
           { col: 'Player Gloves',      label: 'Guantes',                       enum: { '0': 'No', '1': 'Para invierno' } },
           { col: 'Colour',             label: 'Color de guantes',              conditionalDash: { col: 'Player Gloves', value: '0' } },
