@@ -283,35 +283,6 @@ function pickValue(obj, keys, fallback = '') {
   return fallback;
 }
 
-function correctedPlayerFallbackKey(row) {
-  const name = normalizeText(row['Name'] || row['nombre'] || row['PlayerName'] || '');
-  const country = row['Country'] || row['Nationality'] || row['nacionalidad'] || '';
-  const pos = row['POS'] || row['Position'] || row['posicion'] || '';
-  return { nameCountry: name && country ? `${name}|${country}` : '', namePos: name && pos ? `${name}|${pos}` : '' };
-}
-
-function buildCorrectedOverallMap(rows) {
-  const map = { byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
-  rows.forEach(r => {
-    const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-    const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
-    if (!ovr) return;
-    if (pid) map.byPlayer[pid] = ovr;
-    const fallback = correctedPlayerFallbackKey(r);
-    if (fallback.nameCountry) map.byNameCountry[fallback.nameCountry] = ovr;
-    if (fallback.namePos) map.byNamePos[fallback.namePos] = ovr;
-  });
-  return map;
-}
-
-function correctedOverallFor(row, teamId, correctedMap) {
-  if (!row || !correctedMap) return '';
-  const pid = row['Id'] || row.ID || row['PlayerId'] || '';
-  if (pid && correctedMap.byPlayer[pid]) return correctedMap.byPlayer[pid];
-  const fallback = correctedPlayerFallbackKey(row);
-  return correctedMap.byNameCountry[fallback.nameCountry] || correctedMap.byNamePos[fallback.namePos] || '';
-}
-
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;')
@@ -477,16 +448,16 @@ function overallColor(value) {
 // ─── Boot / Indexer ───────────────────────────────────────────────────────────
 
 async function boot() {
+  await window.LAQPEnsurePes2018Overall();
   showLoading(t('loading.database'));
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText, appearancesText, leaguesText, corregidosText] = await Promise.all([
+  const [teamsText, playersText, squadsText, appearancesText, leaguesText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All appeaarances exported.csv'),
     fetchText('database/All leagues exported.csv'),
-    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -497,6 +468,7 @@ async function boot() {
   // Parse all CSVs
   const teamRows = parseCSV(teamsText);
   const playerRows = parseCSV(playersText);
+  playerRows.forEach(row => window.PES2018Overall.assignOverall(row));
   const squadRows = parseCSV(squadsText);
   const appearanceRows = appearancesText ? parseCSV(appearancesText) : [];
 
@@ -555,9 +527,6 @@ async function boot() {
     playerMap[playerId] = normalizePlayerRow(playerRow);
   });
 
-  // Build corrected overall map from medias_corregidas.csv
-  const corregidosMap = corregidosText ? buildCorrectedOverallMap(parseCSV(corregidosText)) : null;
-
   // Assign players to teams using squad data
   squadRows.forEach(squadRow => {
     const teamId = squadRow['Id'];
@@ -570,9 +539,6 @@ async function boot() {
       const player = playerMap[playerId];
       if (!player) continue;
       const p = { ...player, _team: team };
-      // Apply corrected overall if available for this player ID.
-      const corregidosOvr = correctedOverallFor(p, teamId, corregidosMap);
-      if (corregidosOvr) p.Overall = corregidosOvr;
       team.players.push(p);
       DB.players.push(p);
       indexPlayerForSearch(p);
@@ -853,10 +819,10 @@ function renderLeagueGridCard(league) {
         loading="lazy"
         onerror="this.onerror=null;this.src='img/leagues/default.webp'"
         alt="${leagueName}">
-      <span class="grid-card-kicker">Liga</span>
+      <span class="grid-card-kicker">${t('db.leagueKicker')}</span>
       <span class="grid-card-name">${leagueName}</span>
       <span class="grid-card-sub">${t('db.teamCount', { count: teamCount })}</span>
-      <span class="grid-card-action">Ver equipos</span>
+      <span class="grid-card-action">${t('db.viewTeams')}</span>
     </button>`;
 }
 
@@ -947,7 +913,7 @@ function _showLeagueTeamsViewInternal(leagueId) {
         <div class="view-subtitle">${t('db.teamCount', { count: leagueTeams.length })}</div>
       </div>
     </div>
-    <button class="back-btn" onclick="showLeaguesView()" style="margin-bottom:16px">◀ Volver a Ligas</button>
+    <button class="back-btn" onclick="showLeaguesView()" style="margin-bottom:16px">${t('common.backToLeagues')}</button>
     <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
     <div class="grid-cards">${cardsHtml}</div>
     <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="responsive"></div>`;
@@ -981,7 +947,7 @@ function renderTeamGridCard(team) {
   const teamId = escapeHtml(team.id);
   const teamName = escapeHtml(team.displayName);
   const league = _getLeagueForTeam(team.id);
-  const leagueName = league ? escapeHtml(league.name) : 'Sin liga';
+  const leagueName = league ? escapeHtml(league.name) : t('common.noLeague');
   const avg = teamAvgOvr(team);
   const players = _teamPlayerCount(team);
   const avgHtml = avg !== null
@@ -996,10 +962,10 @@ function renderTeamGridCard(team) {
         loading="lazy"
         onerror="this.onerror=null;this.src='img/teams/default.webp'"
         alt="${teamName}">
-      <span class="grid-card-kicker">Equipo</span>
+      <span class="grid-card-kicker">${t('db.teamKicker')}</span>
       <span class="grid-card-name">${teamName}</span>
-      <span class="grid-card-sub">${leagueName} - ${players} jugadores</span>
-      <span class="grid-card-action">Ver plantel</span>
+      <span class="grid-card-sub">${leagueName} - ${t('db.playerCount', { count: players })}</span>
+      <span class="grid-card-action">${t('db.viewSquad')}</span>
     </button>`;
 }
 
@@ -1035,7 +1001,7 @@ function _buildTeamActiveFiltersSummary() {
   add(t('common.league'), league ? league.name : '');
   add(t('common.country'), country);
   add(t('common.type'), teamTypeLabel(_teamFilters.type));
-  if (_teamFilters.minAvg || _teamFilters.maxAvg) add(t('common.overall'), `${_teamFilters.minAvg || 0}-${_teamFilters.maxAvg || 99}`);
+  if (_teamFilters.minAvg || _teamFilters.maxAvg) add(t('common.overall'), `${_teamFilters.minAvg || 0}-${_teamFilters.maxAvg || 109}`);
   if (_teamFilters.minPlayers || _teamFilters.maxPlayers) add(t('common.players'), `${_teamFilters.minPlayers || 0}-${_teamFilters.maxPlayers || 32}`);
 
   return `
@@ -1089,7 +1055,7 @@ function _buildTeamFiltersPanel() {
             ${types.map(t => `<option value="${t}"${_teamFilters.type === t ? ' selected' : ''}>${escapeHtml(teamTypeLabel(t))}</option>`).join('')}
           </select>
         </div>
-        ${_buildRangeFilter(t('filters.avgRange'), 'team-flt-min-avg', 'team-flt-max-avg', 0, 99, _teamFilters.minAvg, _teamFilters.maxAvg).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
+        ${_buildRangeFilter(t('filters.avgRange'), 'team-flt-min-avg', 'team-flt-max-avg', 0, 109, _teamFilters.minAvg, _teamFilters.maxAvg).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
         ${_buildRangeFilter(t('filters.playerQty'), 'team-flt-min-players', 'team-flt-max-players', 0, 32, _teamFilters.minPlayers, _teamFilters.maxPlayers).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
       </div>
       </div>
@@ -1134,7 +1100,7 @@ function _showTeamsViewInternal() {
     <div class="view-header">
       <div>
         <div class="view-title">${t('common.teams')}</div>
-        <div class="view-subtitle" id="teams-grid-subtitle">${_teamsFilteredList.length} equipos</div>
+        <div class="view-subtitle" id="teams-grid-subtitle">${t('db.teamCount', { count: _teamsFilteredList.length })}</div>
       </div>
     </div>
     ${_buildTeamFiltersPanel()}
@@ -1174,9 +1140,9 @@ function _renderTeamsGridPage() {
   if (subtitle) {
     const totalPages = Math.ceil(total / TEAMS_PAGE_SIZE) || 1;
     if (total === _teamsForGrid.length) {
-      subtitle.textContent = `${total} equipos · página ${_teamsGridPage} de ${totalPages}`;
+      subtitle.textContent = `${t('db.teamCount', { count: total })} · ${t('common.pageOf', { page: _teamsGridPage, pages: totalPages })}`;
     } else {
-      subtitle.textContent = `${total} equipo${total !== 1 ? 's' : ''} encontrado${total !== 1 ? 's' : ''} · página ${_teamsGridPage} de ${totalPages}`;
+      subtitle.textContent = `${t('db.teamsFoundPage', { count: total, page: _teamsGridPage, pages: totalPages })}`;
     }
   }
 }
@@ -1346,13 +1312,13 @@ function showHomeLegacy() {
           onerror="this.onerror=null;this.src='img/leagues/default.webp'"
           alt="${safeName}">
         <span>${safeName}</span>
-        <span class="home-league-count">${leagueTeams.length} equipos</span>
+        <span class="home-league-count">${t('db.teamCount', { count: leagueTeams.length })}</span>
       </div>
       ${teamsHtml ? `<div class="home-team-crests-row">${teamsHtml}</div>` : ''}
     </div>`;
   }).join('');
 
-  featuredSection.innerHTML = `<div class="home-section-title">Ligas y equipos</div>
+  featuredSection.innerHTML = `<div class="home-section-title">${t('db.leaguesAndTeams')}</div>
     <div class="home-leagues-blocks">${leaguesHtml}</div>`;
 
   featuredSection.querySelectorAll('.home-league-header').forEach(header => {
@@ -1388,8 +1354,8 @@ function renderHomePlayerItem(player) {
   const team = player._team || {};
   const playerId = escapeHtml(player.ID);
   const teamId = escapeHtml(team.id);
-  const playerName = escapeHtml(player.Name || 'Jugador');
-  const teamName = escapeHtml(team.displayName || 'Equipo');
+  const playerName = escapeHtml(player.Name || t('common.player'));
+  const teamName = escapeHtml(team.displayName || t('common.team'));
   const nationality = escapeHtml(nationalityName(player.Nationality));
   const position = escapeHtml(translatePosition(player.Position) || player.Position || '-');
   const ovr = player.Overall || '-';
@@ -1430,7 +1396,7 @@ function renderHomeTeamItem(team) {
   const teamId = escapeHtml(team.id);
   const teamName = escapeHtml(team.displayName);
   const league = _getLeagueForTeam(team.id);
-  const leagueName = league ? escapeHtml(league.name) : 'Sin liga';
+  const leagueName = league ? escapeHtml(league.name) : t('common.noLeague');
   const avg = teamAvgOvr(team);
   const avgHtml = avg !== null ? `<span>${avg}</span>` : '';
 
@@ -1458,7 +1424,7 @@ function renderHomeLeagueItem(league) {
         alt="${leagueName}">
       <span>
         <strong>${leagueName}</strong>
-        <small>${teamCount} equipos</small>
+        <small>${t('db.teamCount', { count: teamCount })}</small>
       </span>
     </button>`;
 }
@@ -1475,8 +1441,8 @@ function renderHomeFavoriteItem(player) {
   const team = player._team || {};
   const playerId = escapeHtml(player.ID);
   const teamId = escapeHtml(team.id);
-  const playerName = escapeHtml(player.Name || 'Jugador');
-  const teamName = escapeHtml(team.displayName || 'Equipo');
+  const playerName = escapeHtml(player.Name || t('common.player'));
+  const teamName = escapeHtml(team.displayName || t('common.team'));
   const position = escapeHtml(translatePosition(player.Position) || player.Position || '-');
   const ovr = player.Overall || '-';
   const ovrColor = statColor(ovr);
@@ -1503,8 +1469,8 @@ function renderHomeFavoritesPanel() {
   if (!favorites.length) {
     container.innerHTML = `
       <div class="db-favorites-empty">
-        <strong>Sin favoritos guardados</strong>
-        <span>Marc&aacute; jugadores con la estrella para verlos ac&aacute;.</span>
+        <strong>${t('db.noFavoritesTitle')}</strong>
+        <span>${t('db.noFavoritesText')}</span>
       </div>`;
     return;
   }
@@ -2076,7 +2042,7 @@ function _buildActiveFiltersSummary() {
   add(t('common.league'), f.league ? (DB.leagues.find(l => l.id === f.league) || {}).name : '');
   add(t('common.nationality'), f.nationality ? nationalityName(f.nationality) : '');
   add(t('common.position'), f.position ? translatePosition(f.position) : '');
-  if (f.minOvr || f.maxOvr) add(t('common.overall'), `${f.minOvr || '0'}-${f.maxOvr || '99'}`);
+  if (f.minOvr || f.maxOvr) add(t('common.overall'), `${f.minOvr || '0'}-${f.maxOvr || '109'}`);
   if (f.role) add(t('filters.role'), f.role);
   if (f.playingStyle) add(t('filters.playingStyle'), playingStyleLabel(f.playingStyle));
   if (f.comStyle) add('COM', (comStyleLabels().find(([key]) => key === f.comStyle) || [null, f.comStyle])[1]);
@@ -2197,7 +2163,7 @@ function _buildFilterPanel() {
               ${posOptions}
             </select>
           </div>
-          ${_buildRangeFilter(t('common.overall'), 'flt-min-ovr', 'flt-max-ovr', 0, 99, f.minOvr, f.maxOvr)}
+          ${_buildRangeFilter(t('common.overall'), 'flt-min-ovr', 'flt-max-ovr', 0, 109, f.minOvr, f.maxOvr)}
         </div>
       </section>
 
@@ -2473,7 +2439,7 @@ function renderPlayersList(team) {
       <a href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`}">
         <img class="team-crest" src="img/teams/${team.id}.webp"
           onerror="this.onerror=null;this.src='img/teams/default.webp'"
-          alt="${team.displayName}" title="Ver página del equipo">
+          alt="${team.displayName}" title="${t('db.viewSquad')}">
       </a>
       <div>
         <a class="view-title-link" href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`}">${team.displayName}</a>
@@ -2511,7 +2477,7 @@ function renderPlayerRow(player, team) {
   const posDisplay = translatePosition(player.Position);
   const radarAttrs = computeRadarAttributes(player);
   const nationalNote = player._playsForNational
-    ? `<span class="national-team-badge" title="También juega para su selección">🌍</span>`
+    ? `<span class="national-team-badge" title="${t('player.alsoNational')}">🌍</span>`
     : '';
   const fav = isFavorite(player.ID, team.id);
 
@@ -2615,7 +2581,8 @@ function renderPlayerProfile(player, team) {
   const typeLabel = TYPE_LABELS[team.type] || '';
   const posDisplay = translatePosition(player.Position);
 
-  const statsHtml = Object.entries(STAT_LABELS).map(([csvCol, label]) => {
+  const statsHtml = Object.entries(STAT_LABELS).map(([csvCol]) => {
+    const label = translateStat(csvCol);
     const val = player[csvCol] || '0';
     const v = parseInt(val, 10) || 0;
     // Special attributes: bar scaled to their own range
@@ -2645,7 +2612,7 @@ function renderPlayerProfile(player, team) {
   }).join('');
 
   view.innerHTML = `
-    <button class="back-btn" onclick="goBackToTeam()">◀ Volver a ${team.displayName}</button>
+    <button class="back-btn" onclick="goBackToTeam()">◀ ${t('player.backToTeam', { team: team.displayName })}</button>
 
     <div class="player-profile">
       <!-- LEFT: photo + info -->
@@ -2659,14 +2626,14 @@ function renderPlayerProfile(player, team) {
         </div>
         <div class="player-info-card">
           <div class="player-info-row">
-            <span class="info-label">Nacionalidad</span>
+            <span class="info-label">${t('common.nationality')}</span>
             <img src="${flagSrc(player.Nationality)}"
               onerror="this.onerror=null;this.src='img/flags/default.webp'"
               alt="">
-            <span>${player.Nationality || '–'}</span>
+            <span>${nationalityName(player.Nationality) || '–'}</span>
           </div>
           <div class="player-info-row">
-            <span class="info-label">Equipo</span>
+            <span class="info-label">${t('common.team')}</span>
             <a href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${team.id}`}" class="team-crest-link">
               <img class="team-crest-sm"
                 src="img/teams/${team.id}.webp"
@@ -2676,21 +2643,21 @@ function renderPlayerProfile(player, team) {
             </a>
           </div>
           <div class="player-info-row">
-            <span class="info-label">Categoría</span>
+            <span class="info-label">${t('common.category')}</span>
             <span>${typeLabel}</span>
           </div>
-          ${player._playsForNational ? `<div class="national-team-note">🌍 También juega para su selección.</div>` : ''}
+          ${player._playsForNational ? `<div class="national-team-note">🌍 ${t('player.alsoNational')}</div>` : ''}
         </div>
       </div>
 
       <!-- CENTER: ability settings -->
       <div class="player-center">
-        <div class="player-name-line">${player.Name || 'Jugador desconocido'}</div>
+        <div class="player-name-line">${player.Name || t('player.unknown')}</div>
         <div class="player-position-overall">
           <span class="position-badge">${posDisplay || '–'}</span>
           <span class="overall-large">${player.Overall || '–'}</span>
         </div>
-        <div class="ability-title">Estadísticas</div>
+        <div class="ability-title">${t('player.stats')}</div>
         <div class="stats-list">
           ${statsHtml}
         </div>
@@ -2699,7 +2666,7 @@ function renderPlayerProfile(player, team) {
       <!-- RIGHT: radar -->
       <div class="player-right">
         <div class="radar-card">
-          <h3>Radar de atributos</h3>
+          <h3>${t('player.attributeRadar')}</h3>
           <canvas id="radar-canvas" width="260" height="260"></canvas>
         </div>
       </div>
@@ -2893,7 +2860,7 @@ function _showFavoritesViewInternal() {
         <div class="view-subtitle">${t('db.playerCount', { count: playerEntries.length })}</div>
       </div>
       <div class="view-header-actions">
-        <button class="adv-filter-toggle btn-danger" onclick="clearAllFavorites()">✕ Limpiar favoritos</button>
+        <button class="adv-filter-toggle btn-danger" onclick="clearAllFavorites()">✕ ${t('favorites.clear').replace(/^×\s*/, '')}</button>
       </div>
     </div>
     ${missingNote}
@@ -2975,7 +2942,7 @@ function runSearch(query) {
 
   if (!results.length) {
     view.innerHTML = `${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('db.searchPlayers') }])}
-      <div class="view-header"><div class="view-title">Resultados: "${query}"</div></div>
+      <div class="view-header"><div class="view-title">${t('common.results')}: "${query}"</div></div>
       <div class="error-message">${t('errors.noPlayersForSearch', { query })}</div>`;
     return;
   }
@@ -2986,7 +2953,7 @@ function runSearch(query) {
     ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('db.searchPlayers') }])}
     <div class="view-header">
       <div>
-        <div class="view-title">Búsqueda: "${query}"</div>
+        <div class="view-title">${t('common.search')}: "${query}"</div>
         <div class="view-subtitle">${t('common.resultsCount', { count: results.length })}</div>
       </div>
     </div>

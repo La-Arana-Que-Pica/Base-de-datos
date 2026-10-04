@@ -102,9 +102,9 @@
             <section class="db-hero-panel">
               <div class="db-hero-copy">
                 <span class="db-section-kicker">PES 2018 Actualizado</span>
-                <h1>Base de datos de stats y caras para PES 2018</h1>
+                <h1 data-i18n="db.heroTitle">Base de datos de stats y caras para PES 2018</h1>
                 <!-- LAQP_STATIC_DATABASE_INTRO_START -->
-<p>Jugadores, equipos, ligas, stats, medias, plantillas, caras/minifaces y referencias de edición para mantener PES 2018 actualizado con datos modernos.</p><p class="db-static-note">Incluye 6447 relaciones jugador-equipo, 235 equipos y 21 ligas.</p>
+<p data-i18n="db.heroDesc">Jugadores, equipos, ligas, stats, medias, plantillas, caras/minifaces y referencias de edición para mantener PES 2018 actualizado con datos modernos.</p><p class="db-static-note" data-i18n="db.staticCount" data-i18n-params='{"memberships":6447,"teams":235,"leagues":21}'>Incluye 6447 relaciones jugador-equipo, 235 equipos y 21 ligas.</p>
                   <!-- LAQP_STATIC_DATABASE_INTRO_END -->
               </div>
               <div class="db-home-search">
@@ -112,36 +112,37 @@
                 <input
                   type="text"
                   placeholder="Buscar jugador, equipo o liga..."
+                  data-i18n-placeholder="db.searchEverything"
                   autocomplete="off"
                   onkeydown="if(event.key === 'Enter') runHomeDatabaseSearch(this.value)"
                 />
-                <button type="button" onclick="showAllPlayersAndFocusSearch()">Busqueda avanzada</button>
+                <button type="button" onclick="showAllPlayersAndFocusSearch()" data-i18n="db.advancedSearch">Búsqueda avanzada</button>
               </div>
               <div class="db-stat-tiles">
                 <button class="db-stat-tile db-stat-green" type="button" onclick="showAllPlayers()">
-                  <span>Jugadores</span>
+                  <span data-i18n="common.players">Jugadores</span>
                   <strong id="stat-players">5.821</strong>
-                  <small>Ver todos</small>
+                  <small data-i18n="common.viewAll">Ver todos</small>
                 </button>
                 <button class="db-stat-tile db-stat-blue" type="button" onclick="showTeamsView()">
-                  <span>Equipos</span>
+                  <span data-i18n="common.teams">Equipos</span>
                   <strong id="stat-teams">235</strong>
-                  <small>Ver todos</small>
+                  <small data-i18n="common.viewAll">Ver todos</small>
                 </button>
                 <button class="db-stat-tile db-stat-purple" type="button" onclick="showLeaguesView()">
-                  <span>Ligas</span>
+                  <span data-i18n="common.leagues">Ligas</span>
                   <strong id="stat-leagues">21</strong>
-                  <small>Ver todas</small>
+                  <small data-i18n="common.viewAll">Ver todas</small>
                 </button>
                 <a class="db-stat-tile db-stat-red" href="database/DTs/">
                   <span>DTs</span>
                   <strong>ML</strong>
-                  <small>Caras Liga Master</small>
+                  <small data-i18n="db.masterLeagueFaces">Caras Liga Master</small>
                 </a>
                 <button class="db-stat-tile db-stat-gold" type="button" onclick="showFavoritesView()">
-                  <span>Favoritos</span>
+                  <span data-i18n="common.favorites">Favoritos</span>
                   <strong id="stat-favorites">0</strong>
-                  <small>Ver guardados</small>
+                  <small data-i18n="db.viewSaved">Ver guardados</small>
                 </button>
               </div>
             </section>
@@ -156,20 +157,20 @@
             <section class="db-home-content-grid">
               <article class="db-panel">
                 <header>
-                  <h2>Jugadores destacados</h2>
-                  <button type="button" onclick="showAllPlayers()">Ver todos</button>
+                  <h2 data-i18n="db.featuredPlayers">Jugadores destacados</h2>
+                  <button type="button" onclick="showAllPlayers()" data-i18n="common.viewAll">Ver todos</button>
                 </header>
                 <div class="db-feature-list" id="db-latest-players">
                   <!-- LAQP_STATIC_PLAYERS_START -->
-<a class="db-feature-row" href="/player/v2/8/k-mbappe-110718/"><img src="img/players/110718.webp" alt="Miniface de K. Mbappé" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>K. Mbappé</strong><small>FRANCIA · CD · 27 años</small></span><b>92</b></a><a class="db-feature-row" href="/player/v2/109/k-mbappe-110718/"><img src="img/players/110718.webp" alt="Miniface de K. Mbappé" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>K. Mbappé</strong><small>REAL MADRID · CD · 27 años</small></span><b>92</b></a><a class="db-feature-row" href="/player/v2/2704/grosso-325170/"><img src="img/players/325170.webp" alt="Miniface de Grosso" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>Grosso</strong><small>METEGOL · EXI · 29 años</small></span><b>92</b></a><a class="db-feature-row" href="/player/v2/5/h-kane-47287/"><img src="img/players/47287.webp" alt="Miniface de H. Kane" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>H. Kane</strong><small>INGLATERRA · CD · 33 años</small></span><b>91</b></a><a class="db-feature-row" href="/player/v2/9/t-courtois-44383/"><img src="img/players/44383.webp" alt="Miniface de T. Courtois" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>T. Courtois</strong><small>BÉLGICA · PT · 34 años</small></span><b>91</b></a><a class="db-feature-row" href="/player/v2/16/e-haaland-60527/"><img src="img/players/60527.webp" alt="Miniface de E. Haaland" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>E. Haaland</strong><small>NORUEGA · CD · 26 años</small></span><b>91</b></a><a class="db-feature-row" href="/player/v2/109/t-courtois-44383/"><img src="img/players/44383.webp" alt="Miniface de T. Courtois" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>T. Courtois</strong><small>REAL MADRID · PT · 34 años</small></span><b>91</b></a><a class="db-feature-row" href="/player/v2/173/e-haaland-60527/"><img src="img/players/60527.webp" alt="Miniface de E. Haaland" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>E. Haaland</strong><small>MANCHESTER CITY · CD · 26 años</small></span><b>91</b></a>
+<a class="db-feature-row" href="/player/v2/2704/grosso-325170/"><img src="img/players/325170.webp" alt="Miniface de Grosso" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>Grosso</strong><small>METEGOL · EXI · 29 años</small></span><b>93</b></a><a class="db-feature-row" href="/player/v2/8/k-mbappe-110718/"><img src="img/players/110718.webp" alt="Miniface de K. Mbappé" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>K. Mbappé</strong><small>FRANCIA · CD · 27 años</small></span><b>91</b></a><a class="db-feature-row" href="/player/v2/16/e-haaland-60527/"><img src="img/players/60527.webp" alt="Miniface de E. Haaland" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>E. Haaland</strong><small>NORUEGA · CD · 26 años</small></span><b>91</b></a><a class="db-feature-row" href="/player/v2/109/k-mbappe-110718/"><img src="img/players/110718.webp" alt="Miniface de K. Mbappé" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>K. Mbappé</strong><small>REAL MADRID · CD · 27 años</small></span><b>91</b></a><a class="db-feature-row" href="/player/v2/173/e-haaland-60527/"><img src="img/players/60527.webp" alt="Miniface de E. Haaland" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>E. Haaland</strong><small>MANCHESTER CITY · CD · 26 años</small></span><b>91</b></a><a class="db-feature-row" href="/player/v2/5/j-bellingham-101291/"><img src="img/players/101291.webp" alt="Miniface de J. Bellingham" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>J. Bellingham</strong><small>INGLATERRA · MO · 22 años</small></span><b>90</b></a><a class="db-feature-row" href="/player/v2/5/h-kane-47287/"><img src="img/players/47287.webp" alt="Miniface de H. Kane" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>H. Kane</strong><small>INGLATERRA · CD · 33 años</small></span><b>90</b></a><a class="db-feature-row" href="/player/v2/6/vitinha-118236/"><img src="img/players/118236.webp" alt="Miniface de Vitinha" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src='img/players/default.webp'"><span><strong>Vitinha</strong><small>PORTUGAL · MCD · 26 años</small></span><b>90</b></a>
                   <!-- LAQP_STATIC_PLAYERS_END -->
                 </div>
               </article>
 
               <article class="db-panel">
                 <header>
-                  <h2>Equipos destacados</h2>
-                  <button type="button" onclick="showTeamsView()">Ver todos</button>
+                  <h2 data-i18n="db.featuredTeams">Equipos destacados</h2>
+                  <button type="button" onclick="showTeamsView()" data-i18n="common.viewAll">Ver todos</button>
                 </header>
                 <div class="db-featured-teams" id="db-featured-teams">
                   <!-- LAQP_STATIC_TEAMS_START -->
@@ -190,8 +191,8 @@
           <aside class="db-dashboard-aside">
             <article class="db-panel db-side-leagues">
               <header>
-                <h2>Ligas destacadas</h2>
-                <button type="button" onclick="showLeaguesView()">Ver todas</button>
+                <h2 data-i18n="db.featuredLeagues">Ligas destacadas</h2>
+                <button type="button" onclick="showLeaguesView()" data-i18n="common.viewAll">Ver todas</button>
               </header>
               <div id="db-featured-leagues">
                 <!-- LAQP_STATIC_LEAGUES_START -->
@@ -202,8 +203,8 @@
 
             <article class="db-panel db-side-favorites">
               <header>
-                <h2>Favoritos</h2>
-                <button type="button" onclick="showFavoritesView()">Ver todos</button>
+                <h2 data-i18n="common.favorites">Favoritos</h2>
+                <button type="button" onclick="showFavoritesView()" data-i18n="common.viewAll">Ver todos</button>
               </header>
               <div id="db-favorite-players">
                 <!-- LAQP_STATIC_NOSCRIPT_LINKS_START -->
@@ -249,10 +250,12 @@
     </main>
   </div>
 
-  <script src="js/i18n.js"></script>
+  <script src="js/pes2018-translations.js?v=20261003a"></script>
+  <script src="js/i18n.js?v=20261003a"></script>
   <script src="js/site.js"></script>
   <script src="js/favorites.js"></script>
   <script src="js/country-filter.js?v=20260925g"></script>
-  <script src="js/app.js?v=20260925g"></script>
+  <script src="js/pes2018-overall.js?v=20261003a"></script>
+  <script src="js/app.js?v=20261003a"></script>
 </body>
 </html>

@@ -79,35 +79,6 @@ function toTitleCaseName(value) {
   }).join(' ');
 }
 
-function correctedPlayerFallbackKey(row) {
-  const name = normalizeText(row['Name'] || row['nombre'] || row['PlayerName'] || '');
-  const country = row['Country'] || row['Nationality'] || row['nacionalidad'] || '';
-  const pos = row['POS'] || row['Position'] || row['posicion'] || '';
-  return { nameCountry: name && country ? `${name}|${country}` : '', namePos: name && pos ? `${name}|${pos}` : '' };
-}
-
-function buildCorrectedOverallMap(rows) {
-  const map = { byPlayer: Object.create(null), byNameCountry: Object.create(null), byNamePos: Object.create(null) };
-  rows.forEach(r => {
-    const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-    const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
-    if (!ovr) return;
-    if (pid) map.byPlayer[pid] = ovr;
-    const fallback = correctedPlayerFallbackKey(r);
-    if (fallback.nameCountry) map.byNameCountry[fallback.nameCountry] = ovr;
-    if (fallback.namePos) map.byNamePos[fallback.namePos] = ovr;
-  });
-  return map;
-}
-
-function correctedOverallFor(row, teamId, correctedMap) {
-  if (!row || !correctedMap) return '';
-  const pid = row['Id'] || row.ID || row['PlayerId'] || '';
-  if (pid && correctedMap.byPlayer[pid]) return correctedMap.byPlayer[pid];
-  const fallback = correctedPlayerFallbackKey(row);
-  return correctedMap.byNameCountry[fallback.nameCountry] || correctedMap.byNamePos[fallback.namePos] || '';
-}
-
 function statColorClass(value) {
   const v = parseInt(value, 10);
   if (isNaN(v)) return 'stat-range-1';
@@ -1096,6 +1067,7 @@ function goBack() {
 // â”€â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function boot() {
+  await window.LAQPEnsurePes2018Overall();
   const params = new URLSearchParams(window.location.search);
   const embeddedTeamId = document.querySelector('meta[name="laqp-team-id"]')?.content || '';
   const teamId = embeddedTeamId || params.get('id');
@@ -1113,14 +1085,13 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel
-  const [teamsText, playersText, squadsText, formationsText, coachsText, leaguesText, corregidosText] = await Promise.all([
+  const [teamsText, playersText, squadsText, formationsText, coachsText, leaguesText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All formations exported.csv'),
     fetchText('database/All coachs exported.csv'),
     fetchText('database/All leagues exported.csv'),
-    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText) {
@@ -1130,6 +1101,7 @@ async function boot() {
 
   const { rows: teamRows } = parseCSV(teamsText);
   const { rows: playerRows } = parseCSV(playersText);
+  playerRows.forEach(row => window.PES2018Overall.assignOverall(row));
   const { rows: squadRows } = parseCSV(squadsText);
   const { rows: formationRows } = formationsText ? parseCSV(formationsText) : { rows: [] };
   const { rows: coachRows } = coachsText ? parseCSV(coachsText) : { rows: [] };
@@ -1157,9 +1129,6 @@ async function boot() {
     if (pid) playerMap[pid] = normalizePlayerRow(row);
   });
 
-  // Build corrected overall map from medias_corregidas.csv
-  const corregidosMap = corregidosText ? buildCorrectedOverallMap(parseCSV(corregidosText).rows) : null;
-
   // Find this team's squad
   const squadRow = squadRows.find(s => s['Id'] === teamId);
   const players = [];
@@ -1173,9 +1142,6 @@ async function boot() {
       if (player) {
         const shirtNum = squadRow[`Shirt number ${i}`];
         const playerWithShirt = { ...player, _shirtNumber: shirtNum && shirtNum !== '0' ? parseInt(shirtNum, 10) || null : null };
-        // Apply corrected overall if available for this player ID.
-        const corregidosOvr = correctedOverallFor(playerWithShirt, teamId, corregidosMap);
-        if (corregidosOvr) playerWithShirt.Overall = corregidosOvr;
         players.push(playerWithShirt);
         squadSlots[i - 1] = playerWithShirt;  // 0-indexed (slot i -> index i-1)
       }

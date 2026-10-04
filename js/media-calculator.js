@@ -228,7 +228,6 @@ const MEDIA_CALC_CATEGORY_BY_STAT = MEDIA_CALC_STAT_CATEGORIES.reduce((map, cate
   return map;
 }, {});
 
-let mediaCalcFormulas = null;
 let mediaCalcSaveTimer = null;
 let mediaCalcFeedbackTimer = null;
 
@@ -256,19 +255,8 @@ function mediaCalcCssKey(value) {
   return String(value).replace(/"/g, '\\"');
 }
 
-async function mediaCalcFetchText(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`No se pudo cargar ${url}`);
-  return response.text();
-}
-
 function mediaCalcPositions() {
-  const keys = mediaCalcFormulas ? Object.keys(mediaCalcFormulas).filter(pos => mediaCalcFormulas[pos]?.weights) : [];
-  return MEDIA_CALC_POSITIONS.filter(pos => keys.includes(pos)).concat(keys.filter(pos => !MEDIA_CALC_POSITIONS.includes(pos)));
-}
-
-function mediaCalcFormula(position) {
-  return mediaCalcFormulas ? mediaCalcFormulas[position] : null;
+  return MEDIA_CALC_POSITIONS;
 }
 
 function mediaCalcClampStat(value, fallback = MEDIA_CALC_BASE_STAT) {
@@ -306,18 +294,7 @@ function mediaCalcDeltaClass(value) {
 }
 
 function mediaCalcAllStatKeys() {
-  const formulaKeys = mediaCalcPositions()
-    .flatMap(pos => {
-      const formula = mediaCalcFormula(pos) || {};
-      return [
-        ...Object.keys(formula.weights || {}),
-        ...(formula.anchor_stats || []),
-      ];
-    });
-  const uniqueKeys = [...new Set(formulaKeys)];
-  return MEDIA_CALC_STAT_ORDER
-    .filter(key => uniqueKeys.includes(key))
-    .concat(uniqueKeys.filter(key => !MEDIA_CALC_STAT_ORDER.includes(key)));
+  return MEDIA_CALC_STAT_ORDER;
 }
 
 function mediaCalcEditableStatKeys() {
@@ -332,68 +309,40 @@ function mediaCalcActiveComparisonKeys() {
   });
 }
 
-function mediaCalcAnchorCurveValue(formula, level) {
-  const curve = formula?.anchor_curve || {};
-  const points = Object.keys(curve)
-    .map(key => ({ level: Number(key), value: Number(curve[key]) }))
-    .filter(point => Number.isFinite(point.level) && Number.isFinite(point.value))
-    .sort((a, b) => a.level - b.level);
-
-  if (!points.length) return Number(formula?.base || 0);
-  if (points.length === 1) return points[0].value;
-
-  if (level <= points[0].level) {
-    const first = points[0];
-    const second = points[1];
-    const slope = (second.value - first.value) / (second.level - first.level);
-    return first.value + (level - first.level) * slope;
-  }
-
-  const last = points[points.length - 1];
-  if (level >= last.level) {
-    const previous = points[points.length - 2];
-    const slope = (last.value - previous.value) / (last.level - previous.level);
-    return last.value + (level - last.level) * slope;
-  }
-
-  for (let index = 0; index < points.length - 1; index += 1) {
-    const left = points[index];
-    const right = points[index + 1];
-    if (level >= left.level && level <= right.level) {
-      const progress = (level - left.level) / (right.level - left.level);
-      return left.value + (right.value - left.value) * progress;
-    }
-  }
-
-  return Number(formula?.base || 0);
-}
-
-function mediaCalcAnchoredResult(formula) {
-  const stats = formula.anchor_stats?.length
-    ? formula.anchor_stats
-    : Object.keys(formula.weights || {});
-  const values = stats.map(key => mediaCalcStatValue(key));
-  const level = values.length
-    ? values.reduce((sum, value) => sum + value, 0) / values.length
-    : MEDIA_CALC_BASE_STAT;
-  const anchor = mediaCalcAnchorCurveValue(formula, level);
-  const adjustment = stats.reduce((sum, key) => {
-    return sum + (mediaCalcStatValue(key) - level) * Number(formula.weights?.[key] || 0);
-  }, 0);
-  return anchor + adjustment;
+function mediaCalcPesStats() {
+  return {
+    attacking_prowess: mediaCalcStatValue('attacking_prowess'),
+    ball_control: mediaCalcStatValue('ball_control'),
+    dribbling: mediaCalcStatValue('dribbling'),
+    low_pass: mediaCalcStatValue('low_pass'),
+    lofted_pass: mediaCalcStatValue('lofted_pass'),
+    finishing: mediaCalcStatValue('finishing'),
+    set_piece_taking: mediaCalcStatValue('place_kicking'),
+    curve: mediaCalcStatValue('swerve'),
+    header: mediaCalcStatValue('header'),
+    defensive_prowess: mediaCalcStatValue('defensive_prowess'),
+    ball_winning: mediaCalcStatValue('ball_winning'),
+    kicking_power: mediaCalcStatValue('kicking_power'),
+    speed: mediaCalcStatValue('speed'),
+    explosive_power: mediaCalcStatValue('explosive_power'),
+    body_control: mediaCalcStatValue('body_control'),
+    physical_contact: mediaCalcStatValue('physical_contact'),
+    jump: mediaCalcStatValue('jump'),
+    goalkeeping: mediaCalcStatValue('goalkeeper'),
+    catching: mediaCalcStatValue('catching'),
+    clearing: mediaCalcStatValue('clearing'),
+    reflexes: mediaCalcStatValue('reflexes'),
+    coverage: mediaCalcStatValue('coverage'),
+    stamina: mediaCalcStatValue('stamina'),
+    non_dom_leg_precision: 3,
+  };
 }
 
 function mediaCalcResult(position) {
-  const formula = mediaCalcFormula(position);
-  if (!formula || !formula.weights) return { decimal: 0, rounded: 0 };
-  const decimal = formula.formula_mode === 'anchored_direct'
-    ? mediaCalcAnchoredResult(formula)
-    : Object.entries(formula.weights).reduce((sum, [key, weight]) => {
-      return sum + mediaCalcStatValue(key) * Number(weight || 0);
-    }, Number(formula.base || 0));
+  const rounded = window.PES2018Overall.pes2018Overall(mediaCalcPesStats(), position, position);
   return {
-    decimal,
-    rounded: Math.max(MEDIA_CALC_MIN_STAT, Math.min(MEDIA_CALC_MAX_STAT, Math.round(decimal))),
+    decimal: rounded,
+    rounded,
   };
 }
 
@@ -1036,13 +985,13 @@ function clearMediaCalculatorSaved() {
 }
 
 async function initMediaCalculator() {
+  await window.LAQPEnsurePes2018Overall();
   const loading = document.getElementById('media-calculator-loading');
   const content = document.getElementById('media-calculator-content');
   if (!content) return;
   try {
     mediaCalcLoadState();
-    const formulasText = await mediaCalcFetchText('assets/data/formulas_por_posicion.json');
-    mediaCalcFormulas = JSON.parse(formulasText);
+    if (!window.PES2018Overall) throw new Error('No se pudo cargar el algoritmo PES 2018');
     renderMediaCalculatorPage();
     mediaCalcSaveState(true);
   } catch (error) {

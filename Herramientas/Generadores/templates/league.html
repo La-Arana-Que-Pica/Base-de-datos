@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base href="/">
+  <script>document.documentElement.classList.add('laqp-js');window.setTimeout(function(){document.documentElement.classList.add('laqp-js-timeout');},6000);</script>
+  <script src="js/consent-mode.js"></script>
+  <script src="js/minifaces.js"></script>
+  <script src="js/database-rating.js?v=20260924d"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="laqp-league-id" content="{{LEAGUE_ID}}">
+  <meta name="laqp-league-name" content="{{LEAGUE_NAME}}">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="{{CANONICAL_URL}}">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta property="og:image" content="{{OG_IMAGE_URL}}">
+  <meta property="og:url" content="{{CANONICAL_URL}}">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="css/style.css?v=20261002e">
+  <link rel="stylesheet" href="css/database-system.css?v=20260924d">
+  <link rel="icon" href="img/logo.webp" type="image/webp">
+  <script src="js/ads.js?v=20261002f"></script>
+</head>
+<body class="database-product">
+  <header id="header">
+    <a href="/index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a>
+    <div class="header-title">PES 2018 Actualizado <span>Ligas y plantillas</span></div>
+    <nav class="header-nav" aria-label="Menu principal"></nav>
+  </header>
+  <div id="league-page">
+    <div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message" data-i18n="loading.league">Cargando liga...</span></div>
+    <div id="league-content">
+      <div class="js-prerender-fallback">
+        <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html" data-i18n="common.home">Inicio</a><a href="database.html" data-i18n="common.database">Base de datos</a><span>{{LEAGUE_NAME}}</span></nav>
+        <article class="league-static-detail">
+          <header class="league-hero db-hero">
+            <img src="{{LEAGUE_IMAGE_PATH}}" alt="Logo de {{LEAGUE_NAME}}" width="120" height="120" loading="eager" onerror="this.onerror=null;this.src='img/leagues/default.webp'">
+            <div>
+              <p class="db-eyebrow" data-i18n="league.databaseLeague">Base de datos · Liga</p>
+              <h1>{{LEAGUE_NAME}}</h1>
+              <div class="db-hero-summary">{{LEAGUE_SUMMARY}}</div>
+            </div>
+          </header>
+          <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
+          <section class="db-section league-clubs">
+            <div class="db-section-heading"><h2 data-i18n="common.teams">Equipos</h2><span>{{TEAM_COUNT}} <span data-i18n="league.clubs">clubes</span></span></div>
+            <div class="db-club-grid">{{TEAM_CARDS}}</div>
+          </section>
+          <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="responsive"></div>
+        </article>
+      </div>
+    </div>
+  </div>
+  {{AD_BOOTSTRAP}}
+  <script src="js/pes2018-translations.js?v=20261003a"></script>
+  <script src="js/i18n.js?v=20261003a"></script>
+  <script src="js/site.js"></script>
+  <script src="js/pes2018-overall.js?v=20261003a"></script>
+  <script src="js/league.js?v=20261003a"></script>
+</body>
+</html>

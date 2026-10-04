@@ -116,6 +116,9 @@
 
   function renderControl() {
     if (!isDatabasePage() || document.querySelector('.miniface-mode-control')) return;
+    if (typeof window.i18nPageSupportsTranslations === 'function' && !window.i18nPageSupportsTranslations()) return;
+
+    const translate = (key, fallback) => typeof window.t === 'function' ? (window.t(key) || fallback) : fallback;
 
     const host = document.querySelector('[data-miniface-control-host]') || document.querySelector('#main, #player-page, #team-page, #league-page');
     if (!host) return;
@@ -123,12 +126,12 @@
     const control = document.createElement('div');
     control.className = 'miniface-mode-control';
     control.setAttribute('role', 'group');
-    control.setAttribute('aria-label', 'Seleccionar estilo de minifaces');
+    control.setAttribute('aria-label', translate('minifaces.aria', 'Seleccionar estilo de minifaces'));
     control.innerHTML = `
-      <span class="miniface-mode-label">Minifaces:</span>
-      <button type="button" data-miniface-mode="${CURRENT_MODE}">Actuales</button>
+      <span class="miniface-mode-label">${translate('minifaces.label', 'Minifaces:')}</span>
+      <button type="button" data-miniface-mode="${CURRENT_MODE}">${translate('minifaces.current', 'Actuales')}</button>
       <span class="miniface-mode-separator" aria-hidden="true">|</span>
-      <button type="button" data-miniface-mode="${PES_2018_MODE}">PES 2018</button>`;
+      <button type="button" data-miniface-mode="${PES_2018_MODE}">${translate('minifaces.pes2018', 'PES 2018')}</button>`;
     control.addEventListener('click', event => {
       const button = event.target.closest('[data-miniface-mode]');
       if (button) setMode(button.dataset.minifaceMode);

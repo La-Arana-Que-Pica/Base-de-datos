@@ -30,27 +30,27 @@
     <nav class="header-nav" aria-label="Menu principal"></nav>
   </header>
   <div id="league-page">
-    <div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message">Cargando liga...</span></div>
+    <div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message" data-i18n="loading.league">Cargando liga...</span></div>
     <div id="league-content">
       <div class="js-prerender-fallback">
-        <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Inicio</a><a href="database.html">Base de datos</a><span>Selecciones de África</span></nav>
+        <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html" data-i18n="common.home">Inicio</a><a href="database.html" data-i18n="common.database">Base de datos</a><span>Selecciones de África</span></nav>
         <article class="league-static-detail">
           <header class="league-hero db-hero">
             <img src="img/leagues/9006.webp" alt="Logo de Selecciones de África" width="120" height="120" loading="eager" onerror="this.onerror=null;this.src='img/leagues/default.webp'">
             <div>
-              <p class="db-eyebrow">Base de datos · Liga</p>
+              <p class="db-eyebrow" data-i18n="league.databaseLeague">Base de datos · Liga</p>
               <h1>Selecciones de África</h1>
               <div class="db-hero-summary"><span>8 equipos</span><span>208 jugadores</span><span>Media 73</span></div>
             </div>
           </header>
           <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
           <section class="db-section league-clubs">
-            <div class="db-section-heading"><h2>Equipos</h2><span>8 clubes</span></div>
+            <div class="db-section-heading"><h2 data-i18n="common.teams">Equipos</h2><span>8 <span data-i18n="league.clubs">clubes</span></span></div>
             <div class="db-club-grid"><a class="db-club-row" href="/team/v2/senegal-38/"><img src="img/teams/38.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>SENEGAL</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">79</span></a>
 <a class="db-club-row" href="/team/v2/marruecos-32/"><img src="img/teams/32.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>MARRUECOS</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">79</span></a>
-<a class="db-club-row" href="/team/v2/argelia-1040/"><img src="img/teams/1040.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>ARGELIA</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">76</span></a>
+<a class="db-club-row" href="/team/v2/argelia-1040/"><img src="img/teams/1040.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>ARGELIA</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">77</span></a>
 <a class="db-club-row" href="/team/v2/costa-de-marfil-1051/"><img src="img/teams/1051.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>COSTA DE MARFIL</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">79</span></a>
-<a class="db-club-row" href="/team/v2/egipto-34/"><img src="img/teams/34.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>EGIPTO</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">75</span></a>
+<a class="db-club-row" href="/team/v2/egipto-34/"><img src="img/teams/34.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>EGIPTO</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">74</span></a>
 <a class="db-club-row" href="/team/v2/ghana-1058/"><img src="img/teams/1058.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>GHANA</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">75</span></a>
 <a class="db-club-row" href="/team/v2/sudafrica-37/"><img src="img/teams/37.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>SUDÁFRICA</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">71</span></a>
 <a class="db-club-row" href="/team/v2/tunez-33/"><img src="img/teams/33.webp" alt="" width="46" height="46" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="db-club-row-copy"><strong>TÚNEZ</strong><small>26 jugadores</small></span><span class="db-rating stat-range-3">72</span></a></div>
@@ -67,8 +67,10 @@
     <span class="ad-slot__label">Publicidad</span>
     <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest('.ad-slot'));</script></div>
   </aside></div>
-  <script src="js/i18n.js"></script>
+  <script src="js/pes2018-translations.js?v=20261003a"></script>
+  <script src="js/i18n.js?v=20261003a"></script>
   <script src="js/site.js"></script>
-  <script src="js/league.js?v=20260924d"></script>
+  <script src="js/pes2018-overall.js?v=20261003a"></script>
+  <script src="js/league.js?v=20261003a"></script>
 </body>
 </html>

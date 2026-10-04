@@ -1,5 +1,19 @@
 'use strict';
 
+let laqpPes2018OverallPromise = null;
+window.LAQPEnsurePes2018Overall = function ensurePes2018Overall() {
+  if (window.PES2018Overall) return Promise.resolve(window.PES2018Overall);
+  if (laqpPes2018OverallPromise) return laqpPes2018OverallPromise;
+  laqpPes2018OverallPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'js/pes2018-overall.js?v=20261003a';
+    script.onload = () => resolve(window.PES2018Overall);
+    script.onerror = () => reject(new Error('No se pudo cargar el algoritmo PES 2018'));
+    document.head.appendChild(script);
+  });
+  return laqpPes2018OverallPromise;
+};
+
 const SITE_NAV_ITEMS = [
   { href: '/index.html', labelKey: 'nav.home', fallback: 'Inicio', key: 'index' },
   { href: '/database.html', labelKey: 'nav.database', fallback: 'Base de Datos', key: 'database' },
@@ -135,7 +149,7 @@ function renderMainNav() {
   const active = currentPageKey();
   nav.innerHTML = SITE_NAV_ITEMS.map(item => `
     <a href="${item.href}" class="header-nav-link${item.key === active ? ' active' : ''}">
-      ${siteText(item.labelKey, item.fallback)}
+      ${item.fallback}
     </a>`).join('');
   ensureMobileNavToggle(nav);
 }
@@ -225,9 +239,9 @@ function renderLanguageSelector() {
 
   const wrap = document.createElement('label');
   wrap.className = 'language-switcher';
-  wrap.setAttribute('aria-label', siteText('language.label', 'Idioma'));
+  wrap.setAttribute('aria-label', siteText('language.databaseLabel', 'Idioma de la Base de Datos'));
   wrap.innerHTML = `
-    <span>${siteText('language.label', 'Idioma')}</span>
+    <span>${siteText('language.databaseLabel', 'Idioma de la Base de Datos')}</span>
     <select onchange="setLanguage(this.value)">
       ${Object.entries(window.I18N_LANGUAGES).map(([code, info]) =>
         `<option value="${code}"${getCurrentLanguage() === code ? ' selected' : ''}>${info.native}</option>`
@@ -244,17 +258,17 @@ function renderSiteFooter() {
     <div class="site-footer-inner">
       <div>
         <div class="site-footer-title">PES 2018 Actualizado</div>
-        <div class="site-footer-copy">${siteText('footer.copy', 'LAqP.website: stats, caras, plantillas, guias, tacticas, descargas y base de datos para mantener PES 2018 actualizado.')}</div>
+        <div class="site-footer-copy">LAqP.website: stats, caras, plantillas, guías, tácticas, descargas y base de datos para mantener PES 2018 actualizado.</div>
       </div>
-      <nav class="site-footer-links" aria-label="${siteText('footer.linksLabel', 'Enlaces utiles')}">
-        <a href="contact.html">${siteText('footer.contact', 'Contacto')}</a>
-        <a href="acerca-de.html">${siteText('nav.about', 'Acerca de')}</a>
+      <nav class="site-footer-links" aria-label="Enlaces útiles">
+        <a href="contact.html">Contacto</a>
+        <a href="acerca-de.html">Acerca de</a>
         <a href="https://www.youtube.com/@L.A.q.P" target="_blank" rel="noopener noreferrer">YouTube</a>
-        <a href="privacy-policy.html">${siteText('footer.privacy', 'Politica de privacidad')}</a>
+        <a href="privacy-policy.html">Política de privacidad</a>
         <a href="cookies.html">Cookies</a>
         <a href="terms.html">Terminos</a>
         <a href="dmca.html">DMCA</a>
-        <a href="faq.html">${siteText('footer.help', 'Ayuda / FAQ')}</a>
+        <a href="faq.html">Ayuda / FAQ</a>
       </nav>
     </div>`;
   document.body.appendChild(footer);

@@ -1,6 +1,7 @@
 ﻿'use strict';
 
-const I18N_STORAGE_KEY = 'laqpLanguage';
+const I18N_STORAGE_KEY = 'laqpDatabaseLanguage';
+const I18N_LEGACY_STORAGE_KEY = 'laqpLanguage';
 const I18N_PROMPT_KEY = 'laqpLanguagePrompted';
 
 const I18N_LANGUAGES = {
@@ -50,10 +51,10 @@ const I18N_MESSAGES = {
     'common.name': 'Nombre',
     'common.club': 'Club',
     'common.league': 'Liga',
-    'common.country': 'Pais',
+    'common.country': 'País',
     'common.type': 'Tipo',
     'common.nationality': 'Nacionalidad',
-    'common.position': 'Posicion',
+    'common.position': 'Posición',
     'common.positionShort': 'Pos',
     'common.nationalityShort': 'Nac',
     'common.overall': 'Media',
@@ -65,7 +66,7 @@ const I18N_MESSAGES = {
     'common.any': 'Cualquiera',
     'common.allMasc': 'Todos',
     'common.allFem': 'Todas',
-    'common.yes': 'Si',
+    'common.yes': 'Sí',
     'common.no': 'No',
     'common.back': 'Volver',
     'common.backToDatabase': '← Volver a la base de datos',
@@ -73,7 +74,7 @@ const I18N_MESSAGES = {
     'common.cleanFilters': 'Limpiar filtros',
     'common.activeFilters': 'Filtros activos',
     'common.noActiveFilters': 'Sin filtros activos',
-    'common.pageOf': 'pagina {page} de {pages}',
+    'common.pageOf': 'página {page} de {pages}',
     'common.resultsCount': '{count} encontrado(s)',
     'db.homeTitle': 'Base de datos de jugadores',
     'db.homeDesc': 'Explora ligas, equipos y jugadores desde un menu interno simple.',
@@ -140,8 +141,8 @@ const I18N_MESSAGES = {
     'favorites.confirmClear': '¿Eliminar todos los favoritos?',
     'favorites.missing': '⚠️ {count} jugador(es) ya no estan disponibles en la base de datos.',
     'player.unknown': 'Jugador desconocido',
-    'player.alsoNational': 'Tambien juega para su seleccion.',
-    'player.stats': 'Estadisticas',
+    'player.alsoNational': 'También juega para su selección.',
+    'player.stats': 'Estadísticas',
     'player.abilities': 'Habilidades',
     'player.roles': 'Roles',
     'player.playerSkills': 'Habilidades de jugador',
@@ -392,10 +393,10 @@ const I18N_MESSAGES = {
     'common.name': 'Nome',
     'common.club': 'Clube',
     'common.league': 'Liga',
-    'common.country': 'Pais',
+    'common.country': 'País',
     'common.type': 'Tipo',
     'common.nationality': 'Nacionalidade',
-    'common.position': 'Posicao',
+    'common.position': 'Posição',
     'common.positionShort': 'Pos',
     'common.nationalityShort': 'Nac',
     'common.overall': 'Overall',
@@ -403,19 +404,19 @@ const I18N_MESSAGES = {
     'common.height': 'Altura',
     'common.heightShort': 'Alt',
     'common.weight': 'Peso',
-    'common.foot': 'Pe',
+    'common.foot': 'Pé',
     'common.any': 'Qualquer',
     'common.allMasc': 'Todos',
     'common.allFem': 'Todas',
     'common.yes': 'Sim',
-    'common.no': 'Nao',
+    'common.no': 'Não',
     'common.back': 'Voltar',
     'common.backToDatabase': '← Voltar para a base de dados',
     'common.backToLeagues': '◀ Voltar para Ligas',
     'common.cleanFilters': 'Limpar filtros',
     'common.activeFilters': 'Filtros ativos',
     'common.noActiveFilters': 'Sem filtros ativos',
-    'common.pageOf': 'pagina {page} de {pages}',
+    'common.pageOf': 'página {page} de {pages}',
     'common.resultsCount': '{count} encontrado(s)',
     'db.homeTitle': 'Base de dados de jogadores',
     'db.homeDesc': 'Explore ligas, equipes e jogadores em um menu interno simples.',
@@ -443,22 +444,22 @@ const I18N_MESSAGES = {
     'filters.teamTitle': 'Filtros de equipes',
     'filters.teamSubtitle': 'Busque por dados do jogo e metricas calculadas a partir do elenco.',
     'filters.playerTitle': 'Filtros de jogadores',
-    'filters.playerSubtitle': 'Use o basico para buscar rapido e abra o avancado quando precisar de precisao.',
-    'filters.basic': 'Filtros basicos',
-    'filters.advancedData': 'Dados avancados',
+    'filters.playerSubtitle': 'Use o básico para buscar rápido e abra o avançado quando precisar de precisão.',
+    'filters.basic': 'Filtros básicos',
+    'filters.advancedData': 'Dados avançados',
     'filters.playerStats': 'Stats do jogador',
     'filters.skills': 'Habilidades',
     'filters.skillsHelp': 'Mostra jogadores que tenham todas as habilidades escolhidas.',
     'filters.show': 'Mostrar filtros',
     'filters.hide': 'Ocultar filtros',
-    'filters.showAdvanced': 'Mostrar filtros avancados',
-    'filters.hideAdvanced': 'Ocultar filtros avancados',
-    'filters.avgRange': 'Overall medio',
+    'filters.showAdvanced': 'Mostrar filtros avançados',
+    'filters.hideAdvanced': 'Ocultar filtros avançados',
+    'filters.avgRange': 'Média geral',
     'filters.playerQty': 'Quantidade de jogadores',
-    'filters.role': 'Funcao',
+    'filters.role': 'Função',
     'filters.playingStyle': 'Estilo de jogo',
     'filters.comStyle': 'Estilo COM',
-    'filters.dominantFoot': 'Pe dominante',
+    'filters.dominantFoot': 'Pé dominante',
     'filters.faceScan': 'Rosto escaneado',
     'filters.left': 'Esquerdo',
     'filters.right': 'Direito',
@@ -476,40 +477,40 @@ const I18N_MESSAGES = {
     'favorites.add': 'Adicionar aos favoritos',
     'favorites.in': 'Nos favoritos',
     'favorites.emptyTitle': '⭐ Meus Favoritos',
-    'favorites.empty1': 'Voce ainda nao tem jogadores favoritos.',
-    'favorites.empty2': 'Use o botao ☆ em qualquer jogador para adiciona-lo aqui.',
+    'favorites.empty1': 'Você ainda não tem jogadores favoritos.',
+    'favorites.empty2': 'Use o botão ☆ em qualquer jogador para adicioná-lo aqui.',
     'favorites.clear': '× Limpar favoritos',
     'favorites.confirmClear': 'Remover todos os favoritos?',
     'favorites.missing': '⚠️ {count} jogador(es) ja nao estao disponiveis na base de dados.',
     'player.unknown': 'Jogador desconhecido',
-    'player.alsoNational': 'Tambem joga pela selecao.',
-    'player.stats': 'Estatisticas',
+    'player.alsoNational': 'Também joga pela seleção.',
+    'player.stats': 'Estatísticas',
     'player.abilities': 'Habilidades',
-    'player.roles': 'Funcoes',
+    'player.roles': 'Funções',
     'player.playerSkills': 'Habilidades do jogador',
     'player.comStyles': 'Estilos de jogo COM',
-    'player.appearance': 'Aparencia',
-    'player.appearanceInfo': 'Estes valores definem a aparencia do jogador no editor do jogo.',
-    'player.suitablePositions': 'Posicoes aptas',
-    'player.positionView': 'Vista de posicoes',
-    'player.positionMap': 'Mapa de posicoes aptas',
+    'player.appearance': 'Aparência',
+    'player.appearanceInfo': 'Estes valores definem a aparência do jogador no editor do jogo.',
+    'player.suitablePositions': 'Posições aptas',
+    'player.positionView': 'Vista de posições',
+    'player.positionMap': 'Mapa de posições aptas',
     'player.colors': 'Cores',
     'player.letters': 'Letras',
     'player.similar': 'Jogadores similares',
-    'player.noSimilar': 'Nao ha dados suficientes para calcular jogadores similares.',
+    'player.noSimilar': 'Não há dados suficientes para calcular jogadores similares.',
     'player.openCard': 'Abrir ficha',
-    'player.noAppearance': 'Nao ha dados de aparencia para este jogador.',
+    'player.noAppearance': 'Não há dados de aparência para este jogador.',
     'player.scanned': 'Este jogador esta escaneado no jogo.',
     'player.usesBaseFace': 'Usa o rosto base de: <strong>{name}</strong>',
     'player.usesBaseFaceUnknown': 'Usa o rosto base de outro jogador.',
     'player.miniface': 'Miniface: <strong>{name}</strong>',
     'team.squad': 'Elenco',
-    'team.noPlayers': 'Nao ha jogadores nesta equipe.',
+    'team.noPlayers': 'Não há jogadores nesta equipe.',
     'team.noFilterResults': 'Sem resultados para os filtros selecionados.',
     'team.others': 'Outros',
-    'team.initialFormation': 'Formacao inicial',
-    'team.tactics': 'Taticas',
-    'team.assignments': 'Atribuicoes',
+    'team.initialFormation': 'Formação inicial',
+    'team.tactics': 'Táticas',
+    'team.assignments': 'Atribuições',
     'team.general': 'Geral',
     'team.withBall': 'Com bola',
     'team.withoutBall': 'Sem bola',
@@ -565,7 +566,7 @@ const I18N_MESSAGES = {
     'common.league': 'Campionato',
     'common.country': 'Paese',
     'common.type': 'Tipo',
-    'common.nationality': 'Nazionalita',
+    'common.nationality': 'Nazionalità',
     'common.position': 'Posizione',
     'common.positionShort': 'Pos',
     'common.nationalityShort': 'Naz',
@@ -809,11 +810,17 @@ const I18N_MAPS = {
     pt: { GK: 'Goleiros', DEF: 'Defensores', MID: 'Meio-campistas', FWD: 'Atacantes' },
     it: { GK: 'Portieri', DEF: 'Difensori', MID: 'Centrocampisti', FWD: 'Attaccanti' },
   },
+  positionNames: {
+    es: { GK:'Portero', CB:'Defensa central', LB:'Lateral izquierdo', RB:'Lateral derecho', DMF:'Mediocampista defensivo', CMF:'Mediocampista central', LMF:'Mediocampista izquierdo', RMF:'Mediocampista derecho', AMF:'Mediocampista ofensivo', LWF:'Extremo izquierdo', RWF:'Extremo derecho', SS:'Segundo delantero', CF:'Centro delantero' },
+    en: { GK:'Goalkeeper', CB:'Centre back', LB:'Left back', RB:'Right back', DMF:'Defensive midfielder', CMF:'Central midfielder', LMF:'Left midfielder', RMF:'Right midfielder', AMF:'Attacking midfielder', LWF:'Left winger', RWF:'Right winger', SS:'Second striker', CF:'Centre forward' },
+    pt: { GK:'Goleiro', CB:'Zagueiro', LB:'Lateral esquerdo', RB:'Lateral direito', DMF:'Volante', CMF:'Meio-campista central', LMF:'Meio-campista esquerdo', RMF:'Meio-campista direito', AMF:'Meia-atacante', LWF:'Ponta esquerda', RWF:'Ponta direita', SS:'Segundo atacante', CF:'Centroavante' },
+    it: { GK:'Portiere', CB:'Difensore centrale', LB:'Terzino sinistro', RB:'Terzino destro', DMF:'Mediano', CMF:'Centrocampista centrale', LMF:'Centrocampista sinistro', RMF:'Centrocampista destro', AMF:'Trequartista', LWF:'Ala sinistra', RWF:'Ala destra', SS:'Seconda punta', CF:'Punta centrale' },
+  },
   countries: {
     es: {},
-    en: { '11':'Iran','13':'Japan','15':'North Korea','16':'South Korea','19':'Lebanon','26':'Oman','31':'Saudi Arabia','37':'United Arab Emirates','44':'Algeria','50':'Cameroon','51':'Cape Verde','52':'Central African Republic','56':'Ivory Coast','58':'Egypt','62':'Gabon','66':'Guinea-Bissau','70':'Libya','73':'Mali','76':'Morocco','79':'Niger','87':'South Africa','92':'Tunisia','95':'Zimbabwe','115':'Dominican Republic','124':'Mexico','128':'Panama','135':'United States','145':'Bolivia','146':'Brazil','151':'Peru','190':'Turkey','197':'Belgium','198':'Bosnia and Herzegovina','202':'Czech Republic','203':'Denmark','204':'England','210':'Germany','224':'Netherlands','225':'Northern Ireland','226':'Norway','228':'Portugal','230':'Russia','232':'Scotland','234':'Slovakia','236':'Spain','238':'Switzerland','241':'Wales' },
-    pt: { '11':'Irã','13':'Japão','15':'Coreia do Norte','16':'Coreia do Sul','19':'Líbano','26':'Omã','31':'Arábia Saudita','37':'Emirados Árabes Unidos','44':'Argélia','50':'Camarões','51':'Cabo Verde','52':'República Centro-Africana','56':'Costa do Marfim','58':'Egito','62':'Gabão','66':'Guiné-Bissau','70':'Líbia','73':'Mali','76':'Marrocos','79':'Níger','87':'África do Sul','92':'Tunísia','95':'Zimbábue','115':'Rep. Dominicana','124':'México','128':'Panamá','135':'Estados Unidos','145':'Bolívia','146':'Brasil','151':'Peru','190':'Turquia','197':'Bélgica','198':'Bósnia e Herzegovina','202':'Rep. Tcheca','203':'Dinamarca','204':'Inglaterra','210':'Alemanha','224':'Países Baixos','225':'Irlanda do Norte','226':'Noruega','228':'Portugal','230':'Rússia','232':'Escócia','234':'Eslováquia','236':'Espanha','238':'Suíça','241':'País de Gales' },
-    it: { '11':'Iran','13':'Giappone','15':'Corea del Nord','16':'Corea del Sud','19':'Libano','26':'Oman','31':'Arabia Saudita','37':'Emirati Arabi Uniti','44':'Algeria','50':'Camerun','51':'Capo Verde','52':'Repubblica Centrafricana','56':'Costa d Avorio','58':'Egitto','62':'Gabon','66':'Guinea-Bissau','70':'Libia','73':'Mali','76':'Marocco','79':'Niger','87':'Sudafrica','92':'Tunisia','95':'Zimbabwe','115':'Rep. Dominicana','124':'Messico','128':'Panama','135':'Stati Uniti','145':'Bolivia','146':'Brasile','151':'Peru','190':'Turchia','197':'Belgio','198':'Bosnia ed Erzegovina','202':'Rep. Ceca','203':'Danimarca','204':'Inghilterra','210':'Germania','224':'Paesi Bassi','225':'Irlanda del Nord','226':'Norvegia','228':'Portogallo','230':'Russia','232':'Scozia','234':'Slovacchia','236':'Spagna','238':'Svizzera','241':'Galles' },
+    en: { '11':'Iran','13':'Japan','15':'North Korea','16':'South Korea','19':'Lebanon','26':'Oman','31':'Saudi Arabia','37':'United Arab Emirates','44':'Algeria','50':'Cameroon','51':'Cape Verde','52':'Central African Republic','56':'Ivory Coast','58':'Egypt','62':'Gabon','66':'Guinea-Bissau','70':'Libya','73':'Mali','76':'Morocco','79':'Niger','87':'South Africa','92':'Tunisia','95':'Zimbabwe','115':'Dominican Republic','124':'Mexico','128':'Panama','135':'United States','145':'Bolivia','146':'Brazil','151':'Peru','190':'Turkey','197':'Belgium','198':'Bosnia and Herzegovina','202':'Czech Republic','203':'Denmark','204':'England','208':'France','210':'Germany','215':'Italy','224':'Netherlands','225':'Northern Ireland','226':'Norway','228':'Portugal','230':'Russia','232':'Scotland','234':'Slovakia','236':'Spain','238':'Switzerland','241':'Wales' },
+    pt: { '11':'Irã','13':'Japão','15':'Coreia do Norte','16':'Coreia do Sul','19':'Líbano','26':'Omã','31':'Arábia Saudita','37':'Emirados Árabes Unidos','44':'Argélia','50':'Camarões','51':'Cabo Verde','52':'República Centro-Africana','56':'Costa do Marfim','58':'Egito','62':'Gabão','66':'Guiné-Bissau','70':'Líbia','73':'Mali','76':'Marrocos','79':'Níger','87':'África do Sul','92':'Tunísia','95':'Zimbábue','115':'Rep. Dominicana','124':'México','128':'Panamá','135':'Estados Unidos','145':'Bolívia','146':'Brasil','151':'Peru','190':'Turquia','197':'Bélgica','198':'Bósnia e Herzegovina','202':'Rep. Tcheca','203':'Dinamarca','204':'Inglaterra','208':'França','210':'Alemanha','215':'Itália','224':'Países Baixos','225':'Irlanda do Norte','226':'Noruega','228':'Portugal','230':'Rússia','232':'Escócia','234':'Eslováquia','236':'Espanha','238':'Suíça','241':'País de Gales' },
+    it: { '11':'Iran','13':'Giappone','15':'Corea del Nord','16':'Corea del Sud','19':'Libano','26':'Oman','31':'Arabia Saudita','37':'Emirati Arabi Uniti','44':'Algeria','50':'Camerun','51':'Capo Verde','52':'Repubblica Centrafricana','56':'Costa d Avorio','58':'Egitto','62':'Gabon','66':'Guinea-Bissau','70':'Libia','73':'Mali','76':'Marocco','79':'Niger','87':'Sudafrica','92':'Tunisia','95':'Zimbabwe','115':'Rep. Dominicana','124':'Messico','128':'Panama','135':'Stati Uniti','145':'Bolivia','146':'Brasile','151':'Peru','190':'Turchia','197':'Belgio','198':'Bosnia ed Erzegovina','202':'Rep. Ceca','203':'Danimarca','204':'Inghilterra','208':'Francia','210':'Germania','215':'Italia','224':'Paesi Bassi','225':'Irlanda del Nord','226':'Norvegia','228':'Portogallo','230':'Russia','232':'Scozia','234':'Slovacchia','236':'Spagna','238':'Svizzera','241':'Galles' },
   },
 };
 
@@ -1407,6 +1414,267 @@ Object.assign(I18N_MESSAGES.it, {
   'dts.years': 'anni', 'dts.tacticsCount': 'tattiche', 'dts.available': 'Disponibile', 'dts.noData': 'Nessun dato'
 });
 
+const DATABASE_UI_MESSAGES = {
+  es: {
+    'language.databaseLabel': 'Idioma de la Base de Datos',
+    'common.years': 'años', 'common.of': 'de', 'common.noLeague': 'Sin liga',
+    'common.player': 'Jugador', 'common.team': 'Equipo', 'common.stats': 'Estadísticas',
+    'common.viewAll': 'Ver todos', 'common.compare': 'Comparar',
+    'common.category': 'Categoría', 'common.results': 'Resultados', 'common.search': 'Búsqueda',
+    'db.leagueKicker': 'Liga', 'db.teamKicker': 'Equipo', 'db.viewTeams': 'Ver equipos',
+    'db.viewSquad': 'Ver plantel', 'db.updatedPlayers': '{count} jugadores actualizados con stats, medias, equipos y referencias de edición',
+    'db.modernSquads': '{count} equipos con plantillas modernas', 'db.leaguesCompetitions': '{count} ligas y competiciones',
+    'db.heroTitle': 'Base de datos de stats y caras para PES 2018', 'db.heroDesc': 'Jugadores, equipos, ligas, stats, medias, plantillas, caras/minifaces y referencias de edición para mantener PES 2018 actualizado con datos modernos.',
+    'db.searchEverything': 'Buscar jugador, equipo o liga...', 'db.advancedSearch': 'Búsqueda avanzada',
+    'db.featuredPlayers': 'Jugadores destacados', 'db.featuredTeams': 'Equipos destacados',
+    'db.featuredLeagues': 'Ligas destacadas', 'db.masterLeagueFaces': 'Caras Liga Master',
+    'db.viewSaved': 'Ver guardados', 'db.noFavoritesTitle': 'Sin favoritos guardados',
+    'db.noFavoritesText': 'Marcá jugadores con la estrella para verlos acá.',
+    'db.staticCount': 'Incluye {memberships} relaciones jugador-equipo, {teams} equipos y {leagues} ligas.',
+    'minifaces.aria': 'Seleccionar estilo de minifaces', 'minifaces.label': 'Minifaces:',
+    'minifaces.current': 'Actuales', 'minifaces.pes2018': 'PES 2018',
+    'league.databaseLeague': 'Base de datos · Liga', 'league.clubs': 'clubes',
+    'player.databaseProfile': 'PES 2018 · Ficha de jugador', 'player.summary': 'Resumen',
+    'player.profilePes': 'Perfil PES', 'player.strengths': 'Fortalezas', 'player.pesData': 'Datos PES',
+    'player.technicalData': 'Datos técnicos PES 2018', 'player.playingStyle': 'Estilo de juego',
+    'player.form': 'Regularidad', 'player.weakFootUsage': 'Uso de pie malo',
+    'player.weakFootAccuracy': 'Precisión de pie malo', 'player.injuryResistance': 'Resistencia a lesiones',
+    'player.dominantFoot': 'Pie dominante', 'player.starter': 'Titular', 'player.notStarter': 'Fuera del XI inicial',
+    'player.squadRank': '{rank}.º por media en el equipo', 'player.positionRank': '{rank}.º {position} por media',
+    'player.squadContext': 'Contexto en el plantel', 'player.starterInitial': 'Titular en la formación inicial',
+    'player.viewSquad': 'Ver plantel', 'player.viewFormation': 'Ver formación',
+    'player.positionCompetition': 'Competencia por posición', 'player.comparePlayer': 'Comparar jugador',
+    'player.playerB': 'Jugador B', 'player.faceAlt': 'Miniface de {name}',
+    'player.appearanceAdvanced': 'Parámetros avanzados',
+    'player.attributeRadar': 'Radar de atributos', 'player.backToTeam': 'Volver a {team}',
+    'player.analysis': 'Análisis del jugador', 'player.analysisText': '{name} juega como {position} en {team}. Sus atributos más destacados son {strengths}.',
+    'player.analysisRating': 'Con media {overall}, es una opción {impact} para su rol.',
+    'player.highImpact': 'de alto impacto', 'player.interesting': 'interesante',
+    'player.analysisYoung': 'Por edad, también puede leerse como una pieza de proyección.',
+    'player.analysisExperienced': 'Por edad, encaja mejor como pieza de rendimiento inmediato.',
+    'player.analysisStyle': 'Su estilo de juego registrado es {style}.',
+    'player.openScouting': 'Abrir Scouting', 'player.interpretRatings': 'Cómo interpretar medias',
+    'player.explorePlayers': 'Explorar más jugadores',
+    'player.similarNote': 'Perfiles cercanos en la base: {players}. Abrir esas fichas ayuda a comparar alternativas por media, posición y fortalezas.',
+    'team.optionFile': 'PES 2018 · Option File', 'team.pesId': 'PES ID', 'team.players': '{count} jugadores',
+    'team.average': 'Media', 'team.averageAge': 'Edad media', 'team.buildLineup': 'Crear alineación con este equipo',
+    'team.coachTitle': 'Director Técnico', 'team.viewCoach': 'Ver ficha del DT →',
+    'team.formation': 'Formación', 'team.startingEleven': 'Once inicial · Ataque hacia arriba',
+    'team.formationState': 'Estado de la formación', 'team.pitchAria': 'Once inicial; ataque hacia arriba',
+    'team.crestAlt': 'Escudo de {team}', 'team.rightRailAria': 'Roles, uniformes y rivales',
+    'team.squadCaption': 'Plantilla de {team}',
+    'team.roles': 'Roles', 'team.uniforms': 'Uniformes', 'team.rivals': 'Rivales',
+    'team.homeKit': 'Local', 'team.awayKit': 'Visitante', 'team.thirdKit': 'Tercer kit',
+    'team.fourthKit': 'Cuarto kit', 'team.goalkeeperKit': 'Arquero', 'team.kit': 'Kit',
+    'team.shirt': 'Camiseta', 'team.shorts': 'Pantalón', 'team.socks': 'Medias',
+    'team.searchSquad': 'Buscar en la plantilla', 'team.playerName': 'Nombre del jugador',
+    'team.filterPosition': 'Filtrar por posición', 'team.noCsvPlayers': 'No hay jugadores disponibles en los CSV para esta plantilla.',
+    'team.noMatches': 'No hay jugadores que coincidan con los filtros.', 'team.playersShown': '{count} de {total} jugadores',
+    'team.attack': 'Ataque', 'team.defense': 'Defensa', 'team.zone': 'Zona',
+    'team.supportDistance': 'Distancia de apoyo', 'team.advancedInstructions': 'Instrucciones avanzadas',
+    'team.historicTactic': 'Ver táctica histórica · {season} →', 'team.fullTactic': 'Ver táctica completa →',
+  },
+  en: {
+    'language.databaseLabel': 'Database language',
+    'common.years': 'years', 'common.of': 'of', 'common.noLeague': 'No league',
+    'common.player': 'Player', 'common.team': 'Team', 'common.stats': 'Statistics',
+    'common.viewAll': 'View all', 'common.compare': 'Compare',
+    'common.category': 'Category', 'common.results': 'Results', 'common.search': 'Search',
+    'db.leagueKicker': 'League', 'db.teamKicker': 'Team', 'db.viewTeams': 'View teams',
+    'db.viewSquad': 'View squad', 'db.updatedPlayers': '{count} updated players with stats, ratings, teams and editing references',
+    'db.modernSquads': '{count} teams with updated squads', 'db.leaguesCompetitions': '{count} leagues and competitions',
+    'db.heroTitle': 'PES 2018 stats and faces database', 'db.heroDesc': 'Players, teams, leagues, stats, ratings, squads, faces/minifaces and editing references to keep PES 2018 up to date with modern data.',
+    'db.searchEverything': 'Search player, team or league...', 'db.advancedSearch': 'Advanced search',
+    'db.featuredPlayers': 'Featured players', 'db.featuredTeams': 'Featured teams',
+    'db.featuredLeagues': 'Featured leagues', 'db.masterLeagueFaces': 'Caras Liga Master',
+    'db.viewSaved': 'View saved', 'db.noFavoritesTitle': 'No saved favorites',
+    'db.noFavoritesText': 'Star players to see them here.',
+    'db.staticCount': 'Includes {memberships} player-team relationships, {teams} teams and {leagues} leagues.',
+    'minifaces.aria': 'Select miniface style', 'minifaces.label': 'Minifaces:',
+    'minifaces.current': 'Current', 'minifaces.pes2018': 'PES 2018',
+    'league.databaseLeague': 'Database · League', 'league.clubs': 'clubs',
+    'player.databaseProfile': 'PES 2018 · Player profile', 'player.summary': 'Overview',
+    'player.profilePes': 'PES profile', 'player.strengths': 'Strengths', 'player.pesData': 'PES data',
+    'player.technicalData': 'PES 2018 technical data', 'player.playingStyle': 'Playing style',
+    'player.form': 'Form', 'player.weakFootUsage': 'Weak foot usage',
+    'player.weakFootAccuracy': 'Weak foot accuracy', 'player.injuryResistance': 'Injury resistance',
+    'player.dominantFoot': 'Dominant foot', 'player.starter': 'Starter', 'player.notStarter': 'Outside the starting XI',
+    'player.squadRank': '{rank} by overall in the team', 'player.positionRank': '{rank} {position} by overall',
+    'player.squadContext': 'Squad context', 'player.starterInitial': 'Starter in the initial formation',
+    'player.viewSquad': 'View squad', 'player.viewFormation': 'View formation',
+    'player.positionCompetition': 'Competition by position', 'player.comparePlayer': 'Compare player',
+    'player.playerB': 'Player B', 'player.faceAlt': 'Miniface of {name}',
+    'player.appearanceAdvanced': 'Advanced parameters',
+    'player.attributeRadar': 'Attribute radar', 'player.backToTeam': 'Back to {team}',
+    'player.analysis': 'Player analysis', 'player.analysisText': '{name} plays as {position} for {team}. The standout attributes are {strengths}.',
+    'player.analysisRating': 'With an overall of {overall}, this is a {impact} option for the role.',
+    'player.highImpact': 'high-impact', 'player.interesting': 'useful',
+    'player.analysisYoung': 'At this age, the player can also be viewed as a development prospect.',
+    'player.analysisExperienced': 'At this age, the player fits better as an immediate-impact option.',
+    'player.analysisStyle': 'The registered playing style is {style}.',
+    'player.openScouting': 'Open Scouting', 'player.interpretRatings': 'How to read ratings',
+    'player.explorePlayers': 'Explore more players',
+    'player.similarNote': 'Similar profiles in the database: {players}. Open those profiles to compare overall, position and strengths.',
+    'team.optionFile': 'PES 2018 · Option File', 'team.pesId': 'PES ID', 'team.players': '{count} players',
+    'team.average': 'Overall', 'team.averageAge': 'Average age', 'team.buildLineup': 'Create a lineup with this team',
+    'team.coachTitle': 'Head coach', 'team.viewCoach': 'View coach profile →',
+    'team.formation': 'Formation', 'team.startingEleven': 'Starting XI · Attacking upward',
+    'team.formationState': 'Formation state', 'team.pitchAria': 'Starting XI; attacking upward',
+    'team.crestAlt': '{team} crest', 'team.rightRailAria': 'Roles, kits and rivals',
+    'team.squadCaption': '{team} squad',
+    'team.roles': 'Roles', 'team.uniforms': 'Kits', 'team.rivals': 'Rivals',
+    'team.homeKit': 'Home', 'team.awayKit': 'Away', 'team.thirdKit': 'Third kit',
+    'team.fourthKit': 'Fourth kit', 'team.goalkeeperKit': 'Goalkeeper', 'team.kit': 'Kit',
+    'team.shirt': 'Shirt', 'team.shorts': 'Shorts', 'team.socks': 'Socks',
+    'team.searchSquad': 'Search squad', 'team.playerName': 'Player name',
+    'team.filterPosition': 'Filter by position', 'team.noCsvPlayers': 'No players are available in the CSV files for this squad.',
+    'team.noMatches': 'No players match the selected filters.', 'team.playersShown': '{count} of {total} players',
+    'team.attack': 'Attack', 'team.defense': 'Defense', 'team.zone': 'Area',
+    'team.supportDistance': 'Support range', 'team.advancedInstructions': 'Advanced instructions',
+    'team.historicTactic': 'View historical tactic · {season} →', 'team.fullTactic': 'View full tactic →',
+  },
+  pt: {
+    'language.databaseLabel': 'Idioma do banco de dados',
+    'common.years': 'anos', 'common.of': 'de', 'common.noLeague': 'Sem liga',
+    'common.player': 'Jogador', 'common.team': 'Time', 'common.stats': 'Estatísticas',
+    'common.viewAll': 'Ver todos', 'common.compare': 'Comparar',
+    'common.category': 'Categoria', 'common.results': 'Resultados', 'common.search': 'Busca',
+    'db.leagueKicker': 'Liga', 'db.teamKicker': 'Time', 'db.viewTeams': 'Ver times',
+    'db.viewSquad': 'Ver elenco', 'db.updatedPlayers': '{count} jogadores atualizados com stats, médias, times e referências de edição',
+    'db.modernSquads': '{count} times com elencos atualizados', 'db.leaguesCompetitions': '{count} ligas e competições',
+    'db.heroTitle': 'Banco de dados de stats e faces para PES 2018', 'db.heroDesc': 'Jogadores, times, ligas, stats, médias, elencos, faces/minifaces e referências de edição para manter o PES 2018 atualizado com dados modernos.',
+    'db.searchEverything': 'Buscar jogador, time ou liga...', 'db.advancedSearch': 'Busca avançada',
+    'db.featuredPlayers': 'Jogadores em destaque', 'db.featuredTeams': 'Times em destaque',
+    'db.featuredLeagues': 'Ligas em destaque', 'db.masterLeagueFaces': 'Caras Liga Master',
+    'db.viewSaved': 'Ver salvos', 'db.noFavoritesTitle': 'Nenhum favorito salvo',
+    'db.noFavoritesText': 'Marque jogadores com a estrela para vê-los aqui.',
+    'db.staticCount': 'Inclui {memberships} relações jogador-time, {teams} times e {leagues} ligas.',
+    'minifaces.aria': 'Selecionar estilo de minifaces', 'minifaces.label': 'Minifaces:',
+    'minifaces.current': 'Atuais', 'minifaces.pes2018': 'PES 2018',
+    'league.databaseLeague': 'Banco de dados · Liga', 'league.clubs': 'clubes',
+    'player.databaseProfile': 'PES 2018 · Ficha do jogador', 'player.summary': 'Resumo',
+    'player.profilePes': 'Perfil PES', 'player.strengths': 'Pontos fortes', 'player.pesData': 'Dados PES',
+    'player.technicalData': 'Dados técnicos PES 2018', 'player.playingStyle': 'Estilo de jogo',
+    'player.form': 'Condição física', 'player.weakFootUsage': 'Pior pé (frequência)',
+    'player.weakFootAccuracy': 'Pior pé (precisão)', 'player.injuryResistance': 'Resistência à lesão',
+    'player.dominantFoot': 'Pé dominante', 'player.starter': 'Titular', 'player.notStarter': 'Fora do time inicial',
+    'player.squadRank': '{rank}.º por média no time', 'player.positionRank': '{rank}.º {position} por média',
+    'player.squadContext': 'Contexto no elenco', 'player.starterInitial': 'Titular na formação inicial',
+    'player.viewSquad': 'Ver elenco', 'player.viewFormation': 'Ver formação',
+    'player.positionCompetition': 'Concorrência por posição', 'player.comparePlayer': 'Comparar jogador',
+    'player.playerB': 'Jogador B', 'player.faceAlt': 'Miniface de {name}',
+    'player.appearanceAdvanced': 'Parâmetros avançados',
+    'player.attributeRadar': 'Radar de atributos', 'player.backToTeam': 'Voltar para {team}',
+    'player.analysis': 'Análise do jogador', 'player.analysisText': '{name} joga como {position} no {team}. Seus atributos de destaque são {strengths}.',
+    'player.analysisRating': 'Com média {overall}, é uma opção {impact} para a função.',
+    'player.highImpact': 'de alto impacto', 'player.interesting': 'interessante',
+    'player.analysisYoung': 'Pela idade, também pode ser visto como uma peça de projeção.',
+    'player.analysisExperienced': 'Pela idade, encaixa melhor como opção de rendimento imediato.',
+    'player.analysisStyle': 'Seu estilo de jogo registrado é {style}.',
+    'player.openScouting': 'Abrir Scouting', 'player.interpretRatings': 'Como interpretar médias',
+    'player.explorePlayers': 'Explorar mais jogadores',
+    'player.similarNote': 'Perfis próximos no banco: {players}. Abra essas fichas para comparar média, posição e pontos fortes.',
+    'team.optionFile': 'PES 2018 · Option File', 'team.pesId': 'PES ID', 'team.players': '{count} jogadores',
+    'team.average': 'Média', 'team.averageAge': 'Idade média', 'team.buildLineup': 'Criar escalação com este time',
+    'team.coachTitle': 'Técnico', 'team.viewCoach': 'Ver ficha do técnico →',
+    'team.formation': 'Formação', 'team.startingEleven': 'Time inicial · Ataque para cima',
+    'team.formationState': 'Estado da formação', 'team.pitchAria': 'Time inicial; ataque para cima',
+    'team.crestAlt': 'Escudo do {team}', 'team.rightRailAria': 'Funções, uniformes e rivais',
+    'team.squadCaption': 'Elenco do {team}',
+    'team.roles': 'Funções', 'team.uniforms': 'Uniformes', 'team.rivals': 'Rivais',
+    'team.homeKit': 'Casa', 'team.awayKit': 'Fora', 'team.thirdKit': 'Terceiro uniforme',
+    'team.fourthKit': 'Quarto uniforme', 'team.goalkeeperKit': 'Goleiro', 'team.kit': 'Uniforme',
+    'team.shirt': 'Camisa', 'team.shorts': 'Calção', 'team.socks': 'Meias',
+    'team.searchSquad': 'Buscar no elenco', 'team.playerName': 'Nome do jogador',
+    'team.filterPosition': 'Filtrar por posição', 'team.noCsvPlayers': 'Não há jogadores disponíveis nos CSV para este elenco.',
+    'team.noMatches': 'Nenhum jogador corresponde aos filtros.', 'team.playersShown': '{count} de {total} jogadores',
+    'team.attack': 'Ataque', 'team.defense': 'Defesa', 'team.zone': 'Zona',
+    'team.supportDistance': 'Distância de apoio', 'team.advancedInstructions': 'Instruções avançadas',
+    'team.historicTactic': 'Ver tática histórica · {season} →', 'team.fullTactic': 'Ver tática completa →',
+  },
+  it: {
+    'language.databaseLabel': 'Lingua del database',
+    'common.years': 'anni', 'common.of': 'di', 'common.noLeague': 'Senza campionato',
+    'common.player': 'Giocatore', 'common.team': 'Squadra', 'common.stats': 'Statistiche',
+    'common.viewAll': 'Vedi tutti', 'common.compare': 'Confronta',
+    'common.category': 'Categoria', 'common.results': 'Risultati', 'common.search': 'Ricerca',
+    'db.leagueKicker': 'Campionato', 'db.teamKicker': 'Squadra', 'db.viewTeams': 'Vedi squadre',
+    'db.viewSquad': 'Vedi rosa', 'db.updatedPlayers': '{count} giocatori aggiornati con statistiche, valutazioni, squadre e riferimenti di modifica',
+    'db.modernSquads': '{count} squadre con rose aggiornate', 'db.leaguesCompetitions': '{count} campionati e competizioni',
+    'db.heroTitle': 'Database di statistiche e volti per PES 2018', 'db.heroDesc': 'Giocatori, squadre, campionati, statistiche, valutazioni, rose, volti/miniface e riferimenti di modifica per mantenere PES 2018 aggiornato con dati moderni.',
+    'db.searchEverything': 'Cerca giocatore, squadra o campionato...', 'db.advancedSearch': 'Ricerca avanzata',
+    'db.featuredPlayers': 'Giocatori in evidenza', 'db.featuredTeams': 'Squadre in evidenza',
+    'db.featuredLeagues': 'Campionati in evidenza', 'db.masterLeagueFaces': 'Caras Liga Master',
+    'db.viewSaved': 'Vedi salvati', 'db.noFavoritesTitle': 'Nessun preferito salvato',
+    'db.noFavoritesText': 'Contrassegna i giocatori con la stella per vederli qui.',
+    'db.staticCount': 'Include {memberships} relazioni giocatore-squadra, {teams} squadre e {leagues} campionati.',
+    'minifaces.aria': 'Seleziona stile miniface', 'minifaces.label': 'Miniface:',
+    'minifaces.current': 'Attuali', 'minifaces.pes2018': 'PES 2018',
+    'league.databaseLeague': 'Database · Campionato', 'league.clubs': 'club',
+    'player.databaseProfile': 'PES 2018 · Scheda giocatore', 'player.summary': 'Riepilogo',
+    'player.profilePes': 'Profilo PES', 'player.strengths': 'Punti di forza', 'player.pesData': 'Dati PES',
+    'player.technicalData': 'Dati tecnici PES 2018', 'player.playingStyle': 'Stile di gioco',
+    'player.form': 'Forma', 'player.weakFootUsage': 'Freq. piede debole',
+    'player.weakFootAccuracy': 'Prec. piede debole', 'player.injuryResistance': 'Resistenza infortuni',
+    'player.dominantFoot': 'Piede dominante', 'player.starter': 'Titolare', 'player.notStarter': 'Fuori dagli undici iniziali',
+    'player.squadRank': '{rank}.º per valutazione nella squadra', 'player.positionRank': '{rank}.º {position} per valutazione',
+    'player.squadContext': 'Contesto nella rosa', 'player.starterInitial': 'Titolare nella formazione iniziale',
+    'player.viewSquad': 'Vedi rosa', 'player.viewFormation': 'Vedi formazione',
+    'player.positionCompetition': 'Concorrenza per posizione', 'player.comparePlayer': 'Confronta giocatore',
+    'player.playerB': 'Giocatore B', 'player.faceAlt': 'Miniface di {name}',
+    'player.appearanceAdvanced': 'Parametri avanzati',
+    'player.attributeRadar': 'Radar attributi', 'player.backToTeam': 'Torna a {team}',
+    'player.analysis': 'Analisi del giocatore', 'player.analysisText': '{name} gioca come {position} nel {team}. I suoi attributi migliori sono {strengths}.',
+    'player.analysisRating': 'Con una valutazione di {overall}, è un’opzione {impact} per il ruolo.',
+    'player.highImpact': 'ad alto impatto', 'player.interesting': 'interessante',
+    'player.analysisYoung': 'Per età, può essere considerato anche un prospetto in crescita.',
+    'player.analysisExperienced': 'Per età, si adatta meglio come opzione di rendimento immediato.',
+    'player.analysisStyle': 'Lo stile di gioco registrato è {style}.',
+    'player.openScouting': 'Apri Scouting', 'player.interpretRatings': 'Come leggere le valutazioni',
+    'player.explorePlayers': 'Esplora altri giocatori',
+    'player.similarNote': 'Profili simili nel database: {players}. Apri le schede per confrontare valutazione, posizione e punti di forza.',
+    'team.optionFile': 'PES 2018 · Option File', 'team.pesId': 'PES ID', 'team.players': '{count} giocatori',
+    'team.average': 'Valutazione', 'team.averageAge': 'Età media', 'team.buildLineup': 'Crea una formazione con questa squadra',
+    'team.coachTitle': 'Allenatore', 'team.viewCoach': 'Vedi scheda allenatore →',
+    'team.formation': 'Formazione', 'team.startingEleven': 'Undici iniziale · Attacco verso l’alto',
+    'team.formationState': 'Stato della formazione', 'team.pitchAria': 'Undici iniziale; attacco verso l’alto',
+    'team.crestAlt': 'Stemma del {team}', 'team.rightRailAria': 'Ruoli, divise e rivali',
+    'team.squadCaption': 'Rosa del {team}',
+    'team.roles': 'Ruoli', 'team.uniforms': 'Divise', 'team.rivals': 'Rivali',
+    'team.homeKit': 'Casa', 'team.awayKit': 'Trasferta', 'team.thirdKit': 'Terza divisa',
+    'team.fourthKit': 'Quarta divisa', 'team.goalkeeperKit': 'Portiere', 'team.kit': 'Divisa',
+    'team.shirt': 'Maglia', 'team.shorts': 'Pantaloncini', 'team.socks': 'Calzettoni',
+    'team.searchSquad': 'Cerca nella rosa', 'team.playerName': 'Nome del giocatore',
+    'team.filterPosition': 'Filtra per posizione', 'team.noCsvPlayers': 'Nessun giocatore disponibile nei CSV per questa rosa.',
+    'team.noMatches': 'Nessun giocatore corrisponde ai filtri.', 'team.playersShown': '{count} di {total} giocatori',
+    'team.attack': 'Attacco', 'team.defense': 'Difesa', 'team.zone': 'Zona',
+    'team.supportDistance': 'Distanza di supporto', 'team.advancedInstructions': 'Istruzioni avanzate',
+    'team.historicTactic': 'Vedi tattica storica · {season} →', 'team.fullTactic': 'Vedi tattica completa →',
+  },
+};
+
+Object.entries(DATABASE_UI_MESSAGES).forEach(([lang, messages]) => {
+  I18N_MESSAGES[lang] = Object.assign(I18N_MESSAGES[lang] || {}, messages);
+});
+
+const PES2018_OFFICIAL = window.PES2018_OFFICIAL_I18N || {};
+I18N_MAPS.advancedTactics = {
+  es: { '1':'Pegados a la banda','2':'Falso nueve','3':'Laterales interiores','4':'Laterales ofensivos','5':'Rotación de banda','6':'Tiki-taka','7':'Centros al área','8':'Defensivo','9':'Falso extremo','10':'Acumular jugadores en el área','11':'Línea defensiva retrasada','12':'Presión tras pérdida','13':'Marcaje estrecho','14':'Delantero liberado','15':'Extremos defensivos' },
+  en: { '1':'Hug the Touchline','2':'False No. 9','3':'False Full Backs','4':'Attacking Full Backs','5':'Wing Rotation','6':'Tiki-Taka','7':'Centring Targets','8':'Defensive','9':'False Winger','10':'Swarm the Box','11':'Deep Defensive Line','12':'Gegenpress','13':'Tight Marking','14':'Counter Target','15':'Defensive Wingers' },
+  pt: { '1':'Abraçar a lateral','2':'Falso 9','3':'Laterais invertidos','4':'Laterais ofensivos','5':'Rotação pelas pontas','6':'Tiki-taka','7':'Alvos de cruzamento','8':'Defensivo','9':'Ponta falso','10':'Povoar a área','11':'Linha defensiva recuada','12':'Pressão pós-perda','13':'Marcação cerrada','14':'Alvo de contra-ataque','15':'Pontas defensivos' },
+  it: { '1':'Ampiezza sulle fasce','2':'Falso nove','3':'Terzini interni','4':'Terzini offensivi','5':'Rotazione sulle fasce','6':'Tiki-taka','7':'Obiettivi sui cross','8':'Difensivo','9':'Falsa ala','10':'Affollare l’area','11':'Linea difensiva bassa','12':'Gegenpressing','13':'Marcatura stretta','14':'Obiettivo contropiede','15':'Ali difensive' },
+};
+Object.entries(PES2018_OFFICIAL.messages || {}).forEach(([lang, messages]) => {
+  I18N_MESSAGES[lang] = Object.assign(I18N_MESSAGES[lang] || {}, messages);
+});
+Object.entries(PES2018_OFFICIAL.maps || {}).forEach(([group, languages]) => {
+  I18N_MAPS[group] = I18N_MAPS[group] || {};
+  Object.entries(languages || {}).forEach(([lang, values]) => {
+    if (Array.isArray(values)) I18N_MAPS[group][lang] = values;
+    else I18N_MAPS[group][lang] = Object.assign(I18N_MAPS[group][lang] || {}, values);
+  });
+});
+
 function i18nNormalizeLang(lang) {
   const base = String(lang || '').toLowerCase().split('-')[0];
   return I18N_LANGUAGES[base] ? base : I18N_DEFAULT_LANG;
@@ -1414,7 +1682,9 @@ function i18nNormalizeLang(lang) {
 
 function getStoredLanguage() {
   try {
-    return i18nNormalizeLang(localStorage.getItem(I18N_STORAGE_KEY) || I18N_DEFAULT_LANG);
+    const stored = localStorage.getItem(I18N_STORAGE_KEY);
+    const legacy = localStorage.getItem(I18N_LEGACY_STORAGE_KEY);
+    return i18nNormalizeLang(stored || legacy || I18N_DEFAULT_LANG);
   } catch {
     return I18N_DEFAULT_LANG;
   }
@@ -1427,8 +1697,9 @@ function i18nPageSupportsTranslations() {
     .map(part => part.toLowerCase());
   const first = parts[0] || '';
   const file = (parts[parts.length - 1] || 'index.html').toLowerCase();
-  return ['database', 'player', 'team', 'league'].includes(first)
-    || ['database.html', 'player.html', 'team.html', 'league.html'].includes(file);
+  if (['player', 'team', 'league'].includes(first)) return true;
+  if (['database.html', 'player.html', 'team.html', 'league.html'].includes(file)) return true;
+  return first === 'database' && parts[1] === 'v2' && ['players', 'teams', 'leagues'].includes(parts[2] || '');
 }
 
 function getActiveLanguage() {
@@ -1451,7 +1722,7 @@ function t(key, params = {}) {
   const lang = getCurrentLanguage();
   const raw = (I18N_MESSAGES[lang] && I18N_MESSAGES[lang][key])
     || (I18N_MESSAGES.es && I18N_MESSAGES.es[key])
-    || key;
+    || '';
   return Object.entries(params).reduce((text, [name, value]) => {
     return text.replaceAll(`{${name}}`, String(value));
   }, raw);
@@ -1477,14 +1748,25 @@ function i18nPairs(group) {
 
 function applyI18nToDocument(root = document) {
   document.documentElement.lang = getActiveLanguage();
+  document.documentElement.dir = 'ltr';
   root.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = t(el.dataset.i18n);
+    let params = {};
+    try { params = JSON.parse(el.dataset.i18nParams || '{}'); } catch {}
+    el.textContent = t(el.dataset.i18n, params);
+  });
+  root.querySelectorAll('[data-i18n-map][data-i18n-key]').forEach(el => {
+    el.textContent = i18nLookup(el.dataset.i18nMap, el.dataset.i18nKey, el.textContent);
   });
   root.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     el.setAttribute('placeholder', t(el.dataset.i18nPlaceholder));
   });
   root.querySelectorAll('[data-i18n-title]').forEach(el => {
     el.setAttribute('title', t(el.dataset.i18nTitle));
+  });
+  root.querySelectorAll('[data-i18n-alt]').forEach(el => {
+    let params = {};
+    try { params = JSON.parse(el.dataset.i18nParams || '{}'); } catch {}
+    el.setAttribute('alt', t(el.dataset.i18nAlt, params));
   });
   root.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
     el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel));

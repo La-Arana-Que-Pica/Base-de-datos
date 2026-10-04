@@ -500,7 +500,6 @@ const COUNTRY_NAMES = {
 };
 
 let scoutingDataset = null;
-let scoutingFormulas = null;
 let scoutingMarketData = null;
 let scoutingState = {
   leagueId: '',
@@ -759,17 +758,6 @@ function isSpecialPlayer(player) {
   return SPECIAL_TEAM_NAME_PATTERNS.some(pattern => pattern.test(normalizeSearchText(player.teamName || '')));
 }
 
-function buildCorrectedOverallMap(rows) {
-  const map = new Map();
-  rows.forEach(row => {
-    const playerId = row.PlayerId || row.Id || row.id || row.player_id || '';
-    const overall = row.OverallStats || row.Overall || row.corrected_overall || row.media || '';
-    if (!playerId || !overall) return;
-    map.set(playerId, overall);
-  });
-  return map;
-}
-
 function avg(values) {
   const nums = values.filter(value => Number.isFinite(value) && value > 0);
   return nums.length ? nums.reduce((sum, value) => sum + value, 0) / nums.length : 0;
@@ -791,8 +779,8 @@ function groupLabel(group) {
   return { GK: 'arco', DEF: 'defensa', MID: 'mediocampo', FWD: 'ataque' }[group] || group;
 }
 
-function buildDataset(players, teams, squads, leagues, correctedRows) {
-  const correctedMap = buildCorrectedOverallMap(correctedRows || []);
+function buildDataset(players, teams, squads, leagues) {
+  players.forEach(player => window.PES2018Overall.assignOverall(player));
   const leagueRows = leagues || [];
   const teamMap = new Map();
   const leagueMap = new Map();
@@ -841,7 +829,7 @@ function buildDataset(players, teams, squads, leagues, correctedRows) {
       if (!playerId || playerId === '0') continue;
       const row = playerMap.get(playerId);
       if (!row) continue;
-      const overall = correctedMap.get(playerId) || row.OverallStats || '';
+      const overall = row.OverallStats || '';
       const player = {
         ...row,
         OverallStats: overall,
@@ -1087,49 +1075,10 @@ function getPrototypeOptionsForPosition(position) {
   return options;
 }
 
-const FORMULA_STAT_MAP = {
-  attacking_prowess: 'attackingProwess',
-  ball_control: 'ballControl',
-  dribbling: 'dribbling',
-  low_pass: 'lowPass',
-  lofted_pass: 'loftedPass',
-  finishing: 'finishing',
-  place_kicking: 'Place Kicking',
-  swerve: 'controlledSpin',
-  header: 'header',
-  defensive_prowess: 'defensiveProwess',
-  ball_winning: 'ballWinning',
-  kicking_power: 'kickingPower',
-  speed: 'speed',
-  explosive_power: 'acceleration',
-  body_control: 'bodyControl',
-  physical_contact: 'physicalContact',
-  jump: 'jump',
-  stamina: 'stamina',
-  goalkeeper: 'goalkeeping',
-  catching: 'catching',
-  clearing: 'clearing',
-  reflexes: 'reflexes',
-  coverage: 'coverage',
-};
-
-function formulaStatValue(player, formulaKey) {
-  const mapped = FORMULA_STAT_MAP[formulaKey] || formulaKey;
-  return STAT_ALIASES[mapped] ? statValue(player, mapped) : stat(player, mapped);
-}
-
 function getProjectedPositionRating(player, targetPosition) {
   const target = targetPosition || player.pos || playerPosition(player);
   if (!target) return stat(player, 'OverallStats');
-  const formula = scoutingFormulas && scoutingFormulas[target];
-  if (formula && formula.interpretable_formula && formula.weights) {
-    const decimal = Object.entries(formula.weights).reduce((sum, [key, weight]) => {
-      return sum + formulaStatValue(player, key) * Number(weight || 0);
-    }, Number(formula.base || 0));
-    return Math.max(40, Math.min(99, Math.round(decimal)));
-  }
-  if (target === player.pos) return stat(player, 'OverallStats');
-  return Math.max(40, Math.min(99, Math.round(rawMetaScore(player, POSITION_PROFILE_HINT[target] || 'any'))));
+  return window.PES2018Overall.overallFromLaqpRow(player, target);
 }
 
 function positionAptitude(player, targetPosition) {
@@ -1343,7 +1292,7 @@ function transferDifficulty(item, club) {
   else if (diff > 5) score += 24;
   else if (diff > 2) score += 12;
   if (club.region === 'south-america' && playerRegion === 'europe' && overall >= 80) score += 26;
-  if (player.teamId && stat(player, 'OverallStats') >= (item.club?.maxOverall || club.maxOverall || 99) - 1) score += 12;
+  if (player.teamId && stat(player, 'OverallStats') >= (item.club?.maxOverall || club.maxOverall || 109) - 1) score += 12;
   if (item.regionalFit < 55) score += 14;
   if (player.isFreeAgent) score -= 18;
 
@@ -1705,7 +1654,7 @@ function renderScoutingFilters() {
           </div>
           <div class="scouting-control">
             <label for="scout-min-overall">Media min.</label>
-            <input id="scout-min-overall" type="number" min="40" max="99" placeholder="Sin limite" value="${rankEscape(scoutingState.minOverall)}" oninput="updateScoutingState('minOverall', this.value)">
+            <input id="scout-min-overall" type="number" min="40" max="109" placeholder="Sin limite" value="${rankEscape(scoutingState.minOverall)}" oninput="updateScoutingState('minOverall', this.value)">
           </div>
           ${renderScoutingDropdown({
             id: 'scout-sort',
@@ -1725,7 +1674,7 @@ function renderScoutingFilters() {
               </div>
               <div class="scouting-control">
                 <label for="scout-max-overall">Media max.</label>
-                <input id="scout-max-overall" type="number" min="40" max="99" placeholder="Sin limite" value="${rankEscape(scoutingState.maxOverall)}" oninput="updateScoutingState('maxOverall', this.value)">
+                <input id="scout-max-overall" type="number" min="40" max="109" placeholder="Sin limite" value="${rankEscape(scoutingState.maxOverall)}" oninput="updateScoutingState('maxOverall', this.value)">
               </div>
               <div class="scouting-control">
                 <label for="scout-min-meta">Meta min.</label>
@@ -2249,7 +2198,7 @@ function updateScoutingState(key, value) {
     if (club && scoutingState.quickRole === 'starter') scoutingState.minOverall = String(Math.max(40, club.avgOverall - 1));
     if (club && scoutingState.quickRole === 'rotation') {
       scoutingState.minOverall = String(Math.max(40, club.avgOverall - 4));
-      scoutingState.maxOverall = String(Math.min(99, club.avgOverall + 2));
+      scoutingState.maxOverall = String(Math.min(109, club.avgOverall + 2));
     }
     if (club && scoutingState.quickRole === 'veteran') scoutingState.minOverall = String(Math.max(40, club.avgOverall - 2));
   }
@@ -2288,7 +2237,7 @@ function applyQuickScoutingPreset(id) {
     scoutingState.sort = 'fit';
     if (club) {
       scoutingState.minOverall = String(Math.max(40, club.avgOverall - 4));
-      scoutingState.maxOverall = String(Math.min(99, club.avgOverall + 2));
+      scoutingState.maxOverall = String(Math.min(109, club.avgOverall + 2));
     }
   } else if (id === 'realistic') {
     scoutingState.regional = true;
@@ -2385,17 +2334,16 @@ function findSimilarScout(playerId) {
 }
 
 async function initScouting() {
+  await window.LAQPEnsurePes2018Overall();
   const loading = document.getElementById('rankings-loading');
   const content = document.getElementById('rankings-content');
   if (!content) return;
 
-  const [playersText, teamsText, squadsText, leaguesText, correctedText, formulasText, marketValuesText, wagesText, financesText, rivalriesText, historyText, affinitiesText, profilesText] = await Promise.all([
+  const [playersText, teamsText, squadsText, leaguesText, marketValuesText, wagesText, financesText, rivalriesText, historyText, affinitiesText, profilesText] = await Promise.all([
     fetchText('database/All players exported.csv'),
     fetchText('database/All teams exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All leagues exported.csv'),
-    fetchText('database/medias_corregidas.csv'),
-    fetchText('assets/data/formulas_por_posicion.json'),
     fetchText('database/scouting/market_values.csv'),
     fetchText('database/scouting/player_wages.csv'),
     fetchText('database/scouting/club_finances.csv'),
@@ -2411,14 +2359,11 @@ async function initScouting() {
     return;
   }
 
-  scoutingFormulas = formulasText ? JSON.parse(formulasText) : null;
-
   scoutingDataset = buildDataset(
     parseCSV(playersText),
     parseCSV(teamsText),
     parseCSV(squadsText),
-    leaguesText ? parseCSV(leaguesText) : [],
-    correctedText ? parseCSV(correctedText) : []
+    leaguesText ? parseCSV(leaguesText) : []
   );
 
   if (window.ScoutingData) {

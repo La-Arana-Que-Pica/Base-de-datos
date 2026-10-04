@@ -42,13 +42,16 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
     const cta = document.createElement('a');
     cta.className = 'club-builder-cta club-text-link';
     cta.href = `alineaciones.html?team=${encodeURIComponent(teamId)}`;
-    cta.textContent = 'Crear alineación con este equipo';
+    cta.textContent = typeof t === 'function' ? t('team.buildLineup') : 'Crear alineación con este equipo';
     identity.appendChild(cta);
   }
   const body = club.querySelector('.club-roster-table tbody');
   const rows = Array.from(body.rows);
   const search = club.querySelector('[data-club-search]');
-  const collator = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
+  const collator = new Intl.Collator(
+    typeof window.getCurrentLanguage === 'function' ? window.getCurrentLanguage() : 'es',
+    { sensitivity: 'base', numeric: true }
+  );
   let group = '', sort = '', direction = 1;
   const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
 
@@ -59,7 +62,9 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
       row.hidden = !!((group && row.dataset.group !== group) || !normalize(row.dataset.name).includes(term));
       if (!row.hidden) count++;
     });
-    club.querySelector('[data-roster-count]').textContent = `${count} de ${rows.length} jugadores`;
+    club.querySelector('[data-roster-count]').textContent = typeof t === 'function'
+      ? t('team.playersShown', { count, total: rows.length })
+      : `${count} de ${rows.length} jugadores`;
     club.querySelector('[data-roster-empty]').hidden = count !== 0;
   }
 
@@ -90,9 +95,11 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
         const state = positions[variant.dataset.formation] || positions.normal;
         player.style.left = `${state.left}%`;
         player.style.top = `${state.top}%`;
-        player.querySelector('.club-pitch-position').textContent = state.position;
+        player.querySelector('.club-pitch-position').textContent = typeof i18nLookup === 'function'
+          ? i18nLookup('positions', state.positionKey, state.position)
+          : state.position;
       });
-      club.querySelector('.club-pitch').setAttribute('aria-label', `Once inicial: ${variant.textContent}; ataque hacia arriba`);
+      club.querySelector('.club-pitch').setAttribute('aria-label', `${typeof t === 'function' ? t('team.startingEleven') : 'Once inicial'}: ${variant.textContent}`);
     }
   });
   search.addEventListener('input', filterRows);

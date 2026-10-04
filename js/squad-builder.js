@@ -705,7 +705,7 @@
     const file = el['builder-custom-photo'].files[0];
     const url = el['builder-custom-image-url'].value.trim();
     const existing = state.customPlayersById.get(id);
-    if (!name || !formationsApi.formations.length || !position || !Number.isInteger(overall) || overall < 40 || overall > 99) { showToast('Completá nombre, posición y una media entre 40 y 99.', true); return; }
+    if (!name || !formationsApi.formations.length || !position || !Number.isInteger(overall) || overall < 40 || overall > 109) { showToast('Completá nombre, posición y una media entre 40 y 109.', true); return; }
     if (url && !/^https?:\/\//i.test(url)) { showToast('La URL de imagen debe comenzar con http:// o https://.', true); return; }
     if (!file && !url && !(existing && existing.imageRef && existing.imageRef.type)) { showToast('Agregá una foto o una URL de imagen.', true); return; }
     const player = { ...(existing || {}), id, custom:true, name, position, overall, age:Number(el['builder-custom-age'].value) || null, teamName:el['builder-custom-team'].value.trim(), nationality:el['builder-custom-nationality'].value.trim(), secondaryPositions:[], clubIds:[], teamIds:[], clubId:'', miniface:'img/players/default.webp', pes2018Miniface:'' };

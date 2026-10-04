@@ -12,10 +12,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calculadora de Medias PES 2018 | LAqP</title>
-  <meta name="description" content="Calculadora de medias PES 2018 basada en la formula aproximada de LAqP. Elegi posicion, ajusta stats y estima la media del jugador." />
+  <meta name="description" content="Calculadora de medias con el algoritmo real reconstruido de PES 2018. Elegi posicion, ajusta stats y calcula la media del jugador." />
   <link rel="canonical" href="https://laqp.website/calculadora-medias.html" />
   <meta property="og:title" content="Calculadora de Medias PES 2018 - LAqP" />
-  <meta property="og:description" content="Calcula una media aproximada para jugadores de PES 2018 usando formulas por posicion." />
+  <meta property="og:description" content="Calcula la media con el algoritmo interno reconstruido de PES 2018." />
   <meta property="og:image" content="https://laqp.website/img/logo.png" />
   <meta property="og:url" content="https://laqp.website/calculadora-medias.html" />
   <meta property="og:type" content="website" />
@@ -27,7 +27,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Calculadora de Medias PES 2018",
-    "description": "Herramienta para estimar medias de PES 2018 segun posicion y estadisticas.",
+    "description": "Herramienta para calcular medias con el algoritmo interno reconstruido de PES 2018.",
     "url": "https://laqp.website/calculadora-medias.html",
     "applicationCategory": "SportsApplication"
   }
@@ -45,7 +45,7 @@
   <main class="content-hub-page media-calculator-page media-calculator-redesign">
     <section class="content-hub-hero scouting-hero-compact media-calculator-hero">
       <h1>Calculadora de medias</h1>
-      <p>Estima la media aproximada de un jugador de PES 2018 segun posicion y estadisticas. La formula es una aproximacion propia de LAqP basada en pruebas y comparaciones, no una formula oficial de Konami.</p>
+      <p>Calcula la media de un jugador con el algoritmo interno reconstruido de PES 2018, respetando sus pesos, bonus posicionales y redondeos.</p>
     </section>
 
     <section class="seo-content-block content-hub-copy">
@@ -54,7 +54,7 @@
       <div class="tool-value-grid">
         <article class="tool-value-card">
           <h3>Crear jugadores</h3>
-          <p>Proba stats antes de guardar un jugador nuevo y evita medias desbalanceadas.</p>
+          <p>Proba stats antes de guardar un jugador nuevo y obtene la media que calcula PES 2018.</p>
         </article>
         <article class="tool-value-card">
           <h3>Comparar posiciones</h3>
@@ -62,7 +62,7 @@
         </article>
         <article class="tool-value-card">
           <h3>Revisar actualizaciones</h3>
-          <p>Contrasta cambios de stats con una referencia aproximada del juego.</p>
+          <p>Contrasta cambios de stats con el calculo reconstruido del juego.</p>
         </article>
       </div>
     </section>
@@ -78,7 +78,7 @@
       <h2>Como usarla</h2>
       <p>Elegi una posicion, ajusta los atributos principales y revisa la media estimada. Para resultados mas razonables, compara siempre jugadores de roles parecidos: un central rapido, un cinco recuperador o un extremo encarador tienen necesidades distintas.</p>
       <h2>Preguntas frecuentes</h2>
-      <details><summary>La media calculada es exacta?</summary><p>No. Es una aproximacion de LAqP. Sirve como referencia para editar mejor, pero no reemplaza la formula interna del juego.</p></details>
+      <details><summary>La media calculada reproduce PES 2018?</summary><p>Si. Usa el algoritmo reconstruido del ejecutable original, incluidos los redondeos enteros, la tabla global y el tratamiento especial de porteros.</p></details>
       <details><summary>Por que cambia tanto segun la posicion?</summary><p>PES 2018 pondera atributos diferentes segun el puesto. Defensa pesa mas en centrales; definicion y actitud ofensiva pesan mas en delanteros.</p></details>
       <details><summary>Que herramienta conviene usar despues?</summary><p>Usa la base de datos para comparar jugadores reales y Scouting para encontrar perfiles similares dentro del Option File.</p></details>
       <div class="seo-link-row">
@@ -93,6 +93,7 @@
 
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
-  <script src="js/media-calculator.js"></script>
+  <script src="js/pes2018-overall.js?v=20261003a"></script>
+  <script src="js/media-calculator.js?v=20261003a"></script>
 </body>
 </html>

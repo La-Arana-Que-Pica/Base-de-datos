@@ -117,23 +117,23 @@ function renderLeaguePage(league, teams) {
   const content = document.getElementById('league-content');
   window.LAQPAds?.preserve(content);
 
-  const cardsHtml = teams.map(t => {
-    const avg = teamAvgOvr(t.players);
+  const cardsHtml = teams.map(team => {
+    const avg = teamAvgOvr(team.players);
     const avgHtml = avg !== null
       ? `<span class="db-rating ${dbRatingClass(avg)}">${avg}</span>`
       : '';
     return `
-      <a class="db-club-row" href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(t.id, t.displayName) : `team.html?id=${encodeURIComponent(t.id)}`}">
+      <a class="db-club-row" href="${typeof laqpTeamUrl === 'function' ? laqpTeamUrl(team.id, team.displayName) : `team.html?id=${encodeURIComponent(team.id)}`}">
         <img
-          src="img/teams/${escapeHtml(t.id)}.webp"
+          src="img/teams/${escapeHtml(team.id)}.webp"
           onerror="this.onerror=null;this.src='img/teams/default.webp'"
           alt="" width="46" height="46" loading="lazy">
-        <span class="db-club-row-copy"><strong>${escapeHtml(t.displayName)}</strong><small>${t.players.length} jugadores</small></span>
+        <span class="db-club-row-copy"><strong>${escapeHtml(team.displayName)}</strong><small>${t('db.playerCount', { count: team.players.length })}</small></span>
         ${avgHtml}
       </a>`;
   }).join('');
-  const allScores = teams.flatMap(team => team.players.map(player => Number(player['OverallStats']))).filter(value => Number.isFinite(value) && value > 0 && value <= 99);
-  const leagueAverage = allScores.length ? `<span>Media ${Math.round(allScores.reduce((sum, value) => sum + value, 0) / allScores.length)}</span>` : '';
+  const allScores = teams.flatMap(team => team.players.map(player => Number(player['OverallStats']))).filter(value => Number.isFinite(value) && value >= 40 && value <= 109);
+  const leagueAverage = allScores.length ? `<span>${t('common.overall')} ${Math.round(allScores.reduce((sum, value) => sum + value, 0) / allScores.length)}</span>` : '';
   const playerCount = teams.reduce((sum, team) => sum + team.players.length, 0);
 
   content.innerHTML = `
@@ -150,15 +150,15 @@ function renderLeaguePage(league, teams) {
         onerror="this.onerror=null;this.src='img/leagues/default.webp'"
         alt="${escapeHtml(league.name)}">
       <div>
-        <p class="db-eyebrow">Base de datos · Liga</p>
+        <p class="db-eyebrow">${t('league.databaseLeague')}</p>
         <h1>${escapeHtml(league.name)}</h1>
-        <div class="db-hero-summary"><span>${teams.length} equipos</span><span>${playerCount} jugadores</span>${leagueAverage}</div>
+        <div class="db-hero-summary"><span>${t('db.teamCount', { count: teams.length })}</span><span>${t('db.playerCount', { count: playerCount })}</span>${leagueAverage}</div>
       </div>
     </header>
 
     <div class="ad-placement" data-ad-placement="league-top" data-ad-unit-target="responsive"></div>
 
-    <section class="db-section league-clubs"><div class="db-section-heading"><h2>Equipos</h2><span>${teams.length} clubes</span></div><div class="db-club-grid">${cardsHtml}</div></section>
+    <section class="db-section league-clubs"><div class="db-section-heading"><h2>${t('common.teams')}</h2><span>${teams.length} ${t('league.clubs')}</span></div><div class="db-club-grid">${cardsHtml}</div></section>
 
     <div class="ad-placement" data-ad-placement="league-bottom" data-ad-unit-target="responsive"></div>`;
 
@@ -216,6 +216,7 @@ function showError(message) {
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 
 async function boot() {
+  await window.LAQPEnsurePes2018Overall();
   const params = new URLSearchParams(window.location.search);
   const embeddedLeagueId = document.querySelector('meta[name="laqp-league-id"]')?.content || '';
   const embeddedLeagueName = document.querySelector('meta[name="laqp-league-name"]')?.content || '';
@@ -233,12 +234,11 @@ async function boot() {
     return;
   }
 
-  const [teamsText, playersText, squadsText, leaguesText, corregidosText] = await Promise.all([
+  const [teamsText, playersText, squadsText, leaguesText] = await Promise.all([
     fetchText('database/All teams exported.csv'),
     fetchText('database/All players exported.csv'),
     fetchText('database/All squads exported.csv'),
     fetchText('database/All leagues exported.csv'),
-    fetchText('database/medias_corregidas.csv'),
   ]);
 
   if (!teamsText || !playersText || !squadsText || !leaguesText) {
@@ -248,6 +248,7 @@ async function boot() {
 
   const { rows: teamRows } = parseCSV(teamsText);
   const { rows: playerRows } = parseCSV(playersText);
+  playerRows.forEach(row => window.PES2018Overall.assignOverall(row));
   const { rows: squadRows } = parseCSV(squadsText);
   const leagueRows = parseLeaguesCSV(leaguesText);
 
@@ -277,19 +278,6 @@ async function boot() {
     if (pid) playerMap[pid] = row;
   });
 
-  // Build corrected overall map from medias_corregidas.csv
-  const corregidosMap = {};
-  if (corregidosText) {
-    const { rows: corregidosRows } = parseCSV(corregidosText);
-    corregidosRows.forEach(r => {
-      const pid = r['PlayerId'] || r['Id'] || r['id'] || r['player_id'] || '';
-      const ovr = r['OverallStats'] || r['Overall'] || r['corrected_overall'] || r['media'] || '';
-      if (pid && ovr) {
-        corregidosMap[pid] = ovr;
-      }
-    });
-  }
-
   // Build squad map (teamId → player list)
   const squadMap = {};
   squadRows.forEach(squadRow => {
@@ -300,14 +288,7 @@ async function boot() {
       const pid = squadRow[`Player ${i}`];
       if (!pid || pid === '0') continue;
       const p = playerMap[pid];
-      if (p) {
-        const corregidosOvr = corregidosMap[pid];
-        if (corregidosOvr) {
-          players.push({ ...p, OverallStats: corregidosOvr });
-        } else {
-          players.push(p);
-        }
-      }
+      if (p) players.push(p);
     }
     squadMap[tid] = players;
   });
