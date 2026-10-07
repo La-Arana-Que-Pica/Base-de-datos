@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+900001;Fábio;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+900002;Samuel Xavier;LD;83;72;LD;83;72;MD;78;46;LD;82;73
+900003;Nino;DFC;61;75;DFC;61;75;DFC;61;75;DFC;61;76
+900004;Felipe Melo;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+900005;Marcelo;LI;17;72;LI;17;72;MC;31;43;LI;18;73
+900006;André;MCD;43;60;MCD;43;60;MCD;42;52;MC;42;56
+900007;Martinelli;MC;58;54;MC;58;54;MC;57;48;MC;58;56
+900008;Paulo Henrique Ganso;MP;50;37;MP;50;37;MP;62;29;SD;50;32
+900009;Jhon Arias;ED;82;30;ED;82;30;ED;83;22;MD;80;51
+900010;Keno;EI;18;30;EI;18;30;EI;14;22;MI;20;51
+900011;Germán Cano;DC;50;18;DC;50;18;DC;50;15;DC;50;21

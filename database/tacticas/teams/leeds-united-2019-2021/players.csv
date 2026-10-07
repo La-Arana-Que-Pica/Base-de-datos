@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+903001;Illan Meslier;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+903002;Luke Ayling;LD;83;72;LD;83;72;DFC;72;73;LD;83;73
+903003;Diego Llorente;DFC;61;75;DFC;61;75;DFC;52;76;DFC;61;76
+903004;Liam Cooper;DFC;39;75;DFC;39;75;DFC;32;74;DFC;39;76
+903005;Gjanni Alioski;LI;17;72;LI;17;72;EI;13;31;LI;17;73
+903006;Kalvin Phillips;MCD;50;60;MCD;50;60;MCD;50;55;MCD;50;61
+903007;Mateusz Klich;MC;40;47;MC;40;47;MC;41;42;MC;40;50
+903008;Stuart Dallas;MC;60;47;MC;60;47;MP;62;31;MC;60;50
+903009;Raphinha;ED;82;28;ED;82;28;ED;82;22;MD;81;49
+903010;Jack Harrison;EI;18;28;EI;18;28;EI;29;22;MI;19;49
+903011;Patrick Bamford;DC;50;18;DC;50;18;DC;50;15;DC;50;22

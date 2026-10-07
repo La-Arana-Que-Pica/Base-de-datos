@@ -696,6 +696,84 @@ def build_builder_index(project_root: Path, data: GeneratorData) -> dict[str, ob
     }
 
 
+def build_content_index(project_root: Path, data: GeneratorData, version: str = DEFAULT_VERSION) -> dict[str, object]:
+    """Relaciona IDs usados por comentarios/guardados con títulos y URLs reales."""
+    # Reutilizar exactamente la misma resolución que genera las páginas de
+    # Option Files evita que el índice y la URL publicada puedan divergir.
+    from generador_secciones import option_slug, option_title
+
+    items: dict[str, dict[str, str]] = {}
+    public_team_ids = set(data.team_leagues)
+    team_paths = {
+        team_id: f"/team/{version}/{slugify(team.get('Name'), 'equipo')}-{quote(team_id)}/"
+        for team_id, team in data.team_by_id.items()
+        if team_id in public_team_ids and team.get("Name", "").strip() not in {"", "-"}
+    }
+    for team_id, url in team_paths.items():
+        items[f"team:{team_id}"] = {
+            "title": data.team_by_id[team_id].get("Name", "").strip() or f"Equipo {team_id}",
+            "url": url,
+        }
+
+    player_candidates: dict[str, list[tuple[int, str, str]]] = {}
+    for team_id, roster in data.rosters.items():
+        if team_id not in team_paths:
+            continue
+        team_type = data.team_by_id.get(team_id, {}).get("Type", "0")
+        priority = 1 if team_type == "2" else 0
+        for entry in roster:
+            player_id = entry.player.get("Id", "").strip()
+            if not player_id:
+                continue
+            name = entry.player.get("Name", "").strip() or f"Jugador {player_id}"
+            url = f"/player/{version}/{quote(team_id)}/{slugify(name, 'jugador')}-{quote(player_id)}/"
+            player_candidates.setdefault(player_id, []).append((priority, team_id, url))
+    for player_id, candidates in player_candidates.items():
+        _priority, _team_id, url = sorted(candidates, key=lambda row: (row[0], row[1]))[0]
+        player = data.player_by_id.get(player_id, {})
+        items[f"player:{player_id}"] = {
+            "title": player.get("Name", "").strip() or f"Jugador {player_id}",
+            "url": url,
+        }
+
+    issues = SilentIssues()
+    tactics = read_csv_file(project_root / "database" / "tacticas.csv", set(), issues, optional=True)
+    for tactic in tactics:
+        tactic_id = tactic.get("id", "").strip()
+        if not tactic_id:
+            continue
+        title = " ".join(part for part in (tactic.get("equipo", "").strip(), tactic.get("temporada", "").strip()) if part)
+        items[f"tactic:{tactic_id}"] = {
+            "title": title or f"Táctica {tactic_id}",
+            "url": f"/tactics/{quote(tactic_id, safe='')}/",
+        }
+
+    json_path = project_root / "database" / "option-files.json"
+    json_downloads = json.loads(json_path.read_text(encoding="utf-8-sig")) if json_path.is_file() else []
+    json_by_id = {str(row.get("id", "")).strip(): row for row in json_downloads if str(row.get("id", "")).strip()}
+    csv_downloads = read_csv_file(project_root / "database" / "descargas.csv", set(), issues, optional=True)
+    downloads: list[dict[str, object]] = []
+    if csv_downloads:
+        for row in csv_downloads:
+            row_id = str(row.get("id") or row.get("ID") or "").strip()
+            if not row_id:
+                continue
+            merged = dict(json_by_id.get(row_id, {}))
+            merged.update({key: value for key, value in row.items() if value not in (None, "")})
+            downloads.append(merged)
+    else:
+        downloads = list(json_downloads)
+    for download in downloads:
+        status = str(download.get("status") or download.get("estado") or "").strip().casefold()
+        if status == "oculto":
+            continue
+        slug = option_slug(download)
+        title = option_title(download).strip()
+        items[f"download:{slug}"] = {"title": title, "url": f"/option-files/{quote(slug, safe='')}/"}
+
+    return {"schemaVersion": 1, "items": dict(sorted(items.items()))}
+
+
 def player_squad_context(data: GeneratorData, team_id: str, entry: RosterEntry,
                          formation: dict[str, str] | None,
                          player_paths: dict[tuple[str, str], str]) -> dict[str, object]:
@@ -829,25 +907,6 @@ def write_html(file_path: Path, content: str) -> bool:
     raise last_error
 
 
-def ad_bootstrap(kind: str) -> str:
-    placements = {
-        "player": (("banner", "player-top"), ("banner", "player-stats"), ("banner", "player-mid"), ("banner", "player-bottom")),
-        "team": (("banner", "team-top"), ("banner", "team-mid")),
-        "league": (("responsive", "league-top"), ("responsive", "league-bottom")),
-    }[kind]
-    slots: list[str] = []
-    for unit, placement in placements:
-        ad_format = unit
-        slots.append(
-            f'<aside class="ad-slot" aria-label="Publicidad" data-ad-slot="{placement}" '
-            f'data-ad-unit="{unit}" data-ad-format="{ad_format}" data-ad-context="profile" data-ad-state="pending">\n'
-            '    <span class="ad-slot__label">Publicidad</span>\n'
-            '    <div class="ad-slot__content"><script>window.LAQPAds.render(document.currentScript.closest(\'.ad-slot\'));</script></div>\n'
-            "  </aside>"
-        )
-    return '<div class="ad-bootstrap ad-bootstrap--profile" aria-hidden="true">' + "".join(slots) + "</div>"
-
-
 def league_key(league: dict[str, str]) -> tuple[str, str]:
     return league.get("league_id", ""), league.get("league_name", "")
 
@@ -935,9 +994,23 @@ class DatabaseGenerator:
             self.result.files_unchanged += 1
         self.issues.info(f"Indice del Builder {'actualizado' if changed else 'sin cambios'}: {target}.")
 
+    def _generate_content_index(self, data: GeneratorData) -> None:
+        target = self.output_root / "database" / "content-index.json"
+        content = json.dumps(
+            build_content_index(self.project_root, data, self.version),
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ) + "\n"
+        changed = write_html(target, content)
+        if changed:
+            self.result.files_written += 1
+        else:
+            self.result.files_unchanged += 1
+        self.issues.info(f"Indice de contenido {'actualizado' if changed else 'sin cambios'}: {target}.")
+
     def run(self, *, teams_only: bool = False, missing_only: bool = False,
             builder_index_only: bool = False, managers_only: bool = False,
-            tactics_only: bool = False,
+            tactics_only: bool = False, content_index_only: bool = False,
             refresh_coaches: bool = False, refresh_coach_ids: tuple[str, ...] = ()) -> GenerationResult:
         started = time.perf_counter()
         try:
@@ -955,6 +1028,13 @@ class DatabaseGenerator:
                 self.project_root / "database",
                 SilentIssues() if (managers_only or tactics_only) else self.issues,
             )
+            if not managers_only:
+                self._generate_content_index(data)
+            if content_index_only:
+                self.result.warnings = self.issues.warnings
+                self.result.errors = self.issues.errors
+                self.result.elapsed_seconds = time.perf_counter() - started
+                return self.result
             if not managers_only and not tactics_only:
                 self._generate_builder_index(data)
             if builder_index_only:
@@ -1224,7 +1304,6 @@ class DatabaseGenerator:
                 "TEAM_COUNT": len(teams),
                 "LEAGUE_SUMMARY": league_summary,
                 "TEAM_CARDS": "\n".join(cards),
-                "AD_BOOTSTRAP": ad_bootstrap("league"),
             })
 
             canonical_segment = canonical_path.strip("/").split("/")[-1]
@@ -1284,7 +1363,6 @@ class DatabaseGenerator:
                 "DESCRIPTION": escape(description),
                 "CANONICAL_URL": escape(f"{SITE_URL}{canonical_path}"),
                 "OG_IMAGE_URL": escape(f"{SITE_URL}/img/teams/{quote(team_id)}.webp"),
-                "AD_BOOTSTRAP": ad_bootstrap("team"),
             })
 
             canonical_segment = canonical_path.strip("/").split("/")[-1]
@@ -1418,7 +1496,6 @@ class DatabaseGenerator:
                 "FOOT": escape(foot_label(player.get("Foot", ""))),
                 "DORSAL": escape(entry.shirt_number or "-"),
                 "STATS_ROWS": "".join(stat_rows),
-                "AD_BOOTSTRAP": ad_bootstrap("player"),
             })
 
             canonical_segment = canonical_path.strip("/").split("/")[-1]
@@ -1488,6 +1565,7 @@ def run_cli(args: argparse.Namespace) -> int:
             teams_only=args.teams_only,
             missing_only=args.missing_only,
             builder_index_only=args.builder_index_only,
+            content_index_only=args.content_index_only,
             managers_only=args.managers_only,
             tactics_only=args.tactics_only,
             refresh_coaches=args.refresh_coaches,
@@ -1504,7 +1582,7 @@ def run_cli(args: argparse.Namespace) -> int:
     print(f"Log: {result.log_path}")
     # El indice liviano omite referencias rotas de planteles y puede generarse
     # correctamente aun cuando la auditoria global de los CSV registre errores.
-    return 0 if args.builder_index_only else (1 if result.errors else 0)
+    return 0 if (args.builder_index_only or args.content_index_only) else (1 if result.errors else 0)
 
 
 class GeneratorGUI:
@@ -1631,6 +1709,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--teams-only", action="store_true", help="Regenera solamente las fichas de equipos y sus aliases.")
     parser.add_argument("--missing-only", action="store_true", help="Con --teams-only, conserva los HTML existentes.")
     parser.add_argument("--builder-index-only", action="store_true", help="Regenera solo el indice liviano del Creador de alineaciones.")
+    parser.add_argument("--content-index-only", action="store_true", help="Regenera solo el indice de nombres y URLs para cuentas/comentarios.")
     parser.add_argument("--managers-only", action="store_true", help="Regenera solamente las paginas y el indice de DTs.")
     parser.add_argument("--tactics-only", action="store_true", help="Regenera solamente las paginas y el indice de tacticas.")
     parser.add_argument("--refresh-coaches", action="store_true", help="Actualiza DTs nuevos o con cache vencida antes de generar.")

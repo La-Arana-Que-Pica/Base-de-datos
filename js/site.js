@@ -288,7 +288,6 @@ function saveConsent(choice) {
   const payload = {
     choice,
     analytics: choice === 'accept',
-    ads: choice === 'accept',
     updatedAt: new Date().toISOString(),
   };
   try {
@@ -299,11 +298,7 @@ function saveConsent(choice) {
   window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
   window.gtag('consent', 'update', {
     analytics_storage: payload.analytics ? 'granted' : 'denied',
-    ad_storage: payload.ads ? 'granted' : 'denied',
-    ad_user_data: payload.ads ? 'granted' : 'denied',
-    ad_personalization: payload.ads ? 'granted' : 'denied',
   });
-  document.dispatchEvent(new CustomEvent('laqp:consentchange', { detail: payload }));
   document.querySelector('.cookie-consent')?.remove();
 }
 
@@ -313,9 +308,6 @@ function applyConsentDefaults() {
   window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
   window.gtag('consent', 'default', {
     analytics_storage: consent?.analytics ? 'granted' : 'denied',
-    ad_storage: consent?.ads ? 'granted' : 'denied',
-    ad_user_data: consent?.ads ? 'granted' : 'denied',
-    ad_personalization: consent?.ads ? 'granted' : 'denied',
     wait_for_update: 500,
   });
 }
@@ -327,8 +319,8 @@ function renderCookieConsent() {
   banner.setAttribute('aria-label', 'Aviso de cookies');
   banner.innerHTML = `
     <div class="cookie-consent-copy">
-      <strong>Cookies y anuncios</strong>
-      <p>LAqP usa cookies tecnicas para recordar preferencias y puede usar Google Analytics y Adsterra para medicion y publicidad. Podes aceptar o rechazar las cookies no esenciales.</p>
+      <strong>Cookies y analítica</strong>
+      <p>LAqP usa almacenamiento técnico para recordar preferencias y puede usar Google Analytics para medir el uso agregado del sitio. Podés aceptar o rechazar la medición no esencial.</p>
     </div>
     <div class="cookie-consent-actions">
       <a href="cookies.html">Ver detalles</a>
@@ -418,3 +410,110 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('pageshow', rescueDatabaseDirectoryPage);
 
 window.renderLanguageSelector = renderLanguageSelector;
+
+/* Cuentas globales -------------------------------------------------------
+ * Se carga de forma progresiva para conservar el sitio estático y evitar
+ * requests de comentarios en páginas que no los tienen.
+ */
+function laqpLoadScript(src) {
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[data-laqp-src="${src}"]`);
+    if (existing) {
+      if (existing.dataset.loaded === 'true') resolve();
+      else {
+        existing.addEventListener('load', resolve, { once: true });
+        existing.addEventListener('error', reject, { once: true });
+      }
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = false;
+    script.dataset.laqpSrc = src;
+    script.addEventListener('load', () => { script.dataset.loaded = 'true'; resolve(); }, { once: true });
+    script.addEventListener('error', reject, { once: true });
+    document.head.appendChild(script);
+  });
+}
+
+function laqpLoadAccountStyles() {
+  if (document.querySelector('link[data-laqp-account-styles]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = '/css/laqp-account.css?v=20261005a';
+  link.dataset.laqpAccountStyles = '';
+  document.head.appendChild(link);
+}
+
+function laqpCommentContext() {
+  const path = window.location.pathname.replace(/\/+$/, '');
+  const parts = path.split('/').filter(Boolean);
+  const playerId = document.querySelector('meta[name="laqp-player-id"]')?.content;
+  if ((parts[0] === 'player' || /player\.html$/i.test(path)) && playerId) {
+    return { pageType: 'player', pageId: playerId };
+  }
+  const teamId = document.querySelector('meta[name="laqp-team-id"]')?.content;
+  if ((parts[0] === 'team' || /team\.html$/i.test(path)) && teamId) {
+    return { pageType: 'team', pageId: teamId };
+  }
+  if (parts[0] === 'tactics' && parts[1]) {
+    return { pageType: 'tactic', pageId: decodeURIComponent(parts[1]) };
+  }
+  if (parts[0] === 'option-files' && parts[1] && !parts[2]) {
+    return { pageType: 'download', pageId: decodeURIComponent(parts[1]) };
+  }
+  return null;
+}
+
+function laqpEnsureCommentHost() {
+  let host = document.querySelector('[data-laqp-comments]');
+  const context = laqpCommentContext();
+  if (!context) return null;
+  if (!host) {
+    host = document.createElement('section');
+    host.dataset.laqpComments = '';
+    const mount = document.querySelector('#player-page, #team-page, #tactics-page, #downloads-page, main');
+    (mount || document.body).appendChild(host);
+  }
+  host.dataset.pageType = context.pageType;
+  host.dataset.pageId = context.pageId;
+  return host;
+}
+
+async function laqpBootstrapAccounts() {
+  const publicProfilePage = document.querySelector('[data-laqp-public-profile]');
+  const accountPage = document.querySelector('[data-laqp-account-page]');
+  try {
+    if (accountPage || publicProfilePage) laqpLoadAccountStyles();
+    await laqpLoadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js');
+    await laqpLoadScript('/js/supabaseClient.js?v=20261005c');
+    if (!window.LAQP_SUPABASE_CONFIG?.configured) {
+      console.warn('[LAqP] Cuentas y comentarios desactivados: configurá SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY en js/supabaseClient.js.');
+      if (accountPage) accountPage.textContent = 'Las cuentas todavía no están habilitadas.';
+      if (publicProfilePage) publicProfilePage.textContent = 'Los perfiles públicos todavía no están habilitados.';
+      return { configured: false };
+    }
+    laqpLoadAccountStyles();
+    const supabaseClient = window.LAQP_SUPABASE || window.LAQPCreateSupabaseClient?.();
+    if (!supabaseClient) throw new Error('No se pudo inicializar el cliente de Supabase.');
+    await laqpLoadScript('/js/auth.js?v=20261005d');
+    const commentHost = laqpEnsureCommentHost();
+    if (accountPage || publicProfilePage) await laqpLoadScript('/js/content-index.js?v=20261005a');
+    if (accountPage) await laqpLoadScript('/js/account-features.js?v=20261005b');
+    if (commentHost) {
+      await laqpLoadScript('/js/user-content.js?v=20261005a');
+      await laqpLoadScript('/js/comments.js?v=20261005b');
+    }
+    if (publicProfilePage) await laqpLoadScript('/js/public-profile.js?v=20261005b');
+    return { configured: true, client: window.LAQP_SUPABASE };
+  } catch (error) {
+    console.warn('[LAqP] Cuentas y comentarios no están disponibles; el resto del sitio continúa normalmente.', error);
+    if (accountPage) accountPage.textContent = 'No pudimos inicializar tu cuenta. Revisá la conexión y recargá la página.';
+    if (publicProfilePage) publicProfilePage.textContent = 'No pudimos cargar este perfil. Probá de nuevo más tarde.';
+    return { configured: false, error };
+  }
+}
+
+window.LAQPAccountReady = document.readyState === 'loading'
+  ? new Promise(resolve => document.addEventListener('DOMContentLoaded', () => resolve(laqpBootstrapAccounts()), { once: true })).then(value => value)
+  : laqpBootstrapAccounts();

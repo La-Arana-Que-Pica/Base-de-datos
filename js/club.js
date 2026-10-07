@@ -12,30 +12,9 @@ function compareRosterRows(a, b, key, direction, collator) {
 
 if (typeof module !== 'undefined') module.exports = { compareRosterRows };
 
-function ensureClubAdPlacements(club) {
-  const create = (name, unitName) => {
-    const placement = document.createElement('div');
-    placement.className = 'ad-placement';
-    placement.dataset.adPlacement = name;
-    placement.dataset.adUnitTarget = unitName;
-    return placement;
-  };
-
-  if (!document.querySelector('[data-ad-placement="team-top"]')) {
-    club.querySelector('.club-hero')?.after(create('team-top', 'banner'));
-  }
-  if (!document.querySelector('[data-ad-placement="team-mid"]')) {
-    club.querySelector('.club-roster')?.before(create('team-mid', 'banner'));
-  }
-
-  window.LAQPAds?.placeAll(document);
-  window.LAQPAds?.monitorAll(document);
-}
-
 if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => {
   const club = document.querySelector('.club-detail');
   if (!club) return;
-  ensureClubAdPlacements(club);
   const identity = club.querySelector('.club-identity');
   if (identity && !identity.querySelector('.club-builder-cta')) {
     const teamId = club.dataset.clubId || document.querySelector('meta[name="laqp-team-id"]')?.content || '';

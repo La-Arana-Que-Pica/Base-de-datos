@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+906001;Gyula Grosics;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+906002;Jenő Buzánszky;LD;79;72;LD;79;72;LD;79;68;DFC;72;73
+906003;Gyula Lóránt;DFC;50;78;DFC;50;78;DFC;50;77;DFC;50;78
+906004;Mihály Lantos;LI;21;72;LI;21;72;LI;21;68;DFC;28;73
+906005;József Zakariás;MCD;40;59;MCD;40;59;MCD;42;58;MCD;43;60
+906006;József Bozsik;MC;60;55;MC;60;55;MC;60;45;MC;57;52
+906007;László Budai;ED;86;29;ED;86;29;ED;88;21;MD;82;51
+906008;Nándor Hidegkuti;MP;50;37;MP;50;37;MP;50;39;MP;50;39
+906009;Zoltán Czibor;EI;14;29;EI;14;29;EI;12;21;MI;18;51
+906010;Sándor Kocsis;DC;61;19;DC;61;19;DC;61;16;DC;60;23
+906011;Ferenc Puskás;SD;39;21;SD;39;21;SD;39;18;SD;40;25

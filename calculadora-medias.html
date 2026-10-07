@@ -20,7 +20,7 @@
   <meta property="og:url" content="https://laqp.website/calculadora-medias.html" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="stylesheet" href="css/style.css?v=20261002e" />
+  <link rel="stylesheet" href="css/style.css?v=20261004c" />
   <link rel="icon" href="img/logo.webp" type="image/webp" />
   <script type="application/ld+json">
   {
@@ -38,49 +38,30 @@
     <a href="/index.html" class="header-logo-link">
       <img class="logo" src="img/logo.webp" alt="Logo LAqP" />
     </a>
-    <div class="header-title"><span>Calculadora</span> <span>PES 2018</span></div>
+    <div class="header-title"><span data-i18n="nav.calculator">Calculadora</span> <span>PES 2018</span></div>
     <nav class="header-nav" aria-label="Menu principal"></nav>
   </header>
 
   <main class="content-hub-page media-calculator-page media-calculator-redesign">
     <section class="content-hub-hero scouting-hero-compact media-calculator-hero">
-      <h1>Calculadora de medias</h1>
-      <p>Calcula la media de un jugador con el algoritmo interno reconstruido de PES 2018, respetando sus pesos, bonus posicionales y redondeos.</p>
-    </section>
-
-    <section class="seo-content-block content-hub-copy">
-      <h2>Para que sirve</h2>
-      <p>La calculadora ayuda a revisar si una edicion manual mantiene coherencia con el sistema de medias de PES 2018. Es util cuando creas jugadores, actualizas stats, comparas posiciones o queres entender por que un mismo perfil puede subir o bajar de media segun el puesto.</p>
-      <div class="tool-value-grid">
-        <article class="tool-value-card">
-          <h3>Crear jugadores</h3>
-          <p>Proba stats antes de guardar un jugador nuevo y obtene la media que calcula PES 2018.</p>
-        </article>
-        <article class="tool-value-card">
-          <h3>Comparar posiciones</h3>
-          <p>Un lateral, mediocampista o delantero no pondera igual los mismos atributos.</p>
-        </article>
-        <article class="tool-value-card">
-          <h3>Revisar actualizaciones</h3>
-          <p>Contrasta cambios de stats con el calculo reconstruido del juego.</p>
-        </article>
-      </div>
+      <h1 data-i18n="calculator.pageTitle">Calculadora de medias</h1>
+      <p data-i18n="calculator.pageIntro">Editá un jugador desde cero o cargá uno de la base de datos y probá cambios con el cálculo original de PES 2018.</p>
     </section>
 
     <div id="media-calculator-loading" class="loading-inline">
       <div class="spinner"></div>
-      <span>Cargando formulas...</span>
+      <span data-i18n="calculator.loading">Cargando calculadora...</span>
     </div>
 
     <div id="media-calculator-content"></div>
 
-    <section class="seo-content-block content-hub-copy">
-      <h2>Como usarla</h2>
-      <p>Elegi una posicion, ajusta los atributos principales y revisa la media estimada. Para resultados mas razonables, compara siempre jugadores de roles parecidos: un central rapido, un cinco recuperador o un extremo encarador tienen necesidades distintas.</p>
-      <h2>Preguntas frecuentes</h2>
-      <details><summary>La media calculada reproduce PES 2018?</summary><p>Si. Usa el algoritmo reconstruido del ejecutable original, incluidos los redondeos enteros, la tabla global y el tratamiento especial de porteros.</p></details>
-      <details><summary>Por que cambia tanto segun la posicion?</summary><p>PES 2018 pondera atributos diferentes segun el puesto. Defensa pesa mas en centrales; definicion y actitud ofensiva pesan mas en delanteros.</p></details>
-      <details><summary>Que herramienta conviene usar despues?</summary><p>Usa la base de datos para comparar jugadores reales y Scouting para encontrar perfiles similares dentro del Option File.</p></details>
+    <section class="seo-content-block content-hub-copy media-calculator-info">
+      <h2 data-i18n="calculator.infoTitle">Acerca de la calculadora</h2>
+      <details open><summary data-i18n="calculator.purposeTitle">Para qué sirve</summary><p data-i18n="calculator.purposeText">La calculadora permite crear jugadores, actualizar estadísticas y comparar posiciones sin modificar ningún dato de la base.</p></details>
+      <details><summary data-i18n="calculator.howTitle">Cómo usarla</summary><p data-i18n="calculator.howText">Elegí un punto de partida, seleccioná una posición y ajustá las estadísticas. Si cargás un jugador, podés comparar cada cambio y restaurar sus valores originales.</p></details>
+      <h2 data-i18n="calculator.faqTitle">Preguntas frecuentes</h2>
+      <details><summary data-i18n="calculator.faqFormulaQ">¿La media reproduce PES 2018?</summary><p data-i18n="calculator.faqFormulaA">Sí. Usa el algoritmo reconstruido del ejecutable original, incluidos sus pesos, bonus posicionales y redondeos.</p></details>
+      <details><summary data-i18n="calculator.faqCopyQ">¿Editar un jugador modifica la base?</summary><p data-i18n="calculator.faqCopyA">No. La calculadora trabaja con una copia temporal y nunca escribe en los archivos originales.</p></details>
       <div class="seo-link-row">
         <a href="articulo.html?id=sistema-medias-pes-2018">Guia del sistema de medias</a>
         <a href="database.html">Base de datos</a>
@@ -91,9 +72,10 @@
 
   </main>
 
-  <script src="js/i18n.js"></script>
+  <script src="js/pes2018-translations.js?v=20261003a"></script>
+  <script src="js/i18n.js?v=20261004c"></script>
   <script src="js/site.js"></script>
   <script src="js/pes2018-overall.js?v=20261003a"></script>
-  <script src="js/media-calculator.js?v=20261003a"></script>
+  <script src="js/media-calculator.js?v=20261004c"></script>
 </body>
 </html>

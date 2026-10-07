@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+907001;Viktor Chanov;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+907002;Volodymyr Bezsonov;LD;83;72;LD;83;72;LD;78;61;LD;81;70
+907003;Serhiy Baltacha;DFC;39;77;DFC;39;77;DFC;43;78;DFC;39;73
+907004;Oleh Kuznetsov;DFC;61;75;DFC;61;75;MCD;57;56;DFC;61;72
+907005;Anatoliy Demyanenko;LI;17;72;LI;17;72;LI;22;61;LI;19;70
+907006;Pavlo Yakovenko;MCD;50;59;MCD;50;59;MCD;46;56;MC;47;52
+907007;Ivan Yaremchuk;MC;64;48;MC;64;48;MD;70;41;MC;63;49
+907008;Vasyl Rats;MC;36;48;MC;36;48;MI;30;41;MC;37;49
+907009;Oleksandr Zavarov;MP;50;34;MP;50;34;MP;50;29;MP;50;37
+907010;Oleg Blokhin;DC;39;20;DC;39;20;SD;36;19;DC;40;26
+907011;Ihor Belanov;DC;61;19;DC;61;19;DC;63;16;DC;60;25

@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+908001;Waldir Peres;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+908002;Leandro;LD;83;72;LD;83;72;LD;82;44;LD;82;72
+908003;Oscar;DFC;61;76;DFC;61;76;DFC;61;76;DFC;61;77
+908004;Luizinho;DFC;39;76;DFC;39;76;DFC;39;76;DFC;39;77
+908005;Júnior;LI;17;72;LI;17;72;MI;20;43;LI;18;72
+908006;Toninho Cerezo;MCD;42;58;MCD;42;58;MC;41;49;MC;42;55
+908007;Falcão;MC;58;54;MC;58;54;MC;57;44;MC;57;53
+908008;Sócrates;MP;63;36;MP;63;36;MP;63;29;MD;71;47
+908009;Zico;MP;43;32;MP;43;32;MP;43;26;MP;44;34
+908010;Éder;EI;18;28;EI;18;28;EI;17;24;MI;19;50
+908011;Serginho Chulapa;DC;50;17;DC;50;17;DC;50;14;DC;52;22

@@ -1848,7 +1848,6 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
        </button>`
     : '';
 
-  window.LAQPAds?.preserve(content);
   content.innerHTML = `
     <div class="breadcrumb-row"><nav class="breadcrumbs" aria-label="Breadcrumb">
       <a href="${typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html'}">${t('common.home')}</a>
@@ -1893,7 +1892,6 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
       </div>
 
-      <div class="ad-placement" data-ad-placement="player-top" data-ad-unit-target="banner"></div>
       ${renderPlayerStrengths(player)}
       <nav class="player-page-nav" aria-label="${t('player.summary')}"><a href="#player-summary">${t('player.summary')}</a><a href="#player-statistics">${t('player.stats')}</a><a href="#player-skills">${t('player.abilities')}</a><a href="#player-appearance">${t('player.appearance')}</a><a href="#player-technical">${t('player.pesData')}</a></nav>
 
@@ -1903,7 +1901,6 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
           ${statsHtml}
         </div>
       </section>
-      <div class="ad-placement" data-ad-placement="player-stats" data-ad-unit-target="banner"></div>
       ${skillsHtml}
       <section class="profile-tabs" id="player-appearance" aria-labelledby="player-appearance-title">
         <h2 class="player-nav-section-title" id="player-appearance-title">${t('player.appearance')}</h2>
@@ -1915,15 +1912,12 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
         </div>
       </section>
       ${renderSquadContext(team, squadContext, clubUrl)}
-      <div class="ad-placement" data-ad-placement="player-mid" data-ad-unit-target="banner"></div>
       ${renderPlayerEditorial(player, team, pesPosition, similarPlayers)}
       <section class="player-compare-section db-section" id="player-comparison" hidden>
         <div class="player-section-title">${t('player.comparePlayer')}</div>
         <label>${t('player.playerB')} <select id="player-compare-select" onchange="updatePlayerComparison()">${similarPlayers.map(({player: peer}) => `<option value="${escapeHtml(peer['Id'])}">${escapeHtml(peer['Name'])}</option>`).join('')}</select></label>
         <div id="player-compare-result"></div>
       </section>
-
-      <div class="ad-placement" data-ad-placement="player-bottom" data-ad-unit-target="banner"></div>
 
       ${renderSimilarPlayers(similarPlayers)}
       ${renderPesTechnical(player, appearance)}
@@ -1935,8 +1929,6 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   const controlHost = content.querySelector('[data-miniface-control-host]');
   if (control && controlHost) controlHost.append(control);
   window.LAQPMinifaces?.refresh(content);
-  window.LAQPAds?.placeAll(content);
-  window.LAQPAds?.monitorAll(content);
   initPlayerPageNavigation(content);
 
   document.documentElement.classList.add('laqp-hydrated');

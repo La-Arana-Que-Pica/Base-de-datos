@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+902001;Doni;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+902002;Christian Panucci;LD;83;72;LD;83;72;LD;80;62;LD;82;74
+902003;Philippe Mexès;DFC;61;75;DFC;61;75;DFC;61;74;DFC;61;76
+902004;Cristian Chivu;DFC;39;75;DFC;39;75;DFC;39;74;DFC;39;76
+902005;Max Tonetto;LI;17;72;LI;17;72;LI;20;61;LI;18;74
+902006;Daniele De Rossi;MCD;42;59;MCD;42;59;MC;42;50;MC;42;56
+902007;David Pizarro;MC;58;57;MC;58;57;MC;58;49;MC;58;56
+902008;Rodrigo Taddei;ED;81;31;ED;81;31;ED;80;25;MD;80;51
+902009;Simone Perrotta;MP;50;36;MP;50;36;MP;52;20;MP;50;37
+902010;Mancini;EI;19;31;EI;19;31;EI;20;25;MI;20;51
+902011;Francesco Totti;DC;50;18;DC;50;18;SD;48;32;DC;50;23

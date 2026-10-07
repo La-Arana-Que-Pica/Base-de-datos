@@ -119,6 +119,9 @@
   let nativeDrag = null;
   let actionTarget = null;
   let suppressPitchClickUntil = 0;
+  let requestedLineupLoaded = false;
+  const authUser = () => root.LAQPAuth?.user || null;
+  const supabase = () => root.LAQP_SUPABASE || null;
 
   function cacheElements() {
     [
@@ -839,6 +842,28 @@
     return base;
   }
 
+  async function serializeCloudState() {
+    const data = serializeState(false);
+    data.customPlayers = await Promise.all((data.customPlayers || []).map(async player => {
+      if (player.imageRef?.type !== 'idb') return player;
+      try {
+        const blob = await getCustomImage(player.imageRef.key || player.id);
+        return blob ? { ...player, imageRef: { type: 'inline', data: await blobToDataUrl(blob) } } : { ...player, imageRef: { type: 'none' } };
+      } catch (_error) {
+        return { ...player, imageRef: { type: 'none' } };
+      }
+    }));
+    if (data.customTeam?.crestRef?.type === 'idb') {
+      try {
+        const blob = await getCustomImage(data.customTeam.crestRef.key || `crest_${data.customTeam.id}`);
+        data.customTeam.crestRef = blob ? { type: 'inline', data: await blobToDataUrl(blob) } : { type: 'none' };
+      } catch (_error) {
+        data.customTeam.crestRef = { type: 'none' };
+      }
+    }
+    return data;
+  }
+
   function compactShareState() {
     const sharedTeam = state.customTeam ? { ...state.customTeam, crestRef:{ type:'none' } } : undefined;
     return {
@@ -1027,39 +1052,90 @@
     showToast('XI y suplentes cargados desde la Base de Datos.');
   }
 
-  function saveLineup() {
-    state.name = el['builder-name'].value.trim() || 'Mi alineación';
-    const saves = safeStorageGet(STORAGE_KEY, []);
-    const now = new Date().toISOString();
-    if (!state.currentSaveId) {
-      state.currentSaveId = `squad-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
-      state.createdAt = now;
-    }
-    const saved = serializeState(true);
-    const index = saves.findIndex(item => item && item.id === state.currentSaveId);
-    if (index >= 0) saves[index] = saved;
-    else saves.unshift(saved);
-    if (!safeStorageSet(STORAGE_KEY, saves.slice(0,50))) {
-      showToast('No se pudo guardar en este navegador.', true);
+  async function saveLineup() {
+    if (!authUser() || !supabase()) {
+      root.LAQPAuth?.open('login');
+      showToast('Iniciá sesión para guardar la alineación.', true);
       return;
     }
-    safeStorageSet(DRAFT_KEY, serializeState(false));
-    showToast('Alineación guardada en este navegador.');
+    state.name = el['builder-name'].value.trim() || 'Mi alineación';
+    el['builder-save'].disabled = true;
+    try {
+      const data = await serializeCloudState();
+      if (state.currentSaveId && /^[0-9a-f-]{36}$/i.test(state.currentSaveId)) {
+        const { data: updated, error } = await supabase().from('saved_lineups')
+          .update({ name: state.name, data })
+          .eq('id', state.currentSaveId)
+          .eq('user_id', authUser().id)
+          .select('id,created_at')
+          .single();
+        if (error) throw error;
+        state.createdAt = updated.created_at;
+      } else {
+        const { data: created, error } = await supabase().from('saved_lineups')
+          .insert({ user_id: authUser().id, name: state.name, data })
+          .select('id,created_at')
+          .single();
+        if (error) throw error;
+        state.currentSaveId = created.id;
+        state.createdAt = created.created_at;
+      }
+      safeStorageSet(DRAFT_KEY, serializeState(false));
+      showToast('Alineación guardada en tu cuenta.');
+    } catch (error) {
+      console.warn('[LAqP Alineaciones] No se pudo guardar.', error);
+      showToast('No se pudo guardar la alineación.', true);
+    } finally {
+      el['builder-save'].disabled = false;
+    }
   }
 
-  function renderSavedList() {
-    const saves = safeStorageGet(STORAGE_KEY, []);
+  async function renderSavedList() {
+    if (!authUser() || !supabase()) {
+      el['builder-saved-list'].innerHTML = '<p class="builder-dialog-copy">Iniciá sesión para ver tus alineaciones guardadas.</p>';
+      return;
+    }
+    el['builder-saved-list'].innerHTML = '<p class="builder-dialog-copy">Cargando…</p>';
+    const { data: saves, error } = await supabase().from('saved_lineups').select('id,name,data,created_at,updated_at').eq('user_id', authUser().id).order('updated_at', { ascending: false });
+    if (error) {
+      console.warn('[LAqP Alineaciones] No se pudieron cargar.', error);
+      el['builder-saved-list'].innerHTML = '<p class="builder-dialog-copy">No pudimos cargar tus alineaciones.</p>';
+      return;
+    }
     el['builder-saved-list'].innerHTML = saves.length ? saves.map(item => {
-      const team = item.customTeam && String(item.customTeam.id) === String(item.baseTeamId) ? item.customTeam : getTeam(item.baseTeamId);
-      const date = item.modifiedAt ? new Date(item.modifiedAt).toLocaleDateString('es-AR') : '';
-      return `<div class="builder-saved-item" data-save-id="${escapeHtml(item.id)}"><span><strong>${escapeHtml(item.name || 'Sin nombre')}</strong><small>${escapeHtml(team ? team.name : 'Sin equipo')} · ${escapeHtml(item.formationId || '')}${date ? ` · ${date}` : ''}</small></span><button type="button" data-save-action="load">Cargar</button><button type="button" class="danger" data-save-action="delete">Eliminar</button></div>`;
+      const team = item.data?.customTeam && String(item.data.customTeam.id) === String(item.data.baseTeamId) ? item.data.customTeam : getTeam(item.data?.baseTeamId);
+      const modified = item.updated_at ? new Date(item.updated_at).toLocaleDateString('es-AR') : '';
+      return `<div class="builder-saved-item" data-save-id="${escapeHtml(item.id)}"><span><strong>${escapeHtml(item.name || 'Sin nombre')}</strong><small>${escapeHtml(team ? team.name : 'Sin equipo')} · ${escapeHtml(item.data?.formationId || '')}${modified ? ` · ${modified}` : ''}</small></span><button type="button" data-save-action="load">Cargar</button><button type="button" class="danger" data-save-action="delete">Eliminar</button></div>`;
     }).join('') : '<p class="builder-dialog-copy">Todavía no guardaste ninguna alineación.</p>';
   }
 
-  function openSavedDialog() {
-    renderSavedList();
+  async function openSavedDialog() {
+    if (!authUser()) root.LAQPAuth?.open('login');
+    void renderSavedList();
     if (typeof el['builder-saved-dialog'].showModal === 'function') el['builder-saved-dialog'].showModal();
     else el['builder-saved-dialog'].setAttribute('open','');
+  }
+
+  async function loadCloudLineup(lineupId, closeDialog = false) {
+    if (!authUser() || !supabase() || !lineupId) return false;
+    const { data, error } = await supabase().from('saved_lineups').select('id,name,data,created_at').eq('id', lineupId).eq('user_id', authUser().id).maybeSingle();
+    if (error || !data) {
+      if (error) console.warn('[LAqP Alineaciones] No se pudo cargar.', error);
+      showToast('No pudimos cargar esa alineación.', true);
+      return false;
+    }
+    loadState({ ...data.data, name: data.name }, { id: data.id, createdAt: data.created_at });
+    if (closeDialog && el['builder-saved-dialog'].open) el['builder-saved-dialog'].close();
+    showToast('Alineación cargada.');
+    return true;
+  }
+
+  async function loadRequestedLineup() {
+    if (requestedLineupLoaded || !state.data || !authUser()) return;
+    const lineupId = new URLSearchParams(location.search).get('lineup');
+    if (!lineupId || !/^[0-9a-f-]{36}$/i.test(lineupId)) return;
+    requestedLineupLoaded = true;
+    await loadCloudLineup(lineupId);
   }
 
   function shareLineup() {
@@ -1485,7 +1561,7 @@
     [el['builder-global-query'],el['builder-global-team'],el['builder-global-overall']].forEach(input => input.addEventListener('input', renderSearch));
     el['builder-dialog-query'].addEventListener('input', renderPlayerDialog);
 
-    document.addEventListener('click', event => {
+    document.addEventListener('click', async event => {
       if (performance.now() < suppressPitchClickUntil && event.target.closest('.builder-slot')) {
         event.preventDefault();
         return;
@@ -1534,16 +1610,14 @@
       const savedAction = event.target.closest('[data-save-action]');
       if (savedAction) {
         const item = savedAction.closest('[data-save-id]');
-        const saves = safeStorageGet(STORAGE_KEY, []);
         if (savedAction.dataset.saveAction === 'load') {
-          const saved = saves.find(entry => entry.id === item.dataset.saveId);
-          if (saved) {
-            try { loadState(saved, saved); el['builder-saved-dialog'].close(); showToast('Alineación cargada.'); } catch (error) { showToast(error.message, true); }
-          }
+          await loadCloudLineup(item.dataset.saveId, true);
         } else {
-          safeStorageSet(STORAGE_KEY, saves.filter(entry => entry.id !== item.dataset.saveId));
+          if (!window.confirm('¿Eliminar esta alineación guardada?')) return;
+          const { error } = await supabase().from('saved_lineups').delete().eq('id', item.dataset.saveId).eq('user_id', authUser().id);
+          if (error) return showToast('No se pudo eliminar.', true);
           if (state.currentSaveId === item.dataset.saveId) state.currentSaveId = '';
-          renderSavedList();
+          void renderSavedList();
         }
       }
     });
@@ -1714,6 +1788,7 @@
       populateControls();
       applyUiPreferences();
       initialState();
+      void loadRequestedLineup();
       el['builder-loading'].hidden = true;
       el['builder-app'].hidden = false;
     } catch (error) {
@@ -1728,4 +1803,5 @@
     bindEvents();
     loadIndex();
   });
+  document.addEventListener('laqp-auth-change', () => { void loadRequestedLineup(); });
 })(typeof window !== 'undefined' ? window : globalThis);

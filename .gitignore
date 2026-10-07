@@ -1,0 +1,6 @@
+# Python bytecode and cache directories
+__pycache__/
+*.py[cod]
+
+# Runtime log produced by the local site generator
+Herramientas/Salidas/logs/generacion.log

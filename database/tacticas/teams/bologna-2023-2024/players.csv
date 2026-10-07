@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+905001;Łukasz Skorupski;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+905002;Stefan Posch;LD;83;72;LD;83;72;DFC;72;70;LD;82;73
+905003;Sam Beukema;DFC;61;75;DFC;61;75;DFC;54;75;DFC;61;76
+905004;Riccardo Calafiori;DFC;39;75;DFC;39;75;MC;42;50;DFC;39;76
+905005;Victor Kristiansen;LI;17;72;LI;17;72;DFC;29;70;LI;18;73
+905006;Remo Freuler;MCD;50;59;MCD;50;59;MCD;57;52;MC;56;54
+905007;Michel Aebischer;MC;39;47;MC;39;47;MP;35;29;MC;42;52
+905008;Lewis Ferguson;MP;58;39;MP;58;39;MP;64;23;SD;56;31
+905009;Riccardo Orsolini;ED;83;29;ED;83;29;ED;86;23;MD;81;50
+905010;Alexis Saelemaekers;EI;17;29;EI;17;29;EI;14;23;MI;19;50
+905011;Joshua Zirkzee;DC;50;18;DC;50;18;SD;50;34;DC;44;22

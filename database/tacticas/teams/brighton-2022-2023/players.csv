@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+904001;Jason Steele;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+904002;Joël Veltman;LD;83;72;LD;83;72;LD;76;57;LD;82;73
+904003;Lewis Dunk;DFC;61;75;DFC;61;75;DFC;61;75;DFC;61;76
+904004;Levi Colwill;DFC;39;75;DFC;39;75;DFC;39;75;DFC;39;76
+904005;Pervis Estupiñán;LI;17;72;LI;17;72;LI;24;57;LI;18;73
+904006;Moisés Caicedo;MCD;42;59;MCD;42;59;MCD;43;55;MC;42;55
+904007;Alexis Mac Allister;MC;58;57;MC;58;57;MC;57;54;MC;58;55
+904008;Solly March;ED;82;29;ED;82;29;ED;83;26;MD;81;50
+904009;Pascal Groß;MP;50;36;MP;50;36;MP;62;29;SD;50;32
+904010;Kaoru Mitoma;EI;18;29;EI;18;29;EI;17;25;MI;19;50
+904011;Evan Ferguson;DC;50;18;DC;50;18;DC;50;15;DC;52;22

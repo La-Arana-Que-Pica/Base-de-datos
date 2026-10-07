@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+901001;Dean Henderson;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+901002;Chris Basham;DFC;68;74;DFC;68;74;DFC;76;44;DFC;65;75
+901003;John Egan;DFC;50;77;DFC;50;77;DFC;50;76;DFC;50;78
+901004;Jack O'Connell;DFC;32;74;DFC;32;74;DFC;24;44;DFC;35;75
+901005;George Baldock;MD;86;53;MD;86;53;MD;86;31;LD;84;72
+901006;Enda Stevens;MI;14;53;MI;14;53;MI;14;31;LI;16;72
+901007;Oliver Norwood;MCD;50;59;MCD;50;59;MCD;50;55;MCD;50;59
+901008;John Lundstram;MC;64;47;MC;64;47;MC;63;39;MC;63;52
+901009;John Fleck;MC;36;47;MC;36;47;MC;37;39;MC;37;52
+901010;Oliver McBurnie;DC;42;20;DC;42;20;DC;43;18;DC;43;25
+901011;Lys Mousset;DC;58;20;DC;58;20;DC;57;18;DC;57;25

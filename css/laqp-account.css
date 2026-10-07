@@ -1,0 +1,683 @@
+/* Cuentas y comentarios de LAqP. Aislado para no alterar los módulos históricos. */
+:root {
+  --account-bg: #10171c;
+  --account-surface: #172128;
+  --account-surface-2: #1d2931;
+  --account-line: rgba(255, 255, 255, 0.11);
+  --account-text: #f2f6f7;
+  --account-muted: #9dabb4;
+  --account-accent: #21d4c2;
+  --account-danger: #ff7f86;
+}
+
+.laqp-account-control {
+  position: relative;
+  z-index: 80;
+  flex: 0 0 auto;
+  margin-left: 8px;
+}
+
+.laqp-account-control.is-loading {
+  width: 98px;
+  min-height: 34px;
+  visibility: hidden;
+}
+
+.laqp-login-button,
+.laqp-primary-button,
+.laqp-secondary-button,
+.laqp-danger-button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.laqp-login-button,
+.laqp-primary-button {
+  border-color: rgba(33, 212, 194, .44);
+  background: var(--account-accent);
+  color: #07100f;
+}
+
+.laqp-secondary-button {
+  border-color: var(--account-line);
+  background: rgba(255, 255, 255, .045);
+  color: var(--account-text);
+}
+.laqp-danger-button { border-color: rgba(255, 127, 134, .42); background: rgba(255, 127, 134, .08); color: var(--account-danger); }
+.laqp-button-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+
+.laqp-login-button:hover,
+.laqp-primary-button:hover { filter: brightness(1.08); }
+.laqp-secondary-button:hover { border-color: rgba(33, 212, 194, .5); }
+.laqp-primary-button:disabled,
+.laqp-secondary-button:disabled { opacity: .55; cursor: wait; }
+
+.laqp-user-menu { position: relative; }
+.laqp-user-menu summary { list-style: none; }
+.laqp-user-menu summary::-webkit-details-marker { display: none; }
+
+.laqp-user-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 180px;
+  min-height: 38px;
+  padding: 4px 10px 4px 5px;
+  border: 1px solid var(--account-line);
+  border-radius: 999px;
+  background: var(--account-surface);
+  color: var(--account-text);
+  cursor: pointer;
+}
+
+.laqp-user-summary img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--account-surface-2);
+}
+
+.laqp-user-summary span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.laqp-user-menu-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  min-width: 170px;
+  padding: 6px;
+  border: 1px solid var(--account-line);
+  border-radius: 9px;
+  background: var(--account-surface);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, .38);
+}
+
+.laqp-user-menu-panel a,
+.laqp-user-menu-panel button {
+  padding: 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--account-text);
+  font: inherit;
+  font-size: .82rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.laqp-user-menu-panel a:hover,
+.laqp-user-menu-panel button:hover { background: rgba(33, 212, 194, .1); color: var(--account-accent); }
+
+.laqp-modal-open { overflow: hidden; }
+.laqp-auth-modal [hidden] { display: none !important; }
+.laqp-auth-modal,
+.laqp-report-modal { display: none; }
+.laqp-auth-modal.is-open,
+.laqp-report-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.laqp-auth-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: rgba(0, 0, 0, .76);
+  cursor: default;
+}
+
+.laqp-auth-dialog,
+.laqp-report-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  max-height: min(720px, calc(100vh - 36px));
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid var(--account-line);
+  border-radius: 12px;
+  background: var(--account-bg);
+  color: var(--account-text);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .56);
+}
+
+.laqp-auth-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--account-line);
+  border-radius: 7px;
+  background: var(--account-surface);
+  color: var(--account-text);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.laqp-auth-brand,
+.laqp-account-kicker {
+  color: var(--account-accent);
+  font-size: .7rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.laqp-auth-dialog h2,
+.laqp-report-dialog h2 { margin: 5px 42px 4px 0; font-size: 1.45rem; }
+.laqp-auth-intro,
+.laqp-report-dialog > p { margin: 0 0 18px; color: var(--account-muted); line-height: 1.5; }
+
+.laqp-google-button {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--account-line);
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.laqp-google-button span { margin-right: 8px; color: #4285f4; font-size: 1.05rem; }
+
+.laqp-auth-separator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  color: var(--account-muted);
+  font-size: .72rem;
+}
+.laqp-auth-separator::before,
+.laqp-auth-separator::after { content: ''; flex: 1; height: 1px; background: var(--account-line); }
+
+.laqp-auth-form,
+.laqp-report-dialog { display: grid; gap: 12px; }
+.laqp-auth-form label,
+.laqp-report-dialog label,
+.laqp-profile-grid label {
+  display: grid;
+  gap: 6px;
+  color: var(--account-muted);
+  font-size: .74rem;
+  font-weight: 800;
+}
+
+.laqp-auth-form input,
+.laqp-report-dialog select,
+.laqp-profile-grid input,
+.laqp-profile-grid textarea,
+.laqp-comment-form textarea {
+  width: 100%;
+  border: 1px solid var(--account-line);
+  border-radius: 7px;
+  outline: 0;
+  background: var(--account-surface);
+  color: var(--account-text);
+  font: inherit;
+}
+.laqp-auth-form input,
+.laqp-report-dialog select,
+.laqp-profile-grid input { min-height: 42px; padding: 9px 11px; }
+.laqp-profile-grid textarea,
+.laqp-comment-form textarea { padding: 11px; resize: vertical; }
+.laqp-auth-form input:focus,
+.laqp-profile-grid input:focus,
+.laqp-profile-grid textarea:focus,
+.laqp-comment-form textarea:focus { border-color: var(--account-accent); box-shadow: 0 0 0 3px rgba(33, 212, 194, .1); }
+
+.laqp-form-message { min-height: 20px; margin: 0; color: var(--account-muted); font-size: .8rem; line-height: 1.4; }
+.laqp-form-message.is-error { color: var(--account-danger); }
+.laqp-form-message.is-success { color: #83e7ac; }
+
+.laqp-auth-links { display: flex; flex-wrap: wrap; gap: 5px 12px; }
+.laqp-auth-links button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--account-accent);
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.laqp-account-page {
+  width: min(1120px, calc(100% - 32px));
+  min-height: 58vh;
+  margin: calc(var(--header-height, 52px) + 28px) auto 48px;
+}
+.laqp-account-page [hidden] { display: none !important; }
+.laqp-account-shell,
+.laqp-account-empty {
+  border: 1px solid var(--account-line);
+  border-radius: 12px;
+  background: var(--account-bg);
+  color: var(--account-text);
+}
+.laqp-account-shell { overflow: hidden; }
+.laqp-account-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 26px 20px;
+  border-bottom: 1px solid var(--account-line);
+  background: linear-gradient(135deg, rgba(33, 212, 194, .08), transparent 48%);
+}
+.laqp-account-heading h1 { margin: 4px 0 5px; font-size: clamp(1.55rem, 3vw, 2rem); }
+.laqp-account-heading p,
+.laqp-account-section-heading p { margin: 0; color: var(--account-muted); line-height: 1.55; }
+.laqp-account-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0 14px;
+  border-bottom: 1px solid var(--account-line);
+  background: rgba(255, 255, 255, .018);
+}
+.laqp-account-tab {
+  position: relative;
+  min-height: 52px;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--account-muted);
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+.laqp-account-tab::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  bottom: -1px;
+  left: 14px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: transparent;
+}
+.laqp-account-tab:hover,
+.laqp-account-tab[aria-selected="true"] { color: var(--account-accent); }
+.laqp-account-tab[aria-selected="true"]::after { background: var(--account-accent); }
+.laqp-account-tab:focus-visible { outline: 2px solid var(--account-accent); outline-offset: -4px; }
+.laqp-account-panel {
+  padding: 24px 26px 28px;
+  color: var(--account-text);
+}
+.laqp-profile-editor { margin: 0; }
+.laqp-account-empty {
+  padding: 22px;
+}
+.laqp-account-empty { max-width: 560px; margin: 0 auto; text-align: center; }
+.laqp-account-empty p { color: var(--account-muted); }
+.laqp-profile-heading { display: flex; align-items: center; gap: 15px; margin-bottom: 22px; }
+.laqp-profile-heading img { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; background: var(--account-surface); }
+.laqp-profile-heading h2 { margin: 2px 0; font-size: 1.35rem; }
+.laqp-profile-heading p { margin: 0; color: var(--account-muted); font-size: .82rem; }
+.laqp-profile-heading span { color: var(--account-accent); font-size: .7rem; font-weight: 900; text-transform: uppercase; }
+.laqp-profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+.laqp-profile-field { display: grid; align-content: start; gap: 6px; min-width: 0; }
+.laqp-profile-field > label { margin: 0; }
+.laqp-profile-grid .is-wide { grid-column: 1 / -1; }
+.laqp-profile-grid small { justify-self: end; color: var(--account-muted); font-weight: 500; }
+.laqp-profile-grid .laqp-username-cooldown { justify-self: start; line-height: 1.45; }
+.laqp-username-cooldown.is-blocked { color: #f2c879; }
+.laqp-avatar-picker { min-width: 0; margin: 0; padding: 0; border: 0; }
+.laqp-avatar-picker legend { margin-bottom: 7px; color: var(--account-muted); font-size: .74rem; font-weight: 800; }
+.laqp-avatar-picker > div { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.laqp-avatar-option { display: grid; justify-items: center; gap: 6px; min-width: 0; padding: 9px 5px; border: 1px solid var(--account-line); border-radius: 8px; background: var(--account-surface); color: var(--account-muted); font: inherit; font-size: .68rem; font-weight: 800; cursor: pointer; }
+.laqp-avatar-option img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--account-surface-2); }
+.laqp-avatar-option span { overflow: hidden; max-width: 100%; text-overflow: ellipsis; white-space: nowrap; }
+.laqp-avatar-option.is-selected { border-color: var(--account-accent); background: rgba(33, 212, 194, .1); color: var(--account-accent); }
+
+.laqp-avatar-custom-section {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px dashed var(--account-line);
+  border-radius: 9px;
+  background: var(--account-surface);
+}
+.laqp-avatar-custom-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.laqp-avatar-custom-header strong {
+  font-size: .86rem;
+  color: var(--account-text);
+}
+.laqp-avatar-custom-body {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.laqp-avatar-preview-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+.laqp-avatar-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--account-line);
+  background: var(--account-surface-2);
+}
+.laqp-avatar-custom-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.laqp-file-input-hidden {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+.laqp-avatar-custom-hint {
+  margin: 0;
+  color: var(--account-muted);
+  font-size: .74rem;
+  line-height: 1.4;
+}
+
+.laqp-profile-actions { display: flex; flex-wrap: wrap; gap: 9px; margin: 18px 0 10px; }
+.laqp-account-section-heading { margin-bottom: 18px; }
+.laqp-account-section-heading h2 { margin: 4px 0 5px; font-size: 1.35rem; }
+.laqp-security-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.laqp-setting-card {
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid var(--account-line);
+  border-radius: 9px;
+  background: var(--account-surface);
+}
+.laqp-setting-card h3 { margin: 4px 0 12px; font-size: 1rem; }
+.laqp-setting-card > p { margin: 8px 0 0; color: var(--account-muted); font-size: .78rem; line-height: 1.5; }
+.laqp-setting-label { display: block; color: var(--account-muted); font-size: .7rem; font-weight: 850; letter-spacing: .045em; text-transform: uppercase; }
+.laqp-private-email { display: block; overflow-wrap: anywhere; margin-top: 8px; font-size: 1rem; }
+.laqp-access-methods { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+.laqp-access-methods li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--account-line);
+  border-radius: 7px;
+  background: var(--account-surface-2);
+}
+.laqp-access-methods small { grid-column: 2; color: var(--account-muted); line-height: 1.4; }
+.laqp-access-check { grid-row: 1 / span 2; color: var(--account-accent); font-size: 1.05rem; font-weight: 900; }
+.laqp-account-note { color: var(--account-muted); }
+.laqp-security-future { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+.laqp-security-future .laqp-account-kicker { margin-right: 3px; }
+.laqp-future-chip {
+  padding: 7px 9px;
+  border: 1px solid var(--account-line);
+  border-radius: 999px;
+  color: var(--account-muted);
+  background: rgba(255, 255, 255, .025);
+  font-size: .72rem;
+  font-weight: 750;
+}
+.laqp-account-session-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--account-line); }
+.laqp-inline-setting-form { display: grid; gap: 9px; margin-top: 14px; }
+.laqp-inline-setting-form label { display: grid; gap: 6px; color: var(--account-muted); font-size: .74rem; font-weight: 800; }
+.laqp-inline-setting-form input { min-height: 40px; padding: 8px 10px; border: 1px solid var(--account-line); border-radius: 7px; background: var(--account-surface-2); color: var(--account-text); font: inherit; }
+.laqp-inline-setting-form .laqp-secondary-button { justify-self: start; }
+.laqp-access-methods .laqp-inline-danger { grid-column: 2; justify-self: start; }
+.laqp-inline-danger { padding: 2px 0; border: 0; background: transparent; color: var(--account-danger); font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
+.laqp-account-feature-root { min-width: 0; }
+.laqp-activity-sections { display: grid; gap: 10px; }
+.laqp-activity-section { border: 1px solid var(--account-line); border-radius: 9px; background: var(--account-surface); overflow: hidden; }
+.laqp-activity-section summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 11px 14px; cursor: pointer; }
+.laqp-activity-section summary::marker { color: var(--account-accent); }
+.laqp-activity-count { min-width: 26px; padding: 3px 7px; border-radius: 999px; background: rgba(33,212,194,.1); color: var(--account-accent); text-align: center; font-size: .72rem; font-weight: 900; }
+.laqp-activity-section-body { display: grid; gap: 7px; padding: 0 11px 11px; }
+.laqp-activity-section-state { margin: 0; padding: 12px; color: var(--account-muted); font-size: .78rem; text-align: center; }
+.laqp-activity-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; padding: 10px 11px; border: 1px solid var(--account-line); border-radius: 7px; background: var(--account-surface-2); }
+.laqp-activity-row > span:first-child { display: grid; gap: 3px; min-width: 0; }
+.laqp-activity-row a, .laqp-activity-row strong { overflow-wrap: anywhere; color: var(--account-text); font-size: .8rem; font-weight: 850; text-decoration: none; }
+.laqp-activity-row a:hover { color: var(--account-accent); }
+.laqp-activity-row small { display: -webkit-box; overflow: hidden; color: var(--account-muted); font-size: .7rem; line-height: 1.4; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.laqp-status-pill { flex: 0 0 auto; padding: 4px 7px; border-radius: 999px; color: var(--account-muted); background: rgba(255,255,255,.05); font-size: .66rem; font-weight: 850; }
+.laqp-status-pill.is-hidden { color: #f2c879; }
+.laqp-activity-empty {
+  padding: 20px;
+  border: 1px dashed rgba(33, 212, 194, .35);
+  border-radius: 9px;
+  background: rgba(33, 212, 194, .045);
+  text-align: center;
+}
+.laqp-activity-empty p { max-width: 650px; margin: 7px auto 0; color: var(--account-muted); line-height: 1.5; }
+.laqp-activity-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.laqp-activity-item {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--account-line);
+  border-radius: 8px;
+  background: var(--account-surface);
+}
+.laqp-activity-item span { font-size: .82rem; font-weight: 800; }
+.laqp-activity-item small { color: var(--account-muted); font-size: .7rem; }
+
+.laqp-public-profile-page {
+  width: min(980px, calc(100% - 32px));
+  min-height: 58vh;
+  margin: calc(var(--header-height, 52px) + 28px) auto 48px;
+  color: var(--account-text);
+}
+.laqp-public-profile-shell { display: grid; gap: 16px; }
+.laqp-public-profile-hero,
+.laqp-public-profile-comments,
+.laqp-public-profile-state {
+  border: 1px solid var(--account-line);
+  border-radius: 11px;
+  background: var(--account-bg);
+}
+.laqp-public-profile-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+  padding: 22px;
+  background: linear-gradient(135deg, rgba(33, 212, 194, .075), var(--account-bg) 48%);
+}
+.laqp-public-profile-avatar {
+  width: 104px;
+  height: 104px;
+  border: 2px solid rgba(33, 212, 194, .4);
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--account-surface);
+}
+.laqp-public-profile-identity { min-width: 0; }
+.laqp-public-profile-username-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.laqp-public-profile-username-row h1 { overflow-wrap: anywhere; margin: 0; font-size: clamp(1.35rem, 3vw, 1.8rem); }
+.laqp-role-badge {
+  padding: 5px 8px;
+  border: 1px solid rgba(33, 212, 194, .45);
+  border-radius: 999px;
+  background: rgba(33, 212, 194, .1);
+  color: var(--account-accent);
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+.laqp-role-badge.is-admin { border-color: rgba(242, 200, 121, .48); background: rgba(242, 200, 121, .1); color: #f2c879; }
+.laqp-public-profile-name { margin: 5px 0 0; font-weight: 800; }
+.laqp-public-profile-bio { max-width: 650px; margin: 10px 0 0; color: #dce5e8; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.laqp-public-profile-member { margin: 9px 0 0; color: var(--account-muted); font-size: .78rem; }
+.laqp-public-profile-share { display: grid; justify-items: end; gap: 6px; align-self: start; }
+.laqp-share-feedback { min-height: 18px; color: #83e7ac; font-size: .72rem; font-weight: 750; }
+.laqp-share-feedback.is-error { color: var(--account-danger); }
+.laqp-copy-fallback { position: fixed; top: -1000px; left: -1000px; opacity: 0; }
+.laqp-public-profile-comments { padding: 20px 22px 22px; }
+.laqp-public-comments-heading { margin-bottom: 14px; }
+.laqp-public-comments-heading h2 { margin: 4px 0 0; font-size: 1.3rem; }
+.laqp-public-comments-empty,
+.laqp-public-profile-state {
+  padding: 22px;
+  color: var(--account-muted);
+  text-align: center;
+}
+.laqp-public-profile-state h1 { margin: 0 0 7px; color: var(--account-text); font-size: 1.35rem; }
+.laqp-public-profile-state p,
+.laqp-public-comments-empty { margin: 0; }
+.laqp-public-comments-list { display: grid; gap: 9px; }
+.laqp-public-comment { padding: 13px 14px; border: 1px solid var(--account-line); border-radius: 8px; background: var(--account-surface); }
+.laqp-public-comment-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 7px 14px; }
+.laqp-public-comment-meta a,
+.laqp-public-comment-meta span { color: var(--account-accent); font-size: .74rem; font-weight: 850; text-decoration: none; }
+.laqp-public-comment-meta a:hover { text-decoration: underline; }
+.laqp-public-comment-meta time { color: var(--account-muted); font-size: .7rem; }
+.laqp-public-comment-content { margin: 9px 0 0; color: #dbe3e7; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.laqp-comments {
+  display: grid;
+  gap: 16px;
+  width: min(980px, calc(100% - 28px));
+  margin: 32px auto;
+  padding: 20px;
+  border: 1px solid var(--account-line);
+  border-radius: 10px;
+  background: var(--account-bg);
+  color: var(--account-text);
+}
+.laqp-comments-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+.laqp-comments-heading span { color: var(--account-accent); font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.laqp-comments-heading h2 { margin: 3px 0 0; font-size: 1.35rem; }
+.laqp-comments-heading p { margin: 0; color: var(--account-muted); font-size: .82rem; }
+.laqp-comments-login,
+.laqp-comment-composer,
+.laqp-comments-state { border: 1px solid var(--account-line); border-radius: 8px; background: var(--account-surface); }
+.laqp-comments-login { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px; }
+.laqp-comments-login p,
+.laqp-comments-state p { margin: 0; }
+.laqp-comment-composer { padding: 14px; }
+.laqp-composer-author { display: flex; align-items: center; gap: 9px; margin-bottom: 11px; }
+.laqp-composer-author img,
+.laqp-comment-header img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: var(--account-surface-2); }
+.laqp-comment-avatar-link { display: inline-flex; flex: 0 0 auto; border-radius: 50%; }
+.laqp-comment-author-link { color: inherit; text-decoration: none; }
+.laqp-comment-avatar-link:focus-visible,
+.laqp-comment-author-link:focus-visible { outline: 2px solid var(--account-accent); outline-offset: 2px; }
+.laqp-comment-author-link:hover { color: var(--account-accent); }
+.laqp-composer-author strong { font-size: .86rem; }
+.laqp-comment-form { display: grid; gap: 9px; }
+.laqp-comment-form textarea { min-height: 104px; }
+.laqp-composer-context,
+.laqp-comment-form-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.laqp-composer-context { padding: 7px 9px; border-radius: 6px; background: rgba(33, 212, 194, .09); color: var(--account-accent); font-size: .78rem; }
+.laqp-composer-context button { border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.laqp-comment-form-footer > span { color: var(--account-muted); font-size: .75rem; }
+.laqp-comments-list { display: grid; gap: 11px; }
+.laqp-comments-state { margin: 0; padding: 16px; color: var(--account-muted); text-align: center; }
+.laqp-comments-state.is-error { color: var(--account-danger); }
+
+.laqp-comment {
+  padding: 14px;
+  border: 1px solid var(--account-line);
+  border-radius: 8px;
+  background: var(--account-surface);
+}
+.laqp-comment-header { display: flex; align-items: center; gap: 10px; }
+.laqp-comment-header div { display: grid; gap: 2px; }
+.laqp-comment-header strong { font-size: .88rem; }
+.laqp-comment-header time { color: var(--account-muted); font-size: .72rem; }
+.laqp-comment-content { margin: 11px 0; color: #dbe3e7; line-height: 1.58; white-space: pre-wrap; overflow-wrap: anywhere; }
+.laqp-comment.is-deleted .laqp-comment-content { color: var(--account-muted); font-style: italic; }
+.laqp-comment-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.laqp-comment-actions button { padding: 0; border: 0; background: transparent; color: var(--account-accent); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
+.laqp-comment-actions button.is-danger { color: var(--account-danger); }
+.laqp-comment-replies { display: grid; gap: 9px; margin: 14px 0 0 28px; padding-left: 14px; border-left: 2px solid rgba(33, 212, 194, .25); }
+.laqp-comment.is-reply { padding: 12px; background: var(--account-surface-2); }
+.laqp-comment.is-highlighted { border-color: var(--account-accent); animation: laqp-comment-highlight 3.6s ease both; }
+@keyframes laqp-comment-highlight { 0%, 65% { box-shadow: 0 0 0 3px rgba(33,212,194,.23); background: rgba(33,212,194,.12); } 100% { box-shadow: none; } }
+.laqp-comments-more { justify-self: center; }
+.laqp-user-content-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; width: min(980px, calc(100% - 28px)); margin: 24px auto -18px; }
+.laqp-save-item-button { min-height: 38px; padding: 8px 13px; border: 1px solid var(--account-line); border-radius: 7px; background: var(--account-surface); color: var(--account-text); font: inherit; font-size: .78rem; font-weight: 850; cursor: pointer; }
+.laqp-save-item-button.is-saved { border-color: rgba(33,212,194,.45); color: var(--account-accent); }
+.laqp-rating-control { display: flex; align-items: center; gap: 9px; min-height: 38px; padding: 6px 10px; border: 1px solid var(--account-line); border-radius: 7px; background: var(--account-surface); }
+.laqp-rating-control > span { color: var(--account-muted); font-size: .72rem; font-weight: 800; }
+.laqp-rating-stars { display: flex; }
+.laqp-rating-stars button, .laqp-rating-remove { padding: 0 2px; border: 0; background: transparent; color: #f2c879; font: inherit; font-size: 1.2rem; cursor: pointer; }
+.laqp-rating-remove { margin-left: 2px; color: var(--account-muted); font-size: .7rem; font-weight: 800; }
+.laqp-moderation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.laqp-moderation-grid h2 { margin: 0 0 4px; font-size: 1.12rem; }
+
+@media (max-width: 900px) {
+  .laqp-security-grid { grid-template-columns: 1fr; }
+  .laqp-activity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .laqp-moderation-grid { grid-template-columns: 1fr; }
+  #header .laqp-account-control { margin-left: auto; }
+  .laqp-user-summary span { display: none; }
+  .laqp-user-summary { padding-right: 5px; }
+}
+
+@media (max-width: 620px) {
+  .laqp-login-button { min-height: 34px; padding: 7px 9px; font-size: .72rem; }
+  .laqp-account-page { width: min(100% - 20px, 1120px); margin-top: calc(var(--header-height, 52px) + 16px); }
+  .laqp-account-heading { padding: 19px 16px 16px; }
+  .laqp-account-heading p { font-size: .82rem; }
+  .laqp-account-tabs { grid-template-columns: repeat(3, minmax(132px, 1fr)); overflow-x: auto; padding: 0 5px; }
+  .laqp-account-tab { min-height: 48px; padding: 9px 8px; font-size: .76rem; }
+  .laqp-account-tab::after { right: 8px; left: 8px; }
+  .laqp-account-panel { padding: 18px 15px 21px; }
+  .laqp-profile-grid { grid-template-columns: 1fr; }
+  .laqp-profile-grid .is-wide { grid-column: auto; }
+  .laqp-avatar-picker > div { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .laqp-activity-grid { grid-template-columns: 1fr; }
+  .laqp-public-profile-page { width: min(100% - 20px, 980px); margin-top: calc(var(--header-height, 52px) + 16px); }
+  .laqp-public-profile-hero { grid-template-columns: auto minmax(0, 1fr); gap: 14px; padding: 17px 15px; }
+  .laqp-public-profile-avatar { width: 78px; height: 78px; }
+  .laqp-public-profile-share { grid-column: 1 / -1; grid-template-columns: auto 1fr; align-items: center; justify-items: start; width: 100%; }
+  .laqp-public-profile-comments { padding: 17px 15px; }
+  .laqp-public-comment-meta { align-items: start; flex-direction: column; gap: 4px; }
+  .laqp-comments { width: min(100% - 16px, 980px); margin: 20px auto; padding: 14px; }
+  .laqp-comments-heading { align-items: start; flex-direction: column; gap: 5px; }
+  .laqp-comments-login { align-items: stretch; flex-direction: column; }
+  .laqp-comment-replies { margin-left: 10px; padding-left: 9px; }
+  .laqp-activity-row { align-items: flex-start; }
+  .laqp-user-content-actions { align-items: stretch; justify-content: stretch; width: min(100% - 16px, 980px); margin-top: 16px; }
+  .laqp-user-content-actions > * { flex: 1 1 100%; }
+  .laqp-rating-control { justify-content: space-between; }
+  .laqp-auth-dialog,
+  .laqp-report-dialog { padding: 20px 16px; }
+}

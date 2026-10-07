@@ -1,0 +1,12 @@
+﻿id;nombre;posicion;x;y;posicion_inicial;x_inicial;y_inicial;posicion_con_balon;x_con_balon;y_con_balon;posicion_sin_balon;x_sin_balon;y_sin_balon
+909001;Giuliano Sarti;PT;50;91;PT;50;91;PT;50;91;PT;50;91
+909002;Tarcisio Burgnich;LD;80;73;LD;80;73;DFC;72;72;LD;81;74
+909003;Aristide Guarneri;DFC;57;75;DFC;57;75;DFC;56;74;DFC;59;75
+909004;Armando Picchi;DFC;43;82;DFC;43;82;DFC;43;80;DFC;43;82
+909005;Giacinto Facchetti;LI;18;70;LI;18;70;MI;17;38;LI;18;73
+909006;Gianfranco Bedin;MCD;43;59;MCD;43;59;MCD;43;56;DFC;34;72
+909007;Luis Suárez;MC;56;53;MC;56;53;MC;53;49;MC;52;54
+909008;Mario Corso;MI;27;42;MI;27;42;MP;31;32;MI;28;51
+909009;Jair;ED;84;31;ED;84;31;ED;85;23;MD;78;50
+909010;Sandro Mazzola;SD;58;23;SD;58;23;SD;61;20;SD;58;29
+909011;Joaquín Peiró;DC;43;20;DC;43;20;DC;45;17;DC;44;25
