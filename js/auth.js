@@ -29,6 +29,16 @@
     return window.LAQPCreateSupabaseClient?.() || null;
   }
 
+  // The private Draft staging project has Auth but no website social profiles.
+  // This capability changes form fields only; Supabase still verifies Auth.
+  function stagingEmailAuth() {
+    const c = window.LAQP_DRAFT_STAGING_AUTH_CONFIG;
+    return ['127.0.0.1', 'localhost', '[::1]'].includes(location.hostname)
+      && c?.enabled === true && c.contractVerified === true && c.webProfiles === false
+      && c.projectRef === 'niyqnkoqngyoogpwkegl'
+      && client()?.supabaseUrl === 'https://niyqnkoqngyoogpwkegl.supabase.co';
+  }
+
   async function waitForClient() {
     for (let attempt = 0; attempt < 20; attempt += 1) {
       const instance = client();
@@ -136,6 +146,58 @@
     return DEFAULT_AVATAR;
   }
 
+  // La URL persistida permanece canónica; la versión sólo se agrega al renderizar.
+  function avatarDisplayUrl(value) {
+    const url = safeAvatarUrl(value);
+    return isStorageAvatar(url) ? url + '?v=' + Date.now() : url;
+  }
+
+  async function avatarWebp(file) {
+    const source = URL.createObjectURL(file);
+    try {
+      const image = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('No se pudo decodificar la imagen.'));
+        img.src = source;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('No se pudo convertir la imagen.');
+      context.drawImage(image, 0, 0);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.85));
+      if (!blob || blob.type !== 'image/webp') throw new Error('No se pudo convertir la imagen a WEBP.');
+      if (blob.size > 2 * 1024 * 1024) throw new Error('La imagen WEBP supera los 2 MB máximos permitidos.');
+      return blob;
+    } finally {
+      URL.revokeObjectURL(source);
+    }
+  }
+
+  async function cleanUserAvatars(storage, userId, keepPath) {
+    const obsolete = [];
+    // Reunir todas las páginas antes de borrar para no desplazar los offsets.
+    for (let offset = 0; ; offset += 100) {
+      const { data, error } = await storage.list(userId, {
+        limit: 100, offset, sortBy: { column: 'name', order: 'asc' },
+      });
+      if (error) throw error;
+      if (!Array.isArray(data)) throw new Error('No se pudo listar la carpeta de avatares.');
+      for (const item of data) {
+        if (!item.id || !/^[A-Za-z0-9._-]+$/.test(item.name)) continue;
+        const path = userId + '/' + item.name;
+        if (path !== keepPath) obsolete.push(path);
+      }
+      if (data.length < 100) break;
+    }
+    for (let offset = 0; offset < obsolete.length; offset += 100) {
+      const { error } = await storage.remove(obsolete.slice(offset, offset + 100));
+      if (error) throw error;
+    }
+  }
+
   function isGoogleAvatar(value) {
     return GOOGLE_AVATAR_RE.test(String(value || '').trim());
   }
@@ -156,6 +218,7 @@
   }
 
   async function loadProfile() {
+    if (stagingEmailAuth()) { state.profile = null; state.profileError = null; return null; }
     if (!client() || !user()) {
       state.profile = null;
       state.profileError = null;
@@ -260,7 +323,7 @@
     const details = element('details', 'laqp-user-menu');
     const summary = element('summary', 'laqp-user-summary');
     const image = element('img');
-    image.src = safeAvatarUrl(state.profile?.avatar_url);
+    image.src = avatarDisplayUrl(state.profile?.avatar_url);
     image.alt = '';
     image.referrerPolicy = 'no-referrer';
     image.addEventListener('error', () => { image.src = DEFAULT_AVATAR; }, { once: true });
@@ -321,6 +384,8 @@
   }
 
   function modeCopy() {
+    if (stagingEmailAuth() && state.mode === 'register') return ['Crear cuenta de staging', 'Usá el correo descartable autorizado. Confirmalo antes de conservar tu progreso.', 'Crear cuenta'];
+    if (stagingEmailAuth() && state.mode === 'login') return ['Iniciar sesión en staging', 'Esta cuenta de prueba conserva tu progreso de Draft. No usa el perfil público de LAqP.', 'Iniciar sesión'];
     if (state.mode === 'register') return ['Crear cuenta', 'Elegí tu nombre público. El correo nunca se muestra en tu perfil.', 'Crear cuenta'];
     if (state.mode === 'recover') return ['Recuperar contraseña', 'Te enviaremos un enlace seguro para elegir una contraseña nueva.', 'Enviar enlace'];
     if (state.mode === 'update-password') return ['Nueva contraseña', 'Elegí una contraseña nueva para tu cuenta.', 'Guardar contraseña'];
@@ -357,8 +422,8 @@
     const isUpdate = state.mode === 'update-password';
     const isLogin = state.mode === 'login';
     configureAuthField(modal, 'username', {
-      visible: isRegister,
-      required: isRegister,
+      visible: isRegister && !stagingEmailAuth(),
+      required: isRegister && !stagingEmailAuth(),
       autocomplete: 'username',
     });
     configureAuthField(modal, 'email', {
@@ -380,14 +445,14 @@
     });
     modal.querySelector('#laqp-auth-password-label').textContent = isUpdate ? 'Nueva contraseña' : 'Contraseña';
     modal.querySelector('#laqp-auth-repeat-label').textContent = isUpdate ? 'Repetir nueva contraseña' : 'Repetir contraseña';
-    modal.querySelector('#laqp-google-login').hidden = isRecover || isUpdate;
-    modal.querySelector('#laqp-auth-separator').hidden = isRecover || isUpdate;
+    modal.querySelector('#laqp-google-login').hidden = isRecover || isUpdate || stagingEmailAuth();
+    modal.querySelector('#laqp-auth-separator').hidden = isRecover || isUpdate || stagingEmailAuth();
     const links = modal.querySelector('#laqp-auth-links');
     links.replaceChildren();
     links.hidden = isUpdate;
     if (state.mode !== 'login' && !isUpdate) addModeLink(links, 'Ya tengo cuenta', 'login');
     if (state.mode !== 'register' && !isUpdate) addModeLink(links, 'Crear cuenta', 'register');
-    if (!isRecover && !isUpdate) addModeLink(links, 'Olvidé mi contraseña', 'recover');
+    if (!isRecover && !isUpdate && !stagingEmailAuth()) addModeLink(links, 'Olvidé mi contraseña', 'recover');
   }
 
   function openModal(mode = 'login') {
@@ -475,17 +540,17 @@
     setMessage('Procesando…');
     try {
       if (state.mode === 'register') {
-        const check = validateUsername(form.username.value);
+        const check = stagingEmailAuth() ? { ok: true, value: null } : validateUsername(form.username.value);
         if (!check.ok) throw new Error(check.message);
         if (password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres.');
         if (password !== repeat) throw new Error('Las contraseñas no coinciden.');
-        if (!(await usernameAvailable(check.value))) throw Object.assign(new Error('username_taken'), { code: '23505' });
+        if (!stagingEmailAuth() && !(await usernameAvailable(check.value))) throw Object.assign(new Error('username_taken'), { code: '23505' });
         const { data, error } = await client().auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: authRedirectUrl(),
-            data: { username: check.value, display_name: check.value },
+            data: stagingEmailAuth() ? {} : { username: check.value, display_name: check.value },
           },
         });
         if (error) throw error;
@@ -737,7 +802,7 @@
       <div class="laqp-profile-actions"><button class="laqp-primary-button" type="submit">Guardar cambios</button><a class="laqp-secondary-button laqp-button-link" data-public-profile-link>Ver perfil público</a></div>
       <p class="laqp-form-message" data-profile-message role="status"></p>`;
     const avatar = form.querySelector('.laqp-profile-heading img');
-    avatar.src = safeAvatarUrl(state.profile?.avatar_url);
+    avatar.src = avatarDisplayUrl(state.profile?.avatar_url);
     avatar.referrerPolicy = 'no-referrer';
     avatar.addEventListener('error', () => { avatar.src = DEFAULT_AVATAR; }, { once: true });
     form.username.value = state.profile?.username || '';
@@ -751,14 +816,14 @@
         option.classList.toggle('is-selected', option.dataset.avatarChoice === value);
         option.setAttribute('aria-pressed', option.dataset.avatarChoice === value ? 'true' : 'false');
       });
-      avatar.src = safeAvatarUrl(value);
+      avatar.src = avatarDisplayUrl(value);
     };
     const addAvatarChoice = (value, label) => {
       const option = element('button', 'laqp-avatar-option');
       option.type = 'button';
       option.dataset.avatarChoice = value;
       const image = element('img');
-      image.src = safeAvatarUrl(value);
+      image.src = avatarDisplayUrl(value);
       image.alt = '';
       image.referrerPolicy = 'no-referrer';
       image.addEventListener('error', () => { image.src = DEFAULT_AVATAR; }, { once: true });
@@ -780,7 +845,7 @@
     const customMsg = form.querySelector('[data-avatar-custom-message]');
 
     const syncCustomPreview = () => {
-      const current = safeAvatarUrl(state.profile?.avatar_url);
+      const current = avatarDisplayUrl(state.profile?.avatar_url);
       customPreview.src = current;
       customPreview.addEventListener('error', () => { customPreview.src = DEFAULT_AVATAR; }, { once: true });
       const hasCustom = isStorageAvatar(state.profile?.avatar_url);
@@ -859,25 +924,18 @@
       customMsg.textContent = 'Subiendo imagen…';
       customMsg.className = 'laqp-form-message';
 
-      const extensionMap = {
-        'image/jpeg': 'jpg',
-        'image/png': 'png',
-        'image/webp': 'webp',
-      };
-      const ext = extensionMap[pendingFile.type] || 'jpg';
-      const fileName = `${Date.now()}-avatar.${ext}`;
-      const filePath = `${user().id}/${fileName}`;
-      let newlyUploadedPath = null;
-      const oldAvatarUrl = state.profile?.avatar_url;
+      const userId = user().id;
+      const filePath = userId + '/avatar.webp';
+      const storage = client().storage.from('avatars');
 
       try {
         // 1. Subir la imagen nueva
-        const { error: uploadError } = await client().storage.from('avatars').upload(filePath, pendingFile, {
-          cacheControl: '3600',
-          upsert: false,
+        const { error: uploadError } = await storage.upload(filePath, await avatarWebp(pendingFile), {
+          contentType: 'image/webp',
+          cacheControl: '0',
+          upsert: true,
         });
         if (uploadError) throw uploadError;
-        newlyUploadedPath = filePath;
 
         // 2. Obtener URL pública exacta
         const { data: pubData } = client().storage.from('avatars').getPublicUrl(filePath);
@@ -888,20 +946,19 @@
         const { data: updatedProfile, error: profileError } = await client()
           .from('profiles')
           .update({ avatar_url: newPublicUrl })
-          .eq('id', user().id)
+          .eq('id', userId)
           .select('id,username,display_name,avatar_url,bio,created_at')
           .single();
 
         if (profileError) throw profileError;
 
-        // 4. Si se actualizó el perfil correctamente, borrar el avatar custom anterior si existía
-        const oldStoragePath = safeUserStoragePath(oldAvatarUrl, user().id);
-        if (oldStoragePath && oldStoragePath !== filePath) {
-          try {
-            await client().storage.from('avatars').remove([oldStoragePath]);
-          } catch (err) {
-            console.warn('[LAqP Storage] No se pudo eliminar el avatar anterior.', err);
-          }
+        // El perfil ya apunta al archivo estable: ahora limpiar sobrantes propios.
+        let cleanupError = null;
+        try {
+          await cleanUserAvatars(storage, userId, filePath);
+        } catch (err) {
+          cleanupError = err;
+          console.warn('[LAqP Storage] No se pudieron limpiar los avatares antiguos.', err);
         }
 
         if (pendingObjectUrl) URL.revokeObjectURL(pendingObjectUrl);
@@ -916,17 +973,16 @@
         customMsg.textContent = 'Foto de perfil actualizada con éxito.';
         customMsg.className = 'laqp-form-message is-success';
         renderAccountPage();
-      } catch (err) {
-        console.warn('[LAqP Storage]', err);
-        // Rollback: Si se subió el archivo nuevo pero falló la actualización del perfil, eliminar la imagen recién subida
-        const rollbackPath = safeUserStoragePath(`${projectStoragePrefix()}${newlyUploadedPath}`, user().id);
-        if (rollbackPath) {
-          try {
-            await client().storage.from('avatars').remove([rollbackPath]);
-          } catch (rbErr) {
-            console.warn('[LAqP Storage] Error en rollback de imagen subida.', rbErr);
+        if (cleanupError) {
+          const message = document.querySelector('[data-avatar-custom-message]');
+          if (message) {
+            message.textContent = 'Foto actualizada. No pudimos borrar los avatares antiguos; volvé a subirla para reintentar.';
+            message.className = 'laqp-form-message is-error';
           }
         }
+      } catch (err) {
+        console.warn('[LAqP Storage]', err);
+        // Nunca borrar avatar.webp ante un fallo del perfil: puede estar en uso.
         customMsg.textContent = humanError(err, 'No pudimos subir la foto de perfil.');
         customMsg.className = 'laqp-form-message is-error';
       } finally {
@@ -996,7 +1052,7 @@
         await saveProfile(Object.fromEntries(new FormData(form)));
         message.textContent = 'Perfil actualizado.';
         message.className = 'laqp-form-message is-success';
-        avatar.src = safeAvatarUrl(state.profile?.avatar_url);
+        avatar.src = avatarDisplayUrl(state.profile?.avatar_url);
         form.username.value = state.profile?.username || form.username.value;
         renderUsernameCooldown(form.querySelector('[data-username-cooldown]'));
       } catch (error) {
@@ -1120,6 +1176,7 @@
     get user() { return user(); },
     get profile() { return profile(); },
     get ready() { return state.ready; },
+    avatarURL: () => avatarDisplayUrl(state.profile?.avatar_url),
     open: openModal,
     close: closeModal,
     signOut,

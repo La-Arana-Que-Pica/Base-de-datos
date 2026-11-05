@@ -176,14 +176,14 @@ function renderHomeGuide(article) {
   return `
     <article class="editorial-card">
       <a class="editorial-card-media" href="${articleUrl}">
-        <img src="${escapeHtml(assetPath(article.image))}" alt="${escapeHtml(article.title)}" loading="lazy" width="640" height="360" onerror="this.onerror=null;this.src='img/logo.webp'">
+        <img src="${escapeHtml(assetPath(article.thumbnail || article.image))}" alt="${escapeHtml(article.title)}" loading="lazy" width="640" height="360" onerror="this.onerror=null;this.src='img/logo.webp'">
       </a>
       <div class="editorial-card-body">
         <div class="editorial-meta">
           <span>${escapeHtml(article.category)}</span>
           <span>${escapeHtml(article.readTime)}</span>
         </div>
-        <h2><a href="${articleUrl}">${escapeHtml(article.title)}</a></h2>
+        <h3><a href="${articleUrl}">${escapeHtml(article.title)}</a></h3>
         <p>${escapeHtml(article.description)}</p>
         <a class="editorial-card-cta" href="${articleUrl}">Ver guia</a>
       </div>
@@ -198,8 +198,8 @@ async function renderHomeGuides() {
     : (window.LAQP_ARTICLES || []);
   if (!articles.length) return;
   const preferredIds = [
-    'instalar-option-file-pes-2018-2026',
     'importar-kits-pes-2018',
+    'consejos-crear-caras-pes-2018-editor-interno',
     'sistema-medias-pes-2018',
   ];
   const preferred = preferredIds
@@ -212,7 +212,7 @@ async function renderHomeGuides() {
 
 async function bootHome() {
   const section = document.getElementById('featured-of-section');
-  if (!section) return;
+  if (!section || section.dataset.spiderPatch === 'static') return;
 
   // El HTML ya fue generado desde el CSV. Si hay que hidratarlo, usar siempre
   // ese mismo CSV para no reemplazarlo con un option-files.json desactualizado.

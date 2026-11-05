@@ -1,5 +1,9 @@
 'use strict';
 
+if (document.querySelector('#player-page, #team-page, #league-page, #layout #main')) {
+  import('/js/face-badge-preference.js');
+}
+
 let laqpPes2018OverallPromise = null;
 window.LAQPEnsurePes2018Overall = function ensurePes2018Overall() {
   if (window.PES2018Overall) return Promise.resolve(window.PES2018Overall);
@@ -15,17 +19,28 @@ window.LAQPEnsurePes2018Overall = function ensurePes2018Overall() {
 };
 
 const SITE_NAV_ITEMS = [
-  { href: '/index.html', labelKey: 'nav.home', fallback: 'Inicio', key: 'index' },
-  { href: '/database.html', labelKey: 'nav.database', fallback: 'Base de Datos', key: 'database' },
-  { href: '/alineaciones.html', labelKey: 'nav.lineups', fallback: 'Alineaciones', key: 'lineups' },
-  { href: '/database/DTs/', labelKey: 'nav.dts', fallback: 'DTs', key: 'dts' },
-  { href: '/rankings.html', labelKey: 'nav.scouting', fallback: 'Scouting', key: 'rankings' },
-  { href: '/tactics.html', labelKey: 'nav.tactics', fallback: 'Tacticas', key: 'tactics' },
-  { href: '/guias.html', labelKey: 'nav.guides', fallback: 'Guías', key: 'guides' },
-  { href: '/tutorials.html', labelKey: 'nav.tutorials', fallback: 'Tutoriales', key: 'tutorials' },
-  { href: '/calculadora-medias.html', labelKey: 'nav.calculator', fallback: 'Calculadora', key: 'calculator' },
-  { href: '/downloads.html', labelKey: 'nav.downloads', fallback: 'Option Files', key: 'downloads' },
+  { href: '/downloads.html', fallback: 'Spider Patch', key: 'downloads' },
+  { fallback: 'Base de datos', key: 'database', children: [
+    { href: '/database.html', fallback: 'Base de datos de jugadores y equipos', key: 'database' },
+    { href: '/database/DTs/', fallback: 'Directores técnicos', key: 'dts' },
+    { href: '/tactics.html', fallback: 'Tácticas históricas', key: 'tactics' },
+  ] },
+  { href: '/draft/', fallback: 'LAqP Draft', key: 'draft' },
+  // Análisis: trabajan con datos de fútbol (consultar, calcular, planificar).
+  { fallback: 'Análisis', key: 'tools', children: [
+    { href: '/rankings.html', fallback: 'Scouting', key: 'rankings' },
+    { href: '/calculadora-medias.html', fallback: 'Calculadora de medias', key: 'calculator' },
+    { href: '/alineaciones.html', fallback: 'Creador de alineaciones', key: 'lineups' },
+  ] },
+  // Editores: crean archivos para instalar en PES 2018.
+  { fallback: 'Editores', key: 'editors', children: [
+    { href: '/miniface-studio.html', fallback: 'Miniface Studio', key: 'miniface-studio' },
+    { href: '/kit-color-studio.html', fallback: 'Kit Color Studio', key: 'kit-color-studio' },
+    { href: '/soundtrack-maker.html', fallback: 'Soundtrack Maker', key: 'soundtrack-maker' },
+  ] },
+  { href: '/guias.html', fallback: 'Guías', key: 'guides' },
 ];
+const SITE_NAV_DESKTOP_QUERY = '(min-width: 1151px)';
 
 const LAQP_PRETTY_PATHS = {
   'index.html': 'index.html',
@@ -37,6 +52,9 @@ const LAQP_PRETTY_PATHS = {
   'calculadora-medias.html': 'calculadora-medias.html',
   'database.html': 'database.html',
   'alineaciones.html': 'alineaciones.html',
+  'miniface-studio.html': 'miniface-studio.html',
+  'kit-color-studio.html': 'kit-color-studio.html',
+  'soundtrack-maker.html': 'soundtrack-maker.html',
   'contact.html': 'contact.html',
   'about.html': 'about.html',
   'acerca-de.html': 'acerca-de.html',
@@ -75,22 +93,22 @@ function laqpFirstRoutePart(prefix, queryParam) {
 }
 
 function laqpTeamUrl(teamId, teamName) {
-  return `/team/v2/${laqpSlugify(teamName)}-${encodeURIComponent(teamId)}/`;
+  return `/team/${laqpSlugify(teamName)}-${encodeURIComponent(teamId)}/`;
 }
 
 function laqpLeagueUrl(leagueId, leagueName) {
-  return `/league/v2/${laqpSlugify(leagueName)}-${encodeURIComponent(leagueId)}/`;
+  return `/league/${laqpSlugify(leagueName)}-${encodeURIComponent(leagueId)}/`;
 }
 
 function laqpPlayerUrl(playerId, teamId, playerName) {
-  return `/player/v2/${encodeURIComponent(teamId)}/${laqpSlugify(playerName)}-${encodeURIComponent(playerId)}/`;
+  return `/player/${encodeURIComponent(teamId)}/${laqpSlugify(playerName)}-${encodeURIComponent(playerId)}/`;
 }
 
 function laqpDatabaseUrl(view) {
   const paths = {
-    players: '/database/v2/players/',
-    teams: '/database/v2/teams/',
-    leagues: '/database/v2/leagues/',
+    players: '/database/players/',
+    teams: '/database/teams/',
+    leagues: '/database/leagues/',
     dts: '/database/DTs/',
   };
   return paths[view] || 'database.html';
@@ -125,7 +143,7 @@ function currentPageKey() {
   if (first === 'index.html' || first === '') return 'index';
   if (first === 'downloads' || first === 'download' || first === 'option-files' || file === 'downloads.html') return 'downloads';
   if (first === 'guides' || first === 'guia' || first === 'article' || file === 'guias.html' || file === 'articulo.html') return 'guides';
-  if (first === 'tutorials' || file === 'tutorials.html') return 'tutorials';
+  if (first === 'tutorials' || file === 'tutorials.html') return 'guides';
   if (first === 'rankings' || file === 'rankings.html') return 'rankings';
   if (first === 'tactics' || file === 'tactics.html') return 'tactics';
   if (first === 'calculadora-medias' || file === 'calculadora-medias.html') return 'calculator';
@@ -134,24 +152,43 @@ function currentPageKey() {
     return 'database';
   }
   if (first === 'alineaciones' || file === 'alineaciones.html') return 'lineups';
+  if (first === 'miniface-studio' || file === 'miniface-studio.html') return 'miniface-studio';
+  if (first === 'kit-color-studio' || file === 'kit-color-studio.html') return 'kit-color-studio';
+  if (first === 'soundtrack-maker' || file === 'soundtrack-maker.html') return 'soundtrack-maker';
   if (first === 'player' || file === 'player.html') return 'database';
   if (first === 'team' || file === 'team.html') return 'database';
   if (first === 'league' || file === 'league.html') return 'database';
   if (first === 'acerca-de' || first === 'about' || file === 'acerca-de.html' || file === 'about.html') return 'about';
+  if (file === 'squad-organizer.html') return 'organizer';
   if (first === 'news' || file === 'news.html') return 'news';
   if (first === 'faq' || file === 'faq.html') return 'faq';
   return '';
 }
 
-function renderMainNav() {
+async function renderMainNav() {
   const nav = document.querySelector('.header-nav');
   if (!nav) return;
   const active = currentPageKey();
-  nav.innerHTML = SITE_NAV_ITEMS.map(item => `
-    <a href="${item.href}" class="header-nav-link${item.key === active ? ' active' : ''}">
-      ${item.fallback}
-    </a>`).join('');
+  const link = item => '<a href="' + item.href + '" class="header-nav-link' + (item.key === active ? ' active' : '') + '"' + (item.key === active ? ' aria-current="page"' : '') + '>' + item.fallback + '</a>';
+  const items = SITE_NAV_ITEMS.map(item => {
+    if (!item.children) return link(item);
+    const selected = item.children.some(child => child.key === active);
+    return '<details class="site-nav-group" data-nav-group="' + item.key + '"><summary' + (selected ? ' class="active"' : '') + '>' + item.fallback + ' <span aria-hidden="true">⌄</span></summary><div class="site-nav-panel">' + item.children.map(link).join('') + '</div></details>';
+  }).join('');
+  nav.innerHTML = items + '<a class="header-nav-link site-account-fallback" href="/mi-cuenta.html">Cuenta</a>';
   ensureMobileNavToggle(nav);
+  // Community is a Discord invitation, never an avatar/account control.
+  try {
+    const response = await fetch('/database/community.json');
+    if (!response.ok) return;
+    const invite = (await response.json()).discord?.inviteUrl;
+    if (!invite) return;
+    const parsed = new URL(invite);
+    if (parsed.protocol !== 'https:' || !['discord.gg', 'discord.com'].includes(parsed.hostname) || !parsed.pathname.slice(1) || (parsed.hostname === 'discord.com' && !parsed.pathname.startsWith('/invite/'))) return;
+    const community = document.createElement('a'); community.className = 'header-nav-link site-discord-link';
+    community.href = parsed.href; community.textContent = 'Discord'; community.target = '_blank'; community.rel = 'noopener noreferrer';
+    nav.insertBefore(community, nav.querySelector('.site-account-fallback'));
+  } catch { /* No invitation configured: no fake or inactive link. */ }
 }
 
 function renderHeaderBrand() {
@@ -173,59 +210,53 @@ function renderHeaderBrand() {
       header.appendChild(title);
     }
   }
-  title.innerHTML = 'PES 2018 Actualizado <span>LAqP.website</span>';
+  header.classList.add('site-header-v2');
+  if (!document.querySelector('link[data-site-navigation]')) {
+    const style = document.createElement('link');
+    style.rel = 'stylesheet'; style.href = '/css/site-navigation.css';
+    style.dataset.siteNavigation = ''; document.head.appendChild(style);
+  }
+  title.innerHTML = 'LAqP <span>PES 2018</span>';
 }
 
 function ensureMobileNavToggle(nav) {
   const header = document.querySelector('#header');
   if (!header || !nav) return;
   nav.id = nav.id || 'site-main-nav';
-
   let button = header.querySelector('.header-menu-toggle');
   if (!button) {
-    button = document.createElement('button');
-    button.type = 'button';
+    button = document.createElement('button'); button.type = 'button';
     button.className = 'header-menu-toggle';
-    button.setAttribute('aria-controls', nav.id);
-    button.setAttribute('aria-expanded', 'false');
-    button.setAttribute('aria-label', 'Abrir menu principal');
-    button.innerHTML = `
-      <span class="header-menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
-      <span class="header-menu-text">Menu</span>`;
-    nav.before(button);
+    button.setAttribute('aria-controls', nav.id); button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-label', 'Abrir menú principal'); button.textContent = 'Menú'; nav.before(button);
   }
-
-  const closeMenu = () => {
-    header.classList.remove('nav-open');
-    button.setAttribute('aria-expanded', 'false');
+  const closeGroups = () => nav.querySelectorAll('details[open]').forEach(group => { group.open = false; });
+  const closeMenu = (focus = false) => {
+    header.classList.remove('nav-open'); button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-label', 'Abrir menú principal'); closeGroups();
+    if (focus) button.focus();
   };
-
-  button.onclick = event => {
-    event.stopPropagation();
-    const shouldOpen = button.getAttribute('aria-expanded') !== 'true';
-    header.classList.toggle('nav-open', shouldOpen);
-    button.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+  button.onclick = () => {
+    const open = button.getAttribute('aria-expanded') !== 'true';
+    header.classList.toggle('nav-open', open); button.setAttribute('aria-expanded', String(open));
+    button.setAttribute('aria-label', open ? 'Cerrar menú principal' : 'Abrir menú principal');
+    if (!open) closeGroups();
   };
-
-  nav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', closeMenu);
-  });
-
+  nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
+  nav.querySelectorAll('details').forEach(group => group.addEventListener('toggle', () => {
+    if (group.open) nav.querySelectorAll('details').forEach(other => { if (other !== group) other.open = false; });
+  }));
   if (!window.__laqpMobileNavBound) {
     window.__laqpMobileNavBound = true;
-    document.addEventListener('click', event => {
-      const currentHeader = document.querySelector('#header');
-      if (currentHeader && !currentHeader.contains(event.target)) {
-        currentHeader.classList.remove('nav-open');
-        currentHeader.querySelector('.header-menu-toggle')?.setAttribute('aria-expanded', 'false');
-      }
-    });
+    document.addEventListener('click', event => { if (!header.contains(event.target)) closeMenu(); });
+    document.addEventListener('focusin', event => { if (!header.contains(event.target)) closeMenu(); });
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') closeMenu();
+      if (event.key !== 'Escape') return;
+      const open = nav.querySelector('details[open]');
+      if (open) { open.open = false; open.querySelector('summary').focus(); }
+      else if (header.classList.contains('nav-open')) closeMenu(true);
     });
-    window.addEventListener('resize', () => {
-      if (window.innerWidth > 1920) closeMenu();
-    });
+    window.matchMedia(SITE_NAV_DESKTOP_QUERY).addEventListener('change', () => closeMenu());
   }
 }
 
@@ -303,6 +334,7 @@ function saveConsent(choice) {
 }
 
 function applyConsentDefaults() {
+  if (window.__laqpConsentDefaultsApplied) return;
   const consent = getStoredConsent();
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
@@ -310,6 +342,7 @@ function applyConsentDefaults() {
     analytics_storage: consent?.analytics ? 'granted' : 'denied',
     wait_for_update: 500,
   });
+  window.__laqpConsentDefaultsApplied = true;
 }
 
 function renderCookieConsent() {
@@ -337,9 +370,9 @@ function getDatabaseDirectoryView() {
   const metaView = document.querySelector('meta[name="laqp-database-view"]')?.content;
   if (metaView) return metaView;
   const path = window.location.pathname.replace(/\/+$/, '/').toLowerCase();
-  if (path.endsWith('/database/v2/players/')) return 'players';
-  if (path.endsWith('/database/v2/teams/')) return 'teams';
-  if (path.endsWith('/database/v2/leagues/')) return 'leagues';
+  if (path.endsWith('/database/players/')) return 'players';
+  if (path.endsWith('/database/teams/')) return 'teams';
+  if (path.endsWith('/database/leagues/')) return 'leagues';
   return '';
 }
 
@@ -462,22 +495,36 @@ function laqpCommentContext() {
   if (parts[0] === 'option-files' && parts[1] && !parts[2]) {
     return { pageType: 'download', pageId: decodeURIComponent(parts[1]) };
   }
+  const managerId = document.querySelector('[data-laqp-manager-id]')?.dataset.laqpManagerId;
+  if (parts[0] === 'database' && parts[1] === 'DTs' && parts[2] && managerId) {
+    return { pageType: 'manager', pageId: managerId };
+  }
   return null;
 }
 
 function laqpEnsureCommentHost() {
-  let host = document.querySelector('[data-laqp-comments]');
   const context = laqpCommentContext();
   if (!context) return null;
+  const hosts = [...document.querySelectorAll('[data-laqp-comments]')];
+  let host = hosts.find(candidate => candidate.dataset.pageType === context.pageType && candidate.dataset.pageId === context.pageId) || hosts[0] || null;
+  hosts.forEach(candidate => {
+    if (candidate !== host) candidate.remove();
+  });
   if (!host) {
     host = document.createElement('section');
     host.dataset.laqpComments = '';
-    const mount = document.querySelector('#player-page, #team-page, #tactics-page, #downloads-page, main');
+    const mount = document.querySelector('#player-page, #team-page, #tactics-page, #downloads-page, #dts-page, main');
     (mount || document.body).appendChild(host);
   }
   host.dataset.pageType = context.pageType;
   host.dataset.pageId = context.pageId;
   return host;
+}
+
+function laqpRefreshSocialComponents() {
+  const host = laqpEnsureCommentHost();
+  if (!host) return;
+  document.dispatchEvent(new CustomEvent('laqp-social-refresh'));
 }
 
 async function laqpBootstrapAccounts() {
@@ -498,11 +545,12 @@ async function laqpBootstrapAccounts() {
     if (!supabaseClient) throw new Error('No se pudo inicializar el cliente de Supabase.');
     await laqpLoadScript('/js/auth.js?v=20261005d');
     const commentHost = laqpEnsureCommentHost();
-    if (accountPage || publicProfilePage) await laqpLoadScript('/js/content-index.js?v=20261005a');
-    if (accountPage) await laqpLoadScript('/js/account-features.js?v=20261005b');
+    if (accountPage || publicProfilePage) await laqpLoadScript('/js/content-index.js?v=20261008a');
+    if (accountPage) await laqpLoadScript('/js/account-features.js?v=20261008a');
     if (commentHost) {
-      await laqpLoadScript('/js/user-content.js?v=20261005a');
-      await laqpLoadScript('/js/comments.js?v=20261005b');
+      await laqpLoadScript('/js/user-content.js?v=20261008a');
+      await laqpLoadScript('/js/comments.js?v=20261008a');
+      laqpRefreshSocialComponents();
     }
     if (publicProfilePage) await laqpLoadScript('/js/public-profile.js?v=20261005b');
     return { configured: true, client: window.LAQP_SUPABASE };
@@ -513,6 +561,8 @@ async function laqpBootstrapAccounts() {
     return { configured: false, error };
   }
 }
+
+document.addEventListener('laqp-content-rendered', laqpRefreshSocialComponents);
 
 window.LAQPAccountReady = document.readyState === 'loading'
   ? new Promise(resolve => document.addEventListener('DOMContentLoaded', () => resolve(laqpBootstrapAccounts()), { once: true })).then(value => value)

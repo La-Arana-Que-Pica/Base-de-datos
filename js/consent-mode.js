@@ -7,10 +7,12 @@
     consent = JSON.parse(localStorage.getItem(key) || 'null');
   } catch {}
 
+  if (window.__laqpConsentDefaultsApplied) return;
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
   window.gtag('consent', 'default', {
     analytics_storage: consent && consent.analytics ? 'granted' : 'denied',
     wait_for_update: 500,
   });
+  window.__laqpConsentDefaultsApplied = true;
 }());

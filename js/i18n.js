@@ -9,6 +9,7 @@ const I18N_LANGUAGES = {
   en: { label: 'English', native: 'English' },
   pt: { label: 'Português', native: 'Português' },
   it: { label: 'Italiano', native: 'Italiano' },
+  ...(window.location.pathname.endsWith('/alineaciones.html') ? { ar: { label:'Arabic', native:'العربية' } } : {}),
 };
 
 const I18N_DEFAULT_LANG = 'es';
@@ -17,10 +18,12 @@ const I18N_SUPPORTED_PROMPT_LANGS = new Set(['en', 'pt', 'it']);
 const I18N_MESSAGES = {
   es: {
     'nav.home': 'Inicio',
-    'nav.downloads': 'Option Files',
+    'nav.downloads': 'Spider Patch',
     'nav.tutorials': 'Tutoriales',
     'nav.database': 'Base de Datos',
     'nav.lineups': 'Alineaciones',
+    'nav.miniface-studio': 'Miniface Studio',
+    'nav.kit-color-studio': 'Kit Color Studio',
     'nav.dts': 'DTs',
     'nav.guides': 'Guías',
     'nav.scouting': 'Scouting',
@@ -188,10 +191,12 @@ const I18N_MESSAGES = {
   },
   en: {
     'nav.home': 'Home',
-    'nav.downloads': 'Option Files',
+    'nav.downloads': 'Spider Patch',
     'nav.tutorials': 'Tutorials',
     'nav.database': 'Database',
     'nav.lineups': 'Lineups',
+    'nav.miniface-studio': 'Miniface Studio',
+    'nav.kit-color-studio': 'Kit Color Studio',
     'nav.dts': 'Managers',
     'nav.guides': 'Guides',
     'nav.scouting': 'Scouting',
@@ -359,10 +364,12 @@ const I18N_MESSAGES = {
   },
   pt: {
     'nav.home': 'Inicio',
-    'nav.downloads': 'Option Files',
+    'nav.downloads': 'Spider Patch',
     'nav.tutorials': 'Tutoriais',
     'nav.database': 'Base de dados',
     'nav.lineups': 'Escalações',
+    'nav.miniface-studio': 'Miniface Studio',
+    'nav.kit-color-studio': 'Kit Color Studio',
     'nav.dts': 'Treinadores',
     'nav.guides': 'Guias',
     'nav.scouting': 'Scouting',
@@ -530,10 +537,12 @@ const I18N_MESSAGES = {
   },
   it: {
     'nav.home': 'Home',
-    'nav.downloads': 'Option Files',
+    'nav.downloads': 'Spider Patch',
     'nav.tutorials': 'Tutorial',
     'nav.database': 'Database',
     'nav.lineups': 'Formazioni',
+    'nav.miniface-studio': 'Miniface Studio',
+    'nav.kit-color-studio': 'Kit Color Studio',
     'nav.dts': 'Allenatori',
     'nav.guides': 'Guide',
     'nav.scouting': 'Scouting',
@@ -703,11 +712,11 @@ const I18N_MESSAGES = {
 
 const I18N_MEDIA_CALCULATOR_MESSAGES = {
   es: {
-    'calculator.pageTitle':'Calculadora de medias', 'calculator.pageIntro':'Editá un jugador desde cero o cargá uno de la base de datos y probá cambios con el cálculo original de PES 2018.',
+    'calculator.pageTitle':'Calculadora de medias', 'calculator.pageIntro':'Editá un jugador desde cero o cargá uno de la base de datos y probá cambios con el cálculo reconstruido de PES 2018.',
     'calculator.loading':'Cargando calculadora...', 'calculator.infoTitle':'Acerca de la calculadora', 'calculator.purposeTitle':'Para qué sirve',
     'calculator.purposeText':'La calculadora permite crear jugadores, actualizar estadísticas y comparar posiciones sin modificar ningún dato de la base.',
     'calculator.howTitle':'Cómo usarla', 'calculator.howText':'Elegí un punto de partida, seleccioná una posición y ajustá las estadísticas. Si cargás un jugador, podés comparar cada cambio y restaurar sus valores originales.',
-    'calculator.faqTitle':'Preguntas frecuentes', 'calculator.faqFormulaQ':'¿La media reproduce PES 2018?', 'calculator.faqFormulaA':'Sí. Usa el algoritmo reconstruido del ejecutable original, incluidos sus pesos, bonus posicionales y redondeos.',
+    'calculator.faqTitle':'Preguntas frecuentes', 'calculator.faqFormulaQ':'¿La media reproduce PES 2018?', 'calculator.faqFormulaA':'Usa una reconstrucción contrastada con fichas de PES 2018, con diferencias conocidas de un punto. La media depende de la posición y no equivale al promedio de atributos: todos en 80 no garantiza una media de 80. En un jugador nuevo se compara cada puesto como posición natural; en uno cargado se conserva su posición y dominio de puestos secundarios.',
     'calculator.faqCopyQ':'¿Editar un jugador modifica la base?', 'calculator.faqCopyA':'No. La calculadora trabaja con una copia temporal y nunca escribe en los archivos originales.',
     'calculator.title':'Calculadora de medias PES 2018', 'calculator.startFrom':'Punto de partida', 'calculator.chooseStartingPoint':'¿Cómo querés empezar?', 'calculator.createFromScratch':'Crear jugador desde cero', 'calculator.useDatabase':'Usar jugador de la base',
     'calculator.searchPlayer':'Buscar jugador, equipo o posición...', 'calculator.loadingPlayers':'Cargando jugadores...', 'calculator.searchHint':'Escribí al menos parte del nombre de un jugador o equipo.', 'calculator.noPlayers':'No se encontraron jugadores.',
@@ -727,9 +736,9 @@ const I18N_MEDIA_CALCULATOR_MESSAGES = {
     'calculator.goalkeeper':'Portero', 'calculator.centerBack':'Defensa central', 'calculator.leftBack':'Lateral izquierdo', 'calculator.rightBack':'Lateral derecho', 'calculator.defensiveMidfielder':'Mediocampista defensivo', 'calculator.centralMidfielder':'Mediocampista central', 'calculator.leftMidfielder':'Mediocampista izquierdo', 'calculator.rightMidfielder':'Mediocampista derecho', 'calculator.attackingMidfielder':'Mediocampista ofensivo', 'calculator.leftWinger':'Extremo izquierdo', 'calculator.rightWinger':'Extremo derecho', 'calculator.secondStriker':'Segundo delantero', 'calculator.centerForward':'Centro delantero',
   },
   en: {
-    'calculator.pageTitle':'Overall calculator', 'calculator.pageIntro':'Edit a player from scratch or load one from the database and test changes with the original PES 2018 calculation.', 'calculator.loading':'Loading calculator...',
+    'calculator.pageTitle':'Overall calculator', 'calculator.pageIntro':'Edit a player from scratch or load one from the database and test changes with the reconstructed PES 2018 calculation.', 'calculator.loading':'Loading calculator...',
     'calculator.infoTitle':'About the calculator', 'calculator.purposeTitle':'What it is for', 'calculator.purposeText':'Create players, update stats and compare positions without changing any database data.', 'calculator.howTitle':'How to use it', 'calculator.howText':'Choose a starting point, select a position and adjust the stats. Loaded players can be compared and restored to their original values.',
-    'calculator.faqTitle':'Frequently asked questions', 'calculator.faqFormulaQ':'Does the overall match PES 2018?', 'calculator.faqFormulaA':'Yes. It uses the reconstructed original executable algorithm, including weights, positional bonuses and rounding.', 'calculator.faqCopyQ':'Does editing change the database?', 'calculator.faqCopyA':'No. The calculator works on a temporary copy and never writes to the original files.',
+    'calculator.faqTitle':'Frequently asked questions', 'calculator.faqFormulaQ':'Does the overall match PES 2018?', 'calculator.faqFormulaA':'It uses a reconstruction checked against PES 2018 player records, with known one-point differences. Overall depends on position, rather than the average of attributes: all 80 does not guarantee 80 overall. New players compare each role as their natural position; loaded players retain their natural position and secondary familiarity.', 'calculator.faqCopyQ':'Does editing change the database?', 'calculator.faqCopyA':'No. The calculator works on a temporary copy and never writes to the original files.',
     'calculator.title':'PES 2018 overall calculator', 'calculator.startFrom':'Starting point', 'calculator.chooseStartingPoint':'How do you want to start?', 'calculator.createFromScratch':'Create player from scratch', 'calculator.useDatabase':'Use database player', 'calculator.searchPlayer':'Search player, team or position...', 'calculator.loadingPlayers':'Loading players...', 'calculator.searchHint':'Type part of a player or team name.', 'calculator.noPlayers':'No players found.', 'calculator.databaseError':'Could not load the player database', 'calculator.unknownTeam':'Unknown team', 'calculator.unknownPlayer':'Unknown player', 'calculator.playerLoaded':'Player loaded',
     'calculator.customPlayer':'Player editor', 'calculator.newPlayer':'New player', 'calculator.scratchReference':'Compared with base 80', 'calculator.referencePlayer':'Reference player', 'calculator.originalOverall':'Original overall', 'calculator.currentOverall':'Current overall', 'calculator.selectedPosition':'Selected position', 'calculator.overall':'Overall', 'calculator.positionMap':'Calculated position map', 'calculator.allStats':'All stats', 'calculator.restoreOriginal':'Restore original stats', 'calculator.restoreBase':'Restore to 80', 'calculator.quickActions':'Quick actions', 'calculator.moreActions':'More actions', 'calculator.copyConfig':'Copy configuration', 'calculator.disableGoalkeeper':'Disable goalkeeper stats', 'calculator.clearSaved':'Clear saved configuration', 'calculator.searchStat':'Search stat...', 'calculator.filters':'Stat filters',
     'calculator.all':'All', 'calculator.categoryAttack':'Attack', 'calculator.categoryTechnique':'Technique', 'calculator.categoryPhysical':'Physical', 'calculator.categoryDefense':'Defense', 'calculator.categoryGoalkeeper':'Goalkeeper', 'calculator.noStats':'No stats match this filter.', 'calculator.improved':'Improved from original', 'calculator.unchanged':'Unchanged', 'calculator.reduced':'Reduced from original', 'calculator.above80':'Above 80', 'calculator.equal80':'Equal to 80', 'calculator.below80':'Below 80', 'calculator.presets':'Presets and quick profiles', 'calculator.presetsHelp':'Presets replace the current values and provide a starting point.',
@@ -737,7 +746,7 @@ const I18N_MEDIA_CALCULATOR_MESSAGES = {
     'calculator.goalkeeper':'Goalkeeper', 'calculator.centerBack':'Centre back', 'calculator.leftBack':'Left back', 'calculator.rightBack':'Right back', 'calculator.defensiveMidfielder':'Defensive midfielder', 'calculator.centralMidfielder':'Central midfielder', 'calculator.leftMidfielder':'Left midfielder', 'calculator.rightMidfielder':'Right midfielder', 'calculator.attackingMidfielder':'Attacking midfielder', 'calculator.leftWinger':'Left winger', 'calculator.rightWinger':'Right winger', 'calculator.secondStriker':'Second striker', 'calculator.centerForward':'Centre forward',
   },
   pt: {
-    'calculator.pageTitle':'Calculadora de overall', 'calculator.pageIntro':'Edite um jogador do zero ou carregue um do banco de dados e teste alterações com o cálculo original do PES 2018.', 'calculator.loading':'Carregando calculadora...', 'calculator.infoTitle':'Sobre a calculadora', 'calculator.purposeTitle':'Para que serve', 'calculator.purposeText':'Crie jogadores, atualize atributos e compare posições sem alterar nenhum dado do banco.', 'calculator.howTitle':'Como usar', 'calculator.howText':'Escolha um ponto de partida, selecione uma posição e ajuste os atributos. Jogadores carregados podem ser comparados e restaurados.', 'calculator.faqTitle':'Perguntas frequentes', 'calculator.faqFormulaQ':'O overall reproduz o PES 2018?', 'calculator.faqFormulaA':'Sim. Usa o algoritmo reconstruído do executável original, com pesos, bônus posicionais e arredondamentos.', 'calculator.faqCopyQ':'Editar altera o banco de dados?', 'calculator.faqCopyA':'Não. A calculadora usa uma cópia temporária e nunca grava nos arquivos originais.',
+    'calculator.pageTitle':'Calculadora de overall', 'calculator.pageIntro':'Edite um jogador do zero ou carregue um do banco de dados e teste alterações com o cálculo reconstruído do PES 2018.', 'calculator.loading':'Carregando calculadora...', 'calculator.infoTitle':'Sobre a calculadora', 'calculator.purposeTitle':'Para que serve', 'calculator.purposeText':'Crie jogadores, atualize atributos e compare posições sem alterar nenhum dado do banco.', 'calculator.howTitle':'Como usar', 'calculator.howText':'Escolha um ponto de partida, selecione uma posição e ajuste os atributos. Jogadores carregados podem ser comparados e restaurados.', 'calculator.faqTitle':'Perguntas frequentes', 'calculator.faqFormulaQ':'O overall reproduz o PES 2018?', 'calculator.faqFormulaA':'Usa uma reconstrução comparada com fichas do PES 2018, com diferenças conhecidas de um ponto. O overall depende da posição; atributos em 80 não garantem overall 80. Jogadores novos comparam cada posição como natural; os carregados mantêm sua posição e familiaridade.', 'calculator.faqCopyQ':'Editar altera o banco de dados?', 'calculator.faqCopyA':'Não. A calculadora usa uma cópia temporária e nunca grava nos arquivos originais.',
     'calculator.title':'Calculadora de overall PES 2018', 'calculator.startFrom':'Ponto de partida', 'calculator.chooseStartingPoint':'Como deseja começar?', 'calculator.createFromScratch':'Criar jogador do zero', 'calculator.useDatabase':'Usar jogador do banco', 'calculator.searchPlayer':'Buscar jogador, equipe ou posição...', 'calculator.loadingPlayers':'Carregando jogadores...', 'calculator.searchHint':'Digite parte do nome de um jogador ou equipe.', 'calculator.noPlayers':'Nenhum jogador encontrado.', 'calculator.databaseError':'Não foi possível carregar o banco de jogadores', 'calculator.unknownTeam':'Equipe desconhecida', 'calculator.unknownPlayer':'Jogador desconhecido', 'calculator.playerLoaded':'Jogador carregado',
     'calculator.customPlayer':'Editor de jogador', 'calculator.newPlayer':'Novo jogador', 'calculator.scratchReference':'Comparação com base 80', 'calculator.referencePlayer':'Jogador de referência', 'calculator.originalOverall':'Overall original', 'calculator.currentOverall':'Overall atual', 'calculator.selectedPosition':'Posição selecionada', 'calculator.overall':'Overall', 'calculator.positionMap':'Mapa de posições calculadas', 'calculator.allStats':'Todos os atributos', 'calculator.restoreOriginal':'Restaurar atributos originais', 'calculator.restoreBase':'Restaurar para 80', 'calculator.quickActions':'Ações rápidas', 'calculator.moreActions':'Mais ações', 'calculator.copyConfig':'Copiar configuração', 'calculator.disableGoalkeeper':'Desativar atributos de goleiro', 'calculator.clearSaved':'Limpar configuração salva', 'calculator.searchStat':'Buscar atributo...', 'calculator.filters':'Filtros de atributos',
     'calculator.all':'Todos', 'calculator.categoryAttack':'Ataque', 'calculator.categoryTechnique':'Técnica', 'calculator.categoryPhysical':'Físico', 'calculator.categoryDefense':'Defesa', 'calculator.categoryGoalkeeper':'Goleiro', 'calculator.noStats':'Nenhum atributo para este filtro.', 'calculator.improved':'Melhorou em relação ao original', 'calculator.unchanged':'Sem alterações', 'calculator.reduced':'Diminuiu em relação ao original', 'calculator.above80':'Acima de 80', 'calculator.equal80':'Igual a 80', 'calculator.below80':'Abaixo de 80', 'calculator.presets':'Presets e perfis rápidos', 'calculator.presetsHelp':'Os presets substituem os valores atuais e servem como ponto de partida.',
@@ -745,7 +754,7 @@ const I18N_MEDIA_CALCULATOR_MESSAGES = {
     'calculator.goalkeeper':'Goleiro', 'calculator.centerBack':'Zagueiro', 'calculator.leftBack':'Lateral esquerdo', 'calculator.rightBack':'Lateral direito', 'calculator.defensiveMidfielder':'Volante', 'calculator.centralMidfielder':'Meio-campista central', 'calculator.leftMidfielder':'Meia esquerdo', 'calculator.rightMidfielder':'Meia direito', 'calculator.attackingMidfielder':'Meia ofensivo', 'calculator.leftWinger':'Ponta esquerda', 'calculator.rightWinger':'Ponta direita', 'calculator.secondStriker':'Segundo atacante', 'calculator.centerForward':'Centroavante',
   },
   it: {
-    'calculator.pageTitle':'Calcolatore overall', 'calculator.pageIntro':'Modifica un giocatore da zero o caricane uno dal database e prova le modifiche con il calcolo originale di PES 2018.', 'calculator.loading':'Caricamento calcolatore...', 'calculator.infoTitle':'Informazioni sul calcolatore', 'calculator.purposeTitle':'A cosa serve', 'calculator.purposeText':'Crea giocatori, aggiorna statistiche e confronta posizioni senza modificare i dati del database.', 'calculator.howTitle':'Come usarlo', 'calculator.howText':'Scegli un punto di partenza, seleziona una posizione e regola le statistiche. I giocatori caricati possono essere confrontati e ripristinati.', 'calculator.faqTitle':'Domande frequenti', 'calculator.faqFormulaQ':'L overall riproduce PES 2018?', 'calculator.faqFormulaA':'Sì. Usa l algoritmo ricostruito dell eseguibile originale, inclusi pesi, bonus di posizione e arrotondamenti.', 'calculator.faqCopyQ':'Le modifiche cambiano il database?', 'calculator.faqCopyA':'No. Il calcolatore usa una copia temporanea e non scrive mai nei file originali.',
+    'calculator.pageTitle':'Calcolatore overall', 'calculator.pageIntro':'Modifica un giocatore da zero o caricane uno dal database e prova le modifiche con il calcolo ricostruito di PES 2018.', 'calculator.loading':'Caricamento calcolatore...', 'calculator.infoTitle':'Informazioni sul calcolatore', 'calculator.purposeTitle':'A cosa serve', 'calculator.purposeText':'Crea giocatori, aggiorna statistiche e confronta posizioni senza modificare i dati del database.', 'calculator.howTitle':'Come usarlo', 'calculator.howText':'Scegli un punto di partenza, seleziona una posizione e regola le statistiche. I giocatori caricati possono essere confrontati e ripristinati.', 'calculator.faqTitle':'Domande frequenti', 'calculator.faqFormulaQ':'L overall riproduce PES 2018?', 'calculator.faqFormulaA':'Usa una ricostruzione confrontata con i dati di PES 2018, con differenze note di un punto. L overall dipende dalla posizione: tutti gli attributi a 80 non garantiscono overall 80. I nuovi giocatori confrontano ogni ruolo come naturale; quelli caricati mantengono posizione e familiarità.', 'calculator.faqCopyQ':'Le modifiche cambiano il database?', 'calculator.faqCopyA':'No. Il calcolatore usa una copia temporanea e non scrive mai nei file originali.',
     'calculator.title':'Calcolatore overall PES 2018', 'calculator.startFrom':'Punto di partenza', 'calculator.chooseStartingPoint':'Come vuoi iniziare?', 'calculator.createFromScratch':'Crea giocatore da zero', 'calculator.useDatabase':'Usa giocatore del database', 'calculator.searchPlayer':'Cerca giocatore, squadra o posizione...', 'calculator.loadingPlayers':'Caricamento giocatori...', 'calculator.searchHint':'Digita parte del nome di un giocatore o di una squadra.', 'calculator.noPlayers':'Nessun giocatore trovato.', 'calculator.databaseError':'Impossibile caricare il database giocatori', 'calculator.unknownTeam':'Squadra sconosciuta', 'calculator.unknownPlayer':'Giocatore sconosciuto', 'calculator.playerLoaded':'Giocatore caricato',
     'calculator.customPlayer':'Editor giocatore', 'calculator.newPlayer':'Nuovo giocatore', 'calculator.scratchReference':'Confronto con base 80', 'calculator.referencePlayer':'Giocatore di riferimento', 'calculator.originalOverall':'Overall originale', 'calculator.currentOverall':'Overall attuale', 'calculator.selectedPosition':'Posizione selezionata', 'calculator.overall':'Overall', 'calculator.positionMap':'Mappa delle posizioni calcolate', 'calculator.allStats':'Tutte le statistiche', 'calculator.restoreOriginal':'Ripristina statistiche originali', 'calculator.restoreBase':'Ripristina a 80', 'calculator.quickActions':'Azioni rapide', 'calculator.moreActions':'Altre azioni', 'calculator.copyConfig':'Copia configurazione', 'calculator.disableGoalkeeper':'Disattiva statistiche portiere', 'calculator.clearSaved':'Cancella configurazione salvata', 'calculator.searchStat':'Cerca statistica...', 'calculator.filters':'Filtri statistiche',
     'calculator.all':'Tutte', 'calculator.categoryAttack':'Attacco', 'calculator.categoryTechnique':'Tecnica', 'calculator.categoryPhysical':'Fisico', 'calculator.categoryDefense':'Difesa', 'calculator.categoryGoalkeeper':'Portiere', 'calculator.noStats':'Nessuna statistica per questo filtro.', 'calculator.improved':'Migliorata rispetto all originale', 'calculator.unchanged':'Senza modifiche', 'calculator.reduced':'Diminuita rispetto all originale', 'calculator.above80':'Sopra 80', 'calculator.equal80':'Uguale a 80', 'calculator.below80':'Sotto 80', 'calculator.presets':'Preset e profili rapidi', 'calculator.presetsHelp':'I preset sostituiscono i valori attuali e offrono un punto di partenza.',
@@ -895,7 +904,7 @@ const SITE_PAGE_MESSAGES = {
     'home.downloadAction': 'Descargar',
     'home.soon': 'Próximamente',
     'home.details': 'Ver detalles',
-    'downloads.header': 'Option Files',
+    'downloads.header': 'Spider Patch',
     'downloads.loading': 'Cargando descargas...',
     'downloads.title': 'Descargar PES 2018 actualizado 2026',
     'downloads.subtitle': 'Descargas para mantener PES 2018 actualizado con plantillas, ligas, kits y contenido editable.',
@@ -979,7 +988,7 @@ const SITE_PAGE_MESSAGES = {
     'home.downloadAction': 'Download',
     'home.soon': 'Coming soon',
     'home.details': 'View details',
-    'downloads.header': 'Option Files',
+    'downloads.header': 'Spider Patch',
     'downloads.loading': 'Loading downloads...',
     'downloads.title': 'Download updated PES 2018 content for 2026',
     'downloads.subtitle': 'Downloads to keep PES 2018 updated with squads, leagues, kits and editable content.',
@@ -1072,7 +1081,7 @@ const SITE_PAGE_MESSAGES = {
     'home.downloadAction': 'Baixar',
     'home.soon': 'Em breve',
     'home.details': 'Ver detalhes',
-    'downloads.header': 'Option Files',
+    'downloads.header': 'Spider Patch',
     'downloads.loading': 'Carregando downloads...',
     'downloads.title': 'Baixar PES 2018 atualizado para 2026',
     'downloads.subtitle': 'Downloads para manter PES 2018 atualizado com elencos, ligas, kits e conteudo editavel.',
@@ -1156,7 +1165,7 @@ const SITE_PAGE_MESSAGES = {
     'home.downloadAction': 'Scarica',
     'home.soon': 'Prossimamente',
     'home.details': 'Vedi dettagli',
-    'downloads.header': 'Option Files',
+    'downloads.header': 'Spider Patch',
     'downloads.loading': 'Caricamento download...',
     'downloads.title': 'Scarica PES 2018 aggiornato al 2026',
     'downloads.subtitle': 'Download per tenere PES 2018 aggiornato con rose, leghe, kit e contenuti modificabili.',
@@ -1711,6 +1720,26 @@ Object.entries(DATABASE_UI_MESSAGES).forEach(([lang, messages]) => {
   I18N_MESSAGES[lang] = Object.assign(I18N_MESSAGES[lang] || {}, messages);
 });
 
+Object.entries({
+  es: { 'player.faceStatus.edited': 'Cara editada por LAqP', 'player.faceStatus.unmarked': 'Cara no marcada como editada', 'player.faceStatus.unavailable': 'Registro de edición de cara no disponible', 'player.faceStatusHelp': 'Autoría de la cara dentro de PES 2018. Es independiente de la miniface y de las caras originales del juego.' },
+  en: { 'player.faceStatus.edited': 'Face edited by LAqP', 'player.faceStatus.unmarked': 'Face not marked as edited', 'player.faceStatus.unavailable': 'Face editing record unavailable', 'player.faceStatusHelp': 'Authorship of the in-game PES 2018 face. Independent of the miniface and original game faces.' },
+  pt: { 'player.faceStatus.edited': 'Rosto editado por LAqP', 'player.faceStatus.unmarked': 'Rosto não marcado como editado', 'player.faceStatus.unavailable': 'Registro de edição do rosto indisponível', 'player.faceStatusHelp': 'Autoria do rosto dentro do PES 2018. Independente da miniface e dos rostos originais do jogo.' },
+  it: { 'player.faceStatus.edited': 'Volto modificato da LAqP', 'player.faceStatus.unmarked': 'Volto non contrassegnato come modificato', 'player.faceStatus.unavailable': 'Registro delle modifiche al volto non disponibile', 'player.faceStatusHelp': 'Autore del volto in PES 2018. Indipendente dalla miniface e dai volti originali del gioco.' },
+}).forEach(([lang, messages]) => Object.assign(I18N_MESSAGES[lang], messages));
+
+Object.entries({ es: 'Escaneado en PES 2018', en: 'Scanned in PES 2018', pt: 'Escaneado no PES 2018', it: 'Scansionato in PES 2018' })
+  .forEach(([lang, label]) => { I18N_MESSAGES[lang]['player.faceStatus.scanned'] = label; });
+
+Object.entries({
+  es: ['Cara LAqP', 'Full caras LAqP', 'Todas las caras editadas por LAqP o escaneadas en PES 2018', 'Caras editadas por LAqP'],
+  en: ['LAqP face', 'Full LAqP faces', 'All faces edited by LAqP or scanned in PES 2018', 'Faces edited by LAqP'],
+  pt: ['Rosto LAqP', 'Todos os rostos LAqP', 'Todos os rostos editados por LAqP ou escaneados no PES 2018', 'Rostos editados por LAqP'],
+  it: ['Volto LAqP', 'Tutti i volti LAqP', 'Tutti i volti modificati da LAqP o scansionati in PES 2018', 'Volti modificati da LAqP'],
+}).forEach(([lang, labels]) => ['faces.edited', 'faces.full', 'faces.fullHelp', 'filters.faceEdited'].forEach((key, i) => { I18N_MESSAGES[lang][key] = labels[i]; }));
+
+Object.entries({ es: 'Mostrar carteles de caras', en: 'Show face badges', pt: 'Mostrar indicadores de rostos', it: 'Mostra indicatori dei volti' })
+  .forEach(([lang, label]) => { I18N_MESSAGES[lang]['faces.showBadges'] = label; });
+
 const PES2018_OFFICIAL = window.PES2018_OFFICIAL_I18N || {};
 I18N_MAPS.advancedTactics = {
   es: { '1':'Pegados a la banda','2':'Falso nueve','3':'Laterales interiores','4':'Laterales ofensivos','5':'Rotación de banda','6':'Tiki-taka','7':'Centros al área','8':'Defensivo','9':'Falso extremo','10':'Acumular jugadores en el área','11':'Línea defensiva retrasada','12':'Presión tras pérdida','13':'Marcaje estrecho','14':'Delantero liberado','15':'Extremos defensivos' },
@@ -1757,6 +1786,132 @@ Object.entries(APPEARANCE_ENUM_ALIASES).forEach(([spanish, translations]) => {
   });
 });
 
+
+Object.entries({es:'Fichaje',en:'Transfer',pt:'Contratação',it:'Acquisto',ar:'تعاقد'}).forEach(([lang,value])=>{I18N_MESSAGES[lang] ||= {};I18N_MESSAGES[lang]['builder.transfer']=value;});
+// Shared localization for the lineup presentations.
+Object.entries({
+  "es": {
+    "classic": "Clásica",
+    "tactical": "Táctica",
+    "draft": "Draft",
+    "viewLabel": "Vista de la cancha",
+    "classicHelp": "PES 2018 clásico: minifaces sobre el césped",
+    "tacticalHelp": "Pizarra cenital sin fotografías",
+    "draftHelp": "Cancha en perspectiva y cartas originales",
+    "heading": "Creador de alineaciones PES 2018",
+    "intro": "Creá tu alineación de PES 2018 con los jugadores de la Base de Datos LAqP. Elegí una formación, mové jugadores y sumá fichajes; guardá, compartí o exportá el mismo equipo en tres estilos de cancha.",
+    "pitch": "Cancha. Ataque hacia arriba",
+    "empty": "Libre",
+    "searchPlayer": "Buscar jugador",
+    "custom": "Personalizada",
+    "attack": "Ataque",
+    "middle": "Medio",
+    "defense": "Defensa",
+    "left": "Banda izquierda",
+    "leftInside": "Interior izquierdo",
+    "center": "Centro",
+    "rightInside": "Interior derecho",
+    "right": "Banda derecha"
+  },
+  "en": {
+    "classic": "Classic",
+    "tactical": "Tactical",
+    "draft": "Draft",
+    "viewLabel": "Pitch view",
+    "classicHelp": "Classic PES 2018: player faces on the grass",
+    "tacticalHelp": "Overhead tactical board without photos",
+    "draftHelp": "Original cards on a perspective pitch",
+    "heading": "PES 2018 Lineup Builder",
+    "intro": "Build your PES 2018 lineup with players from the LAqP Database. Choose a formation, move players and add transfers; save, share or export the same team in three pitch styles.",
+    "pitch": "Pitch. Attacking upwards",
+    "empty": "Empty",
+    "searchPlayer": "Search players",
+    "custom": "Custom",
+    "attack": "Attack",
+    "middle": "Midfield",
+    "defense": "Defense",
+    "left": "Left wing",
+    "leftInside": "Left half-space",
+    "center": "Centre",
+    "rightInside": "Right half-space",
+    "right": "Right wing"
+  },
+  "pt": {
+    "classic": "Clássica",
+    "tactical": "Tática",
+    "draft": "Draft",
+    "viewLabel": "Visualização do campo",
+    "classicHelp": "PES 2018 clássico: rostos sobre o gramado",
+    "tacticalHelp": "Prancheta vista de cima, sem fotos",
+    "draftHelp": "Cartas originais e campo em perspectiva",
+    "heading": "Criador de escalações PES 2018",
+    "intro": "Monte sua escalação de PES 2018 com jogadores da Base de Dados LAqP. Escolha uma formação, mova jogadores e contrate reforços; salve, compartilhe ou exporte o mesmo time em três estilos de campo.",
+    "pitch": "Campo. Ataque para cima",
+    "empty": "Livre",
+    "searchPlayer": "Buscar jogador",
+    "custom": "Personalizada",
+    "attack": "Ataque",
+    "middle": "Meio",
+    "defense": "Defesa",
+    "left": "Ala esquerda",
+    "leftInside": "Interior esquerdo",
+    "center": "Centro",
+    "rightInside": "Interior direito",
+    "right": "Ala direita"
+  },
+  "it": {
+    "classic": "Classica",
+    "tactical": "Tattica",
+    "draft": "Draft",
+    "viewLabel": "Vista del campo",
+    "classicHelp": "PES 2018 classico: volti sul prato",
+    "tacticalHelp": "Lavagna dall’alto senza fotografie",
+    "draftHelp": "Carte originali e campo in prospettiva",
+    "heading": "Creatore di formazioni PES 2018",
+    "intro": "Crea la tua formazione di PES 2018 con i giocatori del Database LAqP. Scegli uno schema, sposta i giocatori e aggiungi acquisti; salva, condividi o esporta la stessa squadra con tre stili di campo.",
+    "pitch": "Campo. Attacco verso l’alto",
+    "empty": "Libero",
+    "searchPlayer": "Cerca giocatore",
+    "custom": "Personalizzata",
+    "attack": "Attacco",
+    "middle": "Centrocampo",
+    "defense": "Difesa",
+    "left": "Fascia sinistra",
+    "leftInside": "Interno sinistro",
+    "center": "Centro",
+    "rightInside": "Interno destro",
+    "right": "Fascia destra"
+  },
+  "ar": {
+    "classic": "كلاسيكية",
+    "tactical": "تكتيكية",
+    "draft": "درافت",
+    "viewLabel": "طريقة عرض الملعب",
+    "classicHelp": "PES 2018 الكلاسيكي: وجوه اللاعبين فوق العشب",
+    "tacticalHelp": "لوحة تكتيكية من الأعلى بدون صور",
+    "draftHelp": "البطاقات الأصلية وملعب بمنظور مائل",
+    "heading": "منشئ تشكيلات PES 2018",
+    "intro": "أنشئ تشكيلتك في PES 2018 باستخدام لاعبي قاعدة بيانات LAqP. اختر خطة وحرك اللاعبين وأضف تعاقدات، ثم احفظ الفريق نفسه أو شاركه أو صدّره بثلاثة أنماط للملعب.",
+    "pitch": "الملعب. الهجوم إلى الأعلى",
+    "empty": "متاح",
+    "searchPlayer": "البحث عن لاعب",
+    "custom": "مخصصة",
+    "attack": "الهجوم",
+    "middle": "الوسط",
+    "defense": "الدفاع",
+    "left": "الجناح الأيسر",
+    "leftInside": "العمق الأيسر",
+    "center": "المنتصف",
+    "rightInside": "العمق الأيمن",
+    "right": "الجناح الأيمن"
+  }
+}).forEach(([lang,messages]) => {
+  I18N_MESSAGES[lang] ||= {};
+  Object.entries(messages).forEach(([key,value]) => { I18N_MESSAGES[lang]['builder.'+key] = value; });
+});
+I18N_MAPS.positions.ar = {GK:"ح م",CB:"ق د",LB:"ظ أ",RB:"ظ ي",DMF:"و د",CMF:"و م",LMF:"و أ",RMF:"و ي",AMF:"و ه",LWF:"ج أ",RWF:"ج ي",SS:"م ث",CF:"ر ح"};
+I18N_MAPS.positionNames.ar = {GK:"حارس مرمى",CB:"قلب دفاع",LB:"ظهير أيسر",RB:"ظهير أيمن",DMF:"وسط دفاعي",CMF:"وسط مركزي",LMF:"وسط أيسر",RMF:"وسط أيمن",AMF:"وسط هجومي",LWF:"جناح أيسر",RWF:"جناح أيمن",SS:"مهاجم ثانٍ",CF:"رأس حربة"};
+
 function i18nNormalizeLang(lang) {
   const base = String(lang || '').toLowerCase().split('-')[0];
   return I18N_LANGUAGES[base] ? base : I18N_DEFAULT_LANG;
@@ -1780,8 +1935,8 @@ function i18nPageSupportsTranslations() {
   const first = parts[0] || '';
   const file = (parts[parts.length - 1] || 'index.html').toLowerCase();
   if (['player', 'team', 'league'].includes(first)) return true;
-  if (['database.html', 'player.html', 'team.html', 'league.html', 'calculadora-medias.html'].includes(file)) return true;
-  return first === 'database' && parts[1] === 'v2' && ['players', 'teams', 'leagues'].includes(parts[2] || '');
+  if (['database.html', 'player.html', 'team.html', 'league.html', 'calculadora-medias.html', 'alineaciones.html'].includes(file)) return true;
+  return first === 'database' && ['players', 'teams', 'leagues'].includes(parts[1] || '');
 }
 
 function getActiveLanguage() {
@@ -1793,6 +1948,10 @@ function setLanguage(lang) {
   try {
     localStorage.setItem(I18N_STORAGE_KEY, next);
   } catch {}
+  // Pages with a live editor can localize in place after the shared preference
+  // is saved. Other pages keep their existing reload behavior.
+  const change = new CustomEvent('laqp:language-change', { detail: { language: next }, cancelable: true });
+  if (!window.dispatchEvent(change)) return;
   window.location.reload();
 }
 
@@ -1830,7 +1989,7 @@ function i18nPairs(group) {
 
 function applyI18nToDocument(root = document) {
   document.documentElement.lang = getActiveLanguage();
-  document.documentElement.dir = 'ltr';
+  document.documentElement.dir = getActiveLanguage() === 'ar' ? 'rtl' : 'ltr';
   root.querySelectorAll('[data-i18n]').forEach(el => {
     let params = {};
     try { params = JSON.parse(el.dataset.i18nParams || '{}'); } catch {}

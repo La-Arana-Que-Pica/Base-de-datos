@@ -1,6 +1,7 @@
 /*
- * Fórmula reconstruida del algoritmo original de PES 2018.
- * No modificar pesos/redondeos sin validación contra el ejecutable original.
+ * Reconstrucción de OVR contrastada con fichas originales de PES 2018.
+ * Aproximación: existen diferencias de un punto en las referencias verificadas.
+ * Ver Herramientas/Formula medias PES 2018/README.md antes de cambiar pesos.
  *
  * Esta es la única fuente de verdad JavaScript para el OVR de LAQP. El orden de
  * columnas de la matriz recuperada es distinto de los IDs numéricos del juego y
@@ -110,6 +111,17 @@
   }
 
   function calculationRows(stats) {
+    // Convert BEFORE combining attributes: numeric strings must not concatenate
+    // (e.g. "80" + "80"), and invalid inputs must never silently return NaN.
+    stats = Object.fromEntries(Object.keys(LAQP_STAT_ALIASES).map(key => {
+      const raw = stats[key] ?? (key === 'non_dom_leg_precision' ? 3 : undefined);
+      const value = Number(raw);
+      if (raw === undefined || raw === null || String(raw).trim() === '' || !Number.isFinite(value)) {
+        throw new Error(`Invalid PES stat: ${key}`);
+      }
+      return [key, key === 'non_dom_leg_precision'
+        ? clamp(Math.trunc(value), 1, 4) : clamp(Math.trunc(value), 40, 99)];
+    }));
     return [
       stats.attacking_prowess,
       stats.ball_control,

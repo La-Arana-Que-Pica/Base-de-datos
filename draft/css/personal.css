@@ -1,0 +1,11 @@
+.personal-save-status,.personal-migration-controls{padding:.35rem 1rem;background:#071c25;color:#acd9dc;font-size:.82rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}.personal-save-status:has([role=alert]){color:#f5d885}.personal-save-status button,.personal-migration-controls button{font-size:.72rem;padding:.35rem .65rem}.personal-migration-controls:has(dialog){display:block}
+body[data-personal-saving="true"] .pick-panel,body[data-personal-error]:not([data-personal-error=""]) .pick-panel{visibility:hidden}
+
+/* LF4: only the optional cloud conflict dialog; preserve other game modals. */
+#personal-sync-conflict{position:fixed;inset:0;margin:auto;width:min(42rem,calc(100vw - 2rem));height:fit-content;max-height:calc(100dvh - 2rem);overflow:auto;box-sizing:border-box;padding:1.5rem;background:#0b202a;color:#dcecf0;border:1px solid #28bfc2;border-radius:1rem;box-shadow:0 1rem 4rem #0009;font:inherit}
+#personal-sync-conflict::backdrop{background:#020b12bb}
+#personal-sync-conflict h2{font-size:1.35rem;color:#ecf8fa;margin:0 0 1rem}
+#personal-sync-conflict p{line-height:1.5;margin:.65rem 0;color:#b9d4dc}
+#personal-sync-conflict button{margin:.4rem .4rem 0 0;max-width:100%;white-space:normal}
+#personal-sync-conflict button:focus-visible{outline:2px solid #50e0db;outline-offset:3px}
+@media(max-width:480px){#personal-sync-conflict{padding:1rem}#personal-sync-conflict button{width:100%;margin:.5rem 0 0}}

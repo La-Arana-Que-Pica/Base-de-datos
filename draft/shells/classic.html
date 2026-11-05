@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script src="/js/consent-mode.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-M7ZNDRZB27');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>LAqP Draft | Torneo</title>
+  <meta name="description" content="Armá tu Draft, disputá un torneo de 16 equipos y fichá jugadores temporales de tus rivales.">
+  <link rel="stylesheet" href="css/draft.css?v=shared-reveal-1">
+  <link rel="stylesheet" href="css/match.css?v=phase5c-1"><link rel="stylesheet" href="css/acquisition.css?v=rewards-redesign-1">
+  <link rel="stylesheet" href="css/fullscreen.css?v=fullscreen-1">
+  <link rel="stylesheet" href="css/rewards.css?v=rewards-redesign-2">
+  <link rel="stylesheet" href="css/finals.css?v=phase6-1">
+  <link rel="stylesheet" href="css/campaign-save.css?v=phase7-1">
+  <link rel="stylesheet" href="../css/laqp-account.css?v=20261005d">
+  <link rel="icon" href="../img/logo.webp" type="image/webp">
+<link rel="stylesheet" href="css/staff.css?v=shared-reveal-1">
+<link rel="stylesheet" href="css/legends.css"><link rel="stylesheet" href="css/menus.css?v=phase11-1"></head>
+<body data-menu-shell="classic">
+  <header class="draft-header">
+    <div class="draft-brand">
+      <img src="../img/logo.webp" alt="Logo LAQP" class="draft-logo" onerror="this.onerror=null;this.src='../img/logo.png'">
+      <div class="draft-title">LAqP <span>Draft</span></div>
+    </div>
+    <label class="draft-motion-control" for="draft-motion">Animaciones
+      <select id="draft-motion" name="draft-motion">
+        <option value="system">Sistema</option>
+        <option value="full">Completas</option>
+        <option value="fast">Rápidas</option><option value="reduced">Sin animaciones</option>
+      </select>
+    </label>
+    <button type="button" id="draft-fullscreen" class="draft-btn" aria-pressed="false">⛶ Pantalla completa</button>
+    <span id="draft-fullscreen-status" class="fullscreen-status" role="status" aria-live="polite"></span>
+    <button type="button" class="draft-btn" id="draft-cup-path" data-cup-path hidden>Camino a la Copa</button>
+    <button type="button" class="draft-btn" id="draft-save-menu">Mi campaña</button>
+    <span id="draft-save-status" role="status" aria-live="polite"></span>
+    <div class="draft-badge">Torneo · 16 equipos</div>
+  </header>
+
+  <main class="draft-container">
+    <div id="app">
+      <!-- Dynamic views rendered via js/main.js -->
+    </div>
+  </main>
+
+  <script type="importmap" id="draft-data-importmap">{
+  "imports": {
+    "/draft/js/data/adapter.js": "/draft/js/data/adapter.js?v=phase7-1",
+    "/draft/js/data/dataset.js": "/draft/js/data/dataset.js?v=ce2a65c828eb",
+    "/draft/js/data/rivals-subset.js": "/draft/js/data/rivals-subset.js?v=ce2a65c828eb",
+    "/draft/js/data/concacaf-subset.js": "/draft/js/data/concacaf-subset.js?v=ce2a65c828eb",
+    "/draft/js/data/chemistry-leagues.js": "/draft/js/data/chemistry-leagues.js?v=ce2a65c828eb"
+  }
+}</script>
+  <script type="module" src="js/main.js?v=rewards-redesign-1"></script>
+</body>
+</html>
