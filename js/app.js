@@ -22,7 +22,6 @@ const DB = {
   teams: [],      // [{ id, folder, displayName, type, teamData, players, appearanceMap }]
   players: [],    // flat list for global search
   leagues: [],    // [{ id, name, teamIds }]
-  searchIndex: Object.create(null), // token/prefix -> Set<"teamId:playerId">
   playersByKey: Object.create(null),
   appearanceMap: Object.create(null), // playerId → appearanceData (global)
   loaded: false,
@@ -359,44 +358,11 @@ function getPlayerKey(teamId, playerId) {
   return `${teamId}:${playerId}`;
 }
 
-function addToSearchIndex(term, playerKey) {
-  if (!term) return;
-  if (!DB.searchIndex[term]) DB.searchIndex[term] = new Set();
-  DB.searchIndex[term].add(playerKey);
-}
-
 function indexPlayerForSearch(player) {
-  if (!player || !player._team) return;
-  const playerId = player.ID;
-  if (!playerId) return;
-
-  const playerKey = getPlayerKey(player._team.id, playerId);
-  DB.playersByKey[playerKey] = player;
-
-  const terms = new Set([
-    ...tokenizeSearchText(player.Name),
-    ...tokenizeSearchText(player.Position),
-    ...tokenizeSearchText(playerId),
-    ...tokenizeSearchText(player._team.displayName),
-  ]);
-
-  terms.forEach(term => {
-    addToSearchIndex(term, playerKey);
-    if (term.length >= 2) {
-      for (let len = 2; len <= term.length; len++) {
-        addToSearchIndex(term.slice(0, len), playerKey);
-      }
-    }
-  });
-}
-
-function intersectSets(baseSet, nextSet) {
-  if (!baseSet) return new Set(nextSet);
-  const result = new Set();
-  baseSet.forEach(value => {
-    if (nextSet.has(value)) result.add(value);
-  });
-  return result;
+  if (!player?.ID || !player._team) return;
+  // Keep the existing identity map used by favorites and player navigation.
+  DB.playersByKey[getPlayerKey(player._team.id, player.ID)] = player;
+  window.LAQPDatabaseSearch.prepare(player.Name);
 }
 
 /**
@@ -448,6 +414,14 @@ function overallColor(value) {
 // ─── Boot / Indexer ───────────────────────────────────────────────────────────
 
 async function boot() {
+  await import('/js/database-search.js');
+  await import('/js/edited-faces.js');
+  await window.LAQPEditedFaces.load(parseCSV);
+  document.querySelector('#header #search-container')?.remove();
+  if (!document.querySelector('link[data-database-search]')) {
+    const styles = document.createElement('link'); styles.rel = 'stylesheet';
+    styles.href = '/css/database-search.css?v=20261102a'; styles.dataset.databaseSearch = ''; document.head.appendChild(styles);
+  }
   await window.LAQPEnsurePes2018Overall();
   showLoading(t('loading.database'));
 
@@ -568,6 +542,9 @@ async function boot() {
     return;
   }
 
+  // Normalize identity fields once. Club/nationality stay independent filters.
+  DB.teams.forEach(team => window.LAQPDatabaseSearch.prepare(team.displayName));
+  DB.leagues.forEach(league => window.LAQPDatabaseSearch.prepare(league.name));
   DB.loaded = true;
   buildSidebar();
   restoreNavState();
@@ -615,9 +592,9 @@ function _urlToState() {
   let view = params.get('view') || document.querySelector('meta[name="laqp-database-view"]')?.content;
   if (!view) {
     const path = window.location.pathname.replace(/\/+$/, '/').toLowerCase();
-    if (path.endsWith('/database/v2/players/')) view = 'players';
-    if (path.endsWith('/database/v2/teams/')) view = 'teams';
-    if (path.endsWith('/database/v2/leagues/')) view = 'leagues';
+    if (path.endsWith('/database/players/')) view = 'players';
+    if (path.endsWith('/database/teams/')) view = 'teams';
+    if (path.endsWith('/database/leagues/')) view = 'leagues';
   }
   if (!view) return null;
   const state = { view };
@@ -680,9 +657,11 @@ function _applyNavState(state) {
       break;
     case 'leagues':
       _showLeaguesViewInternal();
-      if (state.query) {
+      const leagueFaceFilter = document.getElementById('league-flt-face-edited');
+      if (leagueFaceFilter) leagueFaceFilter.value = state.filters?.faceEdited || '';
+      if (state.query || state.filters?.faceEdited) {
         const input = document.getElementById('leagues-search-input');
-        if (input) { input.value = state.query; filterLeaguesGrid(state.query); }
+        if (input) { input.value = state.query || ''; filterLeaguesGrid(input.value); }
       }
       break;
     case 'leagueTeams':
@@ -690,6 +669,8 @@ function _applyNavState(state) {
       else _showLeaguesViewInternal();
       break;
     case 'teams':
+      _teamFilters.faceEdited = state.filters?.faceEdited || '';
+      if (state.filters) Object.assign(_teamFilters, state.filters);
       if (state.query) _teamFilters.name = state.query;
       _showTeamsViewInternal();
       if (state.query) {
@@ -700,10 +681,14 @@ function _applyNavState(state) {
       if (state.page > 1) goToTeamsPage(state.page, false);
       break;
     case 'players':
+      _advFilters.faceEdited = state.filters?.faceEdited || '';
       if (state.filters) Object.assign(_advFilters, state.filters);
       if (state.specialPlayers !== undefined) _showSpecialPlayers = state.specialPlayers;
       if (state.page) _allPlayersPage = state.page;
       _showAllPlayersInternal(false);
+      break;
+    case 'search':
+      runGeneralSearch(state.query || '', false, state.page || 1);
       break;
     case 'favorites':
       _showFavoritesViewInternal();
@@ -808,6 +793,10 @@ function filterAllPlayers(query) {
 
 let _leaguesForGrid = [];
 
+function faceFilterSelect(id, value, handler, includeFull = false) {
+  return `<div class="adv-filter-group"><label for="${id}">${t('filters.faceEdited')}</label><select id="${id}" onchange="${handler}"><option value="">${t('common.allMasc')}</option>${(includeFull ? ['full', 'yes', 'no'] : ['yes', 'no']).map(option => `<option value="${option}"${value === option ? ' selected' : ''}>${t(option === 'full' ? 'faces.full' : option === 'yes' ? 'common.yes' : 'common.no')}</option>`).join('')}</select></div>`;
+}
+
 function renderLeagueGridCard(league) {
   const teamCount = (league.teamIds || []).length;
   const leagueId = escapeHtml(league.id);
@@ -820,7 +809,7 @@ function renderLeagueGridCard(league) {
         onerror="this.onerror=null;this.src='img/leagues/default.webp'"
         alt="${leagueName}">
       <span class="grid-card-kicker">${t('db.leagueKicker')}</span>
-      <span class="grid-card-name">${leagueName}</span>
+      <span class="grid-card-name">${leagueName} ${window.LAQPEditedFaces.badge(window.LAQPEditedFaces.fullLeague(league, DB.teams), true)}</span>
       <span class="grid-card-sub">${t('db.teamCount', { count: teamCount })}</span>
       <span class="grid-card-action">${t('db.viewTeams')}</span>
     </button>`;
@@ -845,9 +834,10 @@ function _showLeaguesViewInternal() {
     </div>
     <div class="grid-search-wrap">
       <input type="text" class="grid-search-input" id="leagues-search-input"
-        placeholder="${t('db.searchLeague')}" autocomplete="off"
+        placeholder="Buscar ligas..." aria-label="Buscar ligas" autocomplete="off"
         oninput="filterLeaguesGrid(this.value)">
     </div>
+    ${faceFilterSelect('league-flt-face-edited', '', "filterLeaguesGrid(document.getElementById('leagues-search-input').value)", true)}
     <div class="grid-cards" id="leagues-grid-cards">${cardsHtml}</div>
     `;
 }
@@ -858,12 +848,19 @@ function showLeaguesView() {
 }
 
 function filterLeaguesGrid(query) {
-  const q = query.toLowerCase().trim();
+  const q = window.LAQPDatabaseSearch.normalize(query);
   const container = document.getElementById('leagues-grid-cards');
   const subtitle = document.getElementById('leagues-grid-subtitle');
   if (!container) return;
-  saveNavState({ view: 'leagues', query });
-  const matches = q ? _leaguesForGrid.filter(l => (l.name || '').toLowerCase().includes(q)) : _leaguesForGrid;
+  const faceEdited = document.getElementById('league-flt-face-edited')?.value || '';
+  saveNavState({ view: 'leagues', query, filters: { faceEdited } });
+  const candidates = _leaguesForGrid.filter(league => {
+    if (!faceEdited) return true;
+    if (faceEdited === 'full') return window.LAQPEditedFaces.fullLeague(league, DB.teams);
+    const players = DB.teams.filter(team => league.teamIds.includes(team.id)).flatMap(team => team.players);
+    return window.LAQPEditedFaces.matches(players, faceEdited);
+  });
+  const matches = q ? window.LAQPDatabaseSearch.rank(candidates, query, l => l.name) : candidates;
   const cardsHtml = matches.map(renderLeagueGridCard).join('');
   container.innerHTML = cardsHtml;
   if (subtitle) subtitle.textContent = t('db.leaguesFound', { count: matches.length });
@@ -902,7 +899,7 @@ function _showLeagueTeamsViewInternal(leagueId) {
         onerror="this.onerror=null;this.src='img/leagues/default.webp'"
         alt="${league.name}">
       <div>
-        <div class="view-title">${league.name}</div>
+        <div class="view-title">${league.name} ${window.LAQPEditedFaces.badge(window.LAQPEditedFaces.fullLeague(league, DB.teams), true)}</div>
         <div class="view-subtitle">${t('db.teamCount', { count: leagueTeams.length })}</div>
       </div>
     </div>
@@ -924,6 +921,7 @@ let _teamFilters = {
   type: '',
   minAvg: '',
   maxAvg: '',
+  faceEdited: '',
   minPlayers: '',
   maxPlayers: '',
 };
@@ -953,7 +951,7 @@ function renderTeamGridCard(team) {
         onerror="this.onerror=null;this.src='img/teams/default.webp'"
         alt="${teamName}">
       <span class="grid-card-kicker">${t('db.teamKicker')}</span>
-      <span class="grid-card-name">${teamName}</span>
+      <span class="grid-card-name">${teamName} ${window.LAQPEditedFaces.badge(window.LAQPEditedFaces.full(team.players), true)}</span>
       <span class="grid-card-sub">${leagueName} - ${t('db.playerCount', { count: players })}</span>
       <span class="grid-card-action">${t('db.viewSquad')}</span>
     </button>`;
@@ -988,6 +986,7 @@ function _buildTeamActiveFiltersSummary() {
   const league = DB.leagues.find(l => l.id === _teamFilters.league);
   const country = _teamFilters.country ? nationalityName(_teamFilters.country) : '';
   add(t('common.name'), _teamFilters.name);
+  if (_teamFilters.faceEdited) add(t('filters.faceEdited'), t(_teamFilters.faceEdited === 'full' ? 'faces.full' : _teamFilters.faceEdited === 'yes' ? 'common.yes' : 'common.no'));
   add(t('common.league'), league ? league.name : '');
   add(t('common.country'), country);
   add(t('common.type'), teamTypeLabel(_teamFilters.type));
@@ -1012,7 +1011,7 @@ function _buildTeamFiltersPanel() {
   const panelOpen = _teamFiltersOpen || _hasActiveTeamFilters();
 
   return `
-    <div class="adv-filter-panel team-filter-panel">
+    <div class="adv-filter-panel team-filter-panel"><div class="db-context-search"><label for="team-flt-name">Buscar equipos</label><input type="search" id="team-flt-name" placeholder="Buscar equipos..." value="${escapeHtml(_teamFilters.name)}" oninput="onTeamFilterChange()" autocomplete="off"></div>
       <div class="filter-panel-head">
         <div>
           <div class="filter-panel-title">${t('filters.teamTitle')}</div>
@@ -1026,10 +1025,7 @@ function _buildTeamFiltersPanel() {
       ${_buildTeamActiveFiltersSummary()}
       <div id="team-filter-body" ${panelOpen ? '' : 'hidden'}>
       <div class="adv-filter-grid basic-filter-grid">
-        <div class="adv-filter-group">
-          <label>${t('common.name')}</label>
-          <input type="text" id="team-flt-name" placeholder="${t('db.searchTeam')}" value="${escapeHtml(_teamFilters.name)}" oninput="onTeamFilterChange()">
-        </div>
+
         <div class="adv-filter-group">
           <label>${t('common.league')}</label>
           <select id="team-flt-league" onchange="onTeamFilterChange()">
@@ -1045,6 +1041,7 @@ function _buildTeamFiltersPanel() {
             ${types.map(t => `<option value="${t}"${_teamFilters.type === t ? ' selected' : ''}>${escapeHtml(teamTypeLabel(t))}</option>`).join('')}
           </select>
         </div>
+        ${faceFilterSelect('team-flt-face-edited', _teamFilters.faceEdited, 'onTeamFilterChange()', true)}
         ${_buildRangeFilter(t('filters.avgRange'), 'team-flt-min-avg', 'team-flt-max-avg', 0, 109, _teamFilters.minAvg, _teamFilters.maxAvg).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
         ${_buildRangeFilter(t('filters.playerQty'), 'team-flt-min-players', 'team-flt-max-players', 0, 32, _teamFilters.minPlayers, _teamFilters.maxPlayers).replaceAll('onAdvFilterChange()', 'onTeamFilterChange()')}
       </div>
@@ -1055,9 +1052,9 @@ function _buildTeamFiltersPanel() {
 function _applyTeamFilters() {
   const name = normalizeText(_teamFilters.name);
   _teamsFilteredList = _teamsForGrid.filter(team => {
-    if (name && !normalizeText(team.displayName).includes(name)) return false;
     if (_teamFilters.league && _teamFilterValue(team, 'league') !== _teamFilters.league) return false;
     if (_teamFilters.country && _teamFilterValue(team, 'country') !== _teamFilters.country) return false;
+    if (!window.LAQPEditedFaces.matches(team.players, _teamFilters.faceEdited)) return false;
     if (_teamFilters.type && _teamFilterValue(team, 'type') !== _teamFilters.type) return false;
 
     const avg = _teamFilterValue(team, 'avg');
@@ -1070,6 +1067,7 @@ function _applyTeamFilters() {
 
     return true;
   });
+  if (name) _teamsFilteredList = window.LAQPDatabaseSearch.rank(_teamsFilteredList, _teamFilters.name, team => team.displayName);
 }
 
 /** Internal: render teams grid without saving nav state. */
@@ -1142,7 +1140,7 @@ function goToTeamsPage(page, scrollToTop) {
   const totalPages = Math.ceil(_teamsFilteredList.length / TEAMS_PAGE_SIZE) || 1;
   _teamsGridPage = Math.max(1, Math.min(page, totalPages));
   const query = _teamFilters.name || '';
-  saveNavState({ view: 'teams', query, page: _teamsGridPage });
+  saveNavState({ view: 'teams', query, filters: { ..._teamFilters }, page: _teamsGridPage });
   _renderTeamsGridPage();
   if (scrollToTop !== false) {
     const view = document.getElementById('teams-grid-view');
@@ -1157,9 +1155,10 @@ function filterTeamsGrid(query) {
 
 function onTeamFilterChange(saveState = true) {
   if (!document.getElementById('teams-grid-cards')) return;
-  _teamFilters.name = (document.getElementById('team-flt-name') || {}).value || _teamFilters.name || '';
+  _teamFilters.name = document.getElementById('team-flt-name')?.value ?? _teamFilters.name ?? '';
   _teamFilters.league = (document.getElementById('team-flt-league') || {}).value || '';
   _teamFilters.country = (document.getElementById('team-flt-country') || {}).value || '';
+  _teamFilters.faceEdited = document.getElementById('team-flt-face-edited')?.value || '';
   _teamFilters.type = (document.getElementById('team-flt-type') || {}).value || '';
   _teamFilters.minAvg = (document.getElementById('team-flt-min-avg') || {}).value || '';
   _teamFilters.maxAvg = (document.getElementById('team-flt-max-avg') || {}).value || '';
@@ -1168,7 +1167,7 @@ function onTeamFilterChange(saveState = true) {
 
   _applyTeamFilters();
   _teamsGridPage = 1;
-  if (saveState) saveNavState({ view: 'teams', query: _teamFilters.name, page: 1 });
+  if (saveState) saveNavState({ view: 'teams', query: _teamFilters.name, filters: { ..._teamFilters }, page: 1 });
   const summary = document.getElementById('team-active-filters-summary');
   if (summary) summary.outerHTML = _buildTeamActiveFiltersSummary();
   const clearBtn = document.getElementById('btn-clear-team-filters');
@@ -1178,7 +1177,7 @@ function onTeamFilterChange(saveState = true) {
 
 function resetTeamFilters() {
   Object.keys(_teamFilters).forEach(k => { _teamFilters[k] = ''; });
-  ['team-flt-name','team-flt-league','team-flt-country','team-flt-type',
+  ['team-flt-face-edited','team-flt-name','team-flt-league','team-flt-country','team-flt-type',
    'team-flt-min-avg','team-flt-max-avg','team-flt-min-players','team-flt-max-players'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
@@ -1254,11 +1253,7 @@ function showHomeLegacy() {
   hideAllViews();
   document.getElementById('home-view').classList.add('active');
 
-  const leagueCount = DB.leagues.length;
-  document.getElementById('stat-leagues').textContent = leagueCount;
-  document.getElementById('stat-teams').textContent = DB.teams.length;
-  const uniqueIds = new Set(DB.players.map(p => p.ID));
-  document.getElementById('stat-players').textContent = uniqueIds.size;
+  // Public totals are prerendered by database_statistics.py.
   // Show favorites count
   const favCount = getFavoritesCount();
   const statFav = document.getElementById('stat-favorites');
@@ -1350,7 +1345,7 @@ function renderHomePlayerItem(player) {
   return `
     <button type="button" class="db-player-item" onclick="selectPlayer('${playerId}', '${teamId}')">
       <img class="db-player-face"
-        src="img/players/${playerId}.webp"
+        src="${LAQPMinifaces.sourceFor(playerId)}" data-player-id="${playerId}"
         loading="lazy"
         onerror="handleMinifaceError(this,'${playerId}')"
         alt="${playerName}">
@@ -1436,7 +1431,7 @@ function renderHomeFavoriteItem(player) {
   return `
     <button type="button" class="db-favorite-player" onclick="selectPlayer('${playerId}', '${teamId}')">
       <img class="db-favorite-face"
-        src="img/players/${playerId}.webp"
+        src="${LAQPMinifaces.sourceFor(playerId)}" data-player-id="${playerId}"
         loading="lazy"
         onerror="handleMinifaceError(this,'${playerId}')"
         alt="${playerName}">
@@ -1468,7 +1463,7 @@ function runHomeDatabaseSearch(value) {
   if (!query) return;
   const headerSearch = document.getElementById('search-input');
   if (headerSearch) headerSearch.value = query;
-  runSearch(query);
+  runGeneralSearch(query);
 }
 
 function showHome() {
@@ -1481,17 +1476,8 @@ function showHome() {
     return;
   }
   homeView.classList.add('active');
-  const leagueCount = DB.leagues.length;
-  const teamCount = DB.teams.length;
-  const uniqueIds = new Set(DB.players
-    .filter(player => player && player.ID)
-    .map(player => player.ID));
-  const playerCount = uniqueIds.size;
+  // Keep the official totals generated alongside the homepage.
   const favCount = getFavoritesCount();
-
-  setDbText('stat-leagues', formatDbNumber(leagueCount));
-  setDbText('stat-teams', formatDbNumber(teamCount));
-  setDbText('stat-players', formatDbNumber(playerCount));
   setDbText('stat-favorites', formatDbNumber(favCount));
 
   const latestPlayers = document.getElementById('db-latest-players');
@@ -1518,7 +1504,7 @@ function showDatabaseHome() {
 function showAllPlayersAndFocusSearch() {
   showAllPlayers(true);
   requestAnimationFrame(() => {
-    const input = document.getElementById('search-input');
+    const input = document.getElementById('flt-name');
     if (input) input.focus();
   });
 }
@@ -1552,6 +1538,7 @@ const _advFilters = {
   minOvr: '',
   maxOvr: '',
   hasFaceScan: '',
+  faceEdited: '',
   playingStyle: '',
   minSpeed: '',
   maxSpeed: '',
@@ -1589,7 +1576,7 @@ STAT_FILTERS.forEach(stat => {
   _advFilters[stat.maxKey] = '';
 });
 
-const BASIC_FILTER_KEYS = new Set(['name', 'club', 'league', 'nationality', 'position', 'minOvr', 'maxOvr']);
+const BASIC_FILTER_KEYS = new Set(['name', 'club', 'league', 'nationality', 'position', 'minOvr', 'maxOvr', 'faceEdited']);
 let _advancedFiltersOpen = false;
 
 function _hasActiveBasicFilters() {
@@ -1675,8 +1662,7 @@ function _prepareAllPlayersList() {
   const f = _advFilters;
 
   if (f.name) {
-    const q = normalizeText(f.name);
-    unique = unique.filter(p => normalizeText(p.Name).includes(q));
+    unique = window.LAQPDatabaseSearch.rank(unique, f.name, p => p.Name);
   }
   if (f.position) {
     unique = unique.filter(p => p.Position === f.position);
@@ -1736,6 +1722,8 @@ function _prepareAllPlayersList() {
       return f.hasFaceScan === 'yes' ? hasScan : !hasScan;
     });
   }
+
+  if (f.faceEdited) unique = unique.filter(p => window.LAQPEditedFaces.matches([p], f.faceEdited));
 
   // League filter
   if (f.league) {
@@ -1829,7 +1817,7 @@ function _prepareAllPlayersList() {
     unique = unique.filter(p => p[f.comStyle] === 'True');
   }
 
-  _applyPlayerSort(unique);
+  if (!f.name || (_playerSort.key && _playerSort.dir)) _applyPlayerSort(unique);
   _allPlayersList = unique;
 }
 
@@ -2031,6 +2019,7 @@ function _buildActiveFiltersSummary() {
   if (f.playingStyle) add(t('filters.playingStyle'), playingStyleLabel(f.playingStyle));
   if (f.comStyle) add('COM', (comStyleLabels().find(([key]) => key === f.comStyle) || [null, f.comStyle])[1]);
   if (f.foot) add(t('common.foot'), f.foot === 'left' ? t('filters.left') : t('filters.right'));
+  if (f.faceEdited) add(t('filters.faceEdited'), f.faceEdited === 'yes' ? t('common.yes') : t('common.no'));
   if (f.hasFaceScan) add(t('filters.faceScan'), f.hasFaceScan === 'yes' ? t('common.yes') : t('common.no'));
   if (f.minAge || f.maxAge) add(t('common.age'), `${f.minAge || '15'}-${f.maxAge || '50'}`);
   if (f.minHeight || f.maxHeight) add(t('common.height'), `${f.minHeight || '150'}-${f.maxHeight || '220'}`);
@@ -2104,6 +2093,7 @@ function _buildFilterPanel() {
 
   return `
     <div class="adv-filter-panel" id="adv-filter-panel">
+      <div class="db-context-search"><label for="flt-name">Buscar jugadores</label><input type="search" id="flt-name" placeholder="Buscar jugadores..." value="${escapeHtml(f.name)}" oninput="onAdvFilterChange()" autocomplete="off"></div>
       <div class="filter-panel-head">
         <div>
           <div class="filter-panel-title">${t('filters.playerTitle')}</div>
@@ -2121,10 +2111,8 @@ function _buildFilterPanel() {
       <section class="filter-section filter-section-basic">
         <div class="filter-section-title">${t('filters.basic')}</div>
         <div class="adv-filter-grid basic-filter-grid">
-          <div class="adv-filter-group">
-            <label>${t('common.name')}</label>
-            <input type="text" id="flt-name" placeholder="${t('db.searchPlayer')}" value="${escapeHtml(f.name)}" oninput="onAdvFilterChange()">
-          </div>
+
+${faceFilterSelect('flt-face-edited', f.faceEdited, 'onAdvFilterChange()')}
           <div class="adv-filter-group">
             <label>${t('common.club')}</label>
             <select id="flt-club" onchange="onAdvFilterChange()">
@@ -2226,6 +2214,7 @@ function _buildFilterPanel() {
     </div>`;
 }
 function onAdvFilterChange() {
+  _advFilters.faceEdited = document.getElementById('flt-face-edited')?.value || '';
   _advFilters.name       = (document.getElementById('flt-name')       || {}).value || '';
   _advFilters.position   = (document.getElementById('flt-position')   || {}).value || '';
   _advFilters.role       = (document.getElementById('flt-role')       || {}).value || '';
@@ -2281,7 +2270,7 @@ function onAdvFilterChange() {
 function resetAdvancedFilters() {
   Object.keys(_advFilters).forEach(k => { _advFilters[k] = ''; });
   // Reset all filter inputs
-  ['flt-name','flt-position','flt-role','flt-nationality','flt-league','flt-club','flt-foot','flt-facescan',
+  ['flt-face-edited','flt-name','flt-position','flt-role','flt-nationality','flt-league','flt-club','flt-foot','flt-facescan',
    'flt-min-ovr','flt-max-ovr','flt-min-age','flt-max-age',
    'flt-min-height','flt-max-height','flt-min-weight','flt-max-weight',
    'flt-playing-style','flt-com-style',
@@ -2463,7 +2452,7 @@ function renderPlayerRow(player, team) {
   return `<tr onclick="selectPlayer('${player.ID}', '${team.id}')">
     <td>
       <img class="player-row-photo"
-        src="img/players/${player.ID}.webp"
+        src="${LAQPMinifaces.sourceFor(player.ID)}" data-player-id="${player.ID}"
         loading="lazy"
         onerror="handleMinifaceError(this,'${player.ID}')"
         alt="${player.Name}">
@@ -2478,7 +2467,7 @@ function renderPlayerRow(player, team) {
           title="${team.displayName}">
       </a>
     </td>
-    <td><strong>${player.Name || '–'}</strong>${nationalNote}</td>
+    <td><strong>${player.Name || '–'}</strong>${window.LAQPEditedFaces.playerBadge(player)}${nationalNote}</td>
     <td>
       <img class="player-flag"
         src="${flagSrc(player.Nationality)}"
@@ -2599,7 +2588,7 @@ function renderPlayerProfile(player, team) {
         <div class="player-photo-container">
           <img class="player-photo"
             id="profile-photo"
-            src="img/players/${player.ID}.webp"
+            src="${LAQPMinifaces.sourceFor(player.ID)}" data-player-id="${player.ID}"
             onerror="handleMinifaceError(this,'${player.ID}')"
             alt="${player.Name}">
         </div>
@@ -2892,63 +2881,81 @@ function onSearchInput(event) {
   searchTimeout = setTimeout(() => runSearch(query), 200);
 }
 
+// Legacy player search callers stay inside the contextual directory.
 function runSearch(query) {
-  const terms = tokenizeSearchText(query);
-  let matchedKeys = null;
-
-  terms.forEach(term => {
-    const keysForTerm = DB.searchIndex[term] || new Set();
-    matchedKeys = intersectSets(matchedKeys, keysForTerm);
-  });
-
-  const rawResults = matchedKeys
-    ? Array.from(matchedKeys).map(key => DB.playersByKey[key]).filter(Boolean)
-    : [];
-
-  // Deduplicate by player ID: prefer club/special-team entries over national team entries
-  const clubPlayerIds = new Set(DB.players.filter(p => p._team.type !== '2').map(p => p.ID));
-  const seenIds = new Set();
-  const results = rawResults.filter(p => {
-    if (p._team.type === '2' && clubPlayerIds.has(p.ID)) return false;
-    if (seenIds.has(p.ID)) return false;
-    seenIds.add(p.ID);
-    return true;
-  });
-
-  hideAllViews();
-  const view = document.getElementById('search-view');
-  view.classList.add('active');
-
-  if (!results.length) {
-    view.innerHTML = `${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('db.searchPlayers') }])}
-      <div class="view-header"><div class="view-title">${t('common.results')}: "${query}"</div></div>
-      <div class="error-message">${t('errors.noPlayersForSearch', { query })}</div>`;
-    return;
+  _advFilters.name = String(query || ''); showAllPlayers(true);
+}
+let _generalQuery = '', _generalPage = 1, _generalType = 'all', _generalResults = [], _generalCandidates = null;
+function runGeneralSearch(query, save = true, page = 1) {
+  _generalQuery = String(query || '').trim(); _generalPage = page; _generalType = 'all';
+  const engine = window.LAQPDatabaseSearch, prepared = engine.prepare(_generalQuery);
+  if (!_generalCandidates) {
+    const seen = new Map();
+    for (const player of DB.players) {
+      const old = seen.get(player.ID);
+      if (!old || (old._team.type === '2' && player._team.type !== '2')) seen.set(player.ID, player);
+    }
+    _generalCandidates = [
+      ...[...seen.values()].map(p => ({type:'player',label:'Jugador',name:p.Name,faceBadge:window.LAQPEditedFaces.playerBadge(p),context:p._team.displayName,id:p.ID,url:laqpPlayerUrl(p.ID,p._team.id,p.Name),player:p})),
+      ...DB.teams.map(team => ({type:'team',label:'Equipo',name:team.displayName,faceBadge:window.LAQPEditedFaces.badge(window.LAQPEditedFaces.full(team.players),true),context:(team.players?.length || 0)+' jugadores',id:team.id,url:laqpTeamUrl(team.id,team.displayName)})),
+      ...DB.leagues.map(league => ({type:'league',label:'Liga',name:league.name,faceBadge:window.LAQPEditedFaces.badge(window.LAQPEditedFaces.fullLeague(league,DB.teams),true),context:(league.teamIds?.length || 0)+' equipos',id:league.id,url:laqpLeagueUrl(league.id,league.name)})),
+    ].map(item => ({...item, prepared:engine.prepare(item.name)}));
+    _generalCandidates = [...new Map(_generalCandidates.map(item => [item.type + ':' + item.id,item])).values()];
   }
-
-  const rowsHtml = results.map(p => renderPlayerRow(p, p._team)).join('');
-
-  view.innerHTML = `
-    ${renderBreadcrumbTrail([{ label: t('common.home'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('index.html') : 'index.html' }, { label: t('common.database'), href: typeof laqpPageUrl === 'function' ? laqpPageUrl('database.html') : 'database.html' }, { label: t('db.searchPlayers') }])}
-    <div class="view-header">
-      <div>
-        <div class="view-title">${t('common.search')}: "${query}"</div>
-        <div class="view-subtitle">${t('common.resultsCount', { count: results.length })}</div>
-      </div>
-    </div>
-    <div class="table-responsive">
-      <table class="players-table">
-        <thead>
-          <tr>
-            <th></th><th></th><th>${t('common.name')}</th><th>${t('common.nationalityShort')}</th><th>${t('common.positionShort')}</th>
-            <th>OVR</th><th>RIT</th><th>DRI</th><th>TIR</th>
-            <th>PAS</th><th>FIS</th><th>DEF</th>
-            <th class="fav-col"></th>
-          </tr>
-        </thead>
-        <tbody>${rowsHtml}</tbody>
-      </table>
-    </div>`;
+  _generalResults = _generalCandidates.map(item => ({...item,score:engine.score(item.prepared,prepared)}))
+    .filter(item => item.score > 0).sort((a,b) => b.score-a.score || a.name.localeCompare(b.name,'es') || a.type.localeCompare(b.type));
+  hideAllViews(); document.getElementById('search-view').classList.add('active');
+  if (save) saveNavState({view:'search',query:_generalQuery,page:_generalPage});
+  renderGeneralResults();
+}
+const GENERAL_SEARCH_TYPES = [['all','Todos'],['player','Jugadores'],['team','Equipos'],['league','Ligas']];
+function generalResultThumb(item) {
+  const alt = escapeHtml(item.name);
+  if (item.type === 'player') return '<img class="db-search-face" src="'+LAQPMinifaces.sourceFor(item.id)+'" data-player-id="'+escapeHtml(item.id)+'" loading="lazy" onerror="handleMinifaceError(this)" alt="'+alt+'">';
+  const folder = item.type === 'team' ? 'teams' : 'leagues';
+  return '<img src="img/'+folder+'/'+escapeHtml(item.id)+'.webp" loading="lazy" onerror="this.onerror=null;this.src=\'img/'+folder+'/default.webp\'" alt="'+alt+'">';
+}
+function generalResultMarkup(item) {
+  const p = item.player;
+  let meta = '';
+  if (p) {
+    const ovr = p.Overall || '-', color = statColor(ovr);
+    meta = '<span class="db-search-meta"><span class="db-search-pos">'+escapeHtml(translatePosition(p.Position) || p.Position || '-')+'</span>'+
+      '<span class="db-search-ovr" style="background:'+color+';color:'+statTextColor(color)+'">'+escapeHtml(ovr)+'</span></span>';
+  }
+  const context = p
+    ? '<img src="img/teams/'+escapeHtml(p._team.id)+'.webp" loading="lazy" onerror="this.onerror=null;this.src=\'img/teams/default.webp\'" alt="">'+escapeHtml(item.context)
+    : escapeHtml(item.context || '');
+  return '<a class="db-search-result" data-entity-type="'+item.type+'" href="'+escapeHtml(item.url)+'">'+
+    '<span class="db-search-thumb">'+generalResultThumb(item)+'</span>'+
+    '<span class="db-search-body"><span class="db-search-type">'+item.label+'</span><strong>'+escapeHtml(item.name)+'</strong>'+
+    (context ? '<small>'+context+'</small>' : '')+(item.faceBadge || '')+'</span>'+meta+'</a>';
+}
+function renderGeneralResults() {
+  const view = document.getElementById('search-view'), start = (_generalPage-1)*60;
+  const counts = {all:_generalResults.length};
+  _generalResults.forEach(item => { counts[item.type] = (counts[item.type] || 0) + 1; });
+  const results = _generalType === 'all' ? _generalResults : _generalResults.filter(item => item.type === _generalType);
+  const total = _generalResults.length;
+  view.innerHTML = '<header class="db-search-head"><div><h1 class="view-title">Resultados de búsqueda</h1>'+
+    '<p class="db-search-query">'+total+' '+(total === 1 ? 'resultado' : 'resultados')+' para <strong>“'+escapeHtml(_generalQuery)+'”</strong></p></div>'+
+    '<button type="button" class="db-search-return" onclick="showDatabaseHome()">← Volver al inicio</button></header>'+
+    '<form class="db-search-refine" role="search" onsubmit="event.preventDefault();runGeneralSearch(this.q.value)">'+
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'+
+    '<input name="q" type="search" value="'+escapeHtml(_generalQuery)+'" placeholder="Buscar jugador, equipo o liga..." aria-label="Buscar jugador, equipo o liga" autocomplete="off">'+
+    '<button type="submit">Buscar</button></form>'+
+    (total ? '<div class="db-search-filters" role="group" aria-label="Filtrar resultados">'+GENERAL_SEARCH_TYPES.filter(([key]) => counts[key]).map(([key,label]) =>
+      '<button type="button" aria-pressed="'+(key === _generalType)+'" onclick="setGeneralSearchType(\''+key+'\')">'+label+' <span>'+counts[key]+'</span></button>').join('')+'</div>' : '')+
+    '<div class="db-search-results">'+results.slice(start,start+60).map(generalResultMarkup).join('')+'</div>'+
+    (total ? _buildPaginationControls(results.length,_generalPage,60,'goToGeneralSearchPage') : '<p class="db-search-empty" role="status">No encontramos coincidencias por nombre. Probá otra consulta.</p>');
+}
+function setGeneralSearchType(type) {
+  _generalType = type; _generalPage = 1; renderGeneralResults();
+}
+function goToGeneralSearchPage(page) {
+  const total = _generalType === 'all' ? _generalResults.length : _generalResults.filter(item => item.type === _generalType).length;
+  _generalPage=Math.max(1,Math.min(page,Math.ceil(total/60)||1));
+  saveNavState({view:'search',query:_generalQuery,page:_generalPage});renderGeneralResults();
 }
 
 // ─── Entry point ──────────────────────────────────────────────────────────────

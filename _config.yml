@@ -3,3 +3,10 @@
 # no debe copiarse al sitio generado por Jekyll.
 exclude:
   - Herramientas
+  - supabase
+  - scripts
+  - .tmp
+  - .agents
+  - .codex
+  - AGENTS.md
+  - LAQP_DRAFT_BETA_RELEASE.md

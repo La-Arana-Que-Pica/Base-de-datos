@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear minifaces PES 2018 online: Miniface Studio (DDS y CPK) | LAqP</title>
+  <meta name="description" content="Creá minifaces para PES 2018 online y gratis: pegá una imagen, encuadrala con la plantilla y convertila a DDS 128 × 128 o descargá un CPK listo para instalar.">
+  <link rel="canonical" href="https://laqp.website/miniface-studio.html">
+  <meta property="og:title" content="Miniface Studio · Crear minifaces para PES 2018 | LAqP">
+  <meta property="og:description" content="Miniface maker para PES 2018: importá, encuadrá y exportá minifaces en DDS 128 × 128 o en un CPK listo para el juego.">
+  <meta property="og:url" content="https://laqp.website/miniface-studio.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:site_name" content="LAqP">
+  <meta property="og:image" content="https://laqp.website/img/logo.png">
+  <meta property="og:image:alt" content="LAqP · PES 2018">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Miniface Studio · Crear minifaces para PES 2018 | LAqP">
+  <meta name="twitter:description" content="Miniface maker para PES 2018: importá, encuadrá y exportá minifaces en DDS 128 × 128 o en un CPK listo para el juego.">
+  <meta name="twitter:image" content="https://laqp.website/img/logo.png">
+  <link rel="icon" href="/img/logo.webp" type="image/webp">
+  <link rel="stylesheet" href="/css/style.css?v=20261004c">
+  <link rel="stylesheet" href="/css/site-navigation.css" data-site-navigation>
+  <link rel="stylesheet" href="/css/miniface-studio.css?v=20261104b">
+  <link rel="preload" href="/img/miniface-studio/rostro-referencia.png" as="image">
+  <script src="/js/consent-mode.js"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-M7ZNDRZB27');</script>
+  <script type="application/ld+json">
+  {"@context": "https://schema.org", "@type": "WebApplication", "name": "Miniface Studio", "softwareVersion": "1.0 beta", "alternateName": "PES 2018 miniface maker", "url": "https://laqp.website/miniface-studio.html", "description": "Editor online de minifaces para PES 2018: importación desde portapapeles o archivos, plantilla de encuadre, conversión a DDS DXT5 de 128 × 128 y empaquetado en CPK.", "applicationCategory": "MultimediaApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "inLanguage": "es", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "featureList": ["Recorte automático de fondo (beta)", "Encuadre automático del rostro (beta)", "Carpetas para organizar proyectos", "Lectura de EDIT00000000 para organizar por equipos", "Proyectos con guardado automático y exportación", "Pegar imágenes desde el portapapeles", "Plantilla de encuadre con guías", "Conversión a DDS DXT5 128 × 128", "Exportación de varias minifaces en un CPK", "Modo uso personal con exportación PNG, WebP y JPG por carpetas"], "publisher": {"@type": "Organization", "name": "LAqP", "url": "https://laqp.website/"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Puedo convertir una imagen PNG o JPG a DDS para PES 2018?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Importá la imagen, ajustala y descargá el DDS: se genera en 128 × 128 con compresión DXT5, el formato que usa el juego para las minifaces."}}, {"@type": "Question", "name": "¿Las imágenes se suben a algún servidor?", "acceptedAnswer": {"@type": "Answer", "text": "No. La edición, la conversión a DDS y el empaquetado CPK se hacen en tu navegador. Nada se envía a LAqP ni a servicios externos."}}, {"@type": "Question", "name": "¿Necesito Photoshop o CRI Packed File Maker?", "acceptedAnswer": {"@type": "Answer", "text": "No. La plantilla de encuadre está integrada en el editor y el CPK se genera directamente con la misma estructura que crea CRI Packed File Maker."}}, {"@type": "Question", "name": "¿Puedo crear las minifaces de un equipo completo usando mi EDIT00000000?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. En la pestaña Equipo importá tu EDIT00000000: se leen los clubes, plantillas e IDs reales y, al elegir un jugador, su nombre e ID se completan solos. El archivo solo se lee en tu navegador; nunca se modifica ni se sube."}}, {"@type": "Question", "name": "¿Puedo guardar el trabajo y seguir en otra computadora?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. El proyecto se guarda automáticamente en tu navegador y podés exportarlo como archivo .laqpmf con las imágenes originales, ajustes e IDs. Al importarlo en otra computadora se combina con lo que ya tengas, sin borrar nada."}}, {"@type": "Question", "name": "¿Sirve para hacer minifaces para SoFIFA, Football Manager o FIFA?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. En el modo uso personal no hace falta EDIT ni ID: ponés el nombre de archivo y la carpeta que quieras y exportás en PNG, WebP o JPG, de a una o todas juntas en un ZIP organizado por carpetas."}}, {"@type": "Question", "name": "¿Puede quitar el fondo de la foto de un jugador?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, en beta. «Quitar fondo» recorta al jugador con un modelo de recorte de retratos (MODNet), directamente en tu navegador. Conserva la imagen original para que puedas restaurarla, y funciona mejor con fotos de un solo jugador de frente."}}, {"@type": "Question", "name": "¿Puede encuadrar la miniface automáticamente?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, en beta. «Encuadrar automáticamente» detecta el rostro con MediaPipe en tu navegador y ajusta la posición y la escala según las proporciones de las minifaces de LAqP, cuidando que no se corte el pelo. Funciona mejor con PNG de fondo transparente, incluso con siluetas de cuerpo completo, y siempre podés corregirlo a mano o volver al encuadre anterior."}}, {"@type": "Question", "name": "¿Por qué no aparece la miniface en el juego?", "acceptedAnswer": {"@type": "Answer", "text": "Revisá que el ID sea el del jugador en tu PES 2018, que el CPK esté agregado en DpFileList y que ningún otro CPK con la misma miniface tenga prioridad sobre el tuyo."}}]}
+  </script>
+  <script defer src="/js/site.js"></script>
+  <script type="module" src="/js/miniface-studio/app.js?v=20261104b"></script>
+</head>
+<body class="miniface-studio-body" data-mode="pes2018">
+  <a class="ms-skip" href="#miniface-studio">Saltar al editor</a>
+  <header id="header" class="site-header-v2"><a href="/index.html" class="header-logo-link" aria-label="Inicio LAqP"><img class="logo" src="/img/logo.webp" alt="LAqP" width="38" height="38"></a><div class="header-title">LAqP<span>PES 2018</span></div><nav class="header-nav" aria-label="Menú principal"><a href="/downloads.html" class="header-nav-link">Spider Patch</a><details class="site-nav-group"><summary>Base de datos</summary><div class="site-nav-panel"><a class="header-nav-link" href="/database.html">Base de datos de jugadores y equipos</a><a class="header-nav-link" href="/database/DTs/">Directores técnicos</a><a class="header-nav-link" href="/tactics.html">Tácticas históricas</a></div></details><a class="header-nav-link" href="/draft/">LAqP Draft</a><details class="site-nav-group"><summary>Análisis</summary><div class="site-nav-panel"><a class="header-nav-link" href="/rankings.html">Scouting</a><a class="header-nav-link" href="/calculadora-medias.html">Calculadora de medias</a><a class="header-nav-link" href="/alineaciones.html">Creador de alineaciones</a></div></details><details class="site-nav-group"><summary>Editores</summary><div class="site-nav-panel"><a class="header-nav-link" href="/miniface-studio.html" aria-current="page">Miniface Studio</a><a class="header-nav-link" href="/kit-color-studio.html">Kit Color Studio</a><a class="header-nav-link" href="/soundtrack-maker.html">Soundtrack Maker</a></div></details><a href="/guias.html" class="header-nav-link">Guías</a><a class="header-nav-link site-account-fallback" href="/mi-cuenta.html">Cuenta</a></nav></header>
+
+  <main id="miniface-studio" class="ms-main" tabindex="-1">
+    <header class="ms-hero">
+      <h1>Miniface Studio: creador de minifaces para PES 2018 <span class="ms-chip-version" title="Versión en desarrollo: puede tener errores">V1.0 beta</span></h1>
+      <p class="ms-beta-note" role="note"><strong>Versión 1.0 beta:</strong> puede tener errores. Revisá cada miniface antes de usarla y exportá tu proyecto cada tanto.</p>
+      <div class="ms-modebar">
+        <div class="ms-mode-switch" role="radiogroup" aria-label="Modo de uso">
+          <button type="button" role="radio" aria-checked="true" data-mode="pes2018"><span class="ms-mode-dot" aria-hidden="true"></span>Modo PES 2018</button>
+          <button type="button" role="radio" aria-checked="false" data-mode="personal" tabindex="-1"><span class="ms-mode-dot" aria-hidden="true"></span>Modo uso personal</button>
+        </div>
+        <p id="ms-mode-desc" class="ms-sr-only" aria-live="polite">IDs del EDIT · DDS 128 × 128 · CPK listo para el juego</p>
+      </div>
+    </header>
+
+    <section class="ms-app" aria-labelledby="ms-app-title">
+      <h2 id="ms-app-title" class="ms-sr-only">Editor de minifaces</h2>
+      <section class="ms-collection" aria-labelledby="ms-collection-title">
+        <div class="ms-collection-head">
+          <h3 id="ms-collection-title">Colección <span id="ms-collection-count">0</span></h3>
+          <button type="button" class="ms-button ms-button-small" data-action="open" title="Suma las imágenes elegidas como jugadores nuevos"><span class="ms-ico" aria-hidden="true">＋</span>Archivos</button>
+        </div>
+        <input type="search" id="ms-coll-search" class="ms-search ms-search-small" placeholder="Buscar en toda la colección…" autocomplete="off" spellcheck="false" aria-label="Buscar en toda la colección">
+        <nav class="ms-crumbs" id="ms-crumbs" aria-label="Carpeta actual"></nav>
+        <p class="ms-collection-summary" id="ms-collection-summary">Cada imagen que agregues se suma acá.</p>
+        <div class="ms-coll-scroll" id="ms-coll-scroll">
+          <ul class="ms-coll-folders" id="ms-coll-folders" aria-label="Ligas, equipos y carpetas"></ul>
+          <ul class="ms-thumbs" id="ms-thumbs" aria-label="Minifaces de la colección">
+            <li class="ms-thumb-add"><button type="button" data-action="new-player" aria-label="Nuevo jugador: después pegá su imagen con Ctrl + V" title="Nuevo jugador vacío; pegá su imagen con Ctrl + V"><span aria-hidden="true">+</span><small>Nuevo</small></button></li>
+          </ul>
+        </div>
+        <div class="ms-nav" role="group" aria-label="Navegar minifaces">
+          <button type="button" class="ms-icon-button" data-action="prev" aria-label="Miniface anterior" title="Anterior (Re Pág)" disabled>‹</button>
+          <button type="button" class="ms-button ms-button-ghost" data-action="next-pending" title="Siguiente pendiente (Av Pág)" disabled>Siguiente ›</button>
+          <button type="button" class="ms-button ms-button-ghost" data-action="skip" disabled>Omitir</button>
+        </div>
+      </section>
+      <div class="ms-app-grid">
+        <div class="ms-workbench">
+          <div class="ms-toolbar" role="toolbar" aria-label="Imagen y encuadre">
+            <div class="ms-tool-group">
+              <button type="button" class="ms-button ms-button-primary" data-action="paste" title="Pega la imagen del portapapeles en este jugador (Ctrl + V). Si ya tenía una, la reemplaza."><span class="ms-ico" aria-hidden="true">⧉</span>Pegar</button>
+              <button type="button" class="ms-button" data-action="replace-file" title="Elige un archivo para este jugador. Si ya tenía una imagen, la reemplaza."><span class="ms-ico" aria-hidden="true">⇪</span>Desde archivo</button>
+            </div>
+            <div class="ms-tool-group">
+              <button type="button" class="ms-button ms-button-auto" data-action="remove-bg" title="Quita el fondo detrás del jugador (beta)" disabled><span class="ms-ico" aria-hidden="true">◐</span>Quitar fondo</button>
+              <button type="button" class="ms-button ms-button-auto" data-action="auto-frame" title="Detecta el rostro y propone el encuadre (beta)" disabled><span class="ms-ico" aria-hidden="true">✦</span>Encuadrar</button>
+              <button type="button" class="ms-icon-button" data-action="undo-frame" aria-label="Recuperar el encuadre anterior" title="Recuperar el encuadre anterior" disabled>↶</button>
+            </div>
+            <div class="ms-tool-group">
+              <button type="button" class="ms-button ms-button-ghost" data-action="center" disabled>Centrar</button>
+              <button type="button" class="ms-button ms-button-ghost" data-action="reset" disabled>Restablecer</button>
+            </div>
+          </div>
+          <div class="ms-toolbar ms-toolbar-zoom" role="toolbar" aria-label="Escala">
+            <div class="ms-tool-group ms-zoom">
+              <label for="ms-zoom">Escala</label>
+              <button type="button" class="ms-icon-button ms-step" data-action="zoom-out-10" aria-label="Reducir 10 %" title="Reducir 10 % (Shift + −)">−10</button>
+              <button type="button" class="ms-icon-button ms-step" data-action="zoom-out" aria-label="Reducir 1 %" title="Reducir 1 % (−)">−1</button>
+              <input type="range" id="ms-zoom" min="10" max="500" step="1" value="100" disabled>
+              <button type="button" class="ms-icon-button ms-step" data-action="zoom-in" aria-label="Agrandar 1 %" title="Agrandar 1 % (+)">+1</button>
+              <button type="button" class="ms-icon-button ms-step" data-action="zoom-in-10" aria-label="Agrandar 10 %" title="Agrandar 10 % (Shift + +)">+10</button>
+              <output id="ms-zoom-value" for="ms-zoom">100%</output>
+            </div>
+            <label class="ms-switch ms-switch-inline" title="Si está apagado, la rueda solo desplaza la página"><input type="checkbox" id="ms-wheel-zoom"><span>Escalar con la rueda</span></label>
+          </div>
+
+          <div class="ms-canvas-area">
+            <div class="ms-stage" id="ms-stage" tabindex="0" aria-label="Área de edición. Arrastrá para mover la imagen o usá las flechas del teclado. Más y menos cambian la escala." aria-describedby="ms-stage-help">
+              <canvas id="ms-canvas" aria-hidden="true"></canvas>
+              <div class="ms-frame" aria-hidden="true">
+                <img class="ms-ref-face" id="ms-ref-face" src="/img/miniface-studio/rostro-referencia.png" alt="" width="360" height="360" hidden>
+                <div class="ms-ref-guides" id="ms-ref-guides" hidden></div>
+                <div class="ms-ref-center" id="ms-ref-center" hidden></div>
+              </div>
+              <div class="ms-empty" id="ms-empty">
+                <p class="ms-empty-title">Pegá una miniface con <kbd>Ctrl</kbd> + <kbd>V</kbd></p>
+                <p>O arrastrá imágenes hasta acá. Podés agregar varias a la vez.</p>
+                <div class="ms-empty-actions">
+                  <button type="button" class="ms-button ms-button-primary" data-action="paste">Pegar desde portapapeles</button>
+                  <button type="button" class="ms-button" data-action="open">Elegir archivos</button>
+                </div>
+                <p class="ms-empty-formats">PNG, WebP, JPG o GIF (primer fotograma). La transparencia se conserva.</p>
+              </div>
+              <div class="ms-drop" id="ms-drop" hidden><span>Soltá para agregar a la colección</span></div>
+            </div>
+            <p id="ms-stage-help" class="ms-sr-only">El cuadrado es exactamente el área que se exporta.</p>
+          </div>
+          <div class="ms-statusbar">
+            <p class="ms-status" id="ms-status" role="status" aria-live="polite"></p>
+            <p class="ms-source"><span id="ms-source" aria-live="polite">Sin imagen cargada.</span> <button type="button" class="ms-link" data-action="undo-replace" hidden>Deshacer reemplazo</button></p>
+          </div>
+          <input type="file" id="ms-file" class="ms-sr-only" tabindex="-1" aria-label="Elegir imágenes" multiple>
+          <input type="file" id="ms-file-one" class="ms-sr-only" tabindex="-1" aria-label="Elegir la imagen de este jugador">
+        </div>
+
+        <aside class="ms-inspector" aria-label="Opciones de la miniface">
+          <div class="ms-tabs" role="tablist" aria-label="Paneles">
+            <button type="button" role="tab" id="ms-tab-btn-mini" aria-controls="ms-tab-mini" aria-selected="true">Miniface</button>
+            <button type="button" role="tab" id="ms-tab-btn-team" aria-controls="ms-tab-team" aria-selected="false" tabindex="-1" data-mode-only="pes2018">EDIT <span class="ms-tab-badge" id="ms-team-badge" hidden></span></button>
+            <button type="button" role="tab" id="ms-tab-btn-project" aria-controls="ms-tab-project" aria-selected="false" tabindex="-1">Proyecto <span class="ms-tab-dot" id="ms-save-dot" aria-hidden="true"></span></button>
+          </div>
+
+          <div class="ms-tab-panel" role="tabpanel" id="ms-tab-mini" aria-labelledby="ms-tab-btn-mini">
+          <section class="ms-panel-section ms-player" aria-labelledby="ms-pes-title">
+            <h3 id="ms-pes-title"><span data-mode-only="pes2018">Jugador <small>DDS 128 × 128</small></span><span data-mode-only="personal">Miniface <small>imagen libre</small></span></h3>
+            <p class="ms-player-name" id="ms-player-name" hidden></p>
+            <div class="ms-pes-grid">
+              <div class="ms-field" data-mode-only="pes2018">
+                <label for="ms-player-id">ID del jugador <span class="ms-label-hint"><kbd>Enter</kbd> pasa a la siguiente</span></label>
+                <input type="text" id="ms-player-id" inputmode="numeric" autocomplete="off" spellcheck="false" maxlength="10" placeholder="Ej.: 12345" aria-describedby="ms-player-id-msg">
+                <p class="ms-field-msg" id="ms-player-id-msg">Archivo: <code id="ms-file-name">player_ID.dds</code></p>
+              </div>
+              <div class="ms-personal-fields" data-mode-only="personal">
+                <div class="ms-field">
+                  <label for="ms-file-base">Nombre de archivo <span class="ms-label-hint"><kbd>Enter</kbd> pasa a la siguiente</span></label>
+                  <div class="ms-input-suffix"><input type="text" id="ms-file-base" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Ej.: Messi"><span id="ms-file-ext">.png</span></div>
+                </div>
+                <div class="ms-field">
+                  <label for="ms-folder">Carpeta o colección</label>
+                  <input type="text" id="ms-folder" class="ms-search" list="ms-folder-list" autocomplete="off" spellcheck="false" maxlength="120" placeholder="Ej.: Argentina/River (opcional)">
+                  <datalist id="ms-folder-list"></datalist>
+                </div>
+              </div>
+              <figure class="ms-preview">
+                <canvas id="ms-preview" width="128" height="128" aria-label="Vista previa a 128 × 128 px"></canvas>
+                <figcaption>Vista final</figcaption>
+              </figure>
+            </div>
+            <div class="ms-row" data-mode-only="pes2018">
+              <button type="button" class="ms-button ms-button-primary" data-action="export-dds" disabled>DDS</button>
+              <button type="button" class="ms-button" data-action="export-cpk" disabled>CPK</button>
+              <button type="button" class="ms-button" data-action="export-zip" title="ZIP con las carpetas del juego" disabled>ZIP</button>
+            </div>
+            <div class="ms-row ms-png-row" data-mode-only="pes2018">
+              <button type="button" class="ms-button" data-action="export-png" disabled>Descargar PNG</button>
+              <label class="ms-size-field" title="Lado de la imagen cuadrada, en píxeles"><input type="number" id="ms-png-size" min="16" max="4096" step="1" value="360" aria-label="Tamaño del PNG en píxeles (siempre cuadrado)"><span>px</span></label>
+            </div>
+            <div class="ms-format-row" data-mode-only="personal">
+              <label class="ms-select"><span>Formato</span><select id="ms-format"><option value="png">PNG</option><option value="webp">WebP</option><option value="jpeg">JPG</option></select></label>
+              <label class="ms-select"><span>Tamaño (px)</span><input type="number" id="ms-size" min="16" max="4096" step="1" value="360" title="Lado de la imagen cuadrada, en píxeles"></label>
+              <label class="ms-select ms-select-color" id="ms-bg-wrap" hidden><span>Fondo</span><input type="color" id="ms-bg" value="#ffffff" aria-label="Color de fondo para JPG"></label>
+            </div>
+            <div class="ms-row" data-mode-only="personal">
+              <button type="button" class="ms-button ms-button-primary" data-action="export-image" disabled>Descargar imagen</button>
+            </div>
+          </section>
+
+          <section class="ms-panel-section" aria-labelledby="ms-auto-title">
+            <h3 id="ms-auto-title">Al importar <small>beta</small></h3>
+            <label class="ms-switch"><input type="checkbox" id="ms-bg-on-import"><span>Quitar el fondo</span></label>
+            <label class="ms-switch"><input type="checkbox" id="ms-auto-on-import"><span>Encuadrar automáticamente</span></label>
+          </section>
+
+          <section class="ms-panel-section" aria-labelledby="ms-refs-title">
+            <h3 id="ms-refs-title">Referencias <small>no se exportan</small></h3>
+            <label class="ms-switch"><input type="checkbox" id="ms-show-face"><span>Rostro de referencia</span></label>
+            <label class="ms-switch"><input type="checkbox" id="ms-show-guides"><span>Líneas guía</span><i class="ms-swatch ms-swatch-green" aria-hidden="true"></i></label>
+            <label class="ms-switch"><input type="checkbox" id="ms-show-center"><span>Línea central vertical</span><i class="ms-swatch ms-swatch-center" aria-hidden="true"></i></label>
+          </section>
+
+          <section class="ms-panel-section ms-pack" aria-labelledby="ms-pack-title" data-mode-only="pes2018">
+            <h3 id="ms-pack-title">Exportar toda la colección</h3>
+            <div class="ms-field">
+              <label for="ms-cpk-name" class="ms-sr-only">Nombre del CPK</label>
+              <div class="ms-input-suffix"><input type="text" id="ms-cpk-name" autocomplete="off" spellcheck="false" maxlength="60" value="LAqP_Minifaces" aria-label="Nombre del CPK"><span>.cpk</span></div>
+            </div>
+            <div class="ms-row">
+              <button type="button" class="ms-button ms-button-primary" data-action="export-all" title="Copialo en la carpeta download y agregalo con DpFileList Generator. Los jugadores sin imagen no se incluyen." disabled>Exportar todas (CPK)</button>
+              <button type="button" class="ms-button" data-action="export-all-zip" title="Los jugadores sin imagen no se incluyen." disabled>En ZIP</button>
+            </div>
+          </section>
+
+          <section class="ms-panel-section ms-pack" aria-labelledby="ms-pack-personal-title" data-mode-only="personal">
+            <h3 id="ms-pack-personal-title">Exportar colección <small>ZIP por carpetas</small></h3>
+            <label class="ms-select ms-select-block"><span>Qué exportar</span><select id="ms-scope"><option value="">Todas las carpetas</option></select></label>
+            <button type="button" class="ms-button ms-button-primary ms-button-block" data-action="export-personal-zip" disabled>Exportar todas (ZIP)</button>
+          </section>
+          </div>
+
+          <div class="ms-tab-panel" role="tabpanel" id="ms-tab-team" aria-labelledby="ms-tab-btn-team" hidden>
+            <section class="ms-panel-section" aria-labelledby="ms-team-title">
+              <h3 id="ms-team-title">EDIT00000000 <small>solo lectura</small></h3>
+              <button type="button" class="ms-button ms-button-block" data-action="open-edit"><span class="ms-ico" aria-hidden="true">⇪</span>Importar EDIT00000000</button>
+              <input type="file" id="ms-edit-file" class="ms-sr-only" tabindex="-1" aria-label="Elegir EDIT00000000">
+              <p class="ms-hint" id="ms-edit-info">Se lee en tu navegador y <strong>nunca se modifica ni se sube</strong>. Está en <code>Documentos\KONAMI\Pro Evolution Soccer 2018\save</code>.</p>
+              <div class="ms-subtabs" role="tablist" aria-label="Buscar en el EDIT">
+                <button type="button" role="tab" id="ms-sub-league" aria-controls="ms-view-league" aria-selected="true">Ligas</button>
+                <button type="button" role="tab" id="ms-sub-club" aria-controls="ms-view-club" aria-selected="false" tabindex="-1">Clubes</button>
+                <button type="button" role="tab" id="ms-sub-player" aria-controls="ms-view-player" aria-selected="false" tabindex="-1">Jugadores</button>
+              </div>
+              <div class="ms-subview" role="tabpanel" id="ms-view-league" aria-labelledby="ms-sub-league">
+                <p class="ms-hint ms-subview-empty" id="ms-league-empty">Importá tu EDIT para ver sus ligas.</p>
+                <ul class="ms-club-results" id="ms-league-list" aria-label="Ligas" hidden></ul>
+                <div id="ms-league-detail" hidden>
+                  <p class="ms-crumb"><button type="button" class="ms-link" data-action="leagues-back">‹ Ligas</button> <strong id="ms-league-name"></strong></p>
+                  <ul class="ms-club-results" id="ms-league-clubs" aria-label="Clubes de la liga"></ul>
+                </div>
+              </div>
+              <div class="ms-subview" role="tabpanel" id="ms-view-club" aria-labelledby="ms-sub-club" hidden>
+                <div class="ms-field">
+                  <label for="ms-club-search">Club</label>
+                  <input type="search" id="ms-club-search" class="ms-search" placeholder="Buscar club…" autocomplete="off" spellcheck="false" aria-controls="ms-club-results" disabled>
+                </div>
+                <ul class="ms-club-results" id="ms-club-results" role="listbox" aria-label="Clubes" hidden></ul>
+              </div>
+              <div class="ms-subview" role="tabpanel" id="ms-view-player" aria-labelledby="ms-sub-player" hidden>
+                <div class="ms-field">
+                  <label for="ms-player-global">Jugador</label>
+                  <input type="search" id="ms-player-global" class="ms-search" placeholder="Nombre, nombre de camiseta o ID…" autocomplete="off" spellcheck="false" aria-controls="ms-player-results" disabled>
+                </div>
+                <ul class="ms-squad" id="ms-player-results" aria-label="Jugadores encontrados"></ul>
+              </div>
+            </section>
+            <section class="ms-panel-section ms-team-view" id="ms-team-view" aria-labelledby="ms-team-name" hidden>
+              <div class="ms-team-head">
+                <h3 id="ms-team-name">—</h3>
+                <span class="ms-team-progress" id="ms-team-progress"></span>
+              </div>
+              <div class="ms-progress" aria-hidden="true"><span id="ms-team-bar"></span></div>
+              <div class="ms-squad-tools">
+                <label class="ms-check-all"><input type="checkbox" id="ms-select-all"><span>Seleccionar todos</span></label>
+                <button type="button" class="ms-button ms-button-primary" data-action="add-selected" disabled>Agregar seleccionados</button>
+              </div>
+              <p class="ms-links"><button type="button" class="ms-link" data-action="add-squad">Agregar toda la plantilla</button><span aria-hidden="true">·</span><button type="button" class="ms-link" data-action="close-team">Cerrar equipo</button></p>
+              <input type="search" id="ms-player-search" class="ms-search" placeholder="Buscar jugador, ID o posición (ej.: DC)…" autocomplete="off" spellcheck="false" aria-label="Buscar jugador">
+              <ul class="ms-squad" id="ms-squad" aria-label="Plantilla"></ul>
+            </section>
+          </div>
+
+          <div class="ms-tab-panel" role="tabpanel" id="ms-tab-project" aria-labelledby="ms-tab-btn-project" hidden>
+            <section class="ms-panel-section" aria-labelledby="ms-project-title">
+              <h3 id="ms-project-title">Proyecto</h3>
+              <p class="ms-hint" id="ms-project-status">Guardado automático en este navegador.</p>
+              <dl class="ms-stats">
+                <div class="is-done"><dt>Terminadas</dt><dd id="ms-count-done">0</dd></div>
+                <div class="is-pending"><dt>Pendientes</dt><dd id="ms-count-pending">0</dd></div>
+                <div class="is-skipped"><dt>Omitidas</dt><dd id="ms-count-skipped">0</dd></div>
+              </dl>
+              <div class="ms-row">
+                <button type="button" class="ms-button ms-button-primary" data-action="export-project">Exportar proyecto</button>
+                <button type="button" class="ms-button" data-action="import-project">Importar y combinar</button>
+              </div>
+              <input type="file" id="ms-project-file" class="ms-sr-only" tabindex="-1" accept=".laqpmf,.zip" aria-label="Elegir proyecto">
+              <p class="ms-hint">El archivo <code>.laqpmf</code> incluye las imágenes originales, ajustes, IDs, equipos y carpetas: sirve para seguir en otra computadora. Importarlo combina sin borrar lo que ya tenés.</p>
+              <p class="ms-links"><button type="button" class="ms-link ms-link-danger" data-action="new-project">Nuevo proyecto (vaciar colección)</button></p>
+            </section>
+            <section class="ms-panel-section" aria-labelledby="ms-folders-title">
+              <h3 id="ms-folders-title">Carpetas <small>para organizar el proyecto</small></h3>
+              <form class="ms-folder-new" id="ms-folder-new-form">
+                <input type="text" id="ms-folder-new" class="ms-search" placeholder="Nueva carpeta (ej.: Argentina/River)" autocomplete="off" spellcheck="false" maxlength="120" aria-label="Nombre de la nueva carpeta">
+                <button type="submit" class="ms-button">Crear</button>
+              </form>
+              <ul class="ms-folders" id="ms-folders" aria-label="Carpetas del proyecto"></ul>
+              <div class="ms-folder-move">
+                <label class="ms-select ms-select-block"><span>Mover la miniface activa a</span><select id="ms-move-target"></select></label>
+                <button type="button" class="ms-button" data-action="move-active" disabled>Mover</button>
+              </div>
+              <p class="ms-links" data-mode-only="pes2018"><button type="button" class="ms-link" data-action="folders-by-team">Organizar automáticamente por liga y equipo</button></p>
+              <p class="ms-hint">Tocá una carpeta para ver solo sus minifaces. También podés arrastrar miniaturas de la colección sobre una carpeta. <span data-mode-only="pes2018">En PES 2018 las carpetas son solo organizativas: el CPK siempre usa <code>common/render/symbol/player/</code>.</span><span data-mode-only="personal">En uso personal, el ZIP respeta estas carpetas.</span></p>
+            </section>
+          </div>
+
+        </aside>
+      </div>
+
+    </section>
+    <noscript><p class="ms-noscript">Activá JavaScript para utilizar Miniface Studio.</p></noscript>
+
+    <div class="ms-content">
+      <section class="ms-article" aria-labelledby="como-crear">
+        <h2 id="como-crear">Cómo hacer minifaces para PES 2018</h2>
+        <p class="ms-lead">Creá minifaces online, sin instalar nada: pegá una imagen, encuadrala con la plantilla de LAqP y convertila a DDS 128 × 128 o descargá un CPK listo para instalar. En modo uso personal también exporta PNG, WebP y JPG para SoFIFA, Football Manager o tus diseños.</p>
+        <ol class="ms-steps">
+          <li><strong>Copiá la imagen del jugador.</strong> En SoFIFA o en cualquier sitio, hacé clic derecho sobre la cara y elegí «Copiar imagen». También sirve un archivo PNG, WebP, JPG o GIF.</li>
+          <li><strong>Pegala en el editor.</strong> Presioná <kbd>Ctrl</kbd> + <kbd>V</kbd>. Si la imagen ya tiene fondo transparente, se conserva tal cual.</li>
+          <li><strong>Encuadrala.</strong> Arrastrá para moverla y usá el control de escala (de a 1 % o de a 10 %). Si preferís la rueda del mouse, activala junto a la escala. El rostro de referencia, las líneas guía y la línea central muestran la posición que usan las minifaces de LAqP.</li>
+          <li><strong>Escribí el ID del jugador.</strong> Es el número que identifica al jugador en PES 2018; el archivo se nombra automáticamente <code>player_ID.dds</code>.</li>
+          <li><strong>Pasá a la siguiente.</strong> Presioná <kbd>Enter</kbd> o «Siguiente» y pegá la próxima imagen. Pegar siempre actúa sobre el jugador que estás editando; para sumar uno nuevo usá «Nuevo» o «Agregar archivos».</li>
+          <li><strong>Exportá.</strong> Descargá un DDS suelto o todas juntas en un único CPK.</li>
+        </ol>
+      </section>
+
+      <section class="ms-article" aria-labelledby="instalar-cpk">
+        <h2 id="instalar-cpk">Cómo instalar el CPK de minifaces en PES 2018</h2>
+        <ol class="ms-steps">
+          <li>Copiá el archivo <code>.cpk</code> en la carpeta <code>download</code> del juego, por ejemplo <code>Pro Evolution Soccer 2018\download</code>.</li>
+          <li>Abrí DpFileList Generator, agregá el CPK a la lista y guardá el archivo <code>DpFileList.bin</code>.</li>
+          <li>Iniciá PES 2018: las minifaces reemplazan a las del jugador con el mismo ID.</li>
+        </ol>
+        <p>Si otro parche incluye la misma miniface, el resultado depende del orden de los CPK en DpFileList. Para entender la diferencia entre instalar con CPK o con Sider, consultá la guía <a href="/guia/sider-y-cpk-pes-2018/">CPK vs Sider en PES 2018</a>.</p>
+      </section>
+
+      <section class="ms-article" aria-labelledby="formato">
+        <h2 id="formato">Formato de las minifaces de PES 2018</h2>
+        <p>Miniface Studio convierte las imágenes al mismo formato que las minifaces originales del juego, verificado con archivos que funcionan en PES 2018:</p>
+        <dl class="ms-specs">
+          <div><dt>Resolución</dt><dd>128 × 128 píxeles</dd></div>
+          <div><dt>Formato</dt><dd>DDS con compresión DXT5 (BC3) y canal alfa, sin mipmaps</dd></div>
+          <div><dt>Nombre</dt><dd><code>player_ID.dds</code></dd></div>
+          <div><dt>Ruta interna</dt><dd><code>common/render/symbol/player/</code></dd></div>
+          <div><dt>CPK</dt><dd>Modo por nombre de archivo, alineación de 512 bytes, compatible con CRI Packed File Maker</dd></div>
+          <div><dt>Plantilla</dt><dd>Área de edición de 360 × 360 con guías en Y = 28 y Y = 312</dd></div>
+        </dl>
+      </section>
+
+      <section class="ms-article ms-faq" aria-labelledby="preguntas">
+        <h2 id="preguntas">Preguntas frecuentes</h2>
+        <details>
+          <summary>¿Puedo convertir una imagen PNG o JPG a DDS para PES 2018?</summary>
+          <p>Sí. Importá la imagen, ajustala y descargá el DDS: se genera en 128 × 128 con compresión DXT5, el formato que usa el juego para las minifaces.</p>
+        </details>
+        <details>
+          <summary>¿Las imágenes se suben a algún servidor?</summary>
+          <p>No. La edición, la conversión a DDS y el empaquetado CPK se hacen en tu navegador. Nada se envía a LAqP ni a servicios externos.</p>
+        </details>
+        <details>
+          <summary>¿Necesito Photoshop o CRI Packed File Maker?</summary>
+          <p>No. La plantilla de encuadre está integrada en el editor y el CPK se genera directamente con la misma estructura que crea CRI Packed File Maker.</p>
+        </details>
+        <details>
+          <summary>¿Puedo crear las minifaces de un equipo completo usando mi EDIT00000000?</summary>
+          <p>Sí. En la pestaña Equipo importá tu EDIT00000000: se leen los clubes, plantillas e IDs reales y, al elegir un jugador, su nombre e ID se completan solos. El archivo solo se lee en tu navegador; nunca se modifica ni se sube.</p>
+        </details>
+        <details>
+          <summary>¿Puedo guardar el trabajo y seguir en otra computadora?</summary>
+          <p>Sí. El proyecto se guarda automáticamente en tu navegador y podés exportarlo como archivo .laqpmf con las imágenes originales, ajustes e IDs. Al importarlo en otra computadora se combina con lo que ya tengas, sin borrar nada.</p>
+        </details>
+        <details>
+          <summary>¿Sirve para hacer minifaces para SoFIFA, Football Manager o FIFA?</summary>
+          <p>Sí. En el modo uso personal no hace falta EDIT ni ID: ponés el nombre de archivo y la carpeta que quieras y exportás en PNG, WebP o JPG, de a una o todas juntas en un ZIP organizado por carpetas.</p>
+        </details>
+        <details>
+          <summary>¿Puede quitar el fondo de la foto de un jugador?</summary>
+          <p>Sí, en beta. «Quitar fondo» recorta al jugador con un modelo de recorte de retratos (MODNet), directamente en tu navegador. Conserva la imagen original para que puedas restaurarla, y funciona mejor con fotos de un solo jugador de frente.</p>
+        </details>
+        <details>
+          <summary>¿Puede encuadrar la miniface automáticamente?</summary>
+          <p>Sí, en beta. «Encuadrar automáticamente» detecta el rostro con MediaPipe en tu navegador y ajusta la posición y la escala según las proporciones de las minifaces de LAqP, cuidando que no se corte el pelo. Funciona mejor con PNG de fondo transparente, incluso con siluetas de cuerpo completo, y siempre podés corregirlo a mano o volver al encuadre anterior.</p>
+        </details>
+        <details>
+          <summary>¿Por qué no aparece la miniface en el juego?</summary>
+          <p>Revisá que el ID sea el del jugador en tu PES 2018, que el CPK esté agregado en DpFileList y que ningún otro CPK con la misma miniface tenga prioridad sobre el tuyo.</p>
+        </details>
+      </section>
+    </div>
+  </main>
+  <footer class="site-footer ms-footer"><span>LAqP.website · PES 2018</span><nav aria-label="Legal"><a href="/privacy-policy.html">Privacidad</a><a href="/terms.html">Términos</a></nav></footer>
+</body>
+</html>

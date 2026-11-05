@@ -27,6 +27,7 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
   const body = club.querySelector('.club-roster-table tbody');
   const rows = Array.from(body.rows);
   const search = club.querySelector('[data-club-search]');
+  const faceFilter = club.querySelector('[data-club-face-filter]');
   const collator = new Intl.Collator(
     typeof window.getCurrentLanguage === 'function' ? window.getCurrentLanguage() : 'es',
     { sensitivity: 'base', numeric: true }
@@ -38,7 +39,7 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
     const term = normalize(search.value.trim());
     let count = 0;
     rows.forEach(row => {
-      row.hidden = !!((group && row.dataset.group !== group) || !normalize(row.dataset.name).includes(term));
+      row.hidden = !!((group && row.dataset.group !== group) || (faceFilter?.value && (row.dataset.faceEdited === '1') !== (faceFilter.value === 'yes')) || !normalize(row.dataset.name).includes(term));
       if (!row.hidden) count++;
     });
     club.querySelector('[data-roster-count]').textContent = typeof t === 'function'
@@ -74,6 +75,7 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
         const state = positions[variant.dataset.formation] || positions.normal;
         player.style.left = `${state.left}%`;
         player.style.top = `${state.top}%`;
+        if (state.tone) player.style.setProperty('--role-tone', state.tone);
         player.querySelector('.club-pitch-position').textContent = typeof i18nLookup === 'function'
           ? i18nLookup('positions', state.positionKey, state.position)
           : state.position;
@@ -82,4 +84,5 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
     }
   });
   search.addEventListener('input', filterRows);
+  faceFilter?.addEventListener('change', filterRows);
 });

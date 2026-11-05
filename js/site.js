@@ -25,7 +25,7 @@ const SITE_NAV_ITEMS = [
     { href: '/database/DTs/', fallback: 'Directores técnicos', key: 'dts' },
     { href: '/tactics.html', fallback: 'Tácticas históricas', key: 'tactics' },
   ] },
-  { href: '/draft/', fallback: 'LAqP Draft', key: 'draft' },
+  { href: '/draft/', fallback: 'LAqP Draft · Próximamente', key: 'draft' },
   // Análisis: trabajan con datos de fútbol (consultar, calcular, planificar).
   { fallback: 'Análisis', key: 'tools', children: [
     { href: '/rankings.html', fallback: 'Scouting', key: 'rankings' },

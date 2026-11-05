@@ -67,6 +67,7 @@
 .builder-filter-row :is(input,select):focus,
 #builder-dialog-query:focus { border-color: var(--laqp-accent); box-shadow: 0 0 0 2px rgba(33,212,194,.14); }
 .builder-team-input { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px; }
+.builder-field > .builder-team-input { font-weight:400; letter-spacing:normal; text-transform:none; }
 .builder-team-input button { min-height:36px; padding:0 8px; border:1px solid var(--db-line); background:#11171c; color:var(--laqp-accent-hover); font:800 .63rem inherit; cursor:pointer; white-space:nowrap; }
 .builder-team-input button:hover { border-color:var(--laqp-accent); background:rgba(33,212,194,.08); }
 
@@ -202,13 +203,15 @@
   max-width: 100%;
   aspect-ratio: 68 / 100;
   overflow: hidden;
-  border: 2px solid rgba(235,247,239,.66);
+  border: 1px solid #123a1c;
   border-radius: 3px;
-  background:
-    repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 12.5%, transparent 12.5% 25%),
-    linear-gradient(165deg, #1b6246, #104733 72%, #0b3529);
-  box-shadow: inset 0 0 74px rgba(0,0,0,.3), 0 15px 34px rgba(0,0,0,.3);
+  background: #225322 url('../img/builder-pitch.svg') center / 100% 100% no-repeat;
+  box-shadow: 0 5px 0 #092410, 0 15px 28px rgba(0,0,0,.3);
 }
+.builder-pitch > span[class^="builder-pitch-"] { display:none; }
+.builder-suggested-point { position:absolute; display:grid; place-items:center; width:26px; height:26px; border:1px solid rgba(194,219,155,.65); border-radius:50%; background:rgba(9,25,13,.72); color:#dbebc8; font-size:.48rem; font-weight:800; transform:translate(-50%,-50%); }
+.builder-suggested-point.is-nearest { border-color:#7ef2e7; background:#164e45; color:#fff; box-shadow:0 0 0 5px #21d4c22b; }
+.builder-pitch.is-guiding .builder-guides-overlay { opacity:1; }
 .builder-guides-overlay { position:absolute; z-index:20; inset:0; pointer-events:none; opacity:0; transition:opacity .1s ease; }
 .builder-pitch.guides-always .builder-guides-overlay,
 .builder-pitch.is-guiding .builder-guides-overlay { opacity:1; }
@@ -236,10 +239,10 @@
 .builder-pitch-spot { position: absolute; left: 50%; width: 5px; height: 5px; border-radius: 50%; background: rgba(235,247,239,.7); transform: translate(-50%,-50%); }
 .builder-pitch-spot.top { top: 11%; }
 .builder-pitch-spot.bottom { top: 89%; }
-.builder-pitch-caption { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 5px 10px; min-height: 34px; margin: 0; padding: 7px 2px 4px; color: var(--db-muted); font-size: .66rem; }
+.builder-pitch-caption { display: grid; grid-template-columns: minmax(0,1fr); align-items: center; gap: 6px; min-height: 34px; margin: 0; padding: 9px 2px 4px; color: var(--db-muted); font-size: .66rem; }
 .builder-pitch-caption strong { color: var(--laqp-accent-hover); }
-.builder-pitch-caption > span:nth-child(2) { grid-column: 1 / -1; grid-row: 2; color: #dde3e8; text-align: center; }
-.builder-caption-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:0; }
+.builder-pitch-caption > span:nth-child(2) { grid-column: 1 / -1; grid-row: 3; color: #dde3e8; text-align: center; }
+.builder-caption-actions { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-start; gap:8px 12px; min-width:0; grid-column:1 / -1; }
 .builder-reset-formation,
 .builder-clear-lineup { padding: 3px 0; border: 0; border-bottom: 1px solid #6f7983; background: transparent; color: #cbd2d9; font: inherit; font-size: .65rem; cursor: pointer; white-space:nowrap; }
 .builder-reset-formation:hover { border-color: var(--laqp-accent); color: var(--laqp-accent-hover); }
@@ -475,7 +478,7 @@
   .builder-transfer-mark { top: 23px; width: 16px; height: 16px; min-width: 16px; font-size: .52rem; }
   .builder-slot-empty { width: 30px; height: 30px; font-size: .57rem; }
   .builder-slot-empty small { top:32px; }
-  .builder-pitch-caption { grid-template-columns: 1fr auto; min-height: 39px; font-size: .59rem; }
+  .builder-pitch-caption { grid-template-columns: minmax(0,1fr); min-height: 39px; font-size: .59rem; }
   .builder-pitch-caption > span:nth-child(2) { display: none; }
   .builder-caption-actions { grid-column: 1 / -1; justify-content: space-between; gap: 6px; }
   .builder-reset-formation,

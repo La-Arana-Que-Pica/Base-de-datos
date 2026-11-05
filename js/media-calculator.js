@@ -1,138 +1,302 @@
 'use strict';
-
-const MEDIA_CALC_BASE_STAT = 80;
-const MEDIA_CALC_MIN_STAT = 40;
-const MEDIA_CALC_MAX_STAT = 99;
-const MEDIA_CALC_STORAGE_KEY = 'laqp.mediaCalculator.v2';
-const MEDIA_CALC_DATABASE_URL = 'database/index.json';
-const MEDIA_CALC_SEARCH_LIMIT = 8;
-const MEDIA_CALC_POSITIONS = ['GK','CB','LB','RB','DMF','CMF','LMF','RMF','AMF','LWF','RWF','SS','CF'];
-const MEDIA_CALC_POSITION_LABELS = { GK:'PT',CB:'DFC',LB:'LI',RB:'LD',DMF:'MCD',CMF:'MC',LMF:'MI',RMF:'MD',AMF:'MO',LWF:'EI',RWF:'ED',SS:'SD',CF:'DC' };
-const MEDIA_CALC_POSITION_NAMES = { GK:'goalkeeper',CB:'centerBack',LB:'leftBack',RB:'rightBack',DMF:'defensiveMidfielder',CMF:'centralMidfielder',LMF:'leftMidfielder',RMF:'rightMidfielder',AMF:'attackingMidfielder',LWF:'leftWinger',RWF:'rightWinger',SS:'secondStriker',CF:'centerForward' };
-const MEDIA_CALC_POSITION_GRID_LAYOUT = { LWF:{col:1,row:1},CF:{col:2,row:1},RWF:{col:3,row:1},SS:{col:2,row:2},AMF:{col:2,row:3},LMF:{col:1,row:4},CMF:{col:2,row:4},RMF:{col:3,row:4},DMF:{col:2,row:5},LB:{col:1,row:6},CB:{col:2,row:6},RB:{col:3,row:6},GK:{col:2,row:7} };
-const MEDIA_CALC_GOALKEEPER_STATS = new Set(['goalkeeper','catching','clearing','reflexes','coverage']);
-const MEDIA_CALC_STAT_SOURCE_KEYS = {
-  attacking_prowess:'Attacking Prowess',ball_control:'Ball Control',dribbling:'Dribbling',low_pass:'Low Pass',lofted_pass:'Lofted Pass',finishing:'Finishing',place_kicking:'Place Kicking',swerve:'Controlled Spin',header:'Header',defensive_prowess:'Defensive Prowess',ball_winning:'Ball Winning',kicking_power:'Kicking Power',speed:'Speed',explosive_power:'Explosive Power',body_control:'Body Control',physical_contact:'Physical Contact',jump:'Jump',stamina:'Stamina',goalkeeper:'Goalkeeping',catching:'Catching',clearing:'Clearing',reflexes:'Reflexes',coverage:'Coverage'
-};
-const MEDIA_CALC_STAT_ORDER = Object.keys(MEDIA_CALC_STAT_SOURCE_KEYS);
-const MEDIA_CALC_STAT_CATEGORIES = [
-  {id:'attack',label:'categoryAttack',marker:'ATQ',stats:['attacking_prowess','finishing','place_kicking','kicking_power','header','jump']},
-  {id:'technique',label:'categoryTechnique',marker:'TEC',stats:['ball_control','dribbling','low_pass','lofted_pass','swerve','body_control']},
-  {id:'physical',label:'categoryPhysical',marker:'FIS',stats:['speed','explosive_power','physical_contact','stamina']},
-  {id:'defense',label:'categoryDefense',marker:'DEF',stats:['defensive_prowess','ball_winning']},
-  {id:'goalkeeper',label:'categoryGoalkeeper',marker:'PT',stats:['goalkeeper','catching','clearing','reflexes','coverage']},
-];
-const MEDIA_CALC_CATEGORY_BY_STAT = MEDIA_CALC_STAT_CATEGORIES.reduce((map,category) => { category.stats.forEach(stat => { map[stat]=category.id; }); return map; },{});
-const MEDIA_CALC_PRESETS = [
-  {id:'base80',label:'presetBase',values:{}},
-  {id:'defensive',label:'presetDefensive',values:{defensive_prowess:86,ball_winning:86,physical_contact:84,stamina:84,header:83,jump:82,speed:79,attacking_prowess:74,finishing:72}},
-  {id:'offensive',label:'presetOffensive',values:{attacking_prowess:87,finishing:86,ball_control:85,dribbling:85,low_pass:83,lofted_pass:82,speed:84,explosive_power:84,defensive_prowess:72,ball_winning:72}},
-  {id:'physical',label:'presetPhysical',values:{speed:87,explosive_power:87,physical_contact:88,stamina:88,kicking_power:85,jump:86,body_control:76}},
-  {id:'midfielder',label:'presetMidfielder',values:{low_pass:86,lofted_pass:85,ball_control:85,dribbling:83,stamina:86,defensive_prowess:80,ball_winning:80,attacking_prowess:81}},
-  {id:'goalkeeper',label:'presetGoalkeeper',reactivateGoalkeeper:true,values:{goalkeeper:89,catching:87,clearing:86,reflexes:90,coverage:88,jump:85,physical_contact:83,attacking_prowess:45,finishing:45,ball_winning:55}},
-];
-
-let mediaCalcSaveTimer=null;
-let mediaCalcFeedbackTimer=null;
-let mediaCalcDatabase=null;
-let mediaCalcDatabasePromise=null;
-const mediaCalcState={stats:{},goalkeeperMinimum:false,selectedPosition:null,selectedCategory:'all',search:'',lastPreset:'',collapsedCategories:new Set(),sourceMode:'scratch',playerQuery:'',loadedPlayer:null};
-
-function mediaCalcT(key,params={}) { const value=typeof window.t==='function'?window.t(`calculator.${key}`,params):''; return value||key; }
-function mediaCalcEscape(value) { return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-function mediaCalcCssKey(value) { return typeof CSS!=='undefined'&&CSS.escape?CSS.escape(value):String(value).replace(/"/g,'\\"'); }
-function mediaCalcNormalize(value) { return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
-function mediaCalcClampStat(value,fallback=MEDIA_CALC_BASE_STAT) { const number=parseInt(value,10); return Number.isFinite(number)?Math.max(MEDIA_CALC_MIN_STAT,Math.min(MEDIA_CALC_MAX_STAT,number)):fallback; }
-function mediaCalcPositionFromValue(value) { try{return window.PES2018Overall.positionFromLaqp(value);}catch{return 'CF';} }
-function mediaCalcPositionName(position) { return mediaCalcT(MEDIA_CALC_POSITION_NAMES[position]||'position'); }
-function mediaCalcStatLabel(key) { const source=MEDIA_CALC_STAT_SOURCE_KEYS[key]||key; return typeof window.i18nLookup==='function'?window.i18nLookup('stats',source,source):source; }
-function mediaCalcRawStatValue(key) { return mediaCalcClampStat(mediaCalcState.stats[key]??MEDIA_CALC_BASE_STAT); }
-function mediaCalcReferenceValue(key) { return mediaCalcState.loadedPlayer?.originalStats?.[key]??MEDIA_CALC_BASE_STAT; }
-function mediaCalcStatValue(key) { return mediaCalcState.goalkeeperMinimum&&MEDIA_CALC_GOALKEEPER_STATS.has(key)?MEDIA_CALC_MIN_STAT:mediaCalcRawStatValue(key); }
-function mediaCalcAllStatKeys() { return MEDIA_CALC_STAT_ORDER; }
-function mediaCalcEditableStatKeys() { return MEDIA_CALC_STAT_ORDER.filter(key=>!(mediaCalcState.goalkeeperMinimum&&MEDIA_CALC_GOALKEEPER_STATS.has(key))); }
-function mediaCalcValueClass(value) { const n=parseInt(value,10); if(!Number.isFinite(n))return 'stat-range-1'; if(n>=95)return 'stat-range-6'; if(n>=90)return 'stat-range-5'; if(n>=80)return 'stat-range-4'; if(n>=70)return 'stat-range-3'; if(n>=60)return 'stat-range-2'; return 'stat-range-1'; }
-function mediaCalcDelta(key,value=mediaCalcRawStatValue(key)) { return value-mediaCalcReferenceValue(key); }
-function mediaCalcDeltaClassFor(key,value) { const delta=mediaCalcDelta(key,value); return delta>0?'is-above':delta<0?'is-below':'is-equal'; }
-function mediaCalcFormatDelta(delta) { return delta>0?`+${delta}`:String(delta); }
-
+const MEDIA_CALC_BASE_STAT=80,MEDIA_CALC_MIN_STAT=40,MEDIA_CALC_MAX_STAT=99,MEDIA_CALC_STORAGE_KEY='laqp.mediaCalculator.v2';
+const MEDIA_CALC_POSITIONS=['GK','CB','LB','RB','DMF','CMF','LMF','RMF','AMF','LWF','RWF','SS','CF'];
+const MEDIA_CALC_POSITION_LABELS={GK:'PT',CB:'DFC',LB:'LI',RB:'LD',DMF:'MCD',CMF:'MC',LMF:'MI',RMF:'MD',AMF:'MO',LWF:'EI',RWF:'ED',SS:'SD',CF:'DC'};
+const MEDIA_CALC_POSITION_NAMES={GK:'goalkeeper',CB:'centerBack',LB:'leftBack',RB:'rightBack',DMF:'defensiveMidfielder',CMF:'centralMidfielder',LMF:'leftMidfielder',RMF:'rightMidfielder',AMF:'attackingMidfielder',LWF:'leftWinger',RWF:'rightWinger',SS:'secondStriker',CF:'centerForward'};
+const MEDIA_CALC_POSITION_GRID_LAYOUT={LWF:[1,1],CF:[2,1],RWF:[3,1],SS:[2,2],AMF:[2,3],LMF:[1,4],CMF:[2,4],RMF:[3,4],DMF:[2,5],LB:[1,6],CB:[2,6],RB:[3,6],GK:[2,7]};
+const MEDIA_CALC_STAT_SOURCE_KEYS={attacking_prowess:'Attacking Prowess',ball_control:'Ball Control',dribbling:'Dribbling',low_pass:'Low Pass',lofted_pass:'Lofted Pass',finishing:'Finishing',place_kicking:'Place Kicking',swerve:'Controlled Spin',header:'Header',defensive_prowess:'Defensive Prowess',ball_winning:'Ball Winning',kicking_power:'Kicking Power',speed:'Speed',explosive_power:'Explosive Power',body_control:'Body Control',physical_contact:'Physical Contact',jump:'Jump',stamina:'Stamina',goalkeeper:'Goalkeeping',catching:'Catching',clearing:'Clearing',reflexes:'Reflexes',coverage:'Coverage'};
+const MEDIA_CALC_STAT_ORDER=Object.keys(MEDIA_CALC_STAT_SOURCE_KEYS);
+const MEDIA_CALC_GOALKEEPER_STATS=new Set(['goalkeeper','catching','clearing','reflexes','coverage']);
+const MEDIA_CALC_STAT_ALIASES={place_kicking:'set_piece_taking',swerve:'curve',goalkeeper:'goalkeeping'};
+const MEDIA_CALC_DATABASE_URLS=['database/All players exported.csv','database/All teams exported.csv','database/All squads exported.csv','database/All leagues exported.csv'];
+const mediaCalcState={stats:Object.fromEntries(MEDIA_CALC_STAT_ORDER.map(key=>[key,null])),selectedPosition:'CF',loadedPlayer:null,goalkeeperMinimum:false};
+let mediaCalcDatabase=null,mediaCalcDatabasePromise=null,mediaCalcSaveTimer=null,mediaCalcAnnounceTimer=null,mediaCalcSearchTimer=null,mediaCalcSearchVersion=0;
+function mediaCalcT(key,params={}){return typeof window.t==='function'?window.t(`calculator.${key}`,params)||key:key;}
+function mediaCalcEscape(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function mediaCalcNormalize(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();}
+function mediaCalcClampStat(value,fallback=MEDIA_CALC_BASE_STAT){const n=parseInt(value,10);return Number.isFinite(n)?Math.max(40,Math.min(99,n)):fallback;}
+function mediaCalcValidStat(value){return Number.isInteger(value)&&value>=40&&value<=99;}
+function mediaCalcPositionName(position){return typeof window.i18nLookup==='function'?window.i18nLookup('positionNames',position,mediaCalcT(MEDIA_CALC_POSITION_NAMES[position])):mediaCalcT(MEDIA_CALC_POSITION_NAMES[position]);}
+function mediaCalcPositionLabel(position){return typeof window.i18nLookup==='function'?window.i18nLookup('positions',position,MEDIA_CALC_POSITION_LABELS[position]):MEDIA_CALC_POSITION_LABELS[position];}
+function mediaCalcStatLabel(key){const source=MEDIA_CALC_STAT_SOURCE_KEYS[key];return typeof window.i18nLookup==='function'?window.i18nLookup('stats',source,source):source;}
+function mediaCalcValueClass(value){return value===null?'':`stat-range-${value>=95?6:value>=90?5:value>=80?4:value>=70?3:value>=60?2:1}`;}
 function mediaCalcPesStats(stats=mediaCalcState.stats,weakFoot=null) {
   const read=key=>{const value=mediaCalcClampStat(stats[key]??MEDIA_CALC_BASE_STAT); return mediaCalcState.goalkeeperMinimum&&stats===mediaCalcState.stats&&MEDIA_CALC_GOALKEEPER_STATS.has(key)?MEDIA_CALC_MIN_STAT:value;};
   return {attacking_prowess:read('attacking_prowess'),ball_control:read('ball_control'),dribbling:read('dribbling'),low_pass:read('low_pass'),lofted_pass:read('lofted_pass'),finishing:read('finishing'),set_piece_taking:read('place_kicking'),curve:read('swerve'),header:read('header'),defensive_prowess:read('defensive_prowess'),ball_winning:read('ball_winning'),kicking_power:read('kicking_power'),speed:read('speed'),explosive_power:read('explosive_power'),body_control:read('body_control'),physical_contact:read('physical_contact'),jump:read('jump'),goalkeeping:read('goalkeeper'),catching:read('catching'),clearing:read('clearing'),reflexes:read('reflexes'),coverage:read('coverage'),stamina:read('stamina'),non_dom_leg_precision:Number(weakFoot??mediaCalcState.loadedPlayer?.weakFootPrecision??3)||3};
 }
 function mediaCalcFamiliarity(position) { const raw=mediaCalcState.loadedPlayer?.familiarity?.[position]; return Number.isFinite(Number(raw))?Math.max(0,Math.min(2,Number(raw))):0; }
 function mediaCalcResult(position,stats=mediaCalcState.stats) { const loaded=mediaCalcState.loadedPlayer; const natural=loaded?.position||position; const familiarity=loaded&&position!==natural?mediaCalcFamiliarity(position):0; const rounded=window.PES2018Overall.pes2018Overall(mediaCalcPesStats(stats,loaded?.weakFootPrecision),position,natural,familiarity); return {decimal:rounded,rounded}; }
-function mediaCalcPositionResults(stats=mediaCalcState.stats) { return MEDIA_CALC_POSITIONS.map(position=>({position,label:MEDIA_CALC_POSITION_LABELS[position],name:mediaCalcPositionName(position),...mediaCalcResult(position,stats)})); }
-function mediaCalcBestResult(results) { return results.reduce((best,item)=>!best||item.rounded>best.rounded?item:best,null); }
-function mediaCalcSelectedResult(results,best) { return results.find(item=>item.position===mediaCalcState.selectedPosition)||best; }
-
-function mediaCalcStoragePayload() { return {stats:{...mediaCalcState.stats},goalkeeperMinimum:mediaCalcState.goalkeeperMinimum,selectedPosition:mediaCalcState.selectedPosition,selectedCategory:mediaCalcState.selectedCategory,search:mediaCalcState.search,lastPreset:mediaCalcState.lastPreset,collapsedCategories:[...mediaCalcState.collapsedCategories],sourceMode:mediaCalcState.sourceMode,loadedPlayer:mediaCalcState.loadedPlayer}; }
-function mediaCalcLoadState() {
-  try { const stored=JSON.parse(localStorage.getItem(MEDIA_CALC_STORAGE_KEY)||'null'); if(!stored||typeof stored!=='object')return;
-    if(stored.stats&&typeof stored.stats==='object')mediaCalcState.stats=Object.fromEntries(Object.entries(stored.stats).map(([key,value])=>[key,mediaCalcClampStat(value)]));
-    mediaCalcState.goalkeeperMinimum=!!stored.goalkeeperMinimum; mediaCalcState.selectedPosition=stored.selectedPosition||null; mediaCalcState.selectedCategory=stored.selectedCategory||'all'; mediaCalcState.search=stored.search||''; mediaCalcState.lastPreset=stored.lastPreset||''; mediaCalcState.collapsedCategories=new Set(Array.isArray(stored.collapsedCategories)?stored.collapsedCategories:[]); mediaCalcState.sourceMode=stored.sourceMode==='database'?'database':'scratch'; mediaCalcState.loadedPlayer=stored.loadedPlayer?.originalStats?stored.loadedPlayer:null; if(!mediaCalcState.loadedPlayer&&mediaCalcState.sourceMode==='database')mediaCalcState.sourceMode='scratch';
-  } catch(error) { console.warn('No se pudo recuperar la configuracion de la calculadora.',error); }
+function mediaCalcPositionResults(stats=mediaCalcState.stats){
+  const complete=MEDIA_CALC_STAT_ORDER.every(key=>mediaCalcValidStat(stats[key]));
+  return MEDIA_CALC_POSITIONS.map(position=>({position,label:mediaCalcPositionLabel(position),name:mediaCalcPositionName(position),...(complete?mediaCalcResult(position,stats):{rounded:null,decimal:null})}));
 }
-function mediaCalcSaveState(immediate=false) { const save=()=>{try{localStorage.setItem(MEDIA_CALC_STORAGE_KEY,JSON.stringify(mediaCalcStoragePayload()));mediaCalcSetFeedback(mediaCalcT('saved'),'ok',false);}catch{mediaCalcSetFeedback(mediaCalcT('saveError'),'warn');}}; if(immediate){clearTimeout(mediaCalcSaveTimer);save();return;} clearTimeout(mediaCalcSaveTimer);mediaCalcSaveTimer=setTimeout(save,160); }
-function mediaCalcSetFeedback(message,type='ok',autohide=true) { const feedback=document.getElementById('media-calc-feedback'); if(!feedback)return; feedback.textContent=message;feedback.className=`media-calc-feedback is-${type}`;clearTimeout(mediaCalcFeedbackTimer);if(autohide)mediaCalcFeedbackTimer=setTimeout(()=>{feedback.textContent=mediaCalcT('saved');feedback.className='media-calc-feedback is-ok';},1800); }
-
-async function mediaCalcLoadDatabase() {
-  if(mediaCalcDatabase)return mediaCalcDatabase;
-  if(mediaCalcDatabasePromise)return mediaCalcDatabasePromise;
-  mediaCalcDatabasePromise=fetch(MEDIA_CALC_DATABASE_URL,{cache:'no-cache'}).then(response=>{if(!response.ok)throw new Error(String(response.status));return response.json();}).then(data=>{
-    const teams=new Map((data.teams||[]).map(team=>[String(team.id),team.displayName||team.rawName||''])); const canonical=data.canonicalPlayerTeams||{}; const unique=new Map();
-    (data.players||[]).forEach(player=>{const id=String(player.Id||'');const teamId=String(player.teamId||'');if(!id)return;const preferred=String(canonical[id]||'');if(!unique.has(id)||(preferred&&teamId===preferred))unique.set(id,player);});
-    const players=[...unique.values()].map(raw=>{const teamId=String(raw.teamId||'');const position=mediaCalcPositionFromValue(raw.POS);const teamName=teams.get(teamId)||mediaCalcT('unknownTeam');const overall=window.PES2018Overall.overallFromLaqpRow(raw);return {raw,id:String(raw.Id),name:raw.Name||mediaCalcT('unknownPlayer'),teamId,teamName,position,overall,searchText:mediaCalcNormalize(`${raw.Name} ${teamName} ${MEDIA_CALC_POSITION_LABELS[position]} ${position}`)};}).sort((a,b)=>b.overall-a.overall||a.name.localeCompare(b.name));
+// Migrate v2 preferences without filling blank attributes or retaining identities.
+function mediaCalcLoadState(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(MEDIA_CALC_STORAGE_KEY)||'null');
+    if(!saved||typeof saved!=='object')return;
+    if(MEDIA_CALC_POSITIONS.includes(saved.selectedPosition))mediaCalcState.selectedPosition=saved.selectedPosition;
+    for(const key of MEDIA_CALC_STAT_ORDER){
+      const value=saved.stats?.[key];
+      mediaCalcState.stats[key]=value===null||value===undefined||value===''?null:mediaCalcClampStat(value,null);
+      if(saved.goalkeeperMinimum&&MEDIA_CALC_GOALKEEPER_STATS.has(key))mediaCalcState.stats[key]=40;
+    }
+  }catch{/* An unreadable preference must not prevent editing. */}
+}
+function mediaCalcSaveState(immediate=false){
+  const save=()=>{try{localStorage.setItem(MEDIA_CALC_STORAGE_KEY,JSON.stringify({stats:mediaCalcState.stats,selectedPosition:mediaCalcState.selectedPosition}));}catch{mediaCalcSetFeedback(mediaCalcT('saveError'));}};
+  clearTimeout(mediaCalcSaveTimer);if(immediate)save();else mediaCalcSaveTimer=setTimeout(save,160);
+}
+function mediaCalcSetFeedback(message){const el=document.getElementById('media-calc-feedback');if(el)el.textContent=message;}
+function mediaCalcMapMarkup(){
+  return `<div class="mc-pitch"><div class="mc-positions" role="group" aria-label="${mediaCalcEscape(mediaCalcT('positionMap'))}">${MEDIA_CALC_POSITIONS.map(p=>`<button type="button" class="mc-position" data-media-position-cell="${p}" style="grid-column:${MEDIA_CALC_POSITION_GRID_LAYOUT[p][0]};grid-row:${MEDIA_CALC_POSITION_GRID_LAYOUT[p][1]}" aria-pressed="${p===mediaCalcState.selectedPosition}"><span>${mediaCalcPositionLabel(p)}</span><b dir="ltr" data-media-position-score="${p}">—</b></button>`).join('')}</div></div>`;
+}
+function mediaCalcStatMarkup(key){
+  return `<div class="mc-stat" data-media-stat="${key}"><label for="media-stat-${key}">${mediaCalcEscape(mediaCalcStatLabel(key))}</label><input dir="ltr" id="media-stat-${key}" class="media-stat-number" data-media-key="${key}" type="number" min="40" max="99" step="1" inputmode="numeric" value="${mediaCalcState.stats[key]??''}" placeholder="—" autocomplete="off" aria-describedby="media-calc-stat-range"></div>`;
+}
+function renderMediaCalculatorPage(){
+  const content=document.getElementById('media-calculator-content');if(!content)return;
+  content.innerHTML=`<div class="mc-dashboard">
+    <section class="mc-player" aria-labelledby="media-calc-selected-label">
+      <header class="mc-score-heading"><div><span class="mc-caption">${mediaCalcT('selectedPosition')}</span><h2 id="media-calc-selected-label"></h2><p id="media-calc-selected-name"></p></div><div class="media-calc-overall"><strong dir="ltr" id="media-calc-selected-score">—</strong><small>${mediaCalcT('overall')}</small></div></header>
+      ${mediaCalcMapMarkup()}<p id="media-calc-empty-hint" class="mc-empty-hint">${mediaCalcT('emptyHint')}</p>
+    </section>
+    <section class="mc-editor" aria-labelledby="media-calc-stats-title">
+      <header class="mc-editor-header"><div><h2 id="media-calc-stats-title">${mediaCalcT('attributes')}</h2><p id="media-calc-stat-range">${mediaCalcT('range')}</p></div><button class="mc-quiet-button" type="button" data-media-action="clear">${mediaCalcT('clear')}</button></header>
+      <div class="mc-base"><label for="media-calc-player-search">${mediaCalcT('baseLabel')}</label><input id="media-calc-player-search" type="search" placeholder="${mediaCalcEscape(mediaCalcT('basePlaceholder'))}" autocomplete="off" aria-controls="media-calc-player-results"><ul id="media-calc-player-results" class="mc-search-results" aria-label="${mediaCalcEscape(mediaCalcT('baseResults'))}" hidden></ul></div>
+      <form id="media-calc-editor" class="mc-stats-form" aria-labelledby="media-calc-stats-title" novalidate><div class="mc-stat-grid">${MEDIA_CALC_STAT_ORDER.map(mediaCalcStatMarkup).join('')}</div></form>
+      <form id="media-calc-fill-form" class="mc-quick-tools" aria-label="${mediaCalcEscape(mediaCalcT('toolsHeading'))}">
+        <div class="mc-fill"><label for="media-calc-fill-value">${mediaCalcT('fill')}</label><input dir="ltr" id="media-calc-fill-value" type="number" min="40" max="99" step="1" inputmode="numeric" required aria-label="${mediaCalcEscape(mediaCalcT('fillValue'))}"><select id="media-calc-fill-scope" aria-label="${mediaCalcEscape(mediaCalcT('scope'))}"><option value="all">${mediaCalcT('scopeAll')}</option><option value="field">${mediaCalcT('scopeField')}</option><option value="goalkeeper">${mediaCalcT('scopeKeeper')}</option></select><button type="submit">${mediaCalcT('apply')}</button></div>
+        <div class="mc-adjust" role="group" aria-label="${mediaCalcEscape(mediaCalcT('adjust'))}"><span>${mediaCalcT('adjust')}</span>${[-5,-1,1,5].map(delta=>`<button type="button" data-media-adjust="${delta}" aria-label="${mediaCalcEscape(mediaCalcT('step',{delta:delta>0?`+${delta}`:delta}))}">${delta>0?'+':''}${delta}</button>`).join('')}</div>
+      </form>
+    </section>
+  </div><p id="media-calc-feedback" class="mc-feedback" role="status" aria-live="polite" aria-atomic="true"></p>`;
+  mediaCalcUpdateDynamicSections(false);
+}
+function mediaCalcUpdateDynamicSections(announce=true){
+  const results=mediaCalcPositionResults(),selected=results.find(r=>r.position===mediaCalcState.selectedPosition);
+  const label=document.getElementById('media-calc-selected-label'),name=document.getElementById('media-calc-selected-name'),score=document.getElementById('media-calc-selected-score');
+  if(label)label.textContent=selected.label;if(name)name.textContent=selected.name;
+  if(score){score.textContent=selected.rounded??'—';score.parentElement.className=`media-calc-overall ${mediaCalcValueClass(selected.rounded)}`;}
+  for(const r of results){
+    const cell=document.querySelector(`[data-media-position-cell="${r.position}"]`);if(!cell)continue;
+    cell.setAttribute('aria-pressed',String(r.position===selected.position));
+    cell.setAttribute('aria-label',`${r.name}: ${r.rounded??'—'}`);cell.title=`${r.name}: ${r.rounded??'—'}`;
+    cell.querySelector('span').textContent=r.label;
+    cell.querySelector('[data-media-position-score]').textContent=r.rounded??'—';
+  }
+  const hint=document.getElementById('media-calc-empty-hint');if(hint)hint.hidden=selected.rounded!==null;
+  clearTimeout(mediaCalcAnnounceTimer);
+  if(announce)mediaCalcAnnounceTimer=setTimeout(()=>mediaCalcSetFeedback(selected.rounded===null?mediaCalcT('emptyHint'):mediaCalcT('scoreStatus',{position:selected.label,score:selected.rounded})),250);
+}
+function mediaCalcUpdateStatControls(key,skipActive=false){
+  const input=document.getElementById(`media-stat-${key}`);if(!input)return;
+  const value=mediaCalcState.stats[key];if(!skipActive)input.value=value??'';
+  input.setAttribute('aria-invalid',String(value!==null&&!mediaCalcValidStat(value)));
+  input.setCustomValidity(value!==null&&!mediaCalcValidStat(value)?mediaCalcT('validValue'):'');
+}
+function updateMediaCalculatorStatInput(key,value){
+  if(!MEDIA_CALC_STAT_ORDER.includes(key))return;
+  mediaCalcState.stats[key]=String(value).trim()===''?null:Number(value);
+  mediaCalcUpdateStatControls(key,true);mediaCalcUpdateDynamicSections();mediaCalcSaveState();
+}
+function commitMediaCalculatorStatInput(key,value){
+  if(!MEDIA_CALC_STAT_ORDER.includes(key))return;
+  mediaCalcState.stats[key]=String(value).trim()===''?null:mediaCalcClampStat(value,null);
+  mediaCalcUpdateStatControls(key);mediaCalcUpdateDynamicSections();mediaCalcSaveState(true);
+}
+function setMediaCalculatorPosition(position){
+  if(!MEDIA_CALC_POSITIONS.includes(position))return;
+  mediaCalcState.selectedPosition=position;mediaCalcUpdateDynamicSections();mediaCalcSaveState();
+}
+function mediaCalcSyncStats(){MEDIA_CALC_STAT_ORDER.forEach(key=>mediaCalcUpdateStatControls(key));mediaCalcUpdateDynamicSections();mediaCalcSaveState(true);}
+function fillMediaCalculatorStats(value,scope='all'){
+  const number=Number(value);
+  if(String(value).trim()===''||!mediaCalcValidStat(number)||!['all','field','goalkeeper'].includes(scope))return false;
+  for(const key of MEDIA_CALC_STAT_ORDER)if(scope==='all'||(scope==='goalkeeper')===MEDIA_CALC_GOALKEEPER_STATS.has(key))mediaCalcState.stats[key]=number;
+  mediaCalcSyncStats();return true;
+}
+function adjustAllMediaCalculatorStats(delta){
+  if(![-5,-1,1,5].includes(Number(delta)))return;
+  for(const key of MEDIA_CALC_STAT_ORDER)if(mediaCalcValidStat(mediaCalcState.stats[key]))mediaCalcState.stats[key]=mediaCalcClampStat(mediaCalcState.stats[key]+Number(delta));
+  mediaCalcSyncStats();
+}
+function clearMediaCalculatorStats(){MEDIA_CALC_STAT_ORDER.forEach(key=>{mediaCalcState.stats[key]=null;});mediaCalcSyncStats();mediaCalcSetFeedback(mediaCalcT('cleared'));}
+// One-shot copy: never retain identity, originalStats or familiarity.
+function mediaCalcCopiedStats(raw){
+  const canonical=window.PES2018Overall.statsFromLaqpRow(raw);
+  return Object.fromEntries(MEDIA_CALC_STAT_ORDER.map(key=>{
+    const value=canonical[MEDIA_CALC_STAT_ALIASES[key]||key];
+    if(!mediaCalcValidStat(value))throw new Error(`Invalid PES stat: ${key}`);
+    return [key,value];
+  }));
+}
+function loadMediaCalculatorPlayer(playerId){
+  const player=mediaCalcDatabase?.players.find(item=>item.id===String(playerId));if(!player)return;
+  try{
+    const copied=mediaCalcCopiedStats(player.raw);
+    mediaCalcState.stats=copied;mediaCalcState.selectedPosition=player.position;mediaCalcState.loadedPlayer=null;mediaCalcState.goalkeeperMinimum=false;
+    const input=document.getElementById('media-calc-player-search');if(input){input.value='';input.focus();}
+    mediaCalcSearchVersion++;mediaCalcHidePlayerResults();mediaCalcSyncStats();
+    clearTimeout(mediaCalcAnnounceTimer);mediaCalcSetFeedback(mediaCalcT('copiedStats'));
+  }catch{mediaCalcSetFeedback(mediaCalcT('databaseError'));}
+}
+// The existing CSV sources are fetched once, only when search is used.
+function mediaCalcParseCsv(text){
+  const lines=String(text||'').replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n').trim().split('\n');if(lines.length<2)return [];
+  const headers=lines.shift().split(';').map(v=>v.trim());
+  return lines.filter(Boolean).map(line=>{const values=line.split(';');return Object.fromEntries(headers.map((h,i)=>[h,(values[i]??'').trim()]));});
+}
+async function mediaCalcLoadDatabase(){
+  if(mediaCalcDatabase)return mediaCalcDatabase;if(mediaCalcDatabasePromise)return mediaCalcDatabasePromise;
+  mediaCalcDatabasePromise=Promise.all(MEDIA_CALC_DATABASE_URLS.map(url=>fetch(url).then(r=>{if(!r.ok)throw new Error(String(r.status));return r.text();}))).then(([p,t,s,l])=>{
+    const publicIds=new Set(mediaCalcParseCsv(l).flatMap(r=>String(r.team_ids||'').split(',').map(id=>id.trim()).filter(Boolean)));
+    const teams=new Map(mediaCalcParseCsv(t).filter(r=>publicIds.has(String(r.Id))&&r.Name&&r.Name!=='-').map(r=>[String(r.Id),{id:String(r.Id),name:r.Name,type:String(r.Type)}]));
+    const rawPlayers=new Map(mediaCalcParseCsv(p).map(r=>[String(r.Id),r])),unique=new Map();
+    for(const squad of mediaCalcParseCsv(s)){
+      const team=teams.get(String(squad.Id));if(!team)continue;
+      for(let n=1;n<=32;n++){const id=String(squad[`Player ${n}`]||''),raw=rawPlayers.get(id),current=unique.get(id);if(raw&&id!=='0'&&(!current||(current.team.type==='2'&&team.type!=='2')))unique.set(id,{raw,team});}
+    }
+    const players=[];
+    for(const {raw,team} of unique.values()){
+      try{
+        const position=window.PES2018Overall.positionFromLaqp(raw.POS);mediaCalcCopiedStats(raw);
+        players.push({raw,id:String(raw.Id),name:raw.Name,teamName:team.name,position,searchText:mediaCalcNormalize(`${raw.Name} ${team.name} ${position} ${MEDIA_CALC_POSITION_LABELS[position]}`)});
+      }catch{/* An incomplete source record cannot be used as a base. */}
+    }
     mediaCalcDatabase={players,teams};return mediaCalcDatabase;
   }).catch(error=>{mediaCalcDatabasePromise=null;throw error;});
   return mediaCalcDatabasePromise;
 }
-function mediaCalcPlayerMatches(query) { if(!mediaCalcDatabase||!query.trim())return [];const terms=mediaCalcNormalize(query).split(/\s+/).filter(Boolean);return mediaCalcDatabase.players.filter(player=>terms.every(term=>player.searchText.includes(term))).slice(0,MEDIA_CALC_SEARCH_LIMIT); }
-function mediaCalcPlayerResultMarkup(player) { return `<button type="button" class="media-calc-player-result" onclick="loadMediaCalculatorPlayer('${mediaCalcEscape(player.id)}')"><img class="media-calc-player-face" src="img/players/${mediaCalcEscape(player.id)}.webp" onerror="this.onerror=null;this.src='img/players/default.webp'" alt=""><span><strong>${mediaCalcEscape(player.name)}</strong><small>${mediaCalcEscape(player.teamName)} · ${mediaCalcEscape(MEDIA_CALC_POSITION_LABELS[player.position])}</small></span><b>${player.overall}</b><img class="media-calc-player-crest" src="img/teams/${mediaCalcEscape(player.teamId)}.webp" onerror="this.onerror=null;this.src='img/teams/default.webp'" alt=""></button>`; }
-function mediaCalcUpdatePlayerResults() { const results=document.getElementById('media-calc-player-results');if(!results)return;const query=mediaCalcState.playerQuery.trim();if(!query){results.innerHTML='';return;}const matches=mediaCalcPlayerMatches(query);results.innerHTML=matches.length?matches.map(mediaCalcPlayerResultMarkup).join(''):`<p>${mediaCalcT('noPlayers')}</p>`; }
-async function setMediaCalculatorSource(mode) { mediaCalcState.sourceMode=mode==='database'?'database':'scratch';mediaCalcState.playerQuery='';if(mediaCalcState.sourceMode==='scratch'){mediaCalcState.loadedPlayer=null;mediaCalcState.goalkeeperMinimum=false;mediaCalcState.selectedPosition=null;mediaCalcState.lastPreset='base80';setAllMediaCalculatorStats(MEDIA_CALC_BASE_STAT);renderMediaCalculatorPage();mediaCalcSaveState(true);return;}renderMediaCalculatorPage();try{await mediaCalcLoadDatabase();renderMediaCalculatorPage();}catch{mediaCalcSetFeedback(mediaCalcT('databaseError'),'warn',false);}mediaCalcSaveState(true); }
-function updateMediaCalculatorPlayerSearch(value) { mediaCalcState.playerQuery=value||'';mediaCalcUpdatePlayerResults(); }
-function loadMediaCalculatorPlayer(playerId) { const player=mediaCalcDatabase?.players.find(item=>item.id===String(playerId));if(!player)return;const originalStats=Object.fromEntries(Object.entries(MEDIA_CALC_STAT_SOURCE_KEYS).map(([key,source])=>[key,mediaCalcClampStat(player.raw[source])]));const familiarity=Object.fromEntries(MEDIA_CALC_POSITIONS.map(position=>[position,Number(player.raw[position])||0]));mediaCalcState.loadedPlayer={id:player.id,name:player.name,teamId:player.teamId,teamName:player.teamName,position:player.position,publishedOverall:player.overall,weakFootPrecision:Number(player.raw['Weak Foot Acc.'])||3,familiarity,originalStats};mediaCalcState.stats={...originalStats};mediaCalcState.selectedPosition=player.position;mediaCalcState.goalkeeperMinimum=false;mediaCalcState.lastPreset='';mediaCalcState.playerQuery='';renderMediaCalculatorPage();mediaCalcSaveState(true);mediaCalcSetFeedback(mediaCalcT('playerLoaded'),'ok'); }
+function mediaCalcPlayerMatches(query){
+  const terms=mediaCalcNormalize(query).split(/\s+/).filter(Boolean);
+  return !terms.length||!mediaCalcDatabase?[]:mediaCalcDatabase.players.filter(p=>terms.every(term=>mediaCalcNormalize(`${p.searchText} ${mediaCalcPositionLabel(p.position)} ${mediaCalcPositionName(p.position)}`).includes(term))).slice(0,6);
+}
+function mediaCalcHidePlayerResults(){const list=document.getElementById('media-calc-player-results');if(list){list.hidden=true;list.innerHTML='';}}
+async function updateMediaCalculatorPlayerSearch(value){
+  const query=String(value||'').trim(),version=++mediaCalcSearchVersion,list=document.getElementById('media-calc-player-results');
+  if(!query){mediaCalcHidePlayerResults();return;}if(!list)return;
+  list.hidden=false;list.innerHTML=`<li><p>${mediaCalcT('loadingPlayers')}</p></li>`;
+  try{
+    await mediaCalcLoadDatabase();if(version!==mediaCalcSearchVersion)return;
+    const players=mediaCalcPlayerMatches(query);
+    list.innerHTML=players.length?players.map(p=>`<li><button type="button" data-media-player="${mediaCalcEscape(p.id)}"><span><strong>${mediaCalcEscape(p.name)}</strong><small>${mediaCalcEscape(p.teamName)} · ${mediaCalcPositionLabel(p.position)}</small></span><b>${mediaCalcT('copyStats')} ↗</b></button></li>`).join(''):`<li><p>${mediaCalcT('noPlayers')}</p></li>`;
+  }catch{if(version===mediaCalcSearchVersion)list.innerHTML=`<li><p>${mediaCalcT('databaseError')}</p></li>`;}
+}
+function mediaCalcBindEvents(content){
+  content.addEventListener('input',event=>{
+    const input=event.target;
+    if(input.dataset.mediaKey)updateMediaCalculatorStatInput(input.dataset.mediaKey,input.value);
+    if(input.id==='media-calc-fill-value')mediaCalcValidateFill();
+    if(input.id==='media-calc-player-search'){clearTimeout(mediaCalcSearchTimer);mediaCalcSearchVersion++;mediaCalcSearchTimer=setTimeout(()=>updateMediaCalculatorPlayerSearch(input.value),120);}
+  });
+  content.addEventListener('focusout',event=>{if(event.target.dataset.mediaKey)commitMediaCalculatorStatInput(event.target.dataset.mediaKey,event.target.value);});
+  content.addEventListener('click',event=>{
+    const button=event.target.closest('button');if(!button)return;
+    if(button.dataset.mediaPositionCell)setMediaCalculatorPosition(button.dataset.mediaPositionCell);
+    if(button.dataset.mediaAdjust)adjustAllMediaCalculatorStats(Number(button.dataset.mediaAdjust));
+    if(button.dataset.mediaPlayer)loadMediaCalculatorPlayer(button.dataset.mediaPlayer);
+    if(button.dataset.mediaAction==='clear')clearMediaCalculatorStats();
+  });
+  content.addEventListener('invalid',event=>{if(event.target.id==='media-calc-fill-value')mediaCalcValidateFill();},true);
+  content.addEventListener('submit',event=>{
+    event.preventDefault();
+    if(event.target.id==='media-calc-fill-form')fillMediaCalculatorStats(document.getElementById('media-calc-fill-value').value,document.getElementById('media-calc-fill-scope').value);
+  });
+  content.addEventListener('keydown',event=>{
+    if(event.key==='Enter'&&event.target.dataset.mediaKey){event.preventDefault();event.target.blur();}
+    if(event.key==='Escape'){mediaCalcSearchVersion++;clearTimeout(mediaCalcSearchTimer);mediaCalcHidePlayerResults();}
+    if(event.target.id==='media-calc-player-search'&&event.key==='ArrowDown'){const first=content.querySelector('[data-media-player]');if(first){event.preventDefault();first.focus();}}
+  });
+  document.addEventListener('click',event=>{if(!event.target.closest('.mc-base')){mediaCalcSearchVersion++;clearTimeout(mediaCalcSearchTimer);mediaCalcHidePlayerResults();}});
+}
 
-function renderMediaCalculatorSource() { const isDatabase=mediaCalcState.sourceMode==='database';const isLoading=isDatabase&&!mediaCalcDatabase&&!!mediaCalcDatabasePromise;return `<section class="media-calc-source" aria-labelledby="media-calc-source-title"><div class="media-calc-source-copy"><span>${mediaCalcT('startFrom')}</span><strong id="media-calc-source-title">${mediaCalcT('chooseStartingPoint')}</strong></div><div class="media-calc-source-tabs" role="group"><button type="button" class="${!isDatabase?'is-active':''}" onclick="setMediaCalculatorSource('scratch')">${mediaCalcT('createFromScratch')}</button><button type="button" class="${isDatabase?'is-active':''}" onclick="setMediaCalculatorSource('database')">${mediaCalcT('useDatabase')}</button></div>${isDatabase?`<div class="media-calc-player-search-wrap"><label class="media-calc-player-search"><span aria-hidden="true">⌕</span><input type="search" autocomplete="off" value="${mediaCalcEscape(mediaCalcState.playerQuery)}" placeholder="${mediaCalcEscape(mediaCalcT('searchPlayer'))}" aria-label="${mediaCalcEscape(mediaCalcT('searchPlayer'))}" oninput="updateMediaCalculatorPlayerSearch(this.value)"></label><div id="media-calc-player-results" class="media-calc-player-results" role="listbox">${isLoading?`<p>${mediaCalcT('loadingPlayers')}</p>`:''}</div></div>`:''}</section>`; }
-function mediaCalcOriginalOverall(position) { return mediaCalcState.loadedPlayer?mediaCalcResult(position,mediaCalcState.loadedPlayer.originalStats).rounded:null; }
-function renderMediaCalculatorIdentity(selected) { const player=mediaCalcState.loadedPlayer;if(!player)return `<div class="media-calc-editor-label"><span>${mediaCalcT('customPlayer')}</span><strong>${mediaCalcT('newPlayer')}</strong><small>${mediaCalcT('scratchReference')}</small></div>`;const original=mediaCalcOriginalOverall(selected.position);const delta=selected.rounded-original;return `<div class="media-calc-player-identity"><img src="img/players/${mediaCalcEscape(player.id)}.webp" onerror="this.onerror=null;this.src='img/players/default.webp'" alt="${mediaCalcEscape(player.name)}"><div><span>${mediaCalcT('referencePlayer')}</span><strong>${mediaCalcEscape(player.name)}</strong><small><img src="img/teams/${mediaCalcEscape(player.teamId)}.webp" onerror="this.onerror=null;this.src='img/teams/default.webp'" alt="">${mediaCalcEscape(player.teamName)} · ${mediaCalcEscape(MEDIA_CALC_POSITION_LABELS[player.position])}</small></div><p>${mediaCalcT('originalOverall')} <b>${original}</b> <i>→</i> ${mediaCalcT('currentOverall')} <b>${selected.rounded}</b> <em class="${delta>0?'is-above':delta<0?'is-below':'is-equal'}">(${mediaCalcFormatDelta(delta)})</em></p></div>`; }
-function renderMediaCalculatorMap(results,selected) { const map=new Map(results.map(item=>[item.position,item]));return `<div class="positions-map media-calc-position-map" aria-label="${mediaCalcEscape(mediaCalcT('positionMap'))}"><div class="positions-grid">${MEDIA_CALC_POSITIONS.map(position=>{const layout=MEDIA_CALC_POSITION_GRID_LAYOUT[position];const result=map.get(position);return `<button class="media-calc-position-cell${selected.position===position?' is-primary':''}" type="button" data-media-position-cell="${position}" style="grid-column:${layout.col};grid-row:${layout.row}" onclick="setMediaCalculatorPosition('${position}')" title="${mediaCalcEscape(result.name)}: ${result.rounded}"><span>${MEDIA_CALC_POSITION_LABELS[position]}</span><b data-media-position-score="${position}">${result.rounded}</b></button>`;}).join('')}</div></div>`; }
-function renderMediaCalculatorQuickActions() { const restore=mediaCalcState.loadedPlayer?mediaCalcT('restoreOriginal'):mediaCalcT('restoreBase');return `<div class="media-calc-quickbar"><span>${mediaCalcT('allStats')}</span><button type="button" onclick="adjustAllMediaCalculatorStats(-5)">−5</button><button type="button" onclick="adjustAllMediaCalculatorStats(-1)">−1</button><button type="button" onclick="adjustAllMediaCalculatorStats(1)">+1</button><button type="button" onclick="adjustAllMediaCalculatorStats(5)">+5</button><button type="button" class="media-calc-restore-inline" onclick="restoreMediaCalculatorBase()">${restore}</button></div>`; }
-function renderMediaCalculatorSidebar(results,selected) { return `<aside class="media-calc-sidebar">${renderMediaCalculatorIdentity(selected)}<div class="media-calc-overview"><div><span>${mediaCalcT('selectedPosition')}</span><h2 id="media-calc-selected-label">${mediaCalcEscape(selected.label)}</h2><p id="media-calc-selected-name">${mediaCalcEscape(selected.name)}</p></div><div class="media-calc-overall ${mediaCalcValueClass(selected.rounded)}"><strong id="media-calc-selected-score">${selected.rounded}</strong><small>${mediaCalcT('overall')}</small></div></div>${renderMediaCalculatorMap(results,selected)}${renderMediaCalculatorQuickActions()}</aside>`; }
-function renderMediaCalculatorMenu() { const restore=mediaCalcState.loadedPlayer?mediaCalcT('restoreOriginal'):mediaCalcT('restoreBase');return `<details class="media-calc-more"><summary aria-label="${mediaCalcEscape(mediaCalcT('moreActions'))}" title="${mediaCalcEscape(mediaCalcT('moreActions'))}">⋯</summary><div class="media-calc-more-menu"><button type="button" onclick="copyMediaCalculatorConfig();this.closest('details').removeAttribute('open')">${mediaCalcT('copyConfig')}</button><button type="button" onclick="restoreMediaCalculatorBase();this.closest('details').removeAttribute('open')">${restore}</button><label><input type="checkbox" onchange="toggleMediaCalculatorGoalkeeperMinimum(this.checked)"${mediaCalcState.goalkeeperMinimum?' checked':''}><span>${mediaCalcT('disableGoalkeeper')}</span></label><button type="button" class="is-danger" onclick="clearMediaCalculatorSaved();this.closest('details').removeAttribute('open')">${mediaCalcT('clearSaved')}</button></div></details>`; }
-function renderMediaCalculatorToolbar() { const tabs=[{id:'all',label:'all'}].concat(MEDIA_CALC_STAT_CATEGORIES.map(category=>({id:category.id,label:category.label})));return `<div class="media-calc-toolbar"><label class="media-calc-search"><span aria-hidden="true">⌕</span><input id="media-calc-search-input" type="search" value="${mediaCalcEscape(mediaCalcState.search)}" placeholder="${mediaCalcEscape(mediaCalcT('searchStat'))}" oninput="updateMediaCalculatorSearch(this.value)"></label><div class="media-calc-tabs" role="tablist">${tabs.map(tab=>`<button type="button" class="${mediaCalcState.selectedCategory===tab.id?'is-active':''}" onclick="setMediaCalculatorCategory('${tab.id}')">${mediaCalcT(tab.label)}</button>`).join('')}</div>${renderMediaCalculatorMenu()}</div>`; }
-function mediaCalcStatMatchesFilter(key) { if(mediaCalcState.selectedCategory!=='all'&&MEDIA_CALC_CATEGORY_BY_STAT[key]!==mediaCalcState.selectedCategory)return false;const query=mediaCalcNormalize(mediaCalcState.search);return !query||mediaCalcNormalize(`${mediaCalcStatLabel(key)} ${key}`).includes(query); }
-function renderMediaCalculatorStatRow(key) { const value=mediaCalcRawStatValue(key);const reference=mediaCalcReferenceValue(key);const delta=value-reference;const deltaClass=mediaCalcDeltaClassFor(key,value);const locked=mediaCalcState.goalkeeperMinimum&&MEDIA_CALC_GOALKEEPER_STATS.has(key);const safe=mediaCalcEscape(key);const comparison=mediaCalcState.loadedPlayer?`<small class="media-stat-delta ${deltaClass}" data-media-delta="${safe}">${reference} → ${value} (${mediaCalcFormatDelta(delta)})</small>`:'';return `<label class="media-stat-control ${deltaClass}${locked?' is-locked':''}" data-media-stat="${safe}"><span class="stat-name">${mediaCalcEscape(mediaCalcStatLabel(key))}${comparison}</span><input class="media-stat-number" data-media-key="${safe}" type="number" min="40" max="99" step="1" value="${value}" inputmode="numeric" oninput="updateMediaCalculatorStatInput('${safe}',this.value)" onblur="commitMediaCalculatorStatInput('${safe}',this.value)" onkeydown="handleMediaCalculatorStatKeydown(event,'${safe}')"${locked?' disabled':''}><input class="media-stat-range" data-media-key="${safe}" type="range" min="40" max="99" value="${value}" oninput="updateMediaCalculatorStat('${safe}',this.value)"${locked?' disabled':''}></label>`; }
-function renderMediaCalculatorStatGroups(keys) { const groups=MEDIA_CALC_STAT_CATEGORIES.map(category=>({category,keys:category.stats.filter(key=>keys.includes(key)&&mediaCalcStatMatchesFilter(key))})).filter(group=>group.keys.length);if(!groups.length)return `<div class="media-calc-empty">${mediaCalcT('noStats')}</div>`;return `<div class="media-calc-stat-groups">${groups.map(({category,keys:categoryKeys})=>{const collapsed=mediaCalcState.collapsedCategories.has(category.id);return `<section class="media-stat-section${collapsed?' is-collapsed':''}${category.id==='goalkeeper'&&mediaCalcState.goalkeeperMinimum?' is-disabled':''}"><button class="media-stat-section-head" type="button" onclick="toggleMediaCalculatorCategoryCollapse('${category.id}')"><span>${category.marker}</span><strong>${mediaCalcT(category.label)}</strong><b>${collapsed?'+':'−'}</b></button>${collapsed?'':`<div class="media-stat-section-body">${categoryKeys.map(renderMediaCalculatorStatRow).join('')}</div>`}</section>`;}).join('')}</div>`; }
-function renderMediaCalculatorLegend() { const loaded=!!mediaCalcState.loadedPlayer;return `<div class="media-calc-legend"><span><i class="is-above"></i>${mediaCalcT(loaded?'improved':'above80')}</span><span><i class="is-equal"></i>${mediaCalcT(loaded?'unchanged':'equal80')}</span><span><i class="is-below"></i>${mediaCalcT(loaded?'reduced':'below80')}</span></div>`; }
-function renderMediaCalculatorPresets() { return `<details class="media-calc-presets"><summary>${mediaCalcT('presets')}</summary><div>${MEDIA_CALC_PRESETS.map(preset=>`<button type="button" class="${mediaCalcState.lastPreset===preset.id?'is-active':''}" onclick="applyMediaCalculatorNamedPreset('${preset.id}')">${mediaCalcT(preset.label)}</button>`).join('')}</div><p>${mediaCalcT('presetsHelp')}</p></details>`; }
-function mediaCalcComparisonStats() { const values=mediaCalcEditableStatKeys().map(key=>({value:mediaCalcRawStatValue(key),delta:mediaCalcDelta(key)}));return {above:values.filter(item=>item.delta>0).length,equal:values.filter(item=>item.delta===0).length,below:values.filter(item=>item.delta<0).length,average:values.length?values.reduce((sum,item)=>sum+item.value,0)/values.length:MEDIA_CALC_BASE_STAT}; }
-function renderMediaCalculatorComparisonContent() { const stats=mediaCalcComparisonStats();return `<span class="is-above">${mediaCalcT('improvedShort')} <b>${stats.above}</b></span><span class="is-equal">${mediaCalcT('sameShort')} <b>${stats.equal}</b></span><span class="is-below">${mediaCalcT('reducedShort')} <b>${stats.below}</b></span><span>${mediaCalcT('average')} <b>${stats.average.toFixed(1)}</b></span>`; }
-function renderMediaCalculatorWorkspace(keys) { return `<div class="media-calc-workspace"><div class="media-calc-workspace-head"><h2>${mediaCalcT('stats')}</h2><span id="media-calc-feedback" class="media-calc-feedback is-ok">${mediaCalcT('saved')}</span></div>${renderMediaCalculatorToolbar()}<div class="media-calc-tools-meta">${renderMediaCalculatorLegend()}<div id="media-calc-comparison" class="media-calc-comparison">${renderMediaCalculatorComparisonContent()}</div></div>${renderMediaCalculatorStatGroups(keys)}${renderMediaCalculatorPresets()}</div>`; }
-function renderMediaCalculatorPage() { const content=document.getElementById('media-calculator-content');if(!content)return;const results=mediaCalcPositionResults();const best=mediaCalcBestResult(results);const selected=mediaCalcSelectedResult(results,best);if(!mediaCalcState.selectedPosition)mediaCalcState.selectedPosition=selected.position;content.innerHTML=`<section class="media-calculator-section" id="calculadora-medias">${renderMediaCalculatorSource()}<div class="media-calculator-dashboard">${renderMediaCalculatorSidebar(results,selected)}${renderMediaCalculatorWorkspace(MEDIA_CALC_STAT_ORDER)}</div></section>`;if(mediaCalcState.sourceMode==='database'&&mediaCalcDatabase)mediaCalcUpdatePlayerResults();if(typeof window.applyI18nToDocument==='function')window.applyI18nToDocument(content); }
+function mediaCalcValidateFill(){
+  const input=document.getElementById('media-calc-fill-value');
+  if(input)input.setCustomValidity(input.value===''?mediaCalcT('valueRequired'):mediaCalcValidStat(Number(input.value))?'':mediaCalcT('validValue'));
+}
+function mediaCalcLocalizeNavigation(){
+  const nav=document.querySelector('#header .header-nav');
+  if(!nav)return;
+  nav.setAttribute('aria-label',mediaCalcT('mainNav'));
+  // Menu labels come from js/site.js so the header matches every other section.
+  const switcher=document.querySelector('.language-switcher');
+  if(switcher){
+    switcher.setAttribute('aria-label',window.t('language.label'));
+    switcher.querySelector('span').textContent=window.t('language.label');
+    switcher.querySelector('select').setAttribute('aria-label',window.t('language.label'));
+    switcher.querySelector('select').value=window.getCurrentLanguage();
+  }
+  const menu=document.querySelector('.header-menu-toggle');
+  if(menu){menu.textContent=mediaCalcT('menu');menu.setAttribute('aria-label',mediaCalcT(menu.getAttribute('aria-expanded')==='true'?'menuClose':'menuOpen'));}
+}
+function mediaCalcLocalize(){
+  window.applyI18nToDocument(document);
+  const text={
+    '.mc-caption':'selectedPosition','.media-calc-overall small':'overall',
+    '#media-calc-stats-title':'attributes','#media-calc-stat-range':'range',
+    '[data-media-action="clear"]':'clear','.mc-base>label':'baseLabel',
+    '.mc-fill>label':'fill','#media-calc-fill-scope option[value="all"]':'scopeAll',
+    '#media-calc-fill-scope option[value="field"]':'scopeField','#media-calc-fill-scope option[value="goalkeeper"]':'scopeKeeper',
+    '.mc-fill>button':'apply','.mc-adjust>span':'adjust','#media-calc-empty-hint':'emptyHint',
+    '.mc-footer a[href="/terms.html"]':'terms'
+  };
+  for(const [selector,key] of Object.entries(text)){
+    const el=document.querySelector(selector);if(el)el.textContent=mediaCalcT(key);
+  }
+  const attributes={
+    '#media-calc-fill-form':'toolsHeading','#media-calc-fill-value':'fillValue',
+    '#media-calc-fill-scope':'scope','#media-calc-player-results':'baseResults',
+    '#media-calc-player-search':'baseLabel','.mc-adjust':'adjust','.mc-positions':'positionMap',
+    '.mc-footer nav':'legal'
+  };
+  for(const [selector,key] of Object.entries(attributes)){
+    const el=document.querySelector(selector);if(el)el.setAttribute('aria-label',mediaCalcT(key));
+  }
+  for(const key of MEDIA_CALC_STAT_ORDER){
+    const label=document.querySelector(`label[for="media-stat-${key}"]`);
+    if(label)label.textContent=mediaCalcStatLabel(key);
+    const input=document.getElementById(`media-stat-${key}`);
+    if(input)input.setCustomValidity(input.value!==''&&!mediaCalcValidStat(Number(input.value))?mediaCalcT('validValue'):'');
+  }
+  document.querySelectorAll('[data-media-adjust]').forEach(button=>{
+    const delta=Number(button.dataset.mediaAdjust);
+    button.setAttribute('aria-label',mediaCalcT('step',{delta:delta>0?`+${delta}`:delta}));
+  });
+  const search=document.getElementById('media-calc-player-search');
+  search.placeholder=mediaCalcT('basePlaceholder');
+  if(search.value)updateMediaCalculatorPlayerSearch(search.value);
+  mediaCalcValidateFill();
+  mediaCalcLocalizeNavigation();
+  document.title=`${mediaCalcT('pageTitle')} | LAqP`;
+  for(const selector of ['meta[name="description"]','meta[property="og:description"]','meta[name="twitter:description"]']){
+    document.querySelector(selector)?.setAttribute('content',mediaCalcT('metaDescription'));
+  }
+  for(const selector of ['meta[property="og:title"]','meta[name="twitter:title"]']){
+    document.querySelector(selector)?.setAttribute('content',document.title);
+  }
+  const ld=document.querySelector('script[type="application/ld+json"]');
+  if(ld){const app=JSON.parse(ld.textContent);app.name=mediaCalcT('pageTitle');app.description=mediaCalcT('metaDescription');ld.textContent=JSON.stringify(app);}
+  mediaCalcSetFeedback('');
+  mediaCalcUpdateDynamicSections(false);
+}
+function mediaCalcBindLanguage(){
+  window.addEventListener('laqp:language-change',event=>{
+    event.preventDefault();
+    mediaCalcSaveState(true);
+    mediaCalcLocalize();
+  });
+  // The shared mobile menu changes its expanded state independently.
+  const menu=document.querySelector('.header-menu-toggle');
+  if(menu)new MutationObserver(()=>mediaCalcLocalizeNavigation()).observe(menu,{attributes:true,attributeFilter:['aria-expanded']});
+}
 
-function mediaCalcUpdateDynamicSections() { const results=mediaCalcPositionResults();const best=mediaCalcBestResult(results);const selected=mediaCalcSelectedResult(results,best);const label=document.getElementById('media-calc-selected-label');const name=document.getElementById('media-calc-selected-name');const score=document.getElementById('media-calc-selected-score');if(label)label.textContent=selected.label;if(name)name.textContent=selected.name;if(score)score.textContent=selected.rounded;document.querySelectorAll('[data-media-position-cell]').forEach(cell=>cell.classList.toggle('is-primary',cell.dataset.mediaPositionCell===selected.position));document.querySelectorAll('[data-media-position-score]').forEach(el=>{const item=results.find(result=>result.position===el.dataset.mediaPositionScore);if(item)el.textContent=item.rounded;});const comparison=document.getElementById('media-calc-comparison');if(comparison)comparison.innerHTML=renderMediaCalculatorComparisonContent();const identity=document.querySelector('.media-calc-player-identity');if(identity&&mediaCalcState.loadedPlayer)identity.outerHTML=renderMediaCalculatorIdentity(selected); }
-function mediaCalcUpdateStatControls(key,options={}) { const value=mediaCalcRawStatValue(key);const safe=mediaCalcCssKey(key);const active=document.activeElement;document.querySelectorAll(`[data-media-key="${safe}"]`).forEach(input=>{if(!(options.skipActiveNumber&&input===active&&input.classList.contains('media-stat-number')))input.value=value;});document.querySelectorAll(`[data-media-stat="${safe}"]`).forEach(row=>{row.classList.remove('is-above','is-equal','is-below');row.classList.add(mediaCalcDeltaClassFor(key,value));const delta=row.querySelector('[data-media-delta]');if(delta){const difference=mediaCalcDelta(key,value);delta.textContent=`${mediaCalcReferenceValue(key)} → ${value} (${mediaCalcFormatDelta(difference)})`;delta.className=`media-stat-delta ${mediaCalcDeltaClassFor(key,value)}`;}}); }
-function updateMediaCalculatorStat(key,value) { if(mediaCalcState.goalkeeperMinimum&&MEDIA_CALC_GOALKEEPER_STATS.has(key))return;mediaCalcState.stats[key]=mediaCalcClampStat(value);mediaCalcState.lastPreset='';mediaCalcUpdateStatControls(key);mediaCalcUpdateDynamicSections();mediaCalcSaveState(); }
-function updateMediaCalculatorStatInput(key,value) { const text=String(value||'').trim();const number=parseInt(text,10);if(!text||!Number.isFinite(number)||(number<40&&text.length<2))return;mediaCalcState.stats[key]=mediaCalcClampStat(number);mediaCalcState.lastPreset='';mediaCalcUpdateStatControls(key,{skipActiveNumber:number>=40&&number<=99});mediaCalcUpdateDynamicSections();mediaCalcSaveState(); }
-function commitMediaCalculatorStatInput(key,value) { mediaCalcState.stats[key]=mediaCalcClampStat(String(value||'').trim()||mediaCalcRawStatValue(key),mediaCalcRawStatValue(key));mediaCalcUpdateStatControls(key);mediaCalcUpdateDynamicSections();mediaCalcSaveState(true); }
-function handleMediaCalculatorStatKeydown(event,key) { if(event.key==='Enter'){event.preventDefault();commitMediaCalculatorStatInput(key,event.currentTarget.value);event.currentTarget.blur();} }
-function setMediaCalculatorPosition(position) { mediaCalcState.selectedPosition=position;renderMediaCalculatorPage();mediaCalcSaveState(); }
-function setAllMediaCalculatorStats(value) { MEDIA_CALC_STAT_ORDER.forEach(key=>{mediaCalcState.stats[key]=mediaCalcClampStat(value);}); }
-function restoreMediaCalculatorBase() { if(mediaCalcState.loadedPlayer){mediaCalcState.stats={...mediaCalcState.loadedPlayer.originalStats};mediaCalcState.selectedPosition=mediaCalcState.loadedPlayer.position;mediaCalcState.goalkeeperMinimum=false;mediaCalcState.lastPreset='';renderMediaCalculatorPage();mediaCalcSaveState(true);mediaCalcSetFeedback(mediaCalcT('originalRestored'),'ok');return;}setAllMediaCalculatorStats(80);mediaCalcState.lastPreset='base80';renderMediaCalculatorPage();mediaCalcSaveState(true);mediaCalcSetFeedback(mediaCalcT('baseRestored'),'ok'); }
-function restoreMediaCalculatorOriginal() { restoreMediaCalculatorBase(); }
-function adjustAllMediaCalculatorStats(delta) { mediaCalcEditableStatKeys().forEach(key=>{mediaCalcState.stats[key]=mediaCalcClampStat(mediaCalcRawStatValue(key)+Number(delta||0));});mediaCalcState.lastPreset='';renderMediaCalculatorPage();mediaCalcSaveState(true);mediaCalcSetFeedback(mediaCalcT('adjustApplied',{delta:delta>0?`+${delta}`:delta}),'ok'); }
-function applyMediaCalculatorPreset(value) { setAllMediaCalculatorStats(value);mediaCalcState.lastPreset='';renderMediaCalculatorPage();mediaCalcSaveState(true); }
-function applyMediaCalculatorNamedPreset(presetId) { const preset=MEDIA_CALC_PRESETS.find(item=>item.id===presetId);if(!preset)return;setAllMediaCalculatorStats(80);Object.entries(preset.values||{}).forEach(([key,value])=>{mediaCalcState.stats[key]=mediaCalcClampStat(value);});if(preset.reactivateGoalkeeper)mediaCalcState.goalkeeperMinimum=false;mediaCalcState.lastPreset=preset.id;renderMediaCalculatorPage();mediaCalcSaveState(true);mediaCalcSetFeedback(mediaCalcT('presetApplied',{preset:mediaCalcT(preset.label)}),'ok'); }
-function toggleMediaCalculatorGoalkeeperMinimum(checked) { mediaCalcState.goalkeeperMinimum=!!checked;renderMediaCalculatorPage();mediaCalcSaveState(true);mediaCalcSetFeedback(mediaCalcT(checked?'goalkeeperDisabled':'goalkeeperEnabled'),'ok'); }
-function updateMediaCalculatorSearch(value) { mediaCalcState.search=value||'';renderMediaCalculatorPage();const input=document.getElementById('media-calc-search-input');if(input){input.focus();input.setSelectionRange(input.value.length,input.value.length);}mediaCalcSaveState(); }
-function setMediaCalculatorCategory(categoryId) { mediaCalcState.selectedCategory=categoryId||'all';renderMediaCalculatorPage();mediaCalcSaveState(); }
-function toggleMediaCalculatorCategoryCollapse(categoryId) { mediaCalcState.collapsedCategories.has(categoryId)?mediaCalcState.collapsedCategories.delete(categoryId):mediaCalcState.collapsedCategories.add(categoryId);renderMediaCalculatorPage();mediaCalcSaveState(); }
-function mediaCalcBuildCopyText() { const results=mediaCalcPositionResults();const best=mediaCalcBestResult(results);const selected=mediaCalcSelectedResult(results,best);return [mediaCalcT('title'),mediaCalcState.loadedPlayer?`${mediaCalcT('referencePlayer')}: ${mediaCalcState.loadedPlayer.name} · ${mediaCalcState.loadedPlayer.teamName}`:'','',`${mediaCalcT('bestPosition')}: ${best.label} ${best.rounded}`,`${mediaCalcT('overall')}: ${selected.rounded}`,'',mediaCalcT('stats'),...MEDIA_CALC_STAT_ORDER.map(key=>`${mediaCalcStatLabel(key)}: ${mediaCalcRawStatValue(key)}`),'',mediaCalcT('positionOveralls'),...results.map(item=>`${item.label}: ${item.rounded}`)].join('\n'); }
-async function copyMediaCalculatorConfig() { try{const text=mediaCalcBuildCopyText();if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);else{const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();document.execCommand('copy');area.remove();}mediaCalcSetFeedback(mediaCalcT('copied'),'ok');}catch{mediaCalcSetFeedback(mediaCalcT('copyError'),'warn');} }
-function clearMediaCalculatorSaved() { try{localStorage.removeItem(MEDIA_CALC_STORAGE_KEY);}catch{}Object.assign(mediaCalcState,{stats:{},goalkeeperMinimum:false,selectedPosition:null,selectedCategory:'all',search:'',lastPreset:'',collapsedCategories:new Set(),sourceMode:'scratch',playerQuery:'',loadedPlayer:null});renderMediaCalculatorPage();mediaCalcSetFeedback(mediaCalcT('savedCleared'),'ok'); }
-async function initMediaCalculator() { const loading=document.getElementById('media-calculator-loading');const content=document.getElementById('media-calculator-content');if(!content)return;try{await window.LAQPEnsurePes2018Overall();mediaCalcLoadState();if(!window.PES2018Overall)throw new Error(mediaCalcT('formulaError'));renderMediaCalculatorPage();mediaCalcSaveState(true);if(mediaCalcState.sourceMode==='database'){try{await mediaCalcLoadDatabase();renderMediaCalculatorPage();}catch{mediaCalcSetFeedback(mediaCalcT('databaseError'),'warn',false);}}}catch(error){content.innerHTML=`<div class="error-message">${mediaCalcEscape(error.message)}</div>`;}finally{if(loading)loading.style.display='none';} }
-
-document.addEventListener('DOMContentLoaded',initMediaCalculator);
-Object.assign(window,{setMediaCalculatorSource,updateMediaCalculatorPlayerSearch,loadMediaCalculatorPlayer,setMediaCalculatorPosition,applyMediaCalculatorPreset,applyMediaCalculatorNamedPreset,restoreMediaCalculatorBase,restoreMediaCalculatorOriginal,adjustAllMediaCalculatorStats,toggleMediaCalculatorGoalkeeperMinimum,updateMediaCalculatorSearch,setMediaCalculatorCategory,toggleMediaCalculatorCategoryCollapse,updateMediaCalculatorStat,updateMediaCalculatorStatInput,commitMediaCalculatorStatInput,handleMediaCalculatorStatKeydown,copyMediaCalculatorConfig,clearMediaCalculatorSaved,initMediaCalculator});
+async function initMediaCalculator(){
+  const content=document.getElementById('media-calculator-content'),loading=document.getElementById('media-calculator-loading');
+  if(!content||content.dataset.ready)return;content.dataset.ready='true';
+  try{await window.LAQPEnsurePes2018Overall();mediaCalcLoadState();renderMediaCalculatorPage();mediaCalcBindEvents(content);mediaCalcLocalize();mediaCalcBindLanguage();}
+  catch{content.innerHTML=`<p class="mc-error" role="alert">${mediaCalcT('formulaError')}</p>`;}
+  finally{if(loading)loading.hidden=true;}
+}
+document.addEventListener('DOMContentLoaded',initMediaCalculator,{once:true});
+Object.assign(window,{initMediaCalculator,setMediaCalculatorPosition,fillMediaCalculatorStats,adjustAllMediaCalculatorStats,clearMediaCalculatorStats,loadMediaCalculatorPlayer,updateMediaCalculatorPlayerSearch,updateMediaCalculatorStatInput,commitMediaCalculatorStatInput});

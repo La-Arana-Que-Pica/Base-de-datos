@@ -18,7 +18,7 @@
     if (/^\/assets\/avatars\/avatar-[1-4]\.svg$/.test(raw)) return raw;
     if (/^https:\/\/lh3\.googleusercontent\.com\//i.test(raw)) return raw;
     const projectUrl = window.LAQP_SUPABASE_CONFIG?.url || 'https://npyvbqzgcdoujfxefsdr.supabase.co';
-    if (raw.startsWith(`${projectUrl}/storage/v1/object/public/avatars/`)) return raw;
+    if (raw.startsWith(`${projectUrl}/storage/v1/object/public/avatars/`)) return raw + '?v=' + Date.now();
     return DEFAULT_AVATAR;
   }
 

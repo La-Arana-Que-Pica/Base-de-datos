@@ -3,7 +3,7 @@
  * Player Profile Page Script
  *
  * Loads a single player's full data from generated HTML or URL params:
- *   /player/v2/TEAMID/player-slug/
+ *   /player/TEAMID/player-slug/
  *   player.html?id=PLAYERID&team=TEAMID
  */
 
@@ -24,7 +24,7 @@ function handleProfileMinifaceError(img, playerId) {
 
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
-  if (lines.length < 2) return { headers: [], rows: [] };
+  if (!lines[0]) return { headers: [], rows: [] };
   const headers = lines[0].split(';').map(h => h.trim());
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
@@ -79,9 +79,9 @@ function toTitleCaseName(value) {
   }).join(' ');
 }
 
-async function fetchText(url) {
+async function fetchText(url, options) {
   try {
-    const resp = await fetch(url);
+    const resp = await fetch(url, options);
     if (!resp.ok) return null;
     return await resp.text();
   } catch {
@@ -972,7 +972,7 @@ function renderHabilidades(player) {
     .map(col => renderStatRow(translateStat(col), player[col], col))
     .join('');
   return `<div class="player-section">
-    <div class="player-section-title">${t('player.abilities')}</div>
+    <h3 class="player-section-title">${t('player.abilities')}</h3>
     <div class="stats-list">${rows}</div>
   </div>`;
 }
@@ -982,7 +982,7 @@ function renderEstiloDeJuego(player) {
   const styleName = playingStyleLabel(val) || (val ? `${t('filters.playingStyle')} ${val}` : '-');
   const isEmpty = !val || val === '0' || val === '18' || styleName === '-';
   return `<div class="player-section">
-    <div class="player-section-title">${t('player.roles')}</div>
+    <h3 class="player-section-title">${t('player.roles')}</h3>
     <div class="skill-items-list">
       <div class="skill-item-row${isEmpty ? ' skill-item-empty' : ''}">${isEmpty ? '-' : styleName}</div>
     </div>
@@ -995,7 +995,7 @@ function renderHabilidadesJugador(player) {
     ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${pairLabel('playerSkills', s.col, s.label)}</div>`).join('')}</div>`
     : `<div class="skill-items-list"><div class="skill-item-row skill-item-empty">-</div></div>`;
   return `<div class="player-section">
-    <div class="player-section-title">${t('player.playerSkills')}</div>
+    <h3 class="player-section-title">${t('player.playerSkills')}</h3>
     ${content}
   </div>`;
 }
@@ -1006,7 +1006,7 @@ function renderEstilosJuegoCOM(player) {
     ? `<div class="skill-items-list">${active.map(s => `<div class="skill-item-row">${pairLabel('comStyles', s.col, s.label)}</div>`).join('')}</div>`
     : `<div class="skill-items-list"><div class="skill-item-row skill-item-empty">-</div></div>`;
   return `<div class="player-section">
-    <div class="player-section-title">${t('player.comStyles')}</div>
+    <h3 class="player-section-title">${t('player.comStyles')}</h3>
     ${content}
   </div>`;
 }
@@ -1182,7 +1182,7 @@ function renderFaceData(appearance, player, baseCopyPlayerName, isScanned) {
         .join('');
       if (!fieldsHtml) return '';
       const subTitle = sub.title
-        ? `<div class="face-subsection-title">${appearanceSectionTitle(sub.title)}</div>`
+        ? `<h3 class="face-subsection-title">${appearanceSectionTitle(sub.title)}</h3>`
         : '';
       return `<div class="face-subsection">${subTitle}<div class="face-data-grid">${fieldsHtml}</div></div>`;
     }).join('');
@@ -1358,7 +1358,7 @@ function renderPositionPitchLegacy(player) {
 
   return `
     <div class="player-section" style="margin-bottom:0">
-      <div class="player-section-title">Posiciones en el campo</div>
+      <h2 class="player-section-title">Posiciones en el campo</h2>
       <div class="position-field-wrap">
         <div class="position-field">
           <div class="position-field-line pf-halfway"></div>
@@ -1436,7 +1436,7 @@ function renderPositionPitch(player) {
   return `
     <div class="player-section position-map-section" data-view-mode="${viewMode}" style="margin-bottom:0">
       <div class="position-map-header">
-        <div class="player-section-title">${t('player.suitablePositions')}</div>
+        <h2 class="player-section-title">${t('player.suitablePositions')}</h2>
         <div class="position-view-switch" aria-label="${t('player.positionView')}">
           <button class="position-view-toggle${viewMode === 'colors' ? ' is-active' : ''}" type="button" data-mode="colors" aria-pressed="${viewMode === 'colors' ? 'true' : 'false'}" onclick="setPositionViewMode('colors')">${t('player.colors')}</button>
           <button class="position-view-toggle${viewMode === 'letters' ? ' is-active' : ''}" type="button" data-mode="letters" aria-pressed="${viewMode === 'letters' ? 'true' : 'false'}" onclick="setPositionViewMode('letters')">${t('player.letters')}</button>
@@ -1503,7 +1503,7 @@ function renderPlayerEditorial(player, team, pesPosition, similarPlayers) {
 
   return `
     <section class="player-section player-editorial-section">
-      <div class="player-section-title">${t('player.analysis')}</div>
+      <h2 class="player-section-title">${t('player.analysis')}</h2>
       <p>${escapeHtml(tacticalProfileText(player, pesPosition, team))}</p>
       ${strengths.length ? `
         <div class="player-strength-tags">
@@ -1663,14 +1663,14 @@ function renderSimilarPlayers(similarPlayers) {
   if (!similarPlayers || !similarPlayers.length) {
     return `
       <section class="player-section similar-players-section">
-        <div class="player-section-title">${t('player.similar')}</div>
+        <h2 class="player-section-title">${t('player.similar')}</h2>
         <p class="similar-players-empty">${t('player.noSimilar')}</p>
       </section>`;
   }
 
   return `
     <section class="player-section similar-players-section">
-      <div class="player-section-title">${t('player.similar')}</div>
+      <h2 class="player-section-title">${t('player.similar')}</h2>
       <div class="similar-players-grid">
         ${similarPlayers.map(({ player, team, pos }) => {
           const ovr = player['OverallStats'] || '-';
@@ -1681,10 +1681,10 @@ function renderSimilarPlayers(similarPlayers) {
               <div class="similar-player-main">
                 <img class="similar-player-photo"
                   data-player-id="${escapeHtml(player['Id'])}"
-                  data-miniface-current-src="img/players/${escapeHtml(player['Id'])}.webp"
+                  data-miniface-current-src="${LAQPMinifaces.sourceFor(player['Id'])}"
                   alt="${escapeHtml(player['Name'] || '')}">
                 <div>
-                  <div class="similar-player-name">${escapeHtml(player['Name'] || t('player.unknown'))}</div>
+                  <h3 class="similar-player-name">${escapeHtml(player['Name'] || t('player.unknown'))}</h3>
                   <div class="similar-player-team">${escapeHtml(team.displayName || '')}</div>
                 </div>
               </div>
@@ -1708,7 +1708,7 @@ function renderPlayerStrengths(player) {
     .slice(0, 3);
   if (!strengths.length) return '';
   return `<section class="player-strength-summary db-section" id="player-strengths">
-    <div class="player-section-title">${t('player.strengths')}</div>
+    <h2 class="player-section-title">${t('player.strengths')}</h2>
     <div class="player-strength-list">${strengths.map(item => `<div><span>${escapeHtml(translateStat(item.key))}</span><strong class="db-rating ${statColorClass(item.value)}">${item.value}</strong></div>`).join('')}</div>
   </section>`;
 }
@@ -1724,7 +1724,7 @@ function renderPesProfile(player, footDisplay, favBtnHtml, playsForNational, min
     [t('player.dominantFoot'), footDisplay !== '–' ? footDisplay : ''],
   ].filter(([, value]) => value);
   return `<div class="player-header-card player-info-card db-module">
-    <div class="player-header-card-title">${t('player.profilePes')}</div>
+    <h2 class="player-header-card-title">${t('player.profilePes')}</h2>
     <dl class="player-pes-profile">${fields.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}</dl>
     ${playsForNational ? `<p class="player-profile-note">${t('player.alsoNational')}</p>` : ''}
     ${minifacePlayerName ? `<p class="player-profile-note">${t('player.miniface', { name: minifacePlayerName })}</p>` : ''}
@@ -1739,7 +1739,7 @@ function renderSquadContext(team, context, clubUrl) {
   const contextPosition = translatePosition(normalizePositionKey(context.position));
   const peers = (context.competition || []).map(peer => `<li><a href="${escapeHtml(peer.url)}">${escapeHtml(peer.name)}</a><span>${escapeHtml(translatePosition(normalizePositionKey(peer.position)))}</span><strong class="db-rating ${statColorClass(peer.overall)}">${escapeHtml(peer.overall)}</strong></li>`).join('');
   return `<section class="player-squad-context db-section" id="player-squad-context">
-    <div class="player-section-title">${t('player.squadContext')}</div>
+    <h2 class="player-section-title">${t('player.squadContext')}</h2>
     <div class="player-squad-main"><strong>${escapeHtml(team.displayName)}</strong>${status}
       ${context.positionRank ? `<span>${escapeHtml(t('player.positionRank', { rank: context.positionRank, position: contextPosition }))}</span>` : ''}
       <span>${escapeHtml(t('player.squadRank', { rank: context.rank }))}</span></div>
@@ -1798,7 +1798,12 @@ function updatePlayerComparison() {
   drawRadar('compare-radar-b', b);
 }
 
-function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal, similarPlayers = []) {
+function renderEditedFaceStatus(edited, isScanned = false) {
+  const state = isScanned ? 'scanned' : edited === true ? 'edited' : edited === false ? 'unmarked' : 'unavailable';
+  return `<p class="player-face-status${state === 'edited' ? ' is-edited' : state === 'scanned' ? ' is-scanned' : ''}" title="${escapeHtml(t('player.faceStatusHelp'))}">${escapeHtml(t(`player.faceStatus.${state}`))}</p>`;
+}
+
+function renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal, similarPlayers = [], faceEdited = null) {
   const ovr = player['OverallStats'] || '–';
 
   const rawPos = player['POS'] || '';
@@ -1857,12 +1862,13 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
     </nav></div>
     <button class="back-btn" onclick="goBack()">◀ ${t('common.back')}</button>
 
-    <div class="player-profile-page">
+    <article class="player-profile-page">
       <header class="player-hero db-hero" id="player-summary">
-        <div class="player-hero-face-wrap"><img class="player-hero-face" data-player-id="${escapeHtml(player['Id'])}" data-miniface-current-src="img/players/${escapeHtml(player['Id'])}.webp" alt="${escapeHtml(t('player.faceAlt', { name: player['Name'] || '' }))}" width="112" height="124"></div>
+        <div class="player-hero-face-wrap"><img class="player-hero-face" data-player-id="${escapeHtml(player['Id'])}" data-miniface-current-src="${LAQPMinifaces.sourceFor(player['Id'])}" alt="${escapeHtml(t('player.faceAlt', { name: player['Name'] || '' }))}" width="112" height="124"></div>
         <div class="player-hero-identity">
           <p class="db-eyebrow">${t('player.databaseProfile')}</p>
           <h1>${escapeHtml(player['Name'] || t('player.unknown'))}</h1>
+          ${renderEditedFaceStatus(faceEdited, isScanned)}
           <p class="player-hero-context">${crest}${clubName}<span><img class="player-hero-flag" src="${flagSrc(player['Country'])}" alt="" onerror="this.onerror=null;this.src='img/flags/default.webp'">${escapeHtml(nationalityName(player['Country']) || '')}</span>${dorsal ? `<span>#${escapeHtml(dorsal)}</span>` : ''}</p>
           <p class="player-hero-facts">${heroFacts.map(value => `<span>${escapeHtml(value)}</span>`).join('')}</p>
           ${squadContext.starter === true || squadContext.positionRank || squadContext.rank ? `<p class="player-hero-ranks">${squadContext.starter === true ? `<span>${t('player.starter')}</span>` : ''}${squadContext.positionRank ? `<span>${escapeHtml(t('player.positionRank', { rank: squadContext.positionRank, position: translatePosition(normalizePositionKey(squadContext.position)) }))}</span>` : ''}${squadContext.rank ? `<span>${escapeHtml(t('player.squadRank', { rank: squadContext.rank }))}</span>` : ''}</p>` : ''}
@@ -1879,7 +1885,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
 
         <!-- Column 2: Radar chart card -->
         <div class="player-header-card player-radar-card db-module">
-          <div class="player-header-card-title">${t('player.stats')}</div>
+          <h2 class="player-header-card-title">${t('player.stats')}</h2>
           <div class="player-header-radar-wrap">
             <canvas id="radar-canvas" width="240" height="240"></canvas>
           </div>
@@ -1914,7 +1920,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
       ${renderSquadContext(team, squadContext, clubUrl)}
       ${renderPlayerEditorial(player, team, pesPosition, similarPlayers)}
       <section class="player-compare-section db-section" id="player-comparison" hidden>
-        <div class="player-section-title">${t('player.comparePlayer')}</div>
+        <h2 class="player-section-title">${t('player.comparePlayer')}</h2>
         <label>${t('player.playerB')} <select id="player-compare-select" onchange="updatePlayerComparison()">${similarPlayers.map(({player: peer}) => `<option value="${escapeHtml(peer['Id'])}">${escapeHtml(peer['Name'])}</option>`).join('')}</select></label>
         <div id="player-compare-result"></div>
       </section>
@@ -1922,7 +1928,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
       ${renderSimilarPlayers(similarPlayers)}
       ${renderPesTechnical(player, appearance)}
 
-    </div>`;
+    </article>`;
 
   playerComparisonData = { source: player, peers: similarPlayers };
   const control = document.querySelector('.miniface-mode-control');
@@ -1957,7 +1963,7 @@ function renderPlayerPage(player, team, appearance, typeLabel, playsForNational,
   if (ogTitle) ogTitle.setAttribute('content', `${player['Name'] || t('player.unknown')} PES 2018 Actualizado - Stats y cara`);
   if (ogDescription) ogDescription.setAttribute('content', playerDescription);
   if (ogUrl) ogUrl.setAttribute('content', playerUrl);
-  if (ogImage) ogImage.setAttribute('content', `https://laqp.website/img/players/${player['Id']}.webp`);
+  if (ogImage) ogImage.setAttribute('content', `https://laqp.website/${LAQPMinifaces.sourceFor(player['Id'])}`);
   if (window.location.pathname !== playerPath && typeof history.replaceState === 'function') {
     history.replaceState(null, '', playerPath + window.location.hash);
   }
@@ -2014,6 +2020,7 @@ function goBack() {
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 
 async function boot() {
+  await import('/js/edited-faces.js');
   await window.LAQPEnsurePes2018Overall();
   const params = new URLSearchParams(window.location.search);
   const embeddedPlayerId = document.querySelector('meta[name="laqp-player-id"]')?.content || '';
@@ -2034,7 +2041,7 @@ async function boot() {
   }
 
   // Load all global CSV files in parallel (including optional override files)
-  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, scannedPlayersText, leaguesText] = await Promise.all([
+  const [playersText, teamsText, squadsText, appearancesText, originalPlayersText, scannedPlayersText, leaguesText, editedFacesText] = await Promise.all([
     fetchText('database/All players exported.csv'),
     fetchText('database/All teams exported.csv'),
     fetchText('database/All squads exported.csv'),
@@ -2042,6 +2049,7 @@ async function boot() {
     fetchText('database/players_original.csv'),
     fetchText('database/scanned_players.csv'),
     fetchText('database/All leagues exported.csv'),
+    fetchText('database/caras_editadas.csv', { cache: 'no-cache' }),
   ]);
 
   if (!playersText || !teamsText) {
@@ -2172,7 +2180,18 @@ async function boot() {
   }
 
   const similarPlayers = findSimilarPlayers(player, teamId, playerRows, teamRows, squadRows, validTeamIds);
-  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal, similarPlayers);
+  let faceEdited = document.body.dataset.faceEdited === '1' ? true
+    : document.body.dataset.faceEdited === '0' ? false : null;
+  if (editedFacesText) {
+    const parsed = parseCSV(editedFacesText.replace(/^\uFEFF/, ''));
+    if (parsed.headers.includes('Id') && parsed.headers.includes('Edited')) {
+      const record = parsed.rows.find(row => row.Id === player['Id']);
+      const value = String(record?.Edited || '0').toLowerCase();
+      faceEdited = ['1', 'true'].includes(value) ? true : ['0', 'false'].includes(value) ? false : null;
+    }
+  }
+  window.LAQPEditedFaces.configure(editedFacesText ? parseCSV(editedFacesText.replace(/^\uFEFF/, '')) : null, scannedPlayersText ? parseCSV(scannedPlayersText.replace(/^\uFEFF/, '')) : null);
+  renderPlayerPage(player, team, appearance, typeLabel, playsForNational, baseCopyPlayerName, minifacePlayerName, isScanned, dorsal, similarPlayers, faceEdited);
 }
 
 // ─── Error display ────────────────────────────────────────────────────────────

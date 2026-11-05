@@ -194,7 +194,11 @@ function handleTacticPlayerImageError(image, baseId) {
   const fallbackStep = Number(image.dataset.fallbackStep || 0);
   if (fallbackStep === 0 && baseId) {
     image.dataset.fallbackStep = '1';
-    image.src = `img/players/${encodeURIComponent(baseId)}.webp`;
+    image.onerror = null;
+    // Miniface de la base de datos (player_<ID>.webp, como en el juego) con sus respaldos.
+    image.dataset.playerId = baseId;
+    image.dataset.minifaceCurrentSrc = window.LAQPMinifaces.sourceFor(baseId);
+    window.LAQPMinifaces.refresh(image);
     return;
   }
   image.onerror = null;
@@ -1049,6 +1053,7 @@ function renderTacticDetail(tactic) {
     </section>`;
 
   bindDynamicFormation(tactic);
+  document.dispatchEvent(new CustomEvent('laqp-content-rendered'));
 }
 
 async function loadTacticPlayers(tactic) {

@@ -1,23 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
   <base href="/">
   <script src="js/consent-mode.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-M7ZNDRZB27');
+  </script>
   <script src="js/minifaces.js"></script>
-  <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Creador de Alineaciones PES 2018 | Squad Builder | LAQP</title>
-  <meta name="description" content="Crea, guarda, comparte y exporta alineaciones de PES 2018 con los jugadores y planteles actualizados de la Base de Datos LAQP.">
+  <meta name="description" content="Crea alineaciones de PES 2018 en vistas Clásica, Táctica y Draft. Edita tu equipo, mueve jugadores y guarda o exporta tu XI con la Base de Datos LAqP.">
   <link rel="canonical" href="https://laqp.website/alineaciones.html">
   <meta property="og:title" content="Creador de Alineaciones PES 2018 | LAQP">
-  <meta property="og:description" content="Arma tu XI, suma fichajes y exporta una pizarra táctica de PES 2018.">
+  <meta property="og:description" content="Arma tu XI de PES 2018 en vistas Clásica, Táctica y Draft. Suma fichajes, guarda tu equipo y exporta la alineación.">
   <meta property="og:image" content="https://laqp.website/assets/images/home-banner-main-2.png">
   <meta property="og:url" content="https://laqp.website/alineaciones.html">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="css/style.css?v=20261002e">
   <link rel="stylesheet" href="css/database-system.css?v=20260927a">
-  <link rel="stylesheet" href="css/squad-builder.css?v=20260930a">
+  <link rel="stylesheet" href="css/squad-builder.css?v=20261015d">
+  <link rel="stylesheet" href="css/builder-draft-view.css?v=20261015c">
+  <link rel="stylesheet" href="css/builder-views.css?v=20261031d">
   <link rel="icon" href="img/logo.webp" type="image/webp">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebApplication","name":"Creador de Alineaciones PES 2018","url":"https://laqp.website/alineaciones.html","applicationCategory":"SportsApplication","operatingSystem":"Web"}
@@ -25,16 +37,16 @@
 </head>
 <body class="database-product builder-page-body">
   <header id="header">
-    <a href="/index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAQP"></a>
+    <a href="/index.html" class="header-logo-link"><img class="logo" width="64" height="64" src="img/logo.webp" alt="Logo LAQP"></a>
     <div class="header-title">PES 2018 Actualizado <span>Creador de alineaciones</span></div>
-    <nav class="header-nav" aria-label="Menu principal"></nav>
+    <nav class="header-nav" aria-label="Menú principal"><a class="header-nav-link" href="/downloads.html">Spider Patch</a><a class="header-nav-link" href="/database.html">Base de datos</a><a class="header-nav-link" href="/alineaciones.html">Creador de alineaciones</a><a class="header-nav-link" href="/miniface-studio.html">Miniface Studio</a><a class="header-nav-link" href="/guias.html">Guías</a></nav>
   </header>
 
   <main id="builder-page">
     <div class="builder-heading">
       <div>
         <p class="builder-kicker">Pizarra táctica LAQP</p>
-        <h1>Creador de alineaciones</h1>
+        <h1 data-i18n="builder.heading">Creador de alineaciones PES 2018</h1>
       </div>
       <div class="builder-toolbar-actions" aria-label="Acciones de la alineación">
         <button type="button" class="builder-button" id="builder-save">Guardar</button>
@@ -44,10 +56,16 @@
       </div>
     </div>
 
+    <p class="builder-intro" data-i18n="builder.intro">Creá tu alineación de PES 2018 con los jugadores de la Base de Datos LAqP. Elegí una formación, mové jugadores y sumá fichajes; guardá, compartí o exportá el mismo equipo en tres estilos de cancha.</p>
+    <div class="builder-view-selector" role="group" aria-label="Vista de la cancha" data-i18n-aria-label="builder.viewLabel">
+      <button type="button" data-builder-view="classic" aria-pressed="false" data-i18n="builder.classic" data-i18n-title="builder.classicHelp">Clásica</button>
+      <button type="button" data-builder-view="tactical" aria-pressed="false" data-i18n="builder.tactical" data-i18n-title="builder.tacticalHelp">Táctica</button>
+      <button type="button" data-builder-view="draft" aria-pressed="true" data-i18n="builder.draft" data-i18n-title="builder.draftHelp">Draft</button>
+    </div>
     <section class="builder-toolbar" aria-label="Configuración de la alineación">
       <label class="builder-field builder-name-field"><span>Nombre</span><input id="builder-name" type="text" maxlength="60" value="Mi alineación" autocomplete="off"></label>
       <label class="builder-field builder-league-field"><span>Liga</span><select id="builder-league"><option value="">Todas las ligas</option></select></label>
-      <label class="builder-field builder-team-field"><span>Equipo base</span><span class="builder-team-input"><input id="builder-team" type="search" list="builder-team-options" placeholder="Sin equipo" autocomplete="off"><button type="button" id="builder-create-custom-team">+ Personalizado</button></span><datalist id="builder-team-options"></datalist></label>
+      <div class="builder-field builder-team-field"><label for="builder-team" class="builder-field-label">Equipo base</label><span class="builder-team-input"><select id="builder-team" title="Elegí un equipo o escribí su nombre para buscar en la lista"><option value="">Sin equipo</option></select><button type="button" id="builder-create-custom-team">+ Personalizado</button></span></div>
       <label class="builder-field builder-formation-field"><span>Esquema base</span><select id="builder-formation"></select></label>
       <label class="builder-field builder-budget-field"><span>Presupuesto (€M)</span><input id="builder-budget" type="number" min="0" max="99999" step="1" inputmode="decimal" placeholder="Opcional"></label>
     </section>
@@ -75,11 +93,11 @@
         <aside class="builder-panel builder-player-panel" data-builder-panel="players">
           <button type="button" class="builder-panel-collapse" id="builder-panel-collapse" aria-label="Minimizar panel de jugadores" aria-expanded="true">‹</button>
           <button type="button" class="builder-mobile-close" data-close-mobile-panels aria-label="Cerrar panel">×</button>
-          <div class="builder-panel-tabs" role="tablist">
-            <button type="button" role="tab" data-player-tab="squad" aria-selected="true">Plantel</button>
-            <button type="button" role="tab" data-player-tab="search" aria-selected="false">Buscar fichajes</button>
+          <div class="builder-panel-tabs" role="tablist" aria-label="Jugadores">
+            <button type="button" role="tab" id="builder-squad-tab" aria-controls="builder-squad-panel" data-player-tab="squad" aria-selected="true">Plantel</button>
+            <button type="button" role="tab" id="builder-search-tab" aria-controls="builder-search-panel" data-player-tab="search" aria-selected="false" tabindex="-1">Buscar fichajes</button>
           </div>
-          <div class="builder-player-view" data-player-view="squad">
+          <div class="builder-player-view" id="builder-squad-panel" role="tabpanel" aria-labelledby="builder-squad-tab" data-player-view="squad">
             <input class="builder-panel-search" id="builder-squad-query" type="search" placeholder="Buscar en el plantel" autocomplete="off" aria-label="Buscar en el plantel">
             <div class="builder-line-filters" aria-label="Filtrar plantel por línea">
               <button type="button" data-line-filter="squad" data-line="" aria-pressed="true">Todos</button><button type="button" data-line-filter="squad" data-line="GK" aria-pressed="false">POR</button><button type="button" data-line-filter="squad" data-line="DEF" aria-pressed="false">DEF</button><button type="button" data-line-filter="squad" data-line="MID" aria-pressed="false">MED</button><button type="button" data-line-filter="squad" data-line="FWD" aria-pressed="false">ATA</button>
@@ -87,7 +105,7 @@
             <p class="builder-panel-note" id="builder-squad-note">Elegí un equipo base para ver su plantilla.</p>
             <div class="builder-player-list" id="builder-squad-list"></div>
           </div>
-          <div class="builder-player-view" data-player-view="search" hidden>
+          <div class="builder-player-view" id="builder-search-panel" role="tabpanel" aria-labelledby="builder-search-tab" data-player-view="search" hidden>
             <div class="builder-custom-actions"><button type="button" id="builder-create-custom">+ Crear jugador personalizado</button><button type="button" id="builder-manage-custom">Gestionar</button></div>
             <input class="builder-panel-search" id="builder-global-query" type="search" placeholder="Nombre (mín. 2 letras)" autocomplete="off" aria-label="Buscar jugadores">
             <div class="builder-line-filters" aria-label="Filtrar búsqueda por línea">
@@ -102,9 +120,10 @@
           </div>
         </aside>
 
-        <section class="builder-board-column" aria-label="Cancha y suplentes">
+        <section class="builder-board-column" data-view="draft" aria-label="Cancha y suplentes">
           <div class="builder-pitch-wrap">
-            <div id="builder-pitch" class="builder-pitch" aria-label="Cancha. Ataque hacia arriba">
+            <div class="builder-field-scroll" role="region" tabindex="0" aria-label="Cancha; en celular se puede desplazar horizontalmente">
+            <div id="builder-pitch" class="builder-pitch" data-view="draft" aria-label="Cancha. Ataque hacia arriba" data-i18n-aria-label="builder.pitch">
               <span class="builder-pitch-half" aria-hidden="true"></span>
               <span class="builder-pitch-circle" aria-hidden="true"></span>
               <span class="builder-pitch-area top" aria-hidden="true"></span>
@@ -116,10 +135,13 @@
               <div id="builder-guides-overlay" class="builder-guides-overlay" aria-hidden="true"></div>
               <div id="builder-slots"></div>
             </div>
+            </div>
+            <p class="builder-field-mobile-help">Deslizá la cancha para recorrer las posiciones.</p>
             <div class="builder-pitch-caption">
               <span><strong id="builder-scheme-status">4-2-3-1</strong> · Ataque hacia arriba</span>
               <span id="builder-selection-hint">Tocá un jugador o una posición para empezar.</span>
               <span class="builder-caption-actions">
+                <span class="builder-guide-control"><label for="builder-placement">Colocación</label><select id="builder-placement" title="Elegí destinos sugeridos o movimiento completamente libre"><option value="suggested">Posiciones sugeridas</option><option value="free">Libre (100%)</option></select></span>
                 <span class="builder-guide-control"><label for="builder-guides">Guías</label><select id="builder-guides"><option value="auto">Auto</option><option value="always">Siempre</option><option value="hidden">Ocultas</option></select></span>
                 <button type="button" class="builder-reset-formation" id="builder-reset-formation">Restablecer esquema</button>
                 <button type="button" class="builder-clear-lineup" id="builder-clear">Limpiar alineación</button>
@@ -162,32 +184,32 @@
           </div>
           <div class="builder-help">
             <h3>Cómo usar</h3>
-            <p>Arrastrá libremente sobre la cancha. En celular también podés tocar un jugador y después cualquier punto del campo.</p>
+            <p>Elegí «Posiciones sugeridas» para ordenar el equipo o «Libre (100%)» para ubicarlo a tu gusto. En celular también podés tocar un jugador y después un punto del campo.</p>
           </div>
         </aside>
       </div>
     </div>
   </main>
 
-  <dialog id="builder-player-dialog" class="builder-dialog">
+  <dialog id="builder-player-dialog" class="builder-dialog" aria-labelledby="builder-player-dialog-title">
     <form method="dialog">
       <div class="builder-dialog-head"><div><p class="builder-kicker">Elegir jugador</p><h2 id="builder-player-dialog-title">Posición</h2></div><button value="cancel" aria-label="Cerrar">×</button></div>
-      <input id="builder-dialog-query" type="search" placeholder="Buscar jugador" autocomplete="off">
+      <input id="builder-dialog-query" type="search" aria-label="Buscar jugador" data-i18n-aria-label="builder.searchPlayer" placeholder="Buscar jugador" autocomplete="off">
       <div id="builder-dialog-list" class="builder-player-list builder-dialog-list"></div>
     </form>
   </dialog>
 
-  <dialog id="builder-saved-dialog" class="builder-dialog builder-saved-dialog">
+  <dialog id="builder-saved-dialog" class="builder-dialog builder-saved-dialog" aria-labelledby="builder-saved-dialog-heading">
     <form method="dialog">
-      <div class="builder-dialog-head"><div><p class="builder-kicker">Este navegador</p><h2>Alineaciones guardadas</h2></div><button value="cancel" aria-label="Cerrar">×</button></div>
+      <div class="builder-dialog-head"><div><p class="builder-kicker">Este navegador</p><h2 id="builder-saved-dialog-heading">Alineaciones guardadas</h2></div><button value="cancel" aria-label="Cerrar">×</button></div>
       <p class="builder-dialog-copy">Los guardados pertenecen a este navegador y dispositivo.</p>
       <div id="builder-saved-list" class="builder-saved-list"></div>
     </form>
   </dialog>
 
-  <dialog id="builder-export-dialog" class="builder-dialog builder-export-dialog">
+  <dialog id="builder-export-dialog" class="builder-dialog builder-export-dialog" aria-labelledby="builder-export-dialog-heading">
     <form method="dialog">
-      <div class="builder-dialog-head"><div><p class="builder-kicker">Imagen</p><h2>Configurar PNG</h2></div><button value="cancel" aria-label="Cerrar">×</button></div>
+      <div class="builder-dialog-head"><div><p class="builder-kicker">Imagen</p><h2 id="builder-export-dialog-heading">Configurar PNG</h2></div><button value="cancel" aria-label="Cerrar">×</button></div>
       <div class="builder-export-grid">
         <label class="builder-field"><span>Formato</span><select id="builder-export-format"><option value="vertical">Vertical · 1080×1350</option><option value="square">Cuadrado · 1080×1080</option><option value="horizontal">Horizontal · 1920×1080</option></select></label>
         <label class="builder-field"><span>Título</span><input id="builder-export-title" maxlength="60" autocomplete="off"></label>
@@ -202,7 +224,7 @@
     </form>
   </dialog>
 
-  <dialog id="builder-custom-dialog" class="builder-dialog builder-custom-dialog">
+  <dialog id="builder-custom-dialog" class="builder-dialog builder-custom-dialog" aria-labelledby="builder-custom-dialog-title">
     <form id="builder-custom-form">
       <div class="builder-dialog-head"><div><p class="builder-kicker">Solo en tu navegador</p><h2 id="builder-custom-dialog-title">Crear jugador personalizado</h2></div><button type="button" data-close-custom aria-label="Cerrar">×</button></div>
       <input id="builder-custom-id" type="hidden">
@@ -221,13 +243,13 @@
     </form>
   </dialog>
 
-  <dialog id="builder-custom-manager-dialog" class="builder-dialog builder-saved-dialog">
-    <form method="dialog"><div class="builder-dialog-head"><div><p class="builder-kicker">Solo en este navegador</p><h2>Jugadores personalizados</h2></div><button value="cancel" aria-label="Cerrar">×</button></div><div id="builder-custom-manager-list" class="builder-saved-list"></div></form>
+  <dialog id="builder-custom-manager-dialog" class="builder-dialog builder-saved-dialog" aria-labelledby="builder-custom-manager-dialog-heading">
+    <form method="dialog"><div class="builder-dialog-head"><div><p class="builder-kicker">Solo en este navegador</p><h2 id="builder-custom-manager-dialog-heading">Jugadores personalizados</h2></div><button value="cancel" aria-label="Cerrar">×</button></div><div id="builder-custom-manager-list" class="builder-saved-list"></div></form>
   </dialog>
 
-  <dialog id="builder-custom-team-dialog" class="builder-dialog builder-custom-dialog">
+  <dialog id="builder-custom-team-dialog" class="builder-dialog builder-custom-dialog" aria-labelledby="builder-custom-team-dialog-heading">
     <form id="builder-custom-team-form">
-      <div class="builder-dialog-head"><div><p class="builder-kicker">Equipo local</p><h2>Crear equipo personalizado</h2></div><button type="button" data-close-custom-team aria-label="Cerrar">×</button></div>
+      <div class="builder-dialog-head"><div><p class="builder-kicker">Equipo local</p><h2 id="builder-custom-team-dialog-heading">Crear equipo personalizado</h2></div><button type="button" data-close-custom-team aria-label="Cerrar">×</button></div>
       <div class="builder-custom-form-grid">
         <label class="builder-field"><span>Nombre del equipo *</span><input id="builder-custom-team-name" required maxlength="70" autocomplete="off"></label>
         <label class="builder-field"><span>Nombre corto</span><input id="builder-custom-team-short" maxlength="12" autocomplete="off"></label>
@@ -240,7 +262,7 @@
     </form>
   </dialog>
 
-  <dialog id="builder-player-actions-dialog" class="builder-dialog builder-player-actions-dialog">
+  <dialog id="builder-player-actions-dialog" class="builder-dialog builder-player-actions-dialog" aria-labelledby="builder-player-actions-title">
     <form method="dialog">
       <div class="builder-dialog-head"><div><p class="builder-kicker">Jugador seleccionado</p><h2 id="builder-player-actions-title">Acciones</h2></div><button value="cancel" aria-label="Cerrar">×</button></div>
       <div class="builder-player-actions">
@@ -251,9 +273,9 @@
     </form>
   </dialog>
 
-  <dialog id="builder-clear-dialog" class="builder-dialog builder-clear-dialog">
+  <dialog id="builder-clear-dialog" class="builder-dialog builder-clear-dialog" aria-labelledby="builder-clear-dialog-heading">
     <form method="dialog">
-      <div class="builder-dialog-head"><div><p class="builder-kicker">Acción de alineación</p><h2>¿Limpiar alineación?</h2></div><button value="cancel" aria-label="Cerrar">×</button></div>
+      <div class="builder-dialog-head"><div><p class="builder-kicker">Acción de alineación</p><h2 id="builder-clear-dialog-heading">¿Limpiar alineación?</h2></div><button value="cancel" aria-label="Cerrar">×</button></div>
       <p class="builder-dialog-copy">Se quitarán todos los jugadores del XI y del banco. La formación y la configuración actual se conservarán.</p>
       <div class="builder-dialog-actions"><button type="submit" value="cancel" class="builder-button secondary">Cancelar</button><button type="button" id="builder-confirm-clear" class="builder-button danger">Limpiar alineación</button></div>
     </form>
@@ -261,10 +283,12 @@
 
   <div id="builder-toast" class="builder-toast" role="status" aria-live="polite"></div>
 
-  <script src="js/i18n.js"></script>
+  <script src="js/pes2018-translations.js?v=20261003a"></script>
+  <script src="js/i18n.js?v=20261031a"></script>
+  <script src="js/builder-views.js?v=20261031c"></script>
   <script src="js/site.js?v=20261005d"></script>
-  <script src="js/builder-formations.js?v=20260927b"></script>
+  <script src="js/builder-formations.js?v=20261015a"></script>
   <script src="js/builder-transfer-value.js?v=20260927b"></script>
-  <script src="js/squad-builder.js?v=20261005a"></script>
+  <script type="module" src="js/builder-draft-view.js?v=20261031e"></script>
 </body>
 </html>

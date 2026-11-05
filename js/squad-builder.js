@@ -85,6 +85,15 @@
 
   const formationsApi = root.LAQPBuilderFormations;
   const valueApi = root.LAQPTransferValue;
+  const draftView = root.LAQPBuilderDraftView;
+  const views = root.LAQPBuilderViews;
+  const projectField = (x,y) => views.project(state.viewMode,x,y,draftView);
+  const unprojectField = (x,y) => views.unproject(state.viewMode,x,y,draftView);
+  const fieldPath = points => views.fieldPath(state.viewMode,points,draftView);
+  const pitchSurface = () => views.pitchSurface(state.viewMode,draftView);
+  const text = key => root.t?.('builder.'+key) || key;
+  const positionLabel = role => views.positionLabel(role,root.getCurrentLanguage?.() || 'es',root.i18nMap?.('positions'));
+  const positionName = role => root.i18nLookup?.('positionNames',role,positionLabel(role)) || positionLabel(role);
   if (!formationsApi || !valueApi) return;
 
   const state = {
@@ -93,7 +102,6 @@
     customPlayersById: new Map(),
     customImageUrls: new Map(),
     teamsById: new Map(),
-    teamLabelToId: new Map(),
     formationId: '4-2-3-1',
     baseTeamId: '',
     customTeam: null,
@@ -108,7 +116,9 @@
     selectedTarget: null,
     currentSaveId: '',
     createdAt: '',
+    viewMode: 'draft',
     guideMode: 'auto',
+    placementMode: 'suggested',
     playerPanelMinimized: false,
   };
 
@@ -125,8 +135,8 @@
 
   function cacheElements() {
     [
-      'builder-name','builder-league','builder-team','builder-team-options','builder-create-custom-team','builder-formation','builder-budget','builder-save','builder-saved',
-      'builder-share','builder-export','builder-loading','builder-error','builder-retry','builder-app','builder-pitch','builder-slots','builder-guides-overlay',
+      'builder-name','builder-league','builder-team','builder-create-custom-team','builder-formation','builder-budget','builder-save','builder-saved',
+      'builder-share','builder-export','builder-loading','builder-error','builder-retry','builder-app','builder-pitch','builder-slots','builder-guides-overlay','builder-placement',
       'builder-bench-slots','builder-bench-count','builder-selection-hint','builder-scheme-status','builder-reset-formation','builder-clear','builder-clear-dialog','builder-confirm-clear','builder-squad-query','builder-squad-note',
       'builder-squad-list','builder-global-query','builder-global-team','builder-global-overall',
       'builder-search-note','builder-search-list','builder-count-label','builder-average-overall','builder-average-age',
@@ -161,8 +171,9 @@
   }
 
   function createFieldSlots(formation = currentFormation()) {
+    const standard=draftView.standardPositions(formation);
     return Object.fromEntries((formation.slots || []).map(slot => [slot.id, {
-      slotId: slot.id, x: slot.x, y: slot.y, role: slot.position, locked: slot.position === 'GK',
+      slotId: slot.id, x: standard[slot.id].x, y: standard[slot.id].y, role: slot.position, locked: slot.position === 'GK',
     }]));
   }
 
@@ -172,7 +183,8 @@
     formation.slots.forEach(slot => {
       if (!state.fieldSlots[slot.id]) state.fieldSlots[slot.id] = { slotId:slot.id, x:slot.x, y:slot.y, role:slot.position, locked:slot.position === 'GK' };
       if (slot.position === 'GK') {
-        state.fieldSlots[slot.id].x = slot.x; state.fieldSlots[slot.id].y = slot.y; state.fieldSlots[slot.id].locked = true;
+        const standard=draftView.standardPositions(formation)[slot.id];
+        state.fieldSlots[slot.id].x = standard.x; state.fieldSlots[slot.id].y = standard.y; state.fieldSlots[slot.id].locked = true;
       }
     });
   }
@@ -196,7 +208,8 @@
       const slot = formationSlot(slotId);
       if (!slot) return false;
       const coordinates = assignmentCoordinates(slotId, fieldSlot);
-      return Math.abs(coordinates.x - slot.x) > .2 || Math.abs(coordinates.y - slot.y) > .2;
+      const standard=draftView.standardPositions(currentFormation())[slotId];
+      return Math.abs(coordinates.x - standard.x) > .2 || Math.abs(coordinates.y - standard.y) > .2;
     });
   }
 
@@ -455,8 +468,8 @@
   }
 
   function imageMarkup(player, className) {
-    if (player.custom) return `<img class="${className || ''}" alt="${escapeHtml(player.name)}" loading="lazy" src="img/players/default.webp" data-custom-image-id="${escapeHtml(player.id)}">`;
-    return `<img class="${className || ''}" alt="${escapeHtml(player.name)}" loading="lazy" data-player-id="${escapeHtml(player.id)}" data-miniface-current-src="${escapeHtml(player.miniface || 'img/players/default.webp')}" data-miniface-pes-src="${escapeHtml(player.pes2018Miniface || '')}">`;
+    if (player.custom) return `<img class="${className || ''}" alt="${escapeHtml(player.name)}" draggable="false" loading="lazy" src="img/players/default.webp" data-custom-image-id="${escapeHtml(player.id)}">`;
+    return `<img class="${className || ''}" alt="${escapeHtml(player.name)}" draggable="false" loading="lazy" data-player-id="${escapeHtml(player.id)}" data-miniface-current-src="${escapeHtml(player.miniface || 'img/players/default.webp')}" data-miniface-pes-src="${escapeHtml(player.pes2018Miniface || '')}">`;
   }
 
   function playerRowMarkup(player, context) {
@@ -466,7 +479,7 @@
     const club = getTeam(player.clubId);
     return `<button type="button" class="builder-player-row${location ? ' is-used' : ''}${state.selectedPlayerId === player.id ? ' is-selected' : ''}" data-player-id="${escapeHtml(player.id)}" draggable="true">
       ${imageMarkup(player)}
-      <span class="builder-player-copy"><strong>${escapeHtml(player.name)}${player.custom ? ' <em>PERSONALIZADO</em>' : ''}</strong><small>${escapeHtml(player.position || '—')}${player.age ? ` · ${player.age} años` : ''}${club ? ` · ${escapeHtml(club.name)}` : (player.teamName ? ` · ${escapeHtml(player.teamName)}` : '')}</small></span>
+      <span class="builder-player-copy"><strong>${escapeHtml(player.name)}${player.custom ? ' <em>PERSONALIZADO</em>' : ''}</strong><small>${escapeHtml(positionLabel(player.position))}${player.age ? ` · ${player.age} años` : ''}${club ? ` · ${escapeHtml(club.name)}` : (player.teamName ? ` · ${escapeHtml(player.teamName)}` : '')}</small></span>
       <span class="builder-player-meta"><span class="builder-player-overall">${player.overall || '—'}</span>${showPrice ? `<span class="builder-player-price">${valueApi.formatEstimatedMoney(valueApi.estimatedTransferFee(player))}</span>` : ''}</span>
       <span class="builder-player-add" aria-hidden="true">${location ? '✓' : '+'}</span>
     </button>`;
@@ -477,13 +490,64 @@
     const transfer = isTransfer(assignment);
     const changed = hasChangedMembership(assignment);
     const title = changed ? 'El jugador ya no pertenece al club que tenía al guardar esta alineación.' : '';
-    return `<span class="builder-slot-card" title="${escapeHtml(title)}">
-      ${imageMarkup(player)}
-      <span class="builder-slot-overall">${player.overall || '—'}</span>
-      <span class="builder-slot-position">${escapeHtml(player.position || '—')}</span>
+    const club = getTeam(player.clubId);
+    const flag = /^\d+$/.test(String(player.nationalityId || player.countryId || '')) ? `img/flags/${player.nationalityId || player.countryId}.webp` : '';
+    return `<span class="builder-slot-card quality-${draftView.tier(player.overall)}" title="${escapeHtml(title || player.name)}">
+      <span class="builder-card-summary"><span class="builder-slot-overall">${player.overall || '—'}</span><span class="builder-slot-position">${escapeHtml(positionLabel(player.position))}</span><span class="builder-card-insignia">${flag ? `<img src="${flag}" alt="" onerror="this.style.visibility='hidden'">` : ''}${club && !club.custom ? `<img src="${escapeHtml(club.crest || 'img/teams/default.webp')}" alt="" onerror="this.style.visibility='hidden'">` : ''}</span></span>
+      <span class="builder-card-portrait">${imageMarkup(player)}</span>
       ${transfer ? '<span class="builder-transfer-mark" aria-label="Fichaje">€</span>' : changed ? '<span class="builder-transfer-mark" aria-label="Club actualizado">!</span>' : ''}
-      <span class="builder-slot-name">${escapeHtml(player.name)}</span>
+      <span class="builder-slot-name">${escapeHtml(draftView.compactName(player.name))}</span>
     </span>`;
+  }
+
+  function fieldPlayerMarkup(assignment, role) {
+    if (state.viewMode === 'draft') return slotCardMarkup(assignment, false);
+    const player = getPlayer(assignment.playerId);
+    const label = escapeHtml(positionLabel(role || player.position));
+    const name = '<span class="builder-flat-name">'+escapeHtml(draftView.compactName(player.name))+'</span>';
+    const rating = player.overall || '—';
+    const transfer = isTransfer(assignment) ? '<span class="builder-flat-transfer" aria-label="'+escapeHtml(text('transfer'))+'">€</span>' : '';
+    return '<span class="builder-flat-player builder-'+state.viewMode+'-player" style="--role-tone:'+views.tone(role || player.position)+'">'+(state.viewMode === 'classic'
+      ? '<span class="builder-classic-face">'+imageMarkup(player)+'</span><span class="builder-classic-stats"><span class="builder-flat-position">'+label+'</span><b>'+rating+'</b></span>'+name
+      : '<span class="builder-tactical-rating">'+rating+'</span>'+name+'<span class="builder-flat-position">'+label+'</span>')+transfer+'</span>';
+  }
+
+  function applyView() {
+    const pitch = el['builder-pitch'];
+    pitch.dataset.view = state.viewMode;
+    document.querySelector('.builder-board-column').dataset.view = state.viewMode;
+    pitch.querySelector('.builder-draft-surface')?.remove();
+    pitch.insertAdjacentHTML('afterbegin',pitchSurface());
+    document.querySelectorAll('[data-builder-view]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.builderView === state.viewMode)));
+    fitFlatFieldLines();
+    clearDragGuides();
+  }
+
+  // Keep the centre circle round as the flat editing surface adapts to screen width.
+  function fitFlatFieldLines() {
+    const pitch=el['builder-pitch'],surface=pitch.querySelector('.builder-flat-surface');
+    if(!surface || !pitch.clientWidth)return;
+    const rx=7.84*pitch.clientHeight/pitch.clientWidth;
+    surface.querySelector('ellipse[cy="49"]')?.setAttribute('rx',rx);
+    const arc=surface.querySelector('[data-penalty-arcs]');
+    if(arc) { const half=rx*.8; arc.setAttribute('d',`M${50-half} 18.14 A${rx} 7.84 0 0 0 ${50+half} 18.14 M${50-half} 79.86 A${rx} 7.84 0 0 1 ${50+half} 79.86`); }
+  }
+
+  function focusFlatEditor() {
+    if(state.viewMode === 'draft' || !matchMedia('(min-width:761px)').matches)return;
+    requestAnimationFrame(()=>{
+      const workspace=document.querySelector('.builder-workspace');
+      const top=document.getElementById('header').getBoundingClientRect().height+document.querySelector('.builder-toolbar').getBoundingClientRect().height+12;
+      window.scrollTo({top:Math.max(0,workspace.getBoundingClientRect().top+window.scrollY-top),behavior:'instant'});
+    });
+  }
+
+  function localizeBuilder() {
+    root.applyI18nToDocument?.();
+    document.documentElement.dir = root.getCurrentLanguage?.() === 'ar' ? 'rtl' : 'ltr';
+    document.querySelectorAll('#builder-custom-position option').forEach(option => { option.textContent = positionLabel(option.value); });
+    document.querySelectorAll('[data-line="GK"]').forEach(button => { button.textContent = positionLabel('GK'); });
+    if (state.data) { renderPitch(); renderBench(); renderSquad(); renderSearch(); }
   }
 
   function renderPitch() {
@@ -494,14 +558,15 @@
       const assignment = state.xi[slot.id];
       const player = assignment ? getPlayer(assignment.playerId) : null;
       const fit = assignment ? positionFit(player, slot.position) : '';
-      const coordinates = assignmentCoordinates(slot.id, assignment);
+      const tactical = assignmentCoordinates(slot.id, assignment);
+      const coordinates = projectField(tactical.x,tactical.y);
       const selected = assignment && state.selectedPlayerId === String(assignment.playerId);
       const isTarget = state.selectedTarget && state.selectedTarget.area === 'xi' && state.selectedTarget.id === slot.id;
-      return `<button type="button" class="builder-slot${assignment ? ` is-${fit}` : ''}${selected || isTarget ? ' is-target' : ''}${fieldSlot.locked ? ' is-locked' : ''}" data-target-area="xi" data-target-id="${slot.id}" data-slot-role="${escapeHtml(fieldSlot.role || slot.position)}"${fieldSlot.locked ? ' data-slot-locked="true"' : ''}${assignment ? ' data-has-player="true"' : ''} style="left:${coordinates.x}%;top:${coordinates.y}%;z-index:${assignment ? Math.round(coordinates.y) + 3 : 2}" aria-label="${escapeHtml(fieldSlot.role || slot.position)}${player ? `: ${player.name}` : ', libre'}">
-        ${assignment ? slotCardMarkup(assignment, false) : `<span class="builder-slot-empty"><b>+</b><small>${escapeHtml(fieldSlot.role || slot.position)}</small></span>`}
+      return `<button type="button" class="builder-slot${assignment ? ` is-${fit}` : ''}${selected || isTarget ? ' is-target' : ''}${fieldSlot.locked ? ' is-locked' : ''}" data-target-area="xi" data-assigned-player-id="${assignment ? escapeHtml(assignment.playerId) : ''}" data-target-id="${slot.id}" data-slot-role="${escapeHtml(fieldSlot.role || slot.position)}"${fieldSlot.locked ? ' data-slot-locked="true"' : ''}${assignment ? ' data-has-player="true"' : ''} style="left:${coordinates.x}%;top:${coordinates.y}%;z-index:${assignment ? Math.round(coordinates.y) + 3 : 2}" aria-label="${escapeHtml(positionName(fieldSlot.role || slot.position))}${player ? `: ${escapeHtml(player.name)}` : ', '+text('empty')}">
+        ${assignment ? fieldPlayerMarkup(assignment, fieldSlot.role || slot.position) : `<span class="builder-slot-empty"><b>+</b><small>${escapeHtml(positionLabel(fieldSlot.role || slot.position))}</small></span>`}${assignment && state.viewMode === 'draft' ? `<span class="builder-card-caption">${escapeHtml(positionLabel(fieldSlot.role || slot.position))}</span>` : ''}
       </button>`;
     }).join('');
-    el['builder-scheme-status'].textContent = `${formation.name}${hasCustomLayout() ? ' · Personalizada' : ''}`;
+    el['builder-scheme-status'].textContent = `${formation.name}${hasCustomLayout() ? ' · '+text('custom') : ''}`;
     refreshMinifaces(el['builder-pitch']);
     hydrateCustomImages(el['builder-pitch']);
   }
@@ -510,7 +575,7 @@
     el['builder-bench-slots'].innerHTML = state.bench.map((assignment, index) => {
       const selected = assignment && state.selectedPlayerId === String(assignment.playerId);
       const isTarget = state.selectedTarget && state.selectedTarget.area === 'bench' && Number(state.selectedTarget.id) === index;
-      return `<button type="button" class="builder-bench-slot${selected || isTarget ? ' is-target' : ''}" data-target-area="bench" data-target-id="${index}" aria-label="Suplente ${index + 1}${assignment ? `: ${escapeHtml(getPlayer(assignment.playerId).name)}` : ', libre'}"${assignment ? ' data-has-player="true"' : ''}>${assignment ? slotCardMarkup(assignment, true) : '<span class="builder-bench-empty">+</span>'}</button>`;
+      return `<button type="button" class="builder-bench-slot${selected || isTarget ? ' is-target' : ''}" data-target-area="bench" data-assigned-player-id="${assignment ? escapeHtml(assignment.playerId) : ''}" data-target-id="${index}" aria-label="Suplente ${index + 1}${assignment ? `: ${escapeHtml(getPlayer(assignment.playerId).name)}` : ', libre'}"${assignment ? ' data-has-player="true"' : ''}>${assignment ? (state.viewMode === 'draft' ? slotCardMarkup(assignment, true) : fieldPlayerMarkup(assignment, getPlayer(assignment.playerId).position)) : '<span class="builder-bench-empty">+</span>'}<span class="builder-bench-number">S${index+1}</span></button>`;
     }).join('');
     el['builder-bench-count'].textContent = `${state.bench.filter(Boolean).length}/${MAX_BENCH}`;
     refreshMinifaces(el['builder-bench-slots']);
@@ -752,7 +817,7 @@
 
   function renderCustomManager() {
     const players = Array.from(state.customPlayersById.values());
-    el['builder-custom-manager-list'].innerHTML = players.length ? players.map(player => `<div class="builder-saved-item" data-custom-id="${escapeHtml(player.id)}"><span><strong>${escapeHtml(player.name)}</strong><small>${escapeHtml(player.position)} · ${escapeHtml(player.overall)}${player.teamName ? ` · ${escapeHtml(player.teamName)}` : ''}</small></span><button type="button" data-custom-action="edit">Editar</button></div>`).join('') : '<p class="builder-dialog-copy">Todavía no creaste jugadores personalizados.</p>';
+    el['builder-custom-manager-list'].innerHTML = players.length ? players.map(player => `<div class="builder-saved-item" data-custom-id="${escapeHtml(player.id)}"><span><strong>${escapeHtml(player.name)}</strong><small>${escapeHtml(positionLabel(player.position))} · ${escapeHtml(player.overall)}${player.teamName ? ` · ${escapeHtml(player.teamName)}` : ''}</small></span><button type="button" data-custom-action="edit">Editar</button></div>`).join('') : '<p class="builder-dialog-copy">Todavía no creaste jugadores personalizados.</p>';
   }
 
   function openCustomTeamDialog() {
@@ -943,6 +1008,7 @@
     state.budget = Number.isFinite(Number(raw.budget)) && raw.budget !== '' && raw.budget != null ? Number(raw.budget) : null;
     state.xi = xi;
     state.fieldSlots = fieldSlots;
+    draftView.separateGoalkeeperSlots(formation,state.fieldSlots);
     state.bench = [...bench, ...Array(MAX_BENCH - bench.length).fill(null)];
     state.selectedPlayerId = '';
     state.selectedTarget = null;
@@ -983,11 +1049,11 @@
   }
 
   function syncControls() {
-    if (state.customTeam) state.teamLabelToId.set(teamLabel(state.customTeam), state.customTeam.id);
     el['builder-name'].value = state.name;
     el['builder-formation'].value = state.formationId;
     el['builder-budget'].value = state.budget == null ? '' : String(state.budget / 1e6);
-    el['builder-team'].value = teamLabel(getTeam(state.baseTeamId));
+    const team = getTeam(state.baseTeamId), leagueId = el['builder-league'].value;
+    if (team && leagueId && !(team.leagueIds || []).includes(leagueId)) el['builder-league'].value = '';
     if (state.data) filterTeamOptions();
     renderTeamLineupActions();
   }
@@ -1044,6 +1110,7 @@
       if (!entry || state.fieldSlots[entry[0]].locked) return;
       state.fieldSlots[entry[0]].x = clampCoordinate(item.x); state.fieldSlots[entry[0]].y = clampCoordinate(item.y);
     });
+    draftView.separateGoalkeeperSlots(formation,state.fieldSlots);
     state.bench = Array(MAX_BENCH).fill(null);
     state.bench = (lineup.benchPlayerIds || []).filter(id => !assignmentForPlayer(id)).slice(0,MAX_BENCH).map(id => createAssignment(id));
     state.bench.push(...Array(MAX_BENCH - state.bench.length).fill(null));
@@ -1169,7 +1236,7 @@
   function openPlayerDialog(target) {
     dialogTarget = target;
     const slot = target.area === 'xi' ? currentFormation().slots.find(item => item.id === target.id) : null;
-    el['builder-player-dialog-title'].textContent = slot ? `Jugador para ${slot.position}` : 'Jugador suplente';
+    el['builder-player-dialog-title'].textContent = slot ? `Jugador para ${positionLabel(slot.position)}` : 'Jugador suplente';
     el['builder-dialog-query'].value = '';
     renderPlayerDialog();
     if (typeof el['builder-player-dialog'].showModal === 'function') el['builder-player-dialog'].showModal();
@@ -1212,7 +1279,7 @@
   }
 
   function selectPlayerTab(name) {
-    document.querySelectorAll('[data-player-tab]').forEach(button => button.setAttribute('aria-selected', String(button.dataset.playerTab === name)));
+    document.querySelectorAll('[data-player-tab]').forEach(button => { const active=button.dataset.playerTab === name; button.setAttribute('aria-selected', String(active)); button.tabIndex=active?0:-1; });
     document.querySelectorAll('[data-player-view]').forEach(view => { view.hidden = view.dataset.playerView !== name; });
   }
 
@@ -1230,67 +1297,77 @@
 
   function pitchCoordinates(clientX, clientY) {
     const rect = el['builder-pitch'].getBoundingClientRect();
+    const point = unprojectField((clientX-rect.left)/rect.width*100,(clientY-rect.top)/rect.height*100);
     return {
-      x: clampCoordinate((clientX - rect.left) / rect.width * 100),
-      y: clampCoordinate((clientY - rect.top) / rect.height * 100),
+      x: clampCoordinate(point.x),
+      y: clampCoordinate(point.y),
     };
   }
 
   function snapCoordinates(x, y, playerId) {
-    const tolerance = 1.25;
-    let nextX = clampCoordinate(x), nextY = clampCoordinate(y);
-    const candidatesX = [50, ...currentFormation().slots.map(slot => slot.x)];
-    const candidatesY = currentFormation().slots.map(slot => slot.y);
-    Object.entries(state.xi).forEach(([slotId, assignment]) => {
-      if (String(assignment.playerId) === String(playerId)) return;
-      const point = assignmentCoordinates(slotId, assignment); candidatesX.push(point.x); candidatesY.push(point.y);
-    });
-    const close = (value, candidates) => candidates.reduce((best, candidate) => Math.abs(candidate-value) < Math.abs(best-value) ? candidate : best, value);
-    const targetX = close(nextX,candidatesX), targetY = close(nextY,candidatesY);
-    if (Math.abs(targetX-nextX) <= tolerance) nextX = targetX;
-    if (Math.abs(targetY-nextY) <= tolerance) nextY = targetY;
-    return {x:nextX,y:nextY};
+    const point = {x:clampCoordinate(x),y:clampCoordinate(y)};
+    if (state.placementMode === 'free') return point;
+    const nearest = formationsApi.suggestedPositions.reduce((best,candidate) =>
+      Math.hypot(candidate.x-point.x,candidate.y-point.y) < Math.hypot(best.x-point.x,best.y-point.y) ? candidate : best);
+    return {x:nearest.x,y:nearest.y};
   }
 
   function showDragGuides(x, y, playerId) {
-    if (state.guideMode === 'hidden') return;
     const overlay = el['builder-guides-overlay'];
     if (!overlay) return;
     const activeSlot = pointerDrag && pointerDrag.playerId === String(playerId) ? pointerDrag.slot : null;
-    const activeCard = activeSlot && activeSlot.querySelector('.builder-slot-card');
+    const activeCard = activeSlot && activeSlot.querySelector('.builder-slot-card, .builder-flat-player');
     const ghostAssignment = assignmentForPlayer(playerId)?.assignment || createAssignment(playerId);
-    const lane = x < 20 ? 'BANDA IZQUIERDA' : x < 40 ? 'HALF-SPACE IZQ.' : x < 60 ? 'CENTRO' : x < 80 ? 'HALF-SPACE DER.' : 'BANDA DERECHA';
-    const third = y < 33.333 ? 'ATAQUE' : y < 66.666 ? 'MEDIO' : 'DEFENSA';
-    const labelX = Math.min(82, Math.max(18, x));
-    const lines = [
-      `<span class="builder-guide-line vertical primary" style="left:${x}%"></span>`,
-      `<span class="builder-guide-line horizontal primary" style="top:${y}%"></span>`,
-      `<span class="builder-guide-crosshair" style="left:${x}%;top:${y}%"></span>`,
-      `<span class="builder-guide-zone" style="left:${labelX}%;top:${Math.min(94, y + 7)}%">${third} · ${lane}</span>`,
-    ];
-    lines.push(`<span class="builder-drag-preview" style="left:${x}%;top:${y}%">${activeCard ? activeCard.outerHTML : slotCardMarkup(ghostAssignment, false)}</span>`);
+    const lane = text(x < 20 ? 'left' : x < 40 ? 'leftInside' : x < 60 ? 'center' : x < 80 ? 'rightInside' : 'right');
+    const third = text(y < 33.333 ? 'attack' : y < 66.666 ? 'middle' : 'defense');
+    const visual = projectField(x,y);
+    const labelX = Math.min(82, Math.max(18, visual.x));
+    const tacticalLines = [20,40,60,80].map(column=>fieldPath([[column,0],[column,100]])).concat([33.333,66.666].map(row=>fieldPath([[0,row],[100,row]]))).join(' ');
+    const suggested = state.placementMode === 'suggested';
+    const showLines = !suggested && state.guideMode !== 'hidden';
+    const lines = [];
+    if(showLines)lines.push(
+      `<svg class="builder-tactical-zones" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${tacticalLines}" fill="none" stroke="#c2db9b" stroke-width=".12" opacity=".3"/></svg>`,
+      `<span class="builder-guide-line vertical primary" style="left:${visual.x}%"></span>`,
+      `<span class="builder-guide-line horizontal primary" style="top:${visual.y}%"></span>`
+    );
+    // This landing marker is interaction feedback, even when decorative guides are hidden.
+    lines.push(`<span class="builder-guide-crosshair builder-landing-marker" style="left:${visual.x}%;top:${visual.y}%"></span>`);
+    if(!suggested)lines.push(`<span class="builder-guide-zone" style="left:${labelX}%;top:${Math.min(94, visual.y + 12)}%">${third} · ${lane}</span>`);
+    if (state.placementMode === 'suggested') {
+      lines.unshift(...formationsApi.suggestedPositions.map(point => { const at=projectField(point.x,point.y); return `<span class="builder-suggested-point${point.x === x && point.y === y ? ' is-nearest' : ''}" style="left:${at.x}%;top:${at.y}%">${escapeHtml(positionLabel(point.position))}</span>`; }));
+    }
+    lines.push(`<span class="builder-drag-preview" style="left:${visual.x}%;top:${visual.y}%">${activeCard ? activeCard.outerHTML : fieldPlayerMarkup(ghostAssignment, state.fieldSlots[activeSlot?.dataset.targetId]?.role)}</span>`);
     const tolerance = 1.5;
-    Object.entries(state.xi).forEach(([slotId, assignment]) => {
+    if(showLines)Object.entries(state.xi).forEach(([slotId, assignment]) => {
       if (String(assignment.playerId) === String(playerId)) return;
-      const point = assignmentCoordinates(slotId, assignment);
-      if (Math.abs(point.x-x) <= tolerance) lines.push(`<span class="builder-guide-line vertical alignment" style="left:${point.x}%"></span>`);
-      if (Math.abs(point.y-y) <= tolerance) lines.push(`<span class="builder-guide-line horizontal alignment" style="top:${point.y}%"></span>`);
+      const point = assignmentCoordinates(slotId, assignment), at=projectField(point.x,point.y);
+      if (Math.abs(at.x-visual.x) <= tolerance) lines.push(`<span class="builder-guide-line vertical alignment" style="left:${at.x}%"></span>`);
+      if (Math.abs(point.y-y) <= tolerance) lines.push(`<span class="builder-guide-line horizontal alignment" style="top:${at.y}%"></span>`);
     });
     overlay.innerHTML = lines.join('');
     if (!activeCard && nativeDrag?.imageSrc) {
       const previewImage = overlay.querySelector('.builder-drag-preview img');
       if (previewImage) previewImage.src = nativeDrag.imageSrc;
     }
+    refreshMinifaces(overlay);
+    void hydrateCustomImages(overlay);
     el['builder-pitch'].classList.add('is-guiding');
+    el['builder-pitch'].classList.toggle('is-suggesting',suggested);
   }
   function clearDragGuides() {
     if (el['builder-guides-overlay']) el['builder-guides-overlay'].innerHTML = '';
     el['builder-pitch'].classList.remove('is-guiding');
+    el['builder-pitch'].classList.remove('is-suggesting');
   }
 
   function applyUiPreferences() {
     const preferences = safeStorageGet(UI_KEY, {});
+    state.viewMode = views.normalize(preferences.viewMode);
+    applyView();
     state.guideMode = ['auto','always','hidden'].includes(preferences.guideMode) ? preferences.guideMode : 'auto';
+    state.placementMode = preferences.placementMode === 'free' ? 'free' : 'suggested';
+    el['builder-placement'].value = state.placementMode;
     state.playerPanelMinimized = !!preferences.playerPanelMinimized;
     el['builder-guides'].value = state.guideMode;
     document.querySelector('.builder-workspace').classList.toggle('is-player-panel-minimized', state.playerPanelMinimized);
@@ -1299,31 +1376,19 @@
     el['builder-panel-collapse'].setAttribute('aria-label', state.playerPanelMinimized ? 'Expandir panel de jugadores' : 'Minimizar panel de jugadores');
     el['builder-panel-collapse'].title = state.playerPanelMinimized ? 'Expandir panel' : 'Minimizar panel';
     el['builder-pitch'].classList.toggle('guides-always', state.guideMode === 'always');
+    el['builder-pitch'].classList.toggle('placement-suggested', state.placementMode === 'suggested');
   }
-  function saveUiPreferences() { safeStorageSet(UI_KEY, { guideMode:state.guideMode, playerPanelMinimized:state.playerPanelMinimized }); }
+  function saveUiPreferences() { safeStorageSet(UI_KEY, { ...safeStorageGet(UI_KEY, {}), viewMode:state.viewMode, guideMode:state.guideMode, placementMode:state.placementMode, playerPanelMinimized:state.playerPanelMinimized }); }
 
   function setBaseTeamFromInput() {
-    const typed = el['builder-team'].value.trim();
-    if (normalize(typed) === normalize('Sin equipo')) {
-      state.baseTeamId = '';
-      state.selectedPlayerId = '';
-      state.selectedTarget = null;
-      el['builder-team'].value = '';
-      renderTeamLineupActions();
-      commit();
-      return;
-    }
-    let teamId = state.teamLabelToId.get(typed) || '';
-    if (!teamId && typed) {
-      const match = Array.from(state.teamLabelToId.entries()).find(([label]) => normalize(label) === normalize(typed));
-      teamId = match ? match[1] : '';
-    }
-    if (typed && !teamId) return;
+    const teamId = el['builder-team'].value;
+    if (teamId && !getTeam(teamId)) return;
     state.baseTeamId = teamId;
     const team = getTeam(teamId);
     if (team && !team.custom && Array.isArray(team.leagueIds) && team.leagueIds[0]) el['builder-league'].value = team.leagueIds[0];
     state.selectedPlayerId = '';
     state.selectedTarget = null;
+    filterTeamOptions();
     renderTeamLineupActions();
     commit();
   }
@@ -1389,33 +1454,54 @@
     do { ctx.font = `${weight || 700} ${size}px Arial, sans-serif`; size -= 1; } while (size > 12 && ctx.measureText(text).width > maxWidth);
   }
 
-  function drawExportPitch(ctx, pitch) {
-    const gradient = ctx.createLinearGradient(0,pitch.y,0,pitch.y+pitch.h);
-    gradient.addColorStop(0,'#1b6246'); gradient.addColorStop(1,'#0b3529');
-    ctx.fillStyle = gradient; ctx.fillRect(pitch.x,pitch.y,pitch.w,pitch.h);
-    ctx.fillStyle = 'rgba(255,255,255,.018)';
-    for (let index = 0; index < 8; index += 2) ctx.fillRect(pitch.x + pitch.w * index / 8,pitch.y,pitch.w / 8,pitch.h);
-    ctx.strokeStyle = 'rgba(240,248,242,.72)'; ctx.lineWidth = 3;
-    ctx.strokeRect(pitch.x,pitch.y,pitch.w,pitch.h);
-    ctx.beginPath(); ctx.moveTo(pitch.x,pitch.y+pitch.h/2); ctx.lineTo(pitch.x+pitch.w,pitch.y+pitch.h/2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(pitch.x+pitch.w/2,pitch.y+pitch.h/2,pitch.w*.12,0,Math.PI*2); ctx.stroke();
-    const areaW = pitch.w * .54, areaH = pitch.h * .16, smallW = pitch.w * .25, smallH = pitch.h * .075;
-    ctx.strokeRect(pitch.x+(pitch.w-areaW)/2,pitch.y,areaW,areaH);
-    ctx.strokeRect(pitch.x+(pitch.w-areaW)/2,pitch.y+pitch.h-areaH,areaW,areaH);
-    ctx.strokeRect(pitch.x+(pitch.w-smallW)/2,pitch.y,smallW,smallH);
-    ctx.strokeRect(pitch.x+(pitch.w-smallW)/2,pitch.y+pitch.h-smallH,smallW,smallH);
-    ctx.fillStyle = 'rgba(240,248,242,.74)';
-    ctx.beginPath(); ctx.arc(pitch.x+pitch.w/2,pitch.y+pitch.h*.11,3,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(pitch.x+pitch.w/2,pitch.y+pitch.h*.89,3,0,Math.PI*2); ctx.fill();
+  async function drawExportPitch(ctx, pitch) {
+    const surface = await new Promise((resolve,reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error('No se pudo cargar la cancha.'));
+      image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(pitchSurface());
+    });
+    ctx.drawImage(surface,pitch.x,pitch.y,pitch.w,pitch.h);
   }
 
-  function drawExportPlayerHud(ctx, x, y, player, assignment, image, options, scale) {
-    const size = 78 * scale, half = size / 2, plate = 60 * scale, font = Math.max(9, 16 * scale);
-    if (image) ctx.drawImage(image,x-half,y-size*.64,size,size);
-    if (options.name) { ctx.fillStyle = 'rgba(8,12,15,.95)'; ctx.fillRect(x-plate,y+size*.3,plate*2,27*scale); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; fitCanvasText(ctx, player.name, plate*2-10, font, 800); ctx.fillText(player.name,x,y+size*.3+19*scale); }
-    if (options.overall) { ctx.fillStyle = 'rgba(8,12,15,.96)'; ctx.fillRect(x-plate+2*scale,y-size*.62,28*scale,22*scale); ctx.fillStyle = '#fff'; ctx.font = `800 ${14*scale}px Arial, sans-serif`; ctx.fillText(player.overall || '—',x-plate+16*scale,y-size*.35); }
-    if (options.position) { ctx.fillStyle = 'rgba(8,12,15,.96)'; ctx.fillRect(x+plate-30*scale,y-size*.62,28*scale,22*scale); ctx.fillStyle = '#43e3d3'; ctx.font = `800 ${11*scale}px Arial, sans-serif`; ctx.fillText(player.position || '—',x+plate-16*scale,y-size*.35); }
-    if (options.transfer && isTransfer(assignment)) { ctx.fillStyle = '#21d4c2'; ctx.fillRect(x+plate-24*scale,y-size*.15,20*scale,19*scale); ctx.fillStyle = '#111'; ctx.font = `900 ${13*scale}px Arial, sans-serif`; ctx.fillText('€',x+plate-14*scale,y+size*.09); }
+  function drawExportPlayerHud(ctx, x, y, player, assignment, image, options, scale, icons = {}, fieldRole = '') {
+    if (state.viewMode !== 'draft') {
+      drawFlatExportPlayer(ctx,x,y,player,assignment,image,options,scale,fieldRole || player.position);
+      return;
+    }
+    const w=92*scale,h=110*scale,left=x-w/2,top=y-h/2,plate=options.name?19*scale:0;
+    const quality=draftView.tier(player.overall),gold=['highlight','elite'].includes(quality);
+    ctx.save();ctx.beginPath();ctx.roundRect(left,top,w,h,[5*scale,12*scale,5*scale,12*scale]);ctx.clip();
+    const gradient=ctx.createLinearGradient(left,top,left+w,top+h);
+    gradient.addColorStop(0,gold?'#4a442b':'#17484b');gradient.addColorStop(.65,gold?'#1b3035':'#102830');gradient.addColorStop(1,'#173b3d');ctx.fillStyle=gradient;ctx.fillRect(left,top,w,h);
+    ctx.fillStyle=gold?'#d8c07914':'#4bded41a';ctx.beginPath();ctx.moveTo(left,top);ctx.lineTo(left+w*.65,top);ctx.lineTo(left,top+h*.65);ctx.closePath();ctx.fill();
+    if(image){const region={x:left+w*.3,y:top+3*scale,w:w*.7,h:h-plate-3*scale};const ratio=Math.min(region.w/image.width,region.h/image.height);ctx.drawImage(image,region.x+(region.w-image.width*ratio)/2,region.y+region.h-image.height*ratio,image.width*ratio,image.height*ratio);}
+    ctx.textAlign='left';ctx.fillStyle='#f3faf6';ctx.font=`900 ${22*scale}px Arial`;if(options.overall)ctx.fillText(player.overall||'—',left+4*scale,top+23*scale);
+    ctx.fillStyle='#9bc8c6';ctx.font=`700 ${8*scale}px Arial`;if(options.position&&!fieldRole)ctx.fillText(positionLabel(player.position),left+4*scale,top+39*scale);
+    if(icons.crest)ctx.drawImage(icons.crest,left+13*scale,top+h-plate-17*scale,14*scale,14*scale);
+    if(icons.flag)ctx.drawImage(icons.flag,left+2*scale,top+h-plate-13*scale,10*scale,7*scale);
+    if(options.name){ctx.fillStyle='#07151cee';ctx.fillRect(left,top+h-plate,w,plate);ctx.fillStyle='#eef6f5';ctx.textAlign='center';ctx.font=`800 ${10*scale}px Arial`;ctx.fillText(draftView.compactName(player.name).toUpperCase(),x,top+h-5*scale,w-5*scale);}
+    if(options.transfer&&isTransfer(assignment)){ctx.fillStyle='#1d2928';ctx.fillRect(left+w-18*scale,top+3*scale,15*scale,16*scale);ctx.textAlign='center';ctx.fillStyle='#f4d98c';ctx.font=`800 ${12*scale}px Arial`;ctx.fillText('€',left+w-10*scale,top+16*scale);}
+    ctx.restore();ctx.strokeStyle=gold?'#c5b073':'#54c6c1';ctx.lineWidth=scale;ctx.beginPath();ctx.roundRect(left,top,w,h,[5*scale,12*scale,5*scale,12*scale]);ctx.stroke();
+    if(options.position&&fieldRole){ctx.fillStyle='#092329eb';ctx.strokeStyle='#51a59e66';ctx.beginPath();ctx.roundRect(x-18*scale,top+h+3*scale,36*scale,16*scale,8*scale);ctx.fill();ctx.stroke();ctx.textAlign='center';ctx.fillStyle='#96e6d8';ctx.font=`800 ${9*scale}px Arial`;ctx.fillText(positionLabel(fieldRole),x,top+h+14*scale);}
+  }
+
+  function drawFlatExportPlayer(ctx,x,y,player,assignment,image,options,scale,role) {
+    const tone=views.tone(role),w=92*scale,h=110*scale,top=y-h/2;
+    ctx.save();ctx.textAlign='center';
+    if(state.viewMode === 'classic') {
+      if(image){const ratio=Math.min(w*.9/image.width,h*.7/image.height);ctx.drawImage(image,x-image.width*ratio/2,top+h*.7-image.height*ratio,image.width*ratio,image.height*ratio);}
+      ctx.fillStyle='#333f52';ctx.fillRect(x-w/2,top+h*.7,w,20*scale);
+      ctx.font=`800 ${16*scale}px Arial`;ctx.textAlign='left';ctx.fillStyle=tone;if(options.position)ctx.fillText(positionLabel(role),x-w/2+3*scale,top+h*.7+16*scale);
+      ctx.textAlign='right';ctx.fillStyle='#fff';if(options.overall)ctx.fillText(player.overall||'—',x+w/2-3*scale,top+h*.7+16*scale);
+    } else {
+      ctx.beginPath();ctx.arc(x,y-12*scale,25*scale,0,Math.PI*2);ctx.fillStyle='#092c29';ctx.fill();ctx.strokeStyle=tone;ctx.lineWidth=2*scale;ctx.stroke();ctx.fillStyle='#fff';ctx.font=`800 ${24*scale}px Arial`;if(options.overall)ctx.fillText(player.overall||'—',x,y-4*scale);
+      ctx.fillStyle=tone;ctx.font=`800 ${12*scale}px Arial`;if(options.position)ctx.fillText(positionLabel(role),x,y+48*scale);
+    }
+    ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font=`700 ${13*scale}px Arial`;ctx.shadowColor='#000';ctx.shadowBlur=3*scale;
+    if(options.name)ctx.fillText(draftView.compactName(player.name),x,state.viewMode==='classic'?top+h:y+30*scale,w*1.35);
+    if(options.transfer&&isTransfer(assignment)){ctx.fillStyle='#f4d98c';ctx.font=`800 ${13*scale}px Arial`;ctx.fillText('€',x+w*.48,top+14*scale);}
+    ctx.restore();
   }
 
   function exportSettings() {
@@ -1466,25 +1552,33 @@
       ctx.textAlign = 'right'; ctx.fillStyle = '#21d4c2'; ctx.font = '800 22px Arial, sans-serif'; ctx.fillText('LAQP.website',brandRight,78);
       ctx.fillStyle = '#7e8994'; ctx.font = '600 13px Arial, sans-serif'; ctx.fillText('Creador de alineaciones',brandRight,101);
       ctx.textAlign = 'left';
-      const benchH = setting.options.bench && state.bench.filter(Boolean).length ? (horizontal ? 78 : 104) : 0;
+      const benchH = setting.options.bench && state.bench.filter(Boolean).length ? (horizontal ? 144 : 262) : 0;
       const usableH = height - headerH - footerH - benchH - 28, usableW = width - margin*2;
-      const pitchH = horizontal ? usableH : Math.min(usableH, usableW / .68);
-      const pitchW = pitchH * .68;
+      const pitchRatio = state.viewMode === 'draft' ? 1.65 : 68/94;
+      const pitchW = Math.min(usableW,usableH*pitchRatio);
+      const pitchH = pitchW/pitchRatio;
       const pitch = { x:(width-pitchW)/2, y:headerH, w:pitchW, h:pitchH };
-      drawExportPitch(ctx, pitch);
+      await drawExportPitch(ctx, pitch);
 
       const assignments = currentFormation().slots.map(slot => ({ slot, assignment: state.xi[slot.id] })).filter(item => item.assignment);
-      const loaded = await Promise.all(assignments.map(async item => ({ ...item, image: await imageForExport(getPlayer(item.assignment.playerId)) })));
-      loaded.forEach(({ slot, assignment, image }) => {
+      const assetsFor = async assignment => { const player=getPlayer(assignment.playerId),club=getTeam(player.clubId);return {image:state.viewMode === 'tactical' ? null : await imageForExport(player),icons:{crest:club&&!club.custom?await loadExportImage(club.crest):null,flag:player.nationalityId||player.countryId?await loadExportImage(`img/flags/${player.nationalityId||player.countryId}.webp`):null}}; };
+      const loaded = await Promise.all(assignments.map(async item => ({ ...item, ...await assetsFor(item.assignment) })));
+      loaded.forEach(({ slot, assignment, image, icons }) => {
         const player = getPlayer(assignment.playerId);
-        const coordinates = assignmentCoordinates(slot.id, assignment);
+        const tactical = assignmentCoordinates(slot.id, assignment);
+        const coordinates = projectField(tactical.x,tactical.y);
         const x = pitch.x + pitch.w * coordinates.x / 100;
         const y = pitch.y + pitch.h * coordinates.y / 100;
-        drawExportPlayerHud(ctx, x, y, player, assignment, image, setting.options, Math.max(.62, Math.min(1, pitch.w / 820)));
+        drawExportPlayerHud(ctx, x, y, player, assignment, image, setting.options, Math.min(pitch.w*(state.viewMode === 'draft' ? .09 : .125)/92,pitch.h*.18/110),icons,state.fieldSlots[slot.id]?.role || slot.position);
       });
       if (benchH) {
-        const bench = state.bench.filter(Boolean); const cell = Math.min(110, (width-margin*2) / Math.max(bench.length, 1));
-        bench.forEach((assignment, index) => { const player = getPlayer(assignment.playerId); const x = margin + cell * index + cell/2; const y = pitch.y + pitch.h + 16; ctx.fillStyle='rgba(18,24,30,.95)'; ctx.fillRect(x-cell/2+2,y,cell-4,benchH-13); ctx.textAlign='center'; ctx.fillStyle='#dce2e8'; fitCanvasText(ctx,player.name,cell-10,11,800); ctx.fillText(player.name,x,y+22); ctx.fillStyle='#21d4c2'; ctx.font='800 11px Arial'; ctx.fillText(`${player.position || '—'} · ${player.overall || '—'}`,x,y+43); });
+        const columns=horizontal?12:6,cell=usableW/columns,scale=Math.min((cell-10)/92,.88);
+        const benchAssets=await Promise.all(state.bench.map(assignment=>assignment?assetsFor(assignment):null));
+        ctx.textAlign='left';ctx.fillStyle='#b4ede6';ctx.font='800 13px Arial';ctx.fillText('BANCO DE SUPLENTES',margin,pitch.y+pitch.h+22);
+        state.bench.forEach((assignment,index)=>{const x=margin+cell*(index%columns)+cell/2,y=pitch.y+pitch.h+40+55*scale+Math.floor(index/columns)*114;
+          if(assignment){const asset=benchAssets[index];drawExportPlayerHud(ctx,x,y,getPlayer(assignment.playerId),assignment,asset.image,setting.options,scale,asset.icons);}else{ctx.strokeStyle='#62b0a480';ctx.lineWidth=1;ctx.strokeRect(x-46*scale,y-55*scale,92*scale,110*scale);ctx.fillStyle='#88b6b3';ctx.textAlign='center';ctx.font='20px Arial';ctx.fillText('+',x,y+6);}
+          ctx.textAlign='center';ctx.fillStyle='#88b6b3';ctx.font='10px Arial';ctx.fillText(`S${index+1}`,x,y+55*scale+14);
+        });
       }
       const xiPlayers = Object.values(state.xi).map(item => getPlayer(item.playerId));
       const validOveralls = xiPlayers.map(player => Number(player.overall)).filter(Number.isFinite);
@@ -1526,10 +1620,40 @@
   }
 
   function bindEvents() {
+    document.querySelectorAll('[data-builder-view]').forEach(button => button.addEventListener('click', () => {
+      if (pointerDrag || nativeDrag) return;
+      state.viewMode = views.normalize(button.dataset.builderView);
+      saveUiPreferences(); applyView(); renderPitch(); renderBench();
+    }));
+    document.addEventListener('keydown', event => {
+      const tab=event.target.closest('[data-player-tab]');
+      if(tab && ['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) {
+        event.preventDefault();
+        const name=event.key==='Home'?'squad':event.key==='End'?'search':tab.dataset.playerTab==='squad'?'search':'squad';
+        selectPlayerTab(name);document.querySelector('[data-player-tab="'+name+'"]')?.focus();return;
+      }
+      const slot = event.target.closest('.builder-slot[data-has-player]');
+      const arrows = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+      if (!slot || !arrows[event.key] || slot.dataset.slotLocked) return;
+      event.preventDefault();
+      const id=slot.dataset.targetId, assignment=state.xi[id], point=assignmentCoordinates(id,assignment), delta=arrows[event.key],step=event.shiftKey?5:1;
+      let next={x:point.x+delta[0]*step,y:point.y+delta[1]*step};
+      if(state.placementMode === 'suggested') {
+        next=formationsApi.suggestedPositions.filter(p=>(p.x-point.x)*delta[0]+(p.y-point.y)*delta[1]>.5)
+          .sort((a,b)=>{const score=p=>Math.abs((p.x-point.x)*delta[1]-(p.y-point.y)*delta[0])*4+Math.hypot(p.x-point.x,p.y-point.y);return score(a)-score(b);})[0] || point;
+      }
+      placePlayerOnPitch(assignment.playerId,next.x,next.y);
+      el['builder-slots'].querySelector('[data-target-id="'+id+'"]')?.focus({preventScroll:true});
+    });
+    window.addEventListener('laqp:language-change', event => {
+      event.preventDefault(); localizeBuilder();
+    });
     el['builder-name'].addEventListener('input', () => { state.name = el['builder-name'].value.slice(0,60); safeStorageSet(DRAFT_KEY, serializeState(false)); });
     el['builder-team'].addEventListener('change', setBaseTeamFromInput);
-    el['builder-team'].addEventListener('search', () => { if (!el['builder-team'].value) setBaseTeamFromInput(); });
-    el['builder-league'].addEventListener('change', filterTeamOptions);
+    el['builder-league'].addEventListener('change', () => {
+      filterTeamOptions();
+      if (el['builder-team'].value !== state.baseTeamId) setBaseTeamFromInput();
+    });
     el['builder-create-custom-team'].addEventListener('click', openCustomTeamDialog);
     el['builder-custom-team-form'].addEventListener('submit', saveCustomTeam);
     document.querySelectorAll('[data-close-custom-team]').forEach(button => button.addEventListener('click', closeCustomTeamDialog));
@@ -1547,6 +1671,7 @@
     el['builder-load-team-lineup'].addEventListener('click', () => loadTeamLineup(false));
     el['builder-restore-team-lineup'].addEventListener('click', () => loadTeamLineup(true));
     el['builder-guides'].addEventListener('change', () => { state.guideMode = el['builder-guides'].value; saveUiPreferences(); applyUiPreferences(); });
+    el['builder-placement'].addEventListener('change', () => { state.placementMode = el['builder-placement'].value; saveUiPreferences(); clearDragGuides(); applyUiPreferences(); });
     el['builder-panel-collapse'].addEventListener('click', () => { state.playerPanelMinimized = !state.playerPanelMinimized; saveUiPreferences(); applyUiPreferences(); });
     el['builder-create-custom'].addEventListener('click', () => openCustomDialog());
     el['builder-manage-custom'].addEventListener('click', () => { renderCustomManager(); el['builder-custom-manager-dialog'].showModal(); });
@@ -1688,8 +1813,9 @@
       const coordinates = snapCoordinates(rawCoordinates.x, rawCoordinates.y, pointerDrag.playerId);
       pointerDrag.slot.classList.add('is-dragging');
       if (pointerDrag.sourceArea === 'xi') {
-        pointerDrag.slot.style.left = `${coordinates.x}%`;
-        pointerDrag.slot.style.top = `${coordinates.y}%`;
+        const visual = projectField(coordinates.x,coordinates.y);
+        pointerDrag.slot.style.left = `${visual.x}%`;
+        pointerDrag.slot.style.top = `${visual.y}%`;
       }
       const pitchRect = el['builder-pitch'].getBoundingClientRect();
       const overPitch = event.clientX >= pitchRect.left && event.clientX <= pitchRect.right && event.clientY >= pitchRect.top && event.clientY <= pitchRect.bottom;
@@ -1730,21 +1856,17 @@
   function filterTeamOptions() {
     const leagueId = el['builder-league'].value;
     const teams = state.data.teams.filter(team => team.type !== 2 && (!leagueId || (team.leagueIds || []).includes(leagueId)));
-    const customOption = state.customTeam ? `<option value="${escapeHtml(teamLabel(state.customTeam))}"></option>` : '';
-    el['builder-team-options'].innerHTML = '<option value="Sin equipo"></option>' + customOption + teams.map(team => `<option value="${escapeHtml(teamLabel(team))}"></option>`).join('');
+    const customOption = state.customTeam ? `<option value="${escapeHtml(state.customTeam.id)}">${escapeHtml(teamLabel(state.customTeam))}</option>` : '';
+    el['builder-team'].innerHTML = '<option value="">Sin equipo</option>' + customOption + teams.map(team => `<option value="${escapeHtml(team.id)}">${escapeHtml(teamLabel(team))}</option>`).join('');
+    el['builder-team'].value = Array.from(el['builder-team'].options).some(option => option.value === state.baseTeamId) ? state.baseTeamId : '';
   }
 
   function populateControls() {
-    state.teamLabelToId.clear();
     el['builder-formation'].innerHTML = formationsApi.formations.map(formation => `<option value="${formation.id}">${formation.name}</option>`).join('');
-    el['builder-custom-position'].innerHTML = (state.data.positions || ['GK','CB','LB','RB','DMF','CMF','LMF','RMF','AMF','LWF','RWF','SS','CF']).map(position => `<option value="${escapeHtml(position)}">${escapeHtml(position)}</option>`).join('');
+    el['builder-custom-position'].innerHTML = (state.data.positions || ['GK','CB','LB','RB','DMF','CMF','LMF','RMF','AMF','LWF','RWF','SS','CF']).map(position => `<option value="${escapeHtml(position)}">${escapeHtml(positionLabel(position))}</option>`).join('');
     el['builder-league'].innerHTML = '<option value="">Todas las ligas</option>' + (state.data.leagues || []).map(league => `<option value="${escapeHtml(league.id)}">${escapeHtml(displayTeamName(league.name))}</option>`).join('');
     el['builder-global-team'].innerHTML = '<option value="">Todos los equipos</option>';
     const teams = state.data.teams;
-    teams.forEach(team => {
-      const label = teamLabel(team);
-      state.teamLabelToId.set(label, team.id);
-    });
     filterTeamOptions();
     el['builder-global-team'].insertAdjacentHTML('beforeend', teams.map(team => `<option value="${escapeHtml(team.id)}">${escapeHtml(displayTeamName(team.name))}</option>`).join(''));
   }
@@ -1788,9 +1910,11 @@
       populateControls();
       applyUiPreferences();
       initialState();
+      localizeBuilder();
       void loadRequestedLineup();
       el['builder-loading'].hidden = true;
       el['builder-app'].hidden = false;
+      focusFlatEditor();
     } catch (error) {
       console.error(error);
       el['builder-loading'].hidden = true;
@@ -1798,10 +1922,15 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function startBuilder() {
     cacheElements();
+    el['builder-pitch'].insertAdjacentHTML('afterbegin',pitchSurface());
     bindEvents();
+    new ResizeObserver(fitFlatFieldLines).observe(el['builder-pitch']);
+    localizeBuilder();
     loadIndex();
-  });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startBuilder);
+  else startBuilder();
   document.addEventListener('laqp-auth-change', () => { void loadRequestedLineup(); });
 })(typeof window !== 'undefined' ? window : globalThis);

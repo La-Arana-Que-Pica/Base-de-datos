@@ -126,7 +126,7 @@ function renderLeaguePage(league, teams) {
           src="img/teams/${escapeHtml(team.id)}.webp"
           onerror="this.onerror=null;this.src='img/teams/default.webp'"
           alt="" width="46" height="46" loading="lazy">
-        <span class="db-club-row-copy"><strong>${escapeHtml(team.displayName)}</strong><small>${t('db.playerCount', { count: team.players.length })}</small></span>
+        <span class="db-club-row-copy"><strong>${escapeHtml(team.displayName)}</strong>${window.LAQPEditedFaces.badge(window.LAQPEditedFaces.full(team.players), true)}<small>${t('db.playerCount', { count: team.players.length })}</small></span>
         ${avgHtml}
       </a>`;
   }).join('');
@@ -149,7 +149,7 @@ function renderLeaguePage(league, teams) {
         alt="${escapeHtml(league.name)}">
       <div>
         <p class="db-eyebrow">${t('league.databaseLeague')}</p>
-        <h1>${escapeHtml(league.name)}</h1>
+        <h1>${escapeHtml(league.name)}</h1>${window.LAQPEditedFaces.badge(window.LAQPEditedFaces.fullLeague(league, teams), true)}
         <div class="db-hero-summary"><span>${t('db.teamCount', { count: teams.length })}</span><span>${t('db.playerCount', { count: playerCount })}</span>${leagueAverage}</div>
       </div>
     </header>
@@ -208,6 +208,8 @@ function showError(message) {
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 
 async function boot() {
+  await import('/js/edited-faces.js');
+  await window.LAQPEditedFaces.load(parseCSV);
   await window.LAQPEnsurePes2018Overall();
   const params = new URLSearchParams(window.location.search);
   const embeddedLeagueId = document.querySelector('meta[name="laqp-league-id"]')?.content || '';

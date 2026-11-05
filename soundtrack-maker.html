@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cambiar la música de PES 2018: Soundtrack Maker (MP3 a CPK) | LAqP</title>
+  <meta name="description" content="Creá o editá el soundtrack del menú de PES 2018 desde el navegador: cargá MP3 o tu CPK, escuchá, reemplazá y ordená entre 12 y 32 canciones y descargá un CPK listo para instalar.">
+  <link rel="canonical" href="https://laqp.website/soundtrack-maker.html">
+  <meta property="og:title" content="Soundtrack Maker · Tu música en el menú de PES 2018 | LAqP">
+  <meta property="og:description" content="Convertí tus MP3 en el soundtrack del menú de PES 2018: de 12 a 32 canciones, en tu orden, en un CPK listo para el juego.">
+  <meta property="og:url" content="https://laqp.website/soundtrack-maker.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:site_name" content="LAqP">
+  <meta property="og:image" content="https://laqp.website/img/logo.png">
+  <meta property="og:image:alt" content="LAqP · PES 2018">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Soundtrack Maker · Tu música en el menú de PES 2018 | LAqP">
+  <meta name="twitter:description" content="Convertí tus MP3 en el soundtrack del menú de PES 2018: de 12 a 32 canciones, en tu orden, en un CPK listo para el juego.">
+  <meta name="twitter:image" content="https://laqp.website/img/logo.png">
+  <link rel="icon" href="/img/logo.webp" type="image/webp">
+  <link rel="stylesheet" href="/css/style.css?v=20261004c">
+  <link rel="stylesheet" href="/css/site-navigation.css" data-site-navigation>
+  <link rel="stylesheet" href="/css/soundtrack-maker.css?v=20261104a">
+  <script src="/js/consent-mode.js"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-M7ZNDRZB27');</script>
+  <script type="application/ld+json">
+  {"@context": "https://schema.org", "@type": "WebApplication", "name": "LAqP Soundtrack Maker", "softwareVersion": "1.0 beta", "alternateName": "PES 2018 soundtrack maker", "url": "https://laqp.website/soundtrack-maker.html", "description": "Editor online del soundtrack del menú de PES 2018: importa MP3, permite ordenar y editar títulos y artistas, convierte a HCA y genera un CPK con BGM_P2P.acb, BGM_P2P.awb y Playlist.xml.", "applicationCategory": "MultimediaApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "inLanguage": "es", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "featureList": ["Importación de varios MP3 a la vez y arrastrar y soltar", "Títulos y artistas leídos de las etiquetas ID3", "Orden personalizado: el juego muestra las canciones en ese orden", "Vista previa de cada canción", "Carga y edición de un CPK de soundtrack ya armado: escuchar, reemplazar y reordenar sin recodificar", "Conversión a HCA 48 kHz en el navegador", "CPK listo para la carpeta download", "De 12 a 32 canciones"], "publisher": {"@type": "Organization", "name": "LAqP", "url": "https://laqp.website/"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Mis canciones se suben a algún servidor?", "acceptedAnswer": {"@type": "Answer", "text": "No. La lectura, la conversión y el empaquetado se hacen en tu navegador. Ningún archivo se envía a LAqP ni a servicios externos."}}, {"@type": "Question", "name": "¿Cuántas canciones puedo poner en el soundtrack de PES 2018?", "acceptedAnswer": {"@type": "Answer", "text": "Hasta 32: es el límite del juego. Soundtrack Maker pide un mínimo de 12, la misma cantidad que el soundtrack original."}}, {"@type": "Question", "name": "¿En qué orden aparecen las canciones en el juego?", "acceptedAnswer": {"@type": "Answer", "text": "En el mismo orden de tu lista. Reordenalas antes de generar el CPK."}}, {"@type": "Question", "name": "¿Por qué sigo escuchando la música anterior?", "acceptedAnswer": {"@type": "Answer", "text": "Otro CPK con música tiene más prioridad, por ejemplo el de un parche u Option File. En DpFileList Generator, ubicá tu CPK de soundtrack con más prioridad que ese. Si usás Sider con música en LiveCPK, esa música reemplaza a cualquier CPK."}}, {"@type": "Question", "name": "¿Puedo editar un soundtrack que ya armé?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Con «Cargar CPK» se leen las canciones, los títulos, los artistas y el orden. Podés escucharlas, reemplazar algunas, agregar o quitar. Las que no cambies se copian sin perder calidad y tu CPK original no se modifica. Si el CPK no trae Playlist.xml, te avisa y crea uno nuevo."}}, {"@type": "Question", "name": "¿Funciona para PS4?", "acceptedAnswer": {"@type": "Answer", "text": "Por ahora está pensado y probado solo para PES 2018 en PC."}}]}
+  </script>
+  <script defer src="/js/site.js"></script>
+  <script type="module" src="/js/soundtrack-maker/app.js?v=20261104a"></script>
+</head>
+<body class="soundtrack-maker-body">
+  <a class="sm-skip" href="#soundtrack-maker">Saltar al editor</a>
+  <header id="header" class="site-header-v2"><a href="/index.html" class="header-logo-link" aria-label="Inicio LAqP"><img class="logo" src="/img/logo.webp" alt="LAqP" width="38" height="38"></a><div class="header-title">LAqP<span>PES 2018</span></div><nav class="header-nav" aria-label="Menú principal"><a href="/downloads.html" class="header-nav-link">Spider Patch</a><details class="site-nav-group"><summary>Base de datos</summary><div class="site-nav-panel"><a class="header-nav-link" href="/database.html">Base de datos de jugadores y equipos</a><a class="header-nav-link" href="/database/DTs/">Directores técnicos</a><a class="header-nav-link" href="/tactics.html">Tácticas históricas</a></div></details><a class="header-nav-link" href="/draft/">LAqP Draft</a><details class="site-nav-group"><summary>Análisis</summary><div class="site-nav-panel"><a class="header-nav-link" href="/rankings.html">Scouting</a><a class="header-nav-link" href="/calculadora-medias.html">Calculadora de medias</a><a class="header-nav-link" href="/alineaciones.html">Creador de alineaciones</a></div></details><details class="site-nav-group"><summary>Editores</summary><div class="site-nav-panel"><a class="header-nav-link" href="/miniface-studio.html">Miniface Studio</a><a class="header-nav-link" href="/kit-color-studio.html">Kit Color Studio</a><a class="header-nav-link" href="/soundtrack-maker.html" aria-current="page">Soundtrack Maker</a></div></details><a href="/guias.html" class="header-nav-link">Guías</a><a class="header-nav-link site-account-fallback" href="/mi-cuenta.html">Cuenta</a></nav></header>
+
+  <main id="soundtrack-maker" class="sm-main" tabindex="-1">
+    <header class="sm-hero">
+      <div class="sm-hero-text">
+        <p class="sm-eyebrow"><a href="/index.html">LAqP</a> <span aria-hidden="true">/</span> Editores</p>
+        <h1>Soundtrack Maker: tu música en el menú de PES 2018</h1>
+        <p class="sm-lead">Armá el soundtrack del menú con tus propias canciones, sin instalar nada: cargá tus MP3 o un CPK que ya tengas, ordená, reemplazá, corregí títulos y artistas y descargá un CPK listo para el juego. Todo se procesa en tu navegador.</p>
+        <p class="sm-beta-note" role="note"><strong>Versión 1.0 beta:</strong> la herramienta sigue en desarrollo y puede tener errores. Probá el CPK en el juego y guardá una copia de los archivos que vayas a reemplazar.</p>
+      </div>
+      <ul class="sm-chips" aria-label="Características">
+        <li>12 a 32 canciones</li>
+        <li>MP3 → HCA 384 kbps</li>
+        <li>CPK listo</li>
+        <li class="sm-chip-version" title="Versión en desarrollo: puede tener errores">V1.0 beta</li>
+      </ul>
+    </header>
+
+    <section class="sm-app" aria-labelledby="sm-app-title">
+      <h2 id="sm-app-title" class="sm-sr-only">Editor del soundtrack</h2>
+      <div class="sm-library" id="sm-library">
+        <div class="sm-toolbar">
+          <button type="button" class="sm-button sm-button-primary" data-action="add"><span aria-hidden="true">＋</span>Agregar MP3</button>
+          <button type="button" class="sm-button" data-action="load-cpk"><span aria-hidden="true">⇪</span>Cargar CPK</button>
+          <div class="sm-counter">
+            <div class="sm-counter-head"><strong id="sm-count">0/32</strong><span id="sm-total" class="sm-total"></span></div>
+            <div class="sm-meter" id="sm-meter" role="meter" aria-label="Canciones en el soundtrack" aria-valuemin="0" aria-valuemax="32" aria-valuenow="0"><span id="sm-meter-fill"></span><i aria-hidden="true" title="Mínimo: 12"></i></div>
+          </div>
+        </div>
+        <p class="sm-summary" id="sm-summary" aria-live="polite"></p>
+        <div class="sm-source" id="sm-source" hidden>
+          <div class="sm-source-head"><strong id="sm-source-text"></strong><button type="button" class="sm-link" data-action="clear-source">Vaciar lista</button></div>
+          <ul id="sm-source-list"></ul>
+        </div>
+        <div class="sm-list-area">
+          <div class="sm-empty" id="sm-empty">
+            <p class="sm-empty-icon" aria-hidden="true">♫</p>
+            <p class="sm-empty-title">Arrastrá tus MP3 hasta acá</p>
+            <p>O elegilos desde tu computadora. Podés seleccionar varios a la vez.</p>
+            <div class="sm-empty-actions">
+              <button type="button" class="sm-button sm-button-primary" data-action="add">Elegir canciones</button>
+              <button type="button" class="sm-button" data-action="load-cpk">Editar un CPK que ya tengo</button>
+            </div>
+            <p class="sm-empty-note">Necesitás entre 12 y 32 canciones. El título y el artista se completan solos si el MP3 los trae.</p>
+          </div>
+          <div class="sm-list-head" id="sm-list-head" aria-hidden="true" hidden><span>#</span><span>Título</span><span>Artista</span></div>
+          <ol class="sm-list" id="sm-list" aria-label="Canciones del soundtrack, en el orden del juego"></ol>
+          <div class="sm-drop" id="sm-drop" hidden><span>Soltá para agregar las canciones</span></div>
+        </div>
+        <input type="file" id="sm-file" class="sm-sr-only" tabindex="-1" accept=".mp3,audio/mpeg" multiple aria-label="Elegir archivos MP3">
+        <input type="file" id="sm-cpk-file" class="sm-sr-only" tabindex="-1" accept=".cpk" aria-label="Elegir un CPK con soundtrack">
+        <input type="file" id="sm-replace-file" class="sm-sr-only" tabindex="-1" accept=".mp3,audio/mpeg" aria-label="Elegir el MP3 de reemplazo">
+        <audio id="sm-audio" preload="none" hidden></audio>
+      </div>
+
+      <aside class="sm-inspector" aria-label="Generar el soundtrack">
+        <section class="sm-panel" aria-labelledby="sm-generate-title">
+          <h3 id="sm-generate-title">Generar soundtrack <small>CPK para PES 2018 PC</small></h3>
+          <ul class="sm-checks" id="sm-checks" aria-label="Requisitos"></ul>
+          <div class="sm-field">
+            <label for="sm-cpk-name">Nombre del CPK</label>
+            <div class="sm-input-suffix"><input type="text" id="sm-cpk-name" autocomplete="off" spellcheck="false" maxlength="60" value="LAqP_Soundtrack"><span>.cpk</span></div>
+          </div>
+          <button type="button" class="sm-button sm-button-primary sm-button-block" id="sm-generate" disabled>Generar soundtrack</button>
+          <div class="sm-progress" id="sm-progress" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
+            <div class="sm-progress-track"><span id="sm-progress-bar"></span></div>
+            <p id="sm-progress-text" aria-live="polite"></p>
+          </div>
+          <button type="button" class="sm-link" id="sm-cancel" hidden>Cancelar</button>
+          <div class="sm-result" id="sm-result" hidden>
+            <p id="sm-result-text"></p>
+            <button type="button" class="sm-button sm-button-block" id="sm-redownload">Descargar de nuevo</button>
+            <p class="sm-hint"><a href="#instalar">Cómo instalarlo</a></p>
+          </div>
+          <p class="sm-hint">La conversión ocurre en tu navegador: ninguna canción se sube a internet. Tarda unos segundos por canción; no cierres la pestaña mientras tanto.</p>
+        </section>
+        <section class="sm-panel" aria-labelledby="sm-limits-title">
+          <h3 id="sm-limits-title">Límites del juego</h3>
+          <dl class="sm-limits">
+            <div><dt>Canciones</dt><dd>12 a 32 (el juego no admite más de 32)</dd></div>
+            <div><dt>Orden</dt><dd>El juego las muestra en el orden de tu lista</dd></div>
+            <div><dt>Título y artista</dt><dd>Hasta 63 bytes cada uno (unas 60 letras)</dd></div>
+            <div><dt>Formato</dt><dd>MP3 de entrada; se convierte a HCA estéreo 48 kHz</dd></div>
+          </dl>
+        </section>
+        <p class="sm-status" id="sm-status" role="status" aria-live="polite"></p>
+      </aside>
+    </section>
+    <noscript><p class="sm-noscript">Activá JavaScript para usar Soundtrack Maker.</p></noscript>
+
+    <div class="sm-content">
+      <section class="sm-article" aria-labelledby="como-crear">
+        <h2 id="como-crear">Cómo cambiar la música del menú de PES 2018</h2>
+        <ol class="sm-steps">
+          <li><strong>Cargá tus canciones.</strong> Arrastrá los MP3 a la lista o tocá «Agregar MP3». La colección empieza vacía: el soundtrack es solo tuyo.</li>
+          <li><strong>Revisá título y artista.</strong> Se completan con las etiquetas del MP3 o con el nombre del archivo; podés corregirlos. Así aparecen en el menú de música del juego.</li>
+          <li><strong>Ordenalas.</strong> Arrastrá la manija <span aria-hidden="true">⋮⋮</span> o usá las flechas. El juego respeta ese orden.</li>
+          <li><strong>Escuchalas.</strong> Con <span aria-hidden="true">▶</span> comprobás que cada archivo sea el correcto.</li>
+          <li><strong>Generá el soundtrack.</strong> Con 12 a 32 canciones, «Generar soundtrack» convierte todo y descarga el CPK.</li>
+        </ol>
+      </section>
+
+      <section class="sm-article" aria-labelledby="editar-cpk">
+        <h2 id="editar-cpk">Cómo editar un soundtrack que ya tenés</h2>
+        <ol class="sm-steps">
+          <li><strong>Tocá «Cargar CPK»</strong> y elegí el archivo, aunque sea un parche grande: solo se lee la parte de la música.</li>
+          <li><strong>Escuchá las canciones.</strong> Aparecen con sus títulos, artistas y orden.</li>
+          <li><strong>Cambiá lo que quieras.</strong> Con <span aria-hidden="true">⇄</span> reemplazás una canción por otro MP3 en el mismo lugar. También podés agregar, quitar, reordenar y corregir textos.</li>
+          <li><strong>Generá el CPK nuevo</strong> e instalalo con más prioridad que el original, que no se modifica.</li>
+        </ol>
+        <p>Las canciones que no cambies se copian tal cual, sin perder calidad. Si el CPK no trae <code>Playlist.xml</code>, la página te avisa, crea uno nuevo y te deja completar los nombres. El CPK nuevo trae solo el soundtrack: si el original tenía otras cosas, dejalo instalado.</p>
+      </section>
+
+      <section class="sm-article" aria-labelledby="instalar">
+        <h2 id="instalar">Cómo instalar el soundtrack</h2>
+        <ol class="sm-steps">
+          <li>Copiá el <code>.cpk</code> en la carpeta <code>download</code> del juego, por ejemplo <code>Pro Evolution Soccer 2018\download</code>.</li>
+          <li>Abrí DpFileList Generator, agregá el CPK y ubicalo con <strong>más prioridad que cualquier otro CPK que traiga música</strong> (por ejemplo, el del Option File o parche que uses). Guardá <code>DpFileList.bin</code>.</li>
+          <li>Iniciá PES 2018: en el <em>Menú de música de fondo</em> vas a ver tus canciones, en tu orden.</li>
+        </ol>
+        <p>Si usás Sider con música en una carpeta LiveCPK, esa música reemplaza a cualquier CPK: quitala o desactivá esa carpeta. Para entender las diferencias, mirá la guía <a href="/guia/sider-y-cpk-pes-2018/">CPK vs Sider en PES 2018</a>.</p>
+      </section>
+
+      <section class="sm-article" aria-labelledby="formato">
+        <h2 id="formato">Qué genera Soundtrack Maker</h2>
+        <p>El CPK trae solo los tres archivos que el juego necesita para la música del menú, construidos desde cero con la estructura del soundtrack original:</p>
+        <dl class="sm-specs">
+          <div><dt>Audio</dt><dd><code>common/sound/menu/awb/BGM_P2P.awb</code>: HCA estéreo 48 kHz, 384 kbps</dd></div>
+          <div><dt>Banco</dt><dd><code>common/sound/menu/acb/BGM_P2P.acb</code>: canciones, volumen del menú y créditos</dd></div>
+          <div><dt>Lista</dt><dd><code>common/sound/menu/playlist/Playlist.xml</code>: títulos, artistas y orden</dd></div>
+          <div><dt>CPK</dt><dd>Modo por nombre de archivo, alineación de 512 bytes, compatible con CRI Packed File Maker</dd></div>
+        </dl>
+        <p>No incluye los MP3, archivos temporales ni canciones originales del juego. El regulador de volumen de música del menú sigue funcionando.</p>
+      </section>
+
+      <section class="sm-article sm-faq" aria-labelledby="preguntas">
+        <h2 id="preguntas">Preguntas frecuentes</h2>
+        <details>
+          <summary>¿Mis canciones se suben a algún servidor?</summary>
+          <p>No. La lectura, la conversión y el empaquetado se hacen en tu navegador. Ningún archivo se envía a LAqP ni a servicios externos.</p>
+        </details>
+        <details>
+          <summary>¿Cuántas canciones puedo poner en el soundtrack de PES 2018?</summary>
+          <p>Hasta 32: es el límite del juego. Soundtrack Maker pide un mínimo de 12, la misma cantidad que el soundtrack original.</p>
+        </details>
+        <details>
+          <summary>¿En qué orden aparecen las canciones en el juego?</summary>
+          <p>En el mismo orden de tu lista. Reordenalas antes de generar el CPK.</p>
+        </details>
+        <details>
+          <summary>¿Por qué sigo escuchando la música anterior?</summary>
+          <p>Otro CPK con música tiene más prioridad, por ejemplo el de un parche u Option File. En DpFileList Generator, ubicá tu CPK de soundtrack con más prioridad que ese. Si usás Sider con música en LiveCPK, esa música reemplaza a cualquier CPK.</p>
+        </details>
+        <details>
+          <summary>¿Puedo editar un soundtrack que ya armé?</summary>
+          <p>Sí. Con «Cargar CPK» se leen las canciones, los títulos, los artistas y el orden. Podés escucharlas, reemplazar algunas, agregar o quitar. Las que no cambies se copian sin perder calidad y tu CPK original no se modifica. Si el CPK no trae Playlist.xml, te avisa y crea uno nuevo.</p>
+        </details>
+        <details>
+          <summary>¿Se guarda mi colección si cierro la página?</summary>
+          <p>No, en esta versión la colección vive en la pestaña abierta. Generá el CPK antes de cerrarla.</p>
+        </details>
+        <details>
+          <summary>¿Funciona para PS4?</summary>
+          <p>Por ahora está pensado y probado solo para PES 2018 en PC.</p>
+        </details>
+      </section>
+    </div>
+  </main>
+  <footer class="site-footer sm-footer"><span>LAqP.website · PES 2018</span><nav aria-label="Legal"><a href="/privacy-policy.html">Privacidad</a><a href="/terms.html">Términos</a></nav></footer>
+</body>
+</html>

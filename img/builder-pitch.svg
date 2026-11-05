@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 1000" preserveAspectRatio="none">
+  <defs><pattern id="grass" width="680" height="200" patternUnits="userSpaceOnUse"><path fill="#225322" d="M0 0h680v200H0z"/><path fill="#295e27" d="M0 100h680v100H0z"/></pattern><radialGradient id="shade"><stop stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#071d0d" stop-opacity=".22"/></radialGradient></defs>
+  <path fill="url(#grass)" d="M0 0h680v1000H0z"/><path fill="url(#shade)" d="M0 0h680v1000H0z"/>
+  <g fill="none" stroke="#c2db9b" stroke-opacity=".65" stroke-width="2.4">
+    <path d="M2 2h676v996H2zM2 500h676M120 2v155h440V2M248 2v50h184V2M120 998V843h440v155M248 998v-50h184v50"/>
+    <ellipse cx="340" cy="500" rx="91.5" ry="87.14"/>
+    <path d="M265 157a91.5 87.14 0 0 0 150 0M265 843a91.5 87.14 0 0 1 150 0M2 12a10 10 0 0 0 10-10M668 2a10 10 0 0 0 10 10M2 988a10 10 0 0 1 10 10M668 998a10 10 0 0 1 10-10"/>
+  </g>
+  <g fill="#c2db9b" opacity=".7"><circle cx="340" cy="500" r="3"/><circle cx="340" cy="105" r="3"/><circle cx="340" cy="895" r="3"/></g>
+</svg>

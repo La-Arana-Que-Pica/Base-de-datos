@@ -5,7 +5,46 @@
   const CURRENT_MODE = 'current';
   const PES_2018_MODE = 'pes2018';
   const DEFAULT_IMAGE = 'img/players/default.webp';
-  const PLAYER_IMAGE_RE = /(?:^|\/)img\/(?:players|pes_original_minifaces)\/(\d+)\.webp(?:[?#].*)?$/i;
+  // Nombre de archivo igual que en PES 2018: player_<ID>.webp (en el juego, .dds). Los IDs «inflados»
+  // de datapacks o jugadores creados (por ejemplo 1073857291) usan el ID real: ID - 0x40000000.
+  // Mientras queden archivos con el nombre anterior (<ID>.webp), se prueban como respaldo.
+  // Debe coincidir con Herramientas/Generadores/miniface_paths.py y draft/js/data/minifacePaths.js.
+  const INFLATED_ID_OFFSET = 0x40000000;
+  const LEGACY_FALLBACK = true;
+  const PLAYER_IMAGE_RE = /^(|.*\/)img\/(players|pes_original_minifaces)\/(player_)?(\d+)\.webp(?:[?#].*)?$/i;
+
+  function gameId(playerId) {
+    const value = String(playerId ?? '').trim();
+    if (!/^\d+$/.test(value)) return value;
+    const number = Number(value);
+    return number >= INFLATED_ID_OFFSET && number < INFLATED_ID_OFFSET * 2 ? String(number - INFLATED_ID_OFFSET) : String(number);
+  }
+
+  function fileName(playerId) {
+    return `player_${gameId(playerId)}.webp`;
+  }
+
+  /**
+   * Rutas a probar en orden para una miniface: primero el nombre del juego y, si está activo el
+   * respaldo, el nombre anterior. `knownId` es el ID de la base de datos (puede ser inflado).
+   */
+  function candidates(source, knownId) {
+    const match = String(source || '').match(PLAYER_IMAGE_RE);
+    if (!match) return source ? [source] : [];
+    const [, root, folder, prefixed, digits] = match;
+    const dbId = /^\d+$/.test(String(knownId || '')) ? String(knownId) : (prefixed ? '' : digits);
+    const game = prefixed ? String(Number(digits)) : gameId(digits);
+    const dir = `${root}img/${folder}/`;
+    const list = [`${dir}player_${game}.webp`];
+    if (LEGACY_FALLBACK) {
+      if (dbId) list.push(`${dir}${dbId}.webp`);
+      else {
+        list.push(`${dir}${game}.webp`);
+        if (Number(game) < INFLATED_ID_OFFSET) list.push(`${dir}${Number(game) + INFLATED_ID_OFFSET}.webp`);
+      }
+    }
+    return [...new Set(list)];
+  }
 
   function readMode() {
     try {
@@ -17,13 +56,16 @@
 
   let mode = readMode();
 
+  /** ID de la base de datos si se conoce (data-player-id o ruta anterior); si no, el del juego. */
   function playerIdFromImage(image) {
     const explicitId = String(image.dataset.playerId || '').trim();
-    if (/^\d+$/.test(explicitId)) return explicitId;
+    if (/^\d+$/.test(explicitId)) return { id: explicitId, known: true };
+    if (image.dataset.minifaceGameId) return { id: image.dataset.minifaceGameId, known: false };
 
     const source = image.getAttribute('src') || '';
     const match = source.match(PLAYER_IMAGE_RE);
-    return match ? match[1] : '';
+    if (!match) return { id: '', known: false };
+    return match[3] ? { id: String(Number(match[4])), known: false } : { id: match[4], known: true };
   }
 
   function currentSource(image, playerId) {
@@ -31,7 +73,7 @@
 
     const source = image.getAttribute('src') || '';
     const isPesOriginal = /(?:^|\/)img\/pes_original_minifaces\//i.test(source);
-    const resolved = source && !isPesOriginal ? source : `img/players/${encodeURIComponent(playerId)}.webp`;
+    const resolved = source && !isPesOriginal ? source : `img/players/${fileName(playerId)}`;
     image.dataset.minifaceCurrentSrc = resolved;
     return resolved;
   }
@@ -41,24 +83,32 @@
     if (image.getAttribute('src') !== source) image.setAttribute('src', source);
   }
 
+  function startSources(image, list, stage) {
+    image.dataset.minifaceFallbacks = JSON.stringify(list.slice(1));
+    setImageSource(image, list[0] || DEFAULT_IMAGE, list.length ? stage : 'default');
+  }
+
   function applyToImage(image, force) {
     if (!(image instanceof HTMLImageElement)) return;
 
-    const playerId = playerIdFromImage(image);
+    const { id: playerId, known } = playerIdFromImage(image);
     if (!playerId) return;
     if (!force && image.dataset.minifaceAppliedMode === mode) return;
 
-    image.dataset.playerId = playerId;
+    if (known) image.dataset.playerId = playerId;
+    else image.dataset.minifaceGameId = playerId;
     image.dataset.miniface = 'player';
+    const knownId = known ? playerId : '';
     image.onerror = null;
 
     const current = currentSource(image, playerId);
     image.dataset.minifaceAppliedMode = mode;
     const original = image.dataset.minifacePesSrc;
     if (mode === PES_2018_MODE) {
-      setImageSource(image, original === '' ? DEFAULT_IMAGE : (original || `img/pes_original_minifaces/${encodeURIComponent(playerId)}.webp`), original === '' ? 'default' : PES_2018_MODE);
+      if (original === '') setImageSource(image, DEFAULT_IMAGE, 'default');
+      else startSources(image, candidates(original || `img/pes_original_minifaces/${fileName(playerId)}`, knownId), PES_2018_MODE);
     } else {
-      setImageSource(image, current, CURRENT_MODE);
+      startSources(image, candidates(current, knownId), CURRENT_MODE);
     }
 
     if (image.complete && image.naturalWidth === 0) handleImageError(image);
@@ -74,6 +124,14 @@
     if (!(image instanceof HTMLImageElement) || image.dataset.miniface !== 'player') return;
 
     const stage = image.dataset.minifaceStage;
+    let pending = [];
+    try { pending = JSON.parse(image.dataset.minifaceFallbacks || '[]'); } catch (_error) { pending = []; }
+    if (stage !== 'default' && pending.length) {
+      const next = pending.shift();
+      image.dataset.minifaceFallbacks = JSON.stringify(pending);
+      setImageSource(image, next, stage);
+      return;
+    }
     if (stage === PES_2018_MODE) {
       setImageSource(image, DEFAULT_IMAGE, 'default');
       return;
@@ -164,11 +222,14 @@
     getMode: () => mode,
     setMode,
     refresh: root => applyToTree(root || document, true),
+    gameId,
+    fileName,
+    candidates,
     sourceFor(playerId, requestedMode) {
-      const safeId = encodeURIComponent(String(playerId || '').trim());
+      const name = encodeURIComponent(fileName(playerId));
       return requestedMode === PES_2018_MODE
-        ? `img/pes_original_minifaces/${safeId}.webp`
-        : `img/players/${safeId}.webp`;
+        ? `img/pes_original_minifaces/${name}`
+        : `img/players/${name}`;
     },
   };
 })();

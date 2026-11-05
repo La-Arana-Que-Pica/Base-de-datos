@@ -18,7 +18,16 @@
   ];
 
   const byId = Object.fromEntries(formations.map(formation => [formation.id, formation]));
-  const api = Object.freeze({ formations: Object.freeze(formations), byId: Object.freeze(byId) });
+  // Sporting coordinates shared by the drag preview and final placement.
+  const suggestedPositions = [
+    [15,['LWF','CF','CF','CF','RWF']],
+    [29,['LWF','SS','SS','SS','RWF']],
+    [43,['LMF','AMF','AMF','AMF','RMF']],
+    [57,['LMF','CMF','CMF','CMF','RMF']],
+    [70,['LB','DMF','DMF','DMF','RB']],
+    [81,['LB','CB','CB','CB','RB']],
+  ].flatMap(([y,roles]) => roles.map((position,index) => ({x:[12,31,50,69,88][index],y,position})));
+  const api = Object.freeze({ formations: Object.freeze(formations), byId: Object.freeze(byId), suggestedPositions: Object.freeze(suggestedPositions) });
   root.LAQPBuilderFormations = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

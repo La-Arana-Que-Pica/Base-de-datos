@@ -191,6 +191,7 @@
       ['comments', 'Mis comentarios', 'Todavía no publicaste comentarios.'],
       ['player', 'Jugadores favoritos', 'Todavía no guardaste jugadores.'],
       ['team', 'Equipos favoritos', 'Todavía no guardaste equipos.'],
+      ['manager', 'DTs favoritos', 'Todavía no guardaste DTs.'],
       ['tactic', 'Tácticas guardadas', 'Todavía no guardaste tácticas.'],
       ['lineups', 'Alineaciones guardadas', 'Todavía no guardaste alineaciones.'],
       ['ratings', 'Valoraciones', 'Todavía no valoraste contenido.'],
@@ -227,7 +228,7 @@
       }
 
       const saved = savedResult.data || [];
-      for (const type of ['player', 'team', 'tactic']) {
+      for (const type of ['player', 'team', 'manager', 'tactic']) {
         const rows = saved.filter(item => item.item_type === type);
         sections[type].count.textContent = String(rows.length);
         if (!rows.length) continue;

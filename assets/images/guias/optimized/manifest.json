@@ -1,0 +1,164 @@
+{
+  "assets/images/guias/configurar-kits.png": {
+    "original": [
+      1448,
+      1086
+    ],
+    "width": 960,
+    "height": 720,
+    "src": "/assets/images/guias/optimized/configurar-kits.webp"
+  },
+  "assets/images/guias/configurar-kits/comparacion-dorsales-mismo-club.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/comparacion-dorsales-mismo-club.webp"
+  },
+  "assets/images/guias/configurar-kits/comparacion-kits-configurado-y-no-conigurado.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/comparacion-kits-configurado-y-no-conigurado.webp"
+  },
+  "assets/images/guias/configurar-kits/comparacion-numeros.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/comparacion-numeros.webp"
+  },
+  "assets/images/guias/configurar-kits/cuentagotas-paint.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/cuentagotas-paint.webp"
+  },
+  "assets/images/guias/configurar-kits/muestra-colores-en-kit.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/muestra-colores-en-kit.webp"
+  },
+  "assets/images/guias/configurar-kits/muestra-cuello-correcto.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/muestra-cuello-correcto.webp"
+  },
+  "assets/images/guias/configurar-kits/muestra-importar-kits.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/muestra-importar-kits.webp"
+  },
+  "assets/images/guias/configurar-kits/muestra-kit-antes-de-ser-pegado.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/muestra-kit-antes-de-ser-pegado.webp"
+  },
+  "assets/images/guias/configurar-kits/muestra-kit-final.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/muestra-kit-final.webp"
+  },
+  "assets/images/guias/configurar-kits/muestra-tipo-71.png": {
+    "original": [
+      987,
+      738
+    ],
+    "width": 960,
+    "height": 718,
+    "src": "/assets/images/guias/optimized/muestra-tipo-71.webp"
+  },
+  "assets/images/guias/consejos-caras.png": {
+    "original": [
+      1536,
+      1024
+    ],
+    "width": 960,
+    "height": 640,
+    "src": "/assets/images/guias/optimized/consejos-caras.webp"
+  },
+  "assets/images/guias/consejos-caras/color-piel.webp": {
+    "original": [
+      660,
+      360
+    ],
+    "width": 660,
+    "height": 360,
+    "src": "/assets/images/guias/optimized/color-piel.webp"
+  },
+  "assets/images/guias/consejos-caras/imagen-referencia.webp": {
+    "original": [
+      220,
+      120
+    ],
+    "width": 220,
+    "height": 120,
+    "src": "/assets/images/guias/optimized/imagen-referencia.webp"
+  },
+  "assets/images/guias/cpk-vs-sider.png": {
+    "original": [
+      1536,
+      1024
+    ],
+    "width": 960,
+    "height": 640,
+    "src": "/assets/images/guias/optimized/cpk-vs-sider.webp"
+  },
+  "assets/images/guias/instalar-of.png": {
+    "original": [
+      1536,
+      1024
+    ],
+    "width": 960,
+    "height": 640,
+    "src": "/assets/images/guias/optimized/instalar-of.webp"
+  },
+  "assets/images/guias/parches-vs-option-files.png": {
+    "original": [
+      1536,
+      1024
+    ],
+    "width": 960,
+    "height": 640,
+    "src": "/assets/images/guias/optimized/parches-vs-option-files.webp"
+  },
+  "assets/images/guias/sistema-medias.png": {
+    "original": [
+      1448,
+      1086
+    ],
+    "width": 960,
+    "height": 720,
+    "src": "/assets/images/guias/optimized/sistema-medias.webp"
+  }
+}

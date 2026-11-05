@@ -1820,7 +1820,7 @@ function renderPlayerCard(item, index) {
     <article class="scouting-recommendation-card${index === 0 && !scoutingState.offset ? ' is-featured' : ''}">
       <div class="scouting-card-topline">
         <a class="scouting-player-photo" href="${link}">
-          <img src="img/players/${rankEscape(player.Id)}.webp" onerror="this.onerror=null;this.src='img/players/default.webp'" alt="${rankEscape(player.Name)}" loading="lazy">
+          <img src="${LAQPMinifaces.sourceFor(player.Id)}" data-player-id="${rankEscape(player.Id)}" onerror="this.onerror=null;this.src='img/players/default.webp'" alt="${rankEscape(player.Name)}" loading="lazy">
         </a>
         <div class="scouting-player-main">
           <a href="${link}" class="scouting-player-name scouting-marquee"><span class="scouting-marquee-text">${rankEscape(player.Name || 'Jugador')}</span></a>
@@ -2060,7 +2060,7 @@ function renderScoutedListPanel(items, club) {
           ${saved.map(player => `
             <div class="scouting-saved-row">
               <button type="button" class="scouting-saved-player" onclick="compareScoutingPlayer('${rankEscape(player.playerId)}')">
-                <img src="img/players/${rankEscape(player.playerId)}.webp" onerror="this.onerror=null;this.src='img/players/default.webp'" alt="">
+                <img src="${LAQPMinifaces.sourceFor(player.playerId)}" data-player-id="${rankEscape(player.playerId)}" onerror="this.onerror=null;this.src='img/players/default.webp'" alt="">
                 <span class="scouting-saved-info">
                   <strong>${rankEscape(player.name)}</strong>
                   <small>
@@ -2088,7 +2088,7 @@ function renderDiscoverySections(items, club) {
   ];
   const groups = definitions.map(([title, predicate]) => [title, items.filter(predicate).slice(0, 3)]).filter(([, rows]) => rows.length);
   if (!groups.length) return '';
-  return `<section class="scouting-discovery"><div class="scouting-section-heading"><span>Explorar el mercado</span><h2>Otras formas de descubrir</h2><p>Todas las listas usan el mismo motor de realismo y sus topes económicos.</p></div><div class="scouting-discovery-grid">${groups.map(([title, rows]) => `<article><h3>${rankEscape(title)}</h3>${rows.map(item => `<button type="button" onclick="compareScoutingPlayer('${rankEscape(item.player.Id)}')"><img src="img/players/${rankEscape(item.player.Id)}.webp" onerror="this.onerror=null;this.src='img/players/default.webp'" alt=""><span><strong>${rankEscape(item.player.Name)}</strong><small>${rankEscape(item.player.teamName)} · ${Math.round(item.fit)}% encaje</small></span><b>${item.realism?.score ?? '-'}%</b></button>`).join('')}</article>`).join('')}</div></section>`;
+  return `<section class="scouting-discovery"><div class="scouting-section-heading"><span>Explorar el mercado</span><h2>Otras formas de descubrir</h2><p>Todas las listas usan el mismo motor de realismo y sus topes económicos.</p></div><div class="scouting-discovery-grid">${groups.map(([title, rows]) => `<article><h3>${rankEscape(title)}</h3>${rows.map(item => `<button type="button" onclick="compareScoutingPlayer('${rankEscape(item.player.Id)}')"><img src="${LAQPMinifaces.sourceFor(item.player.Id)}" data-player-id="${rankEscape(item.player.Id)}" onerror="this.onerror=null;this.src='img/players/default.webp'" alt=""><span><strong>${rankEscape(item.player.Name)}</strong><small>${rankEscape(item.player.teamName)} · ${Math.round(item.fit)}% encaje</small></span><b>${item.realism?.score ?? '-'}%</b></button>`).join('')}</article>`).join('')}</div></section>`;
 }
 
 function applyScoutingMarquees() {

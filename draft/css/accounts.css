@@ -1,7 +1,0 @@
-/* Account synchronization only; existing game layouts remain unchanged. */
-#account-save-status{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;padding:7px clamp(12px,2.5vw,36px);min-height:34px;background:#071a22e8;border-bottom:1px solid #24535b;color:#9bdad6;font-size:12px;line-height:1.4}
-#account-save-status [data-account-message]{flex:1 1 240px}
-#account-save-status button{font-size:12px;min-height:32px;padding:6px 12px;white-space:normal}
-#account-save-status button[hidden]{display:none}
-@media(max-width:600px){#account-save-status{padding:7px 12px;gap:6px}#account-save-status button{flex:1 1 150px}}
-@media(forced-colors:active){#account-save-status{border-bottom:1px solid CanvasText;color:CanvasText;background:Canvas}}

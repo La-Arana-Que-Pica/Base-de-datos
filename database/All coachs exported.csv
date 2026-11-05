@@ -1,183 +1,183 @@
 ﻿Id;Country;Name;Photo;Photo_file;Edit_Name;Edit_Country;Edit_Photo;Edit_Intern;Value5
-2;228;JORGE JESUS;-1;;False;False;False;False;6
-24;215;G. IACHINI;-1;;False;False;False;False;6
-30;215;G. GASPERINI;-1;;False;False;False;False;6
+2;228;Jorge Jesus;-1;;False;False;False;False;6
+24;215;G. Iachini;-1;;False;False;False;False;6
+30;215;G. Gasperini;-1;;False;False;False;False;6
 31;215;A. Aquilani;-1;;True;False;False;False;0
-52;144;D. SIMEONE;-1;;False;False;False;False;6
-58;303;S. JOKANOVIĆ;-1;;False;False;False;False;6
-60;152;P. BENGOECHEA;-1;;False;False;False;False;6
-69;236;MARCELINO;-1;;False;False;False;False;6
-90;226;S. SOLBAKKEN;-1;;False;False;False;False;6
+52;144;D. Simeone;-1;;False;False;False;False;6
+58;303;S. Jokanović;-1;;False;False;False;False;6
+60;152;P. Bengoechea;-1;;False;False;False;False;6
+69;236;Marcelino;-1;;False;False;False;False;6
+90;226;S. Solbakken;-1;;False;False;False;False;6
 108;144;J. Vaccari;-1;;True;True;False;False;0
 109;146;Odair Hellmann;-1;;True;True;False;False;0
-113;232;D. MOYES;-1;;True;True;False;False;0
+113;144;W. Ribonetto;-1;;True;True;False;False;0
 119;210;E. Terzić;-1;;True;True;False;False;0
-123;215;R. MANCINI;-1;;False;False;False;False;6
+123;215;R. Mancini;-1;;False;False;False;False;6
 127;236;Iñigo Pérez;-1;;True;True;False;False;0
-144;144;G. B. SCHELOTTO;-1;;False;False;False;False;6
-155;144;M. RUSSO;-1;;False;False;False;False;6
-160;144;F. SAVA;-1;;False;False;False;False;6
-163;144;P. SÁNCHEZ;-1;;False;False;False;False;6
-166;144;M. PALERMO;-1;;False;False;False;False;6
+144;144;G. B. Schelotto;-1;;False;False;False;False;6
+155;144;M. Russo;-1;;False;False;False;False;6
+160;144;F. Sava;-1;;False;False;False;False;6
+163;144;P. Sánchez;-1;;False;False;False;False;6
+166;144;M. Palermo;-1;;False;False;False;False;6
 169;144;M. Demichelis;-1;;True;True;False;False;0
-172;144;J. ALMIRÓN;-1;;False;False;False;False;6
+172;144;J. Almirón;-1;;False;False;False;False;6
 183;200;S. Bilić;-1;;True;True;False;False;0
-195;147;M. SALAS;-1;;False;False;False;False;6
+195;147;M. Salas;-1;;False;False;False;False;6
 202;208;Z. Zidane;-1;;True;True;False;False;0
 205;236;Santi Denia;-1;;True;True;False;False;0
-210;236;MANOLO JIMÉNEZ;-1;;False;False;False;False;6
-238;236;E. VALVERDE;-1;;False;False;False;False;6
-249;228;S. CONCEIÇÃO;-1;;False;False;False;False;6
-271;190;F. TERIM;-1;;False;False;False;False;6
+210;236;Manolo Jiménez;-1;;False;False;False;False;6
+238;236;E. Valverde;-1;;False;False;False;False;6
+249;228;S. Conceição;-1;;False;False;False;False;6
+271;190;F. Terim;-1;;False;False;False;False;6
 278;215;V. Montella;-1;;True;True;False;False;0
-287;147;L. MARCOLETA;-1;;False;False;False;False;6
-290;194;A. HÜTTER;-1;;False;False;False;False;6
-297;228;PAULO FONSECA;-1;;False;False;False;False;6
-312;228;RUI VITÓRIA;-1;;False;False;False;False;6
+287;147;L. Marcoleta;-1;;False;False;False;False;6
+290;194;A. Hütter;-1;;False;False;False;False;6
+297;228;Paulo Fonseca;-1;;False;False;False;False;6
+312;228;Rui Vitória;-1;;False;False;False;False;6
 320;236;Julen Lopetegui;-1;;True;True;False;False;0
-332;144;0-editable;-1;;True;False;False;False;0
+332;144;Hernán Quiroga;-1;;True;False;False;False;0
 335;162;A. Postecoglou;-1;;True;True;False;False;0
-349;147;H. VILCHES;-1;;False;False;False;False;6
-372;215;S. PIOLI;-1;;False;False;False;False;6
-374;215;R. DONADONI;-1;;False;False;False;False;6
-379;215;D. BALLARDINI;-1;;False;False;False;False;6
+349;147;H. Vilches;-1;;False;False;False;False;6
+372;215;S. Pioli;-1;;False;False;False;False;6
+374;215;R. Donadoni;-1;;False;False;False;False;6
+379;215;D. Ballardini;-1;;False;False;False;False;6
 389;148;L. G. Vélez;-1;;True;True;False;False;0
-398;144;P. GUEDE;-1;;False;False;False;False;6
+398;144;P. Guede;-1;;False;False;False;False;6
 419;236;Luis Enrique;-1;;True;False;False;False;0
-430;228;PAULO SOUSA;-1;;False;False;False;False;0
-435;224;P. BOSZ;-1;;False;False;False;False;0
-478;144;M. GALLARDO;-1;;False;False;False;False;6
-488;144;D. COCCA;-1;;False;False;False;False;0
-498;144;J. FALCIONI;-1;;False;False;False;False;6
+430;228;Paulo Sousa;-1;;False;False;False;False;0
+435;224;P. Bosz;-1;;False;False;False;False;0
+478;144;M. Gallardo;-1;;False;False;False;False;6
+488;144;D. Cocca;-1;;False;False;False;False;0
+498;144;J. Falcioni;-1;;False;False;False;False;6
 511;144;H. Cúper;-1;;True;True;False;False;0
-513;236;ÓSCAR GARCÍA;-1;;False;False;False;False;6
-1046;144;1-editable;-1;;True;True;False;False;8
-1051;146;DORIVAL JÚNIOR;-1;;True;True;False;False;8
+513;236;Óscar García;-1;;False;False;False;False;6
+1046;144;Matías Barraza;-1;;True;True;False;False;8
+1051;146;Dorival Júnior;-1;;True;True;False;False;8
 1058;150;N. Valdez;-1;;True;True;False;False;8
-100143;215;W. ZENGA;-1;;False;False;False;False;6
-100161;215;R. MARAN;-1;;False;False;False;False;6
-100162;152;D. LÓPEZ;-1;;False;False;False;False;6
-100191;152;D. AGUIRRE;-1;;False;False;False;False;0
-100192;144;E. COUDET;-1;;False;False;False;False;6
-100196;215;M. ODDO;-1;;False;False;False;False;6
-100197;144;G. MILITO;-1;;False;False;False;False;6
-100198;224;D. ADVOCAAT;-1;;False;False;False;False;0
-100216;215;R. DE ZERBI;-1;;False;False;False;False;6
-100217;200;I. JURIC;-1;;False;False;False;False;0
-100227;144;N. GOROSITO;-1;;False;False;False;False;6
-100263;215;M. GIAMPAOLO;-1;;False;False;False;False;6
-100286;144;R. C. LOMBARDI;-1;;False;False;False;False;0
-100289;144;G. ALFARO;-1;;False;False;False;False;6
-100300;144;S. MÉNDEZ;-1;;False;False;False;False;0
-100301;144;L. MADELÓN;-1;;False;False;False;False;6
-100308;215;L. SEMPLICI;-1;;False;False;False;False;6
-100316;144;J. LLOP;-1;;False;False;False;False;6
-100355;144;R. ZIELINSKI;-1;;False;False;False;False;6
-100408;144;J. AZCONZÁBAL;-1;;False;False;False;False;0
-100416;144;D. GIOVAGNOLI;-1;;False;False;False;False;6
-100430;144;R. FORESTELLO;-1;;False;False;False;False;0
-100454;144;S. RONDINA;-1;;False;False;False;False;6
-100510;215;C. BUCCHI;-1;;False;False;False;False;0
-100556;144;C. VIGEVANI;-1;;False;False;False;False;0
-100583;147;F. BOZÁN;-1;;False;False;False;False;6
-100644;197;VANHAEZEBROUCK;-1;;False;False;False;False;6
-100657;239;S. REBROV;-1;;False;False;False;False;0
-100663;144;M. SCIACQUA;-1;;False;False;False;False;0
-100670;238;U. FISCHER;-1;;False;False;False;False;0
-100672;144;A. HOLAN;-1;;False;False;False;False;6
-100674;144;G. HEINZE;-1;;False;False;False;False;6
-100676;144;L. BERNARDI;-1;;False;False;False;False;6
-100715;190;S. GÜNEŞ;-1;;False;False;False;False;6
-100720;144;E. DOMÍNGUEZ;-1;;False;False;False;False;6
+100143;215;W. Zenga;-1;;False;False;False;False;6
+100161;215;R. Maran;-1;;False;False;False;False;6
+100162;152;D. López;-1;;False;False;False;False;6
+100191;152;D. Aguirre;-1;;False;False;False;False;0
+100192;144;E. Coudet;-1;;False;False;False;False;6
+100196;215;M. Oddo;-1;;False;False;False;False;6
+100197;144;G. Milito;-1;;False;False;False;False;6
+100198;224;D. Advocaat;-1;;False;False;False;False;0
+100216;215;R. De Zerbi;-1;;False;False;False;False;6
+100217;200;I. Juric;-1;;False;False;False;False;0
+100227;144;N. Gorosito;-1;;False;False;False;False;6
+100263;215;M. Giampaolo;-1;;False;False;False;False;6
+100286;144;R. C. Lombardi;-1;;False;False;False;False;0
+100289;144;G. Alfaro;-1;;False;False;False;False;6
+100300;144;S. Méndez;-1;;False;False;False;False;0
+100301;144;L. Madelón;-1;;False;False;False;False;6
+100308;215;L. Semplici;-1;;False;False;False;False;6
+100316;144;J. Llop;-1;;False;False;False;False;6
+100355;144;R. Zielinski;-1;;False;False;False;False;6
+100408;144;J. Azconzábal;-1;;False;False;False;False;0
+100416;144;D. Giovagnoli;-1;;False;False;False;False;6
+100430;144;R. Forestello;-1;;False;False;False;False;0
+100454;144;S. Rondina;-1;;False;False;False;False;6
+100510;215;C. Bucchi;-1;;False;False;False;False;0
+100556;144;C. Vigevani;-1;;False;False;False;False;0
+100583;147;F. Bozán;-1;;False;False;False;False;6
+100644;197;Vanhaezebrouck;-1;;False;False;False;False;6
+100657;239;S. Rebrov;-1;;False;False;False;False;0
+100663;144;M. Sciacqua;-1;;False;False;False;False;0
+100670;238;U. Fischer;-1;;False;False;False;False;0
+100672;144;A. Holan;-1;;False;False;False;False;6
+100674;144;G. Heinze;-1;;False;False;False;False;6
+100676;144;L. Bernardi;-1;;False;False;False;False;6
+100715;190;S. Güneş;-1;;False;False;False;False;6
+100720;144;E. Domínguez;-1;;False;False;False;False;6
 100727;144;M. Gallardo;-1;;True;True;False;False;0
-100733;147;M. PONCE;-1;;False;False;False;False;0
-100735;147;M. RAMÍREZ;-1;;False;False;False;False;6
-100736;147;N. CÓRDOVA;-1;;False;False;False;False;6
-100751;210;J. KLOPP;-1;;False;False;False;False;6
+100733;147;M. Ponce;-1;;False;False;False;False;0
+100735;147;M. Ramírez;-1;;False;False;False;False;6
+100736;147;N. Córdova;-1;;False;False;False;False;6
+100751;210;J. Klopp;-1;;False;False;False;False;6
 100754;210;K. Runjaić;-1;;True;True;False;False;0
-100764;236;BEÑAT SAN JOSÉ;-1;;False;False;False;False;6
-100771;215;L. SPALLETTI;-1;;False;False;False;False;6
-100773;144;C. ARÁN;-1;;False;False;False;False;0
-100774;144;N. VIVAS;-1;;False;False;False;False;0
-100777;144;C. BASSEDAS;-1;;False;False;False;False;6
-100778;144;P. LAVALLÉN;-1;;False;False;False;False;6
-100796;144;J. VOJVODA;-1;;False;False;False;False;6
-100817;215;S. INZAGHI;-1;;False;False;False;False;6
-100818;210;T. TUCHEL;-1;;False;False;False;False;0
-100829;197;M. PREUD'HOMME;-1;;False;False;False;False;0
-100849;144;G. ÁLVAREZ;-1;;False;False;False;False;0
-100853;144;F. KUDELKA;41;DT_F Kudelka.png;False;False;True;False;6
-100874;152;P. MONTERO;-1;;False;False;False;False;0
-100885;215;F. PECCHIA;-1;;False;False;False;False;6
-100888;210;M. WEINZIERL;-1;;False;False;False;False;0
-100909;236;VORO;-1;;False;False;False;False;0
-100921;215;S. VECCHI;-1;;False;False;False;False;0
-100924;144;J. PUMPIDO;-1;;False;False;False;False;6
-100939;196;V. GONCHARENKO;-1;;False;False;False;False;6
-100942;144;L. FERNÁNDEZ;-1;;False;False;False;False;6
-100946;144;G. HOYOS;-1;;False;False;False;False;6
-100948;144;H. GRONDONA;-1;;False;False;False;False;0
-100999;144;G. CAVALIERI;-1;;False;False;False;False;6
-101005;152;S. FERNÁNDEZ;-1;;False;False;False;False;0
-101006;144;P. MARINI;-1;;False;False;False;False;0
-101033;211;M. OUZOUNIDIS;-1;;False;False;False;False;6
-101034;211;T. LEMONIS;-1;;False;False;False;False;0
-101035;215;M. CARRERA;-1;;False;False;False;False;6
-101036;200;I. TUDOR;-1;;False;False;False;False;0
-101037;194;R. HASENHÜTTL;-1;;False;False;False;False;6
+100764;236;Beñat San José;-1;;False;False;False;False;6
+100771;215;L. Spalletti;-1;;False;False;False;False;6
+100773;144;C. Arán;-1;;False;False;False;False;0
+100774;144;N. Vivas;-1;;False;False;False;False;0
+100777;144;C. Bassedas;-1;;False;False;False;False;6
+100778;144;P. Lavallén;-1;;False;False;False;False;6
+100796;144;J. Vojvoda;-1;;False;False;False;False;6
+100817;215;S. Inzaghi;-1;;False;False;False;False;6
+100818;210;T. Tuchel;-1;;False;False;False;False;0
+100829;197;M. Preud'Homme;-1;;False;False;False;False;0
+100849;144;G. Álvarez;-1;;False;False;False;False;0
+100853;144;F. Kudelka;41;DT_F Kudelka.png;False;False;True;False;6
+100874;152;P. Montero;-1;;False;False;False;False;0
+100885;215;F. Pecchia;-1;;False;False;False;False;6
+100888;210;M. Weinzierl;-1;;False;False;False;False;0
+100909;236;Voro;-1;;False;False;False;False;0
+100921;215;S. Vecchi;-1;;False;False;False;False;0
+100924;144;J. Pumpido;-1;;False;False;False;False;6
+100939;196;V. Goncharenko;-1;;False;False;False;False;6
+100942;144;L. Fernández;-1;;False;False;False;False;6
+100946;144;G. Hoyos;-1;;False;False;False;False;6
+100948;144;H. Grondona;-1;;False;False;False;False;0
+100999;144;G. Cavalieri;-1;;False;False;False;False;6
+101005;152;S. Fernández;-1;;False;False;False;False;0
+101006;144;P. Marini;-1;;False;False;False;False;0
+101033;211;M. Ouzounidis;-1;;False;False;False;False;6
+101034;211;T. Lemonis;-1;;False;False;False;False;0
+101035;215;M. Carrera;-1;;False;False;False;False;6
+101036;200;I. Tudor;-1;;False;False;False;False;0
+101037;194;R. Hasenhüttl;-1;;False;False;False;False;6
 101040;144;Schiapparelli;-1;;True;True;False;False;0
-101041;238;R. WEILER;-1;;False;False;False;False;0
-101042;202;J. ŠILHAVÝ;-1;;False;False;False;False;0
-101043;303;V. IVIĆ;-1;;False;False;False;False;0
-101048;151;J. DEL SOLAR;-1;;False;False;False;False;0
-101051;237;M. PEHRSSON;-1;;False;False;False;False;6
-101055;144;G. ESMERADO;-1;;False;False;False;False;6
-101065;196;A. KHATSKEVICH;-1;;False;False;False;False;6
-101066;210;D. TEDESCO;-1;;False;False;False;False;6
-101067;229;V. TĂNASE;-1;;False;False;False;False;0
-101071;151;P. ZEGARRA;-1;;False;False;False;False;0
-101072;144;N. LARCAMÓN;-1;;False;False;False;False;6
-101078;200;I. LEKO;-1;;False;False;False;False;6
-101079;144;2-editable;0;;True;True;True;True;0
-101081;238;R. WICKY;-1;;False;False;False;False;6
-101086;190;A. KOCAMAN;-1;;False;False;False;False;6
-101090;152;M. LARRIERA;-1;;False;False;False;False;0
-101093;200;M. CVITANOVIĆ;-1;;False;False;False;False;6
-101099;144;A. BERTI;-1;;False;False;False;False;6
-101100;144;R. PANCALDO;-1;;False;False;False;False;6
-101103;229;R. LUCESCU;-1;;False;False;False;False;6
-101110;144;C. BIAGGIO;-1;;False;False;False;False;6
-101119;197;Y. VANDERHAEGHE;-1;;False;False;False;False;6
-101122;147;E. GUERRERO;-1;;False;False;False;False;6
-101127;229;N. DICĂ;-1;;False;False;False;False;6
-101138;194;P. STÖGER;-1;;False;False;False;False;6
-101140;144;S. PENA;-1;;False;False;False;False;6
-101141;215;E. CARBONI;-1;;False;False;False;False;6
-101142;144;C. LEDESMA;-1;;False;False;False;False;6
-101151;144;D. DABOVE;-1;;False;False;False;False;6
-101153;144;G. AMELI;-1;;False;False;False;False;6
-101160;202;J. TRPIŠOVSKÝ;-1;;False;False;False;False;6
-101510;147;A. SAL;-1;;True;True;False;False;14
-131073;236;R. MARTÍNEZ;-1;;False;False;False;False;6
-131177;215;G. VENTURA;-1;;False;False;False;False;6
-131205;210;J. LÖW;-1;;False;False;False;False;6
-131212;208;D. DESCHAMPS;-1;;False;False;False;False;6
-131228;144;E. BAUZA;-1;;False;False;False;False;6
-131342;241;C. COLEMAN;-1;;False;False;False;False;6
-131343;190;F. TERIM;-1;;False;False;False;False;6
-131344;225;M. O'NEILL;-1;;False;False;False;False;6
-131371;236;LOPETEGUI;-1;;False;False;False;False;6
-131373;227;A. NAWALKA;-1;;False;False;False;False;2
-131420;234;J. KOZÁK;-1;;False;False;False;False;6
-131477;144;J. PEKERMAN;-1;;False;False;False;False;6
-231350;228;FERNANDO SANTOS;-1;;False;False;False;False;6
-231562;224;F. GRIM;-1;;False;False;False;False;6
-231739;215;G. DE BIASI;-1;;False;False;False;False;6
-231866;200;A. ČAČIĆ;-1;;False;False;False;False;6
-232055;202;K. JAROLÍM;-1;;False;False;False;False;6
-232056;204;G. SOUTHGATE;-1;;False;False;False;False;6
-232058;213;H. HALLGRÍMSSON;-1;;False;False;False;False;6
-232068;239;A. SHEVCHENKO;-1;;False;False;False;False;6
+101041;238;R. Weiler;-1;;False;False;False;False;0
+101042;202;J. Šilhavý;-1;;False;False;False;False;0
+101043;303;V. Ivić;-1;;False;False;False;False;0
+101048;151;J. Del Solar;-1;;False;False;False;False;0
+101051;237;M. Pehrsson;-1;;False;False;False;False;6
+101055;144;G. Esmerado;-1;;False;False;False;False;6
+101065;196;A. Khatskevich;-1;;False;False;False;False;6
+101066;210;D. Tedesco;-1;;False;False;False;False;6
+101067;229;V. Tănase;-1;;False;False;False;False;0
+101071;151;P. Zegarra;-1;;False;False;False;False;0
+101072;144;N. Larcamón;-1;;False;False;False;False;6
+101078;200;I. Leko;-1;;False;False;False;False;6
+101079;144;Sergio Villalba;0;;True;True;True;True;0
+101081;238;R. Wicky;-1;;False;False;False;False;6
+101086;190;A. Kocaman;-1;;False;False;False;False;6
+101090;152;M. Larriera;-1;;False;False;False;False;0
+101093;200;M. Cvitanović;-1;;False;False;False;False;6
+101099;144;A. Berti;-1;;False;False;False;False;6
+101100;144;R. Pancaldo;-1;;False;False;False;False;6
+101103;229;R. Lucescu;-1;;False;False;False;False;6
+101110;144;C. Biaggio;-1;;False;False;False;False;6
+101119;197;Y. Vanderhaeghe;-1;;False;False;False;False;6
+101122;147;E. Guerrero;-1;;False;False;False;False;6
+101127;229;N. Dică;-1;;False;False;False;False;6
+101138;194;P. Stöger;-1;;False;False;False;False;6
+101140;144;S. Pena;-1;;False;False;False;False;6
+101141;215;E. Carboni;-1;;False;False;False;False;6
+101142;144;C. Ledesma;-1;;False;False;False;False;6
+101151;144;D. Dabove;-1;;False;False;False;False;6
+101153;144;G. Ameli;-1;;False;False;False;False;6
+101160;202;J. Trpišovský;-1;;False;False;False;False;6
+101510;147;A. Sal;-1;;True;True;False;False;14
+131073;236;R. Martínez;-1;;False;False;False;False;6
+131177;215;G. Ventura;-1;;False;False;False;False;6
+131205;210;J. Löw;-1;;False;False;False;False;6
+131212;208;D. Deschamps;-1;;False;False;False;False;6
+131228;144;E. Bauza;-1;;False;False;False;False;6
+131342;241;C. Coleman;-1;;False;False;False;False;6
+131343;190;F. Terim;-1;;False;False;False;False;6
+131344;225;M. O'Neill;-1;;False;False;False;False;6
+131371;236;Lopetegui;-1;;False;False;False;False;6
+131373;227;A. Nawalka;-1;;False;False;False;False;2
+131420;234;J. Kozák;-1;;False;False;False;False;6
+131477;144;J. Pekerman;-1;;False;False;False;False;6
+231350;228;Fernando Santos;-1;;False;False;False;False;6
+231562;224;F. Grim;-1;;False;False;False;False;6
+231739;215;G. De Biasi;-1;;False;False;False;False;6
+231866;200;A. Čačić;-1;;False;False;False;False;6
+232055;202;K. Jarolím;-1;;False;False;False;False;6
+232056;204;G. Southgate;-1;;False;False;False;False;6
+232058;213;H. Hallgrímsson;-1;;False;False;False;False;6
+232068;239;A. Shevchenko;-1;;False;False;False;False;6
 262156;225;M. O'Neill;-1;;True;True;False;False;0
 262161;208;B. Genesio;-1;;True;False;False;False;0
 262162;241;C. Bellamy;-1;;True;True;False;False;0
@@ -187,170 +187,170 @@
 262170;210;M. Jaissle;-1;;True;True;False;False;0
 262172;215;R. Mancini;-1;;True;True;False;False;0
 262173;215;P. Vanoli;-1;;True;False;False;False;0
-262175;215;S. CONTINI;-1;;False;False;False;False;0
+262175;215;F. Farioli;-1;;True;False;False;False;0
 262179;215;E. Di Francesco;-1;;True;False;False;False;0
 262181;144;F. Gago;-1;;True;True;False;False;0
 262194;232;D. Moyes;-1;;True;True;False;False;0
-262197;236;J. LUSARRETA;-1;;False;False;False;False;0
+262197;236;J. Lusarreta;-1;;False;False;False;False;0
 262200;210;J. Klopp;-1;;True;True;False;False;0
-262209;236;G. SAURA;-1;;False;False;False;False;0
+262209;236;G. Saura;-1;;False;False;False;False;0
 262210;226;S. Solbakken;-1;;True;True;False;False;0
 262211;234;V. Weiss;-1;;True;True;False;False;0
-262214;146;0-editable;-1;;True;False;False;False;0
-262215;236;R. GRIMAU;-1;;False;False;False;False;0
-262216;144;3-editable;-1;;True;True;False;False;0
+262214;146;Ricardo Neves;-1;;True;False;False;False;0
+262215;236;R. Grimau;-1;;False;False;False;False;0
+262216;144;Pablo Ferreyra;-1;;True;True;False;False;0
 262221;144;S. Domínguez;-1;;True;True;False;False;0
 262222;146;Jádson Viera;-1;;True;True;False;False;0
 262223;236;Quique Álvarez;-1;;True;False;False;False;0
 262224;236;C. Giráldez;-1;;True;True;False;False;0
-262226;236;T. DE BLAS;-1;;False;False;False;False;0
+262226;236;T. De Blas;-1;;False;False;False;False;0
 262227;135;P. Matarazzo;-1;;True;True;False;False;0
 262231;236;Unai Emery;-1;;True;False;False;False;0
 262232;236;José Bordalás;-1;;True;True;False;False;0
-262235;241;W. CESSNA;-1;;False;False;False;False;0
+262235;241;W. Cessna;-1;;False;False;False;False;0
 262236;215;A. Maldera;-1;;True;True;False;False;0
 262243;236;Mikel Arteta;-1;;True;True;False;False;0
-262248;236;G. ARCAS;-1;;False;False;False;False;0
+262248;236;G. Arcas;-1;;False;False;False;False;0
 262250;147;N. Córdova;-1;;True;True;False;False;0
-262254;215;C. MORINARI;-1;;False;False;False;False;0
+262254;215;C. Morinari;-1;;False;False;False;False;0
 262255;215;G. Gattuso;-1;;True;False;False;False;0
 262256;144;D. Garnero;-1;;True;True;False;False;8
 262268;146;Filipe Luís;-1;;True;True;False;False;0
 262294;144;G. Alfaro;-1;;True;True;False;False;0
-262314;144;F. ABASOLO;-1;;False;False;False;False;0
-262318;204;R. LODER;-1;;False;False;False;False;0
+262314;144;F. Abasolo;-1;;False;False;False;False;0
+262318;204;R. Loder;-1;;False;False;False;False;0
 262322;215;L. Spalletti;-1;;True;True;False;False;0
 262323;200;S. Jakirović;-1;;True;True;False;False;0
 262325;162;T. Popovic;-1;;True;True;False;False;0
 262329;215;G. Gasperini;-1;;True;True;False;False;0
-262330;152;0-editable;-1;;True;True;False;False;0
+262330;152;Martín Barrios;-1;;True;True;False;False;0
 262331;228;Luís Castro;-1;;True;True;False;False;0
-262332;224;M. DE WIT;-1;;False;False;False;False;0
+262332;224;M. De Wit;-1;;False;False;False;False;0
 262338;204;G. O'Neil;-1;;True;True;False;False;0
-262341;236;F. ERICE;-1;;False;False;False;False;0
+262341;236;F. Erice;-1;;False;False;False;False;0
 262360;215;E. Maresca;-1;;True;True;False;False;0
-262364;241;E. TYLER;-1;;False;False;False;False;0
-262365;152;O. BUENDIA;-1;;False;False;False;False;0
-262366;204;H. BLEASDALE;-1;;False;False;False;False;0
-262367;144;N. ACEDO;-1;;False;False;False;False;0
+262364;190;O. Buruk;-1;;True;True;False;False;0
+262365;152;O. Buendia;-1;;False;False;False;False;0
+262366;204;H. Bleasdale;-1;;False;False;False;False;0
+262367;144;N. Acedo;-1;;False;False;False;False;0
 262368;236;Óscar Sánchez;-1;;True;True;False;False;0
-262370;230;G. KYREJKO;-1;;False;False;False;False;0
+262370;230;G. Kyrejko;-1;;False;False;False;False;0
 262374;152;P. Pezzolano;-1;;True;True;False;False;0
 262379;203;J. Askou;-1;;True;True;False;False;0
-262380;236;G. CORNAGO;-1;;False;False;False;False;0
-262381;236;M. SAURA;-1;;False;False;False;False;0
+262380;236;G. Cornago;-1;;False;False;False;False;0
+262381;236;M. Saura;-1;;False;False;False;False;0
 262382;146;Fernando Diniz;-1;;True;True;False;False;0
-262383;208;Z. CAMARA;-1;;True;True;False;False;0
+262383;208;Z. Camara;-1;;True;True;False;False;0
 262386;220;L. Holtz;-1;;True;True;False;False;0
-262388;208;J. DUHAMEL;-1;;False;False;False;False;0
-262390;208;J. KLOTZ;-1;;False;False;False;False;0
+262388;208;J. Duhamel;-1;;False;False;False;False;0
+262390;208;J. Klotz;-1;;False;False;False;False;0
 262391;208;J. Lachuer;-1;;True;False;False;False;0
 262393;208;G. Poirier;-1;;True;True;False;False;0
 262395;144;L. Ponzio;-1;;True;True;False;False;0
 262396;236;Cesc Fàbregas;-1;;True;True;False;False;0
 262399;144;D. Simeone;-1;;True;True;False;False;0
 262403;208;A. Dujeux;-1;;True;False;False;False;0
-262404;208;N. SPIRA;-1;;False;False;False;False;0
-262406;208;E. TURPIN;-1;;False;False;False;False;0
-262407;208;F. HENNO;-1;;False;False;False;False;0
+262404;208;N. Spira;-1;;False;False;False;False;0
+262406;208;E. Turpin;-1;;False;False;False;False;0
+262407;208;F. Henno;-1;;False;False;False;False;0
 262413;236;J. López;-1;;True;True;False;False;0
 262414;215;R. De Zerbi;-1;;True;True;False;False;0
 262422;228;Paulo Fonseca;-1;;True;True;False;False;0
 262423;194;M. Muslić;-1;;True;True;False;False;0
-262425;144;F. EIZAGUIRRE;-1;;False;False;False;False;0
-262429;204;R. COLLINS;-1;;False;False;False;False;0
+262425;144;F. Eizaguirre;-1;;False;False;False;False;0
+262429;204;R. Collins;-1;;False;False;False;False;0
 262438;215;M. Sarri;-1;;True;True;False;False;0
-262439;208;R. AGNOLUTTO;-1;;False;False;False;False;0
+262439;208;R. Agnolutto;-1;;False;False;False;False;0
 262451;146;Rogério Ceni;-1;;True;True;False;False;0
 262453;236;Álvaro Arbeloa;-1;;True;True;False;False;8
-262454;227;J. URBAN;-1;;True;True;False;False;0
-262457;228;B. CUNHA;-1;;False;False;False;False;0
+262454;227;J. Urban;-1;;True;True;False;False;0
+262457;228;B. Cunha;-1;;False;False;False;False;0
 262458;228;César Peixoto;-1;;True;True;False;False;0
-262460;228;I. ATAIDE;-1;;False;False;False;False;0
-262461;208;F. TURPIN;-1;;False;False;False;False;0
+262460;228;I. Ataide;-1;;False;False;False;False;0
+262461;208;F. Turpin;-1;;False;False;False;False;0
 262462;228;N. E. Santo;-1;;True;True;False;False;0
-262465;204;B. FIRMAN;-1;;False;False;False;False;0
+262465;228;Marco Silva;-1;;True;True;False;False;0
 262480;215;M. Allegri;-1;;True;False;False;False;0
 262485;144;A. Pereyra;-1;;True;True;False;False;0
 262494;215;C. Ancelotti;-1;;True;True;False;False;0
-262495;211;G. LANCHESTER;-1;;False;False;False;False;0
-262497;236;O. BELEN;-1;;False;False;False;False;0
+262495;190;E. Belözoğlu;-1;;True;True;False;False;0
+262497;236;O. Belen;-1;;False;False;False;False;0
 262500;228;Hugo Oliveira;-1;;True;True;False;False;0
-262501;208;M. SAIN CYR;-1;;False;False;False;False;0
-262502;152;R. DEBON;-1;;False;False;False;False;0
+262501;208;M. Sain Cyr;-1;;False;False;False;False;0
+262502;152;R. Debon;-1;;False;False;False;False;0
 262503;210;D. Toppmöller;-1;;True;True;False;False;0
 262504;215;D. Tedesco;-1;;True;True;False;False;0
-262505;208;B. FRAMERY;-1;;False;False;False;False;0
+262505;208;B. Framery;-1;;False;False;False;False;0
 262507;208;S. Gilli;-1;;True;False;False;False;0
 262519;215;G. Stroppa;-1;;True;False;False;False;0
 262522;228;Leonardo Jardim;-1;;True;True;False;False;0
 262524;147;M. Pellegrini;-1;;True;True;False;False;0
-262525;236;T. MENDOZA;-1;;False;False;False;False;0
+262525;236;T. Mendoza;-1;;False;False;False;False;0
 262533;210;M. Rose;-1;;True;True;False;False;0
-262536;208;G. JOSPIN;-1;;False;False;False;False;0
+262536;208;G. Jospin;-1;;False;False;False;False;0
 262540;215;D. Ancelotti;-1;;True;True;False;False;0
 262545;146;Jair Ventura;-1;;True;True;False;False;0
-262546;232;K. DAVID;-1;;False;False;False;False;0
+262546;232;K. David;-1;;False;False;False;False;0
 262558;210;H. Flick;-1;;True;True;False;False;0
 262561;197;N. Hayen;-1;;True;True;False;False;0
 262567;236;Juan Funes;-1;;True;True;False;False;0
-262576;224;T. KONING;-1;;False;False;False;False;0
-262578;236;J. DE NEBRA;-1;;False;False;False;False;0
-262579;224;S. MARTENS;-1;;False;False;False;False;0
-262580;215;R. CITTERIO;-1;;False;False;False;False;0
-262581;215;R. SODI;-1;;False;False;False;False;0
+262576;224;T. Koning;-1;;False;False;False;False;0
+262578;236;J. De Nebra;-1;;False;False;False;False;0
+262579;224;S. Martens;-1;;False;False;False;False;0
+262580;215;V. Italiano;-1;;True;False;False;False;0
+262581;215;R. Sodi;-1;;False;False;False;False;0
 262589;208;F. Haise;-1;;True;False;False;False;0
 262592;236;Andoni Iraola;-1;;True;True;False;False;8
-262593;224;R. BOS;-1;;False;False;False;False;0
+262593;224;R. Bos;-1;;False;False;False;False;0
 262597;144;R. Arruabarrena;-1;;True;True;False;False;8
-262599;224;A. WILLEMSEN;-1;;False;False;False;False;0
+262599;224;P. Bosz;-1;;True;False;False;False;0
 262601;236;Xavi Hernández;-1;;True;True;False;False;0
 262615;144;N. Diez;-1;;True;True;False;False;0
-262616;215;T. BOSCOSCURO;-1;;False;False;False;False;0
+262616;215;T. Boscoscuro;-1;;False;False;False;False;0
 262620;148;A. Gamero;-1;;True;True;False;False;0
-262628;215;M. TROISI;-1;;False;False;False;False;0
+262628;215;M. Troisi;-1;;False;False;False;False;0
 262629;236;Carlos Cuesta;-1;;True;True;False;False;0
-262630;208;E. BERCHOT;-1;;False;False;False;False;0
+262630;208;E. Berchot;-1;;False;False;False;False;0
 262634;144;M. Soso;-1;;True;True;False;False;0
-262640;146;1-editable;-1;;True;True;False;False;0
-262645;204;T. HAZLEWOOD;-1;;False;False;False;False;0
+262640;146;Marcelo Cunha;-1;;True;True;False;False;0
+262645;204;T. Hazlewood;-1;;False;False;False;False;0
 262657;228;Hélio Sousa;-1;;True;True;False;False;0
 262662;145;Ó. Villegas;-1;;True;True;False;False;0
 262665;228;Artur Jorge;-1;;True;True;False;False;0
 263185;208;P. Videira;-1;;True;True;False;False;0
 263203;215;R. Maran;-1;;True;True;False;False;0
-263211;144;E. NUNEZ;-1;;False;False;False;False;0
-263310;215;1-editable;-1;;True;True;False;False;8
-264388;236;O. CALLEJA;-1;;False;False;False;False;0
-266246;228;L. MEDEIROS;-1;;False;False;False;False;0
+263211;144;E. Nunez;-1;;False;False;False;False;0
+263310;215;Andrea Bellini;-1;;True;True;False;False;8
+264388;236;O. Calleja;-1;;False;False;False;False;0
+266246;228;L. Medeiros;-1;;False;False;False;False;0
 362145;144;Francisco;-1;;True;True;False;False;0
 362146;213;A. Gunnlaugsson;-1;;True;True;False;False;0
-362151;194;B. WELLER;-1;;False;False;False;False;0
+362151;194;B. Weller;-1;;False;False;False;False;0
 362158;144;M. Anselmi;-1;;True;True;False;False;0
 362159;234;M. Gašparík;-1;;True;True;False;False;0
-362160;227;F. WHEATER;-1;;False;False;False;False;0
-362163;232;M. DEDRICK;-1;;False;False;False;False;0
-362169;210;G. LOHNER;-1;;False;False;False;False;0
+362160;227;F. Wheater;-1;;False;False;False;False;0
+362163;232;M. Dedrick;-1;;False;False;False;False;0
+362169;210;G. Lohner;-1;;False;False;False;False;0
 362170;197;V. Kompany;-1;;True;True;False;False;0
 362171;210;R. Kettemann;-1;;True;True;False;False;0
 362172;194;C. Ilzer;-1;;True;True;False;False;0
 362173;200;N. Kovač;-1;;True;True;False;False;0
 362174;228;José Mourinho;-1;;True;True;False;False;0
 362175;210;M. Polzin;-1;;True;True;False;False;0
-362176;210;0-editable;-1;;True;True;False;False;0
+362176;210;Lukas Hartmann;-1;;True;True;False;False;0
 362177;210;R. Wagner;-1;;True;True;False;False;0
-362178;210;A.BREITENREITER;-1;;True;True;False;False;0
+362178;210;A.Breitenreiter;-1;;True;True;False;False;0
 362179;151;R. Mosquera;-1;;True;True;False;False;0
-362180;44;I. AL MUQIT;-1;;False;False;False;False;0
+362180;44;I. Al Muqit;-1;;False;False;False;False;0
 362181;210;D. Thioune;-1;;True;True;False;False;0
-362182;210;S. SCHWARZ;-1;;True;True;False;False;0
+362182;210;S. Schwarz;-1;;True;True;False;False;0
 362183;238;M. Lustrinelli;-1;;True;True;False;False;0
 362184;210;J. Lichte;-1;;True;True;False;False;0
 362185;238;U. Fischer;-1;;True;True;False;False;0
 362186;210;S. Hoeneß;-1;;True;True;False;False;0
-362187;224;A. JONKER;-1;;True;True;False;False;0
-362188;208;G. SCHONBERG;-1;;False;False;False;False;0
-362189;144;0-editable;-1;;True;True;False;False;0
+362187;224;A. Jonker;-1;;True;True;False;False;0
+362188;208;G. Schonberg;-1;;False;False;False;False;0
+362189;144;Diego Santillán;-1;;True;True;False;False;0
 362190;146;Rafael Lacerda;-1;;True;True;False;False;0
 362191;124;V. Vucetich;-1;;True;True;False;False;0
 362192;152;P. Repetto;-1;;True;True;False;False;0
@@ -358,252 +358,252 @@
 362194;148;A. Restrepo;-1;;True;True;False;False;0
 362195;144;G. Álvarez;-1;;True;True;False;False;0
 362196;153;L. De Oliveira;-1;;True;True;False;False;0
-362197;208;L. Courtois;-1;;True;True;False;False;0
-362198;83;A. HUGUENET;-1;;False;False;False;False;0
+362197;135;G. Berhalter;-1;;True;True;False;False;0
+362198;83;A. Huguenet;-1;;False;False;False;False;0
 362199;148;S. Oliveros;-1;;True;True;False;False;0
 362200;144;H. Caputto;-1;;True;True;False;False;0
 362201;146;Léo Condé;-1;;True;True;False;False;0
 362202;144;H. Bidoglio;-1;;True;True;False;False;0
-362203;110;M. Dos Santos;-1;;True;True;False;False;0
-362204;215;A. CORRADINI;-1;;False;False;False;False;0
-362205;144;J. LLOBET;-1;;False;False;False;False;0
+362203;236;Xavi Tamarit;-1;;True;True;False;False;0
+362204;147;R. Fuentes;-1;;True;True;False;False;0
+362205;144;J. Llobet;-1;;False;False;False;False;0
 362206;210;J. Schuster;-1;;True;True;False;False;0
 362207;144;A. Mohamed;-1;;True;True;False;False;0
 362208;144;P. Troglio;-1;;True;True;False;False;0
 362209;144;P. De Muner;-1;;True;True;False;False;0
-362210;215;P. EVANI;-1;;False;False;False;False;0
-362211;215;S. DEMY;-1;;False;False;False;False;0
+362210;215;P. Evani;-1;;False;False;False;False;0
+362211;215;S. Demy;-1;;False;False;False;False;0
 362212;146;Cuca;-1;;True;True;False;False;0
 362213;144;D. Flores;-1;;True;True;False;False;0
-362214;128;J. ESCOLAR;-1;;False;False;False;False;0
-362215;144;M. ESLAVA;-1;;False;False;False;False;0
-362216;121;M. GARBAJOSA;-1;;False;False;False;False;0
-362217;144;A. HOMAR;-1;;False;False;False;False;0
-362218;215;A. MANCIA;-1;;False;False;False;False;0
-362219;147;A. MONTEIRO;-1;;False;False;False;False;0
-362220;215;G. SOMMESE;-1;;False;False;False;False;0
+362214;128;J. Escolar;-1;;False;False;False;False;0
+362215;144;M. Eslava;-1;;False;False;False;False;0
+362216;121;M. Garbajosa;-1;;False;False;False;False;0
+362217;144;A. Homar;-1;;False;False;False;False;0
+362218;215;A. Mancia;-1;;False;False;False;False;0
+362219;228;Paulo Fonseca;-1;;True;True;False;False;0
+362220;215;G. Sommese;-1;;False;False;False;False;0
 362221;152;D. Carreño;-1;;True;True;False;False;1
-362222;215;A. PACE;-1;;False;False;False;False;0
-362223;144;S. WEINDLER;-1;;False;False;False;False;0
-362224;149;T. URTUBIA;-1;;False;False;False;False;0
-362225;152;O. REVERTE;-1;;False;False;False;False;0
-362226;194;O. SCHLACK;-1;;False;False;False;False;0
-362227;224;C. DE LEEUW;-1;;False;False;False;False;0
-362228;210;I. HEPPNER;-1;;False;False;False;False;0
+362222;215;A. Pace;-1;;False;False;False;False;0
+362223;144;S. Weindler;-1;;False;False;False;False;0
+362224;149;T. Urtubia;-1;;False;False;False;False;0
+362225;152;O. Reverte;-1;;False;False;False;False;0
+362226;194;O. Schlack;-1;;False;False;False;False;0
+362227;224;C. De Leeuw;-1;;False;False;False;False;0
+362228;210;I. Heppner;-1;;False;False;False;False;0
 362234;152;J. Papa;-1;;True;True;False;False;0
-362245;210;B. KERPEN;-1;;False;False;False;False;0
+362245;210;B. Kerpen;-1;;False;False;False;False;0
 362246;152;S. Viera;-1;;True;True;False;False;0
 362247;152;G. Almada;-1;;True;True;False;False;0
 362248;144;G. Milito;-1;;True;True;False;False;0
-362249;197;P. VAN DER POL;-1;;False;False;False;False;0
+362249;197;P. Van Der Pol;-1;;False;False;False;False;0
 362250;198;S. Barbarez;-1;;True;True;False;False;0
-362251;135;R. Richter;-1;;True;True;False;False;0
+362251;144;M. Perelman;-1;;True;True;False;False;0
 362252;124;B. Mora;-1;;True;True;False;False;0
 362253;144;M. Almeyda;-1;;True;True;False;False;0
-362254;146;0-editable;-1;;True;True;False;False;0
+362254;146;Paulo Reis;-1;;True;True;False;False;0
 362255;144;D. Ayude;-1;;True;True;False;False;0
-362256;147;Q. PISADOR;-1;;False;False;False;False;0
+362256;147;Q. Pisador;-1;;False;False;False;False;0
 362257;215;F. Pisacane;-1;;True;True;False;False;0
-362258;197;D. EVERS;-1;;False;False;False;False;0
+362258;197;D. Evers;-1;;False;False;False;False;0
 362259;208;P. Sage;-1;;True;True;False;False;0
 362260;152;D. Aguirre;-1;;True;True;False;False;0
 362261;236;Pablo Trobbiani;-1;;True;True;False;False;0
 362262;144;P. Sánchez;-1;;True;True;False;False;0
 362263;148;L. Perea;-1;;True;True;False;False;0
 362264;146;Roger Silva;-1;;True;True;False;False;0
-362265;224;Q. DRIESSEN;-1;;False;False;False;False;0
+362265;224;Q. Driessen;-1;;False;False;False;False;0
 362266;144;J. Sanguinetti;-1;;True;True;False;False;0
-362268;194;O. SPEIDEL;-1;;False;False;False;False;0
-362279;204;F. WYNESS;-1;;False;False;False;False;0
-362281;144;S. RANDALL;-1;;False;False;False;False;0
-362283;11;J. GILLAN;-1;;False;False;False;False;0
+362268;194;O. Speidel;-1;;False;False;False;False;0
+362279;204;F. Wyness;-1;;False;False;False;False;0
+362281;144;S. Randall;-1;;False;False;False;False;0
+362283;11;J. Gillan;-1;;False;False;False;False;0
 362288;236;Manolo González;-1;;True;True;False;False;0
 362291;146;Rafael Guanaes;-1;;True;True;False;False;0
 362292;238;F. Hürzeler;-1;;True;True;False;False;0
-362304;215;T. BLANC;-1;;False;False;False;False;0
-362311;144;J. Vojvoda;-1;;True;True;False;False;0
-362312;224;P. GROEN;-1;;False;False;False;False;0
-362313;224;G. KONING;-1;;False;False;False;False;0
-362316;228;P. AZEVEDO;-1;;False;False;False;False;0
-362317;227;M. PROBIERZ;-1;;True;True;False;False;0
+362304;215;T. Blanc;-1;;False;False;False;False;0
+362311;144;S. Romero;-1;;True;True;False;False;0
+362312;224;P. Groen;-1;;False;False;False;False;0
+362313;224;G. Koning;-1;;False;False;False;False;0
+362316;228;P. Azevedo;-1;;False;False;False;False;0
+362317;203;N. Fredericksen;-1;;True;True;False;False;0
 362320;208;R. Le Bris;-1;;True;True;False;False;0
 362321;150;P. Godoy;-1;;True;True;False;False;0
 362332;236;Luis García;-1;;True;True;False;False;0
-362338;224;T. DE RUITER;-1;;False;False;False;False;0
-362342;224;V. SMITS;-1;;False;False;False;False;0
+362338;224;Van Bronckhorst;-1;;True;False;False;False;0
+362342;224;V. Smits;-1;;False;False;False;False;0
 362346;210;T. Tuchel;-1;;True;True;False;False;0
-362349;224;M. BOSMAN;-1;;False;False;False;False;0
+362349;224;M. Bosman;-1;;False;False;False;False;0
 362350;144;O. De Felippe;-1;;True;True;False;False;0
-362368;204;E. CAINE;-1;;False;False;False;False;0
+362368;204;E. Caine;-1;;False;False;False;False;0
 362369;144;F. Kudelka;-1;;True;True;False;False;0
 362381;204;D. Bazeley;-1;;True;True;False;False;0
-362383;208;T. FORET;-1;;False;False;False;False;0
-362396;224;G. HENDRIKS;-1;;False;False;False;False;0
+362383;208;T. Foret;-1;;False;False;False;False;0
+362396;224;G. Hendriks;-1;;False;False;False;False;0
 362406;144;J. Almirón;-1;;True;True;False;False;0
 362408;144;R. Insúa;-1;;True;True;False;False;0
 362411;204;W. Still;-1;;True;True;False;False;0
-362427;204;D. RODWELL;-1;;False;False;False;False;0
-362436;208;B. RENELLE;-1;;False;False;False;False;0
+362427;204;D. Rodwell;-1;;False;False;False;False;0
+362436;208;B. Renelle;-1;;False;False;False;False;0
 362439;208;D. Digard;-1;;True;False;False;False;0
 362442;144;G. B. Schelotto;-1;;True;True;False;False;0
-362456;215;2-editable;-1;;True;True;False;False;0
+362456;215;Marco Bianchi;-1;;True;True;False;False;0
 362462;204;F. Lampard;-1;;True;False;False;False;0
 362473;144;E. Domínguez;-1;;True;True;False;False;0
-362486;215;T. BLANGINI;-1;;False;False;False;False;0
-362490;215;L. BARBA;-1;;False;False;False;False;0
-362493;228;C. SANCHES;-1;;False;False;False;False;0
-362531;236;P. JONATHAN;-1;;False;False;False;False;0
-362532;228;F. BETENCOURT;-1;;False;False;False;False;0
-362545;236;N. BOLLAIN;-1;;False;False;False;False;0
-362565;236;G. MULLERA;-1;;False;False;False;False;0
+362486;215;T. Blangini;-1;;False;False;False;False;0
+362490;215;L. Barba;-1;;False;False;False;False;0
+362493;228;C. Sanches;-1;;False;False;False;False;0
+362531;236;P. Jonathan;-1;;False;False;False;False;0
+362532;228;F. Betencourt;-1;;False;False;False;False;0
+362545;236;N. Bollain;-1;;False;False;False;False;0
+362565;236;G. Mullera;-1;;False;False;False;False;0
 362581;214;K. Andrews;-1;;True;True;False;False;0
-362593;236;G. HERRALDE;-1;;False;False;False;False;0
-362608;236;I. FRAILE;-1;;False;False;False;False;0
-362618;208;N. BONHOMME;-1;;False;False;False;False;0
+362593;236;G. Herralde;-1;;False;False;False;False;0
+362608;236;I. Fraile;-1;;False;False;False;False;0
+362618;208;N. Bonhomme;-1;;False;False;False;False;0
 362620;204;L. Rosenior;-1;;True;True;False;False;0
-362646;146;C. ANTUNES;-1;;False;False;False;False;0
-362654;215;N. MASTRANGELO;-1;;False;False;False;False;0
-362662;236;I. DORADO;-1;;False;False;False;False;0
-362668;238;G. LETTIERI;-1;;True;True;False;False;0
-362669;228;L. TEIXEIRA;-1;;False;False;False;False;0
-362682;228;N. AGUILAR;-1;;False;False;False;False;0
-362691;236;F. UELTA;-1;;False;False;False;False;0
+362646;146;C. Antunes;-1;;False;False;False;False;0
+362654;215;N. Mastrangelo;-1;;False;False;False;False;0
+362662;236;I. Dorado;-1;;False;False;False;False;0
+362668;238;G. Lettieri;-1;;True;True;False;False;0
+362669;228;L. Teixeira;-1;;False;False;False;False;0
+362682;228;N. Aguilar;-1;;False;False;False;False;0
+362691;236;F. Uelta;-1;;False;False;False;False;0
 362696;144;M. Pellegrino;-1;;True;True;False;False;0
 362715;236;L. Ramis;-1;;True;True;False;False;0
-362738;232;F. HOLE;-1;;False;False;False;False;0
+362738;232;F. Hole;-1;;False;False;False;False;0
 362791;228;Abel Ferreira;-1;;True;True;False;False;0
-362796;204;L. ARFWEDSON;-1;;False;False;False;False;0
+362796;204;L. Arfwedson;-1;;False;False;False;False;0
 362799;208;O. Pantaloni;-1;;True;True;False;False;0
-362800;224;Z. PETERS;-1;;False;False;False;False;0
+362800;224;Z. Peters;-1;;False;False;False;False;0
 362808;144;F. Lisa;-1;;True;True;False;False;0
-362830;208;Y. JONCIERES;-1;;False;False;False;False;0
+362830;208;Y. Joncieres;-1;;False;False;False;False;0
 362831;144;I. Delfino;-1;;True;True;False;False;0
-362833;224;KUIJPERS;-1;;True;False;False;False;0
-362834;224;N. SMITS;-1;;False;False;False;False;0
-362835;224;J. KOK;-1;;False;False;False;False;0
-362837;228;T. DA GAMA;-1;;False;False;False;False;0
+362833;224;Kuijpers;-1;;True;False;False;False;0
+362834;236;Míchel Sánchez;-1;;True;True;False;False;0
+362835;224;J. Kok;-1;;False;False;False;False;0
+362837;228;T. Da Gama;-1;;False;False;False;False;0
 362840;144;D. Dabove;-1;;True;True;False;False;0
-362842;303;R. JOSIPOVIC;-1;;False;False;False;False;0
-362843;236;L. GALDEANO;-1;;False;False;False;False;0
+362842;303;R. Josipovic;-1;;False;False;False;False;0
+362843;236;L. Galdeano;-1;;False;False;False;False;0
 362850;146;Marcão;-1;;True;True;False;False;0
-362865;236;B. UNANUA;-1;;False;False;False;False;0
+362865;144;P. Graff;-1;;True;True;False;False;0
 362866;228;Luís Castro;-1;;True;True;False;False;0
 362884;236;Xabi Alonso;-1;;True;True;False;False;0
 362888;228;Pedro Emanuel;-1;;True;True;False;False;0
-362893;208;F. CUVILLIER;-1;;False;False;False;False;0
-362897;210;P. ROBILLARD;-1;;False;False;False;False;0
-362904;144;Manager;-1;;True;True;False;False;0
-362906;236;F. AZKORRA;-1;;False;False;False;False;0
+362893;208;F. Cuvillier;-1;;False;False;False;False;0
+362897;210;P. Robillard;-1;;False;False;False;False;0
+362904;144;Gustavo Peralta;-1;;True;True;False;False;0
+362906;236;F. Azkorra;-1;;False;False;False;False;0
 362909;144;G. Duró;-1;;True;True;False;False;0
-362915;215;3-editable;-1;;True;True;False;False;0
+362915;215;Alessio Moretti;-1;;True;True;False;False;0
 362926;144;P. Guede;-1;;True;True;False;False;0
-362928;208;T. ALDAY;-1;;False;False;False;False;0
-362942;224;C. BAKKER;-1;;False;False;False;False;0
-362943;236;O. MABILI;-1;;False;False;False;False;0
+362928;208;T. Alday;-1;;False;False;False;False;0
+362942;224;C. Bakker;-1;;False;False;False;False;0
+362943;236;O. Mabili;-1;;False;False;False;False;0
 362956;215;P. Bianco;-1;;True;False;False;False;0
-362967;204;C. BOECE;-1;;False;False;False;False;0
-362979;208;N. USAÏ;-1;;True;True;False;False;0
-362980;204;H. BRAMBLE;-1;;False;False;False;False;0
+362967;204;C. Boece;-1;;False;False;False;False;0
+362979;208;N. Usaï;-1;;True;True;False;False;0
+362980;204;H. Bramble;-1;;False;False;False;False;0
 362981;152;A. Medina;-1;;True;True;False;False;0
-362983;146;Allan Aal;-1;;True;True;False;False;0
-362995;215;M. CAPPELLINI;-1;;False;False;False;False;0
-363013;146;0-editable;-1;;True;False;False;False;0
+362983;146;Marquinhos;-1;;True;False;False;False;0
+362995;215;M. Cappellini;-1;;False;False;False;False;0
+363013;146;Eduardo Menezes;-1;;True;False;False;False;0
 363014;144;C. González;-1;;True;True;False;False;0
-363024;228;P. NUNES;-1;;False;False;False;False;0
-363025;224;W. DE GRAAF;-1;;False;False;False;False;0
+363024;228;P. Nunes;-1;;False;False;False;False;0
+363025;224;W. De Graaf;-1;;False;False;False;False;0
 363030;215;M. Alvini;-1;;True;False;False;False;0
 363035;236;Julián Calero;-1;;True;False;False;False;0
 363041;208;S. Durmont;-1;;True;False;False;False;0
-363043;228;D. SERPA;-1;;False;False;False;False;0
+363043;228;D. Serpa;-1;;False;False;False;False;0
 363045;144;A. Berti;-1;;True;True;False;False;0
 363047;144;R. Zielinski;-1;;True;True;False;False;0
 363054;144;L. Madelón;-1;;True;True;False;False;0
 363055;210;M. Baum;-1;;True;True;False;False;0
 363057;210;V. Wagner;-1;;True;True;False;False;0
 363074;144;C. Mungo;-1;;True;True;False;False;0
-363080;228;I. ALVARES;-1;;False;False;False;False;0
+363080;144;L. Bovaglio;-1;;True;True;False;False;0
 363082;229;C. Chivu;-1;;True;True;False;False;0
-363084;146;F. ABOIM;-1;;False;False;False;False;0
-363088;228;J. ATAIDE;-1;;False;False;False;False;0
-363089;227;M. BROSZ;-1;;True;True;False;False;0
+363084;147;H. Peña;-1;;True;True;False;False;0
+363088;147;J. García;-1;;True;True;False;False;0
+363089;227;M. Brosz;-1;;True;True;False;False;0
 363093;236;Luis García;-1;;True;True;False;False;0
-363095;232;I. CATHRO;-1;;True;True;False;False;0
+363095;232;I. Cathro;-1;;True;True;False;False;0
 363097;236;B. San José;-1;;True;True;False;False;0
-363098;208;A. BOUQUET;-1;;False;False;False;False;0
-363099;204;W. RIZA;-1;;False;False;False;False;0
-363115;215;G. SOLLECITO;-1;;False;False;False;False;0
-363116;146;C. MANUEL;-1;;False;False;False;False;0
-363117;215;T. CROCE;-1;;False;False;False;False;0
+363098;147;L. Marcoleta;-1;;True;True;False;False;0
+363099;144;G. Farré;-1;;True;True;False;False;0
+363115;147;C. Muñoz;-1;;True;True;False;False;0
+363116;146;C. Manuel;-1;;False;False;False;False;0
+363117;147;D. Muñoz;-1;;True;True;False;False;0
 363120;147;H. Suazo;-1;;True;True;False;False;0
 363145;144;J. Falcioni;-1;;True;True;False;False;0
 363147;144;M. Fuentes;-1;;True;True;False;False;0
 363148;144;G. Costas;-1;;True;True;False;False;0
-363153;135;P. Noonan;-1;;True;True;False;False;0
+363153;135;B. J. Callaghan;-1;;True;True;False;False;0
 363154;194;A. Hütter;-1;;True;True;False;False;0
-363155;197;C. KUIPER;-1;;False;False;False;False;0
-363156;204;A. HEYWOOD;-1;;False;False;False;False;0
-363159;208;H. JARIER;-1;;False;False;False;False;0
+363155;197;C. Kuiper;-1;;False;False;False;False;0
+363156;204;A. Heywood;-1;;False;False;False;False;0
+363159;208;H. Jarier;-1;;False;False;False;False;0
 363166;228;Rúben Amorim;-1;;True;True;False;False;0
-363167;224;T. VERMEULEN;-1;;False;False;False;False;0
-363189;215;E. PREGADIO;-1;;False;False;False;False;0
-363194;236;A. TXURRUKA;-1;;False;False;False;False;0
-363201;215;C. DE SICA;-1;;False;False;False;False;0
+363167;224;T. Vermeulen;-1;;False;False;False;False;0
+363189;215;E. Pregadio;-1;;False;False;False;False;0
+363194;236;A. Txurruka;-1;;False;False;False;False;0
+363201;215;C. De Sica;-1;;False;False;False;False;0
 363204;144;F. Sava;-1;;True;True;False;False;0
 363206;144;M. Palermo;-1;;True;True;False;False;0
-363212;210;D. JAKSCHE;-1;;False;False;False;False;0
+363212;210;D. Jaksche;-1;;False;False;False;False;0
 363213;144;F. Ortiz;-1;;True;True;False;False;0
 363214;224;M. Van Bommel;-1;;True;True;False;False;0
 363217;135;B. Schmetzer;-1;;True;True;False;False;0
-363218;210;M. WASCHER;-1;;False;False;False;False;0
+363218;210;M. Wascher;-1;;False;False;False;False;0
 363219;215;F. Pecchia;-1;;True;True;False;False;0
 363220;210;D. Farke;-1;;True;True;False;True;0
 363224;144;D. Martínez;-1;;True;True;False;False;0
-363227;236;J. GIBANEL;-1;;False;False;False;False;0
-363228;224;N. DRIESSEN;-1;;False;False;False;False;0
-363229;208;D. BLANCHOT;-1;;False;False;False;False;0
+363227;236;J. Gibanel;-1;;False;False;False;False;0
+363228;224;N. Driessen;-1;;False;False;False;False;0
+363229;208;D. Blanchot;-1;;False;False;False;False;0
 363232;200;I. Jurić;-1;;True;True;False;False;0
-363233;215;C. BACCIN;-1;;False;False;False;False;0
+363233;147;E. Astorga;-1;;True;True;False;False;0
 363235;236;Q. Flores;-1;;True;True;False;False;0
-363236;236;M. DE LA PENA;-1;;False;False;False;False;0
+363236;236;M. De La Pena;-1;;False;False;False;False;0
 363238;144;N. Domingo;-1;;True;True;False;False;0
-363242;228;B. GOIS;-1;;False;False;False;False;0
+363242;228;B. Gois;-1;;False;False;False;False;0
 363245;146;Dorival Júnior;-1;;True;True;False;False;0
-363249;208;D. FAURE;-1;;False;False;False;False;0
+363249;208;D. Faure;-1;;False;False;False;False;0
 363250;144;S. Rondina;-1;;True;True;False;False;0
 363251;144;C. Corrales;-1;;True;True;False;False;0
 363258;146;Fernando Seabra;-1;;True;True;False;False;0
-363265;224;0-editable;-1;;True;True;False;False;8
-363267;228;D. CORREA;-1;;False;False;False;False;0
+363265;224;Jeroen van Dijk;-1;;True;True;False;False;8
+363267;228;D. Correa;-1;;False;False;False;False;0
 363268;236;Antonio Hidalgo;-1;;True;True;False;False;0
-363273;224;E. BLOM;-1;;False;False;False;False;0
+363273;224;E. Blom;-1;;False;False;False;False;0
 363276;215;S. Inzaghi;-1;;True;True;False;False;0
-363279;228;I. VALENTE;-1;;False;False;False;False;0
-363283;236;C. ALZAMORA;-1;;False;False;False;False;0
-363288;146;0-editable;-1;;True;False;False;False;0
-363289;224;F. SCHOLTEN;-1;;False;False;False;False;0
-363291;146;0-editable;-1;;True;False;False;False;0
-363292;215;R. CAUSIO;-1;;False;False;False;False;0
+363279;228;I. Valente;-1;;False;False;False;False;0
+363283;236;C. Alzamora;-1;;False;False;False;False;0
+363288;146;Rafael Duarte;-1;;True;False;False;False;0
+363289;224;F. Scholten;-1;;False;False;False;False;0
+363291;146;Thiago Azevedo;-1;;True;False;False;False;0
+363292;215;R. Causio;-1;;False;False;False;False;0
 363293;236;Javier Rabanal;-1;;True;True;False;False;0
-363296;146;Gilson Kleina;-1;;True;True;False;False;0
-363298;228;0-editable;-1;;True;False;False;False;0
-363299;228;0-editable;-1;;True;False;False;False;0
-363301;208;0-editable;-1;;True;False;False;False;0
-363302;208;R. BOTTOLLIER;-1;;False;False;False;False;0
+363296;146;M. Fernandes;-1;;True;False;False;False;0
+363298;228;João Moreira;-1;;True;False;False;False;0
+363299;228;Miguel Cardoso;-1;;True;False;False;False;0
+363301;208;Laurent Dubois;-1;;True;False;False;False;0
+363302;208;R. Bottollier;-1;;False;False;False;False;0
 363305;146;Rodrigo Bellão;-1;;True;True;False;False;8
-363306;215;V. COBOLLI;-1;;False;False;False;False;0
+363306;215;V. Cobolli;-1;;False;False;False;False;0
 363310;215;D. De Rossi;-1;;True;True;False;False;8
 363652;146;Vagner Mancini;-1;;True;True;False;False;8
 393219;236;T. Christiansen;-1;;True;True;False;False;0
 393222;7;Jiayi Shao;-1;;True;True;False;False;0
 393231;204;A. Hudson;-1;;True;True;False;False;0
-393297;144;E. BERIZZO;-1;;True;True;False;False;0
+393297;152;F. Palladino;-1;;True;True;False;False;0
 393314;92;M. Chaabani;-1;;True;True;False;False;0
 393357;238;M. Yakin;-1;;True;True;False;False;0
 393429;200;Z. Dalić;-1;;True;True;False;False;0
 393484;197;S. Pocognoli;-1;;True;True;False;False;0
 393489;213;H. Hallgrímsson;-1;;True;True;False;False;0
 393490;124;R. Márquez;-1;;True;True;False;False;0
-393499;145;0-editable;-1;;True;False;False;False;0
+393499;145;Carlos Arce;-1;;True;False;False;False;0
 393518;194;O. Glasner;-1;;True;True;False;False;0
 393521;236;José Molina;-1;;True;True;False;False;0
 393539;11;A. Ghalenoei;-1;;True;True;False;False;0
@@ -616,7 +616,7 @@
 393601;236;L. De La Fuente;-1;;True;True;False;False;0
 393609;146;Mano Menezes;-1;;True;True;False;False;0
 393619;208;H. Renard;-1;;True;True;False;False;0
-393621;144;Y. VIQUEIRA;-1;;False;False;False;False;0
+393621;144;Y. Viqueira;-1;;False;False;False;False;0
 393623;153;O. Vizcarrondo;-1;;True;True;False;False;0
 393632;215;M. Baroni;-1;;True;True;False;False;0
 393662;210;R. Rangnick;-1;;True;True;False;False;0
@@ -634,7 +634,7 @@
 493648;208;P. Vieira;-1;;True;True;False;False;0
 493703;162;G. Arnold;-1;;True;True;False;False;0
 493775;215;F. Cannavaro;-1;;True;True;False;False;0
-493884;226;0-editable;-1;;True;True;False;False;0
+493884;226;Anders Haugland;-1;;True;True;False;False;0
 493932;303;V. Paunović;-1;;True;True;False;False;0
 494011;215;M. Rossi;-1;;True;True;False;False;0
 494071;50;D. Pagou;-1;;True;True;False;False;0
@@ -655,35 +655,35 @@
 494211;204;G. Potter;-1;;True;True;False;False;0
 494213;144;M. Pochettino;-1;;True;True;False;False;0
 494214;94;M. Sichone;-1;;True;True;False;False;0
-1073741828;16;SUN-HONG HWANG;-1;;False;False;False;False;2
-1073741867;162;T. POPOVIC;-1;;False;False;False;False;2
-1073741892;124;J. AGUIRRE;-1;;False;False;False;False;2
-1073742031;229;C. OLĂROIU;-1;;False;False;False;False;2
-1073742051;228;A. VILLAS-BOAS;-1;;False;False;False;False;2
-1073742206;146;L. F. SCOLARI;-1;;False;False;False;False;2
-1073742274;44;D. BELMADI;-1;;False;False;False;False;2
-1073742275;203;M. LAUDRUP;-1;;False;False;False;False;2
-1073742341;229;C. GÂLCĂ;-1;;False;False;False;False;2
-1073841969;92;F. AL JABAL;-1;;False;False;False;False;2
-1073842023;200;B. IVANKOVIĆ;-1;;False;False;False;False;2
-1073842037;16;JUNG-WON SEO;-1;;False;False;False;False;2
-1073842044;240;S. LUSHCHAN;-1;;False;False;False;False;2
-1073842060;238;C. GROSS;-1;;False;False;False;False;2
-1073842073;194;M. PETROVIĆ;-1;;False;False;False;False;2
-1073842109;144;R. DÍAZ;-1;;False;False;False;False;2
-1073842222;13;K. HASEGAWA;-1;;False;False;False;False;2
-1073842242;16;YONG-SOO CHOI;-1;;False;False;False;False;2
-1073842312;11;A. MANSOURIAN;-1;;False;False;False;False;2
-1073842604;200;Z. MAMIĆ;-1;;False;False;False;False;2
-1073842631;224;H. TEN CATE;-1;;False;False;False;False;2
-1073842633;240;A. MIKLYAEV;-1;;False;False;False;False;2
-1073842783;236;AMOR;-1;;False;False;False;False;2
-1073842784;11;M. HOSEINI;-1;;False;False;False;False;2
-1073842785;13;M. ISHII;-1;;False;False;False;False;2
-1073842786;13;T. ONIKI;-1;;False;False;False;False;2
-1073842787;16;DO-HOON KIM;-1;;False;False;False;False;2
-1073842789;162;J. ALOISI;-1;;False;False;False;False;2
-1073842791;16;SUNG-HWAN CHO;-1;;False;False;False;False;2
-1073842792;8;CHAN YUEN TING;-1;;False;False;False;False;2
-1073842793;36;T. SRIPAN;-1;;False;False;False;False;2
-1073842794;11;S. POURMOUSAVI;-1;;False;False;False;False;2
+1073741828;16;Sun-Hong Hwang;-1;;False;False;False;False;2
+1073741867;162;T. Popovic;-1;;False;False;False;False;2
+1073741892;124;J. Aguirre;-1;;False;False;False;False;2
+1073742031;229;C. Olăroiu;-1;;False;False;False;False;2
+1073742051;228;A. Villas-Boas;-1;;False;False;False;False;2
+1073742206;146;L. F. Scolari;-1;;False;False;False;False;2
+1073742274;44;D. Belmadi;-1;;False;False;False;False;2
+1073742275;203;M. Laudrup;-1;;False;False;False;False;2
+1073742341;229;C. Gâlcă;-1;;False;False;False;False;2
+1073841969;92;F. Al Jabal;-1;;False;False;False;False;2
+1073842023;200;B. Ivanković;-1;;False;False;False;False;2
+1073842037;16;Jung-Won Seo;-1;;False;False;False;False;2
+1073842044;240;S. Lushchan;-1;;False;False;False;False;2
+1073842060;238;C. Gross;-1;;False;False;False;False;2
+1073842073;194;M. Petrović;-1;;False;False;False;False;2
+1073842109;144;R. Díaz;-1;;False;False;False;False;2
+1073842222;13;K. Hasegawa;-1;;False;False;False;False;2
+1073842242;16;Yong-Soo Choi;-1;;False;False;False;False;2
+1073842312;11;A. Mansourian;-1;;False;False;False;False;2
+1073842604;200;Z. Mamić;-1;;False;False;False;False;2
+1073842631;224;H. Ten Cate;-1;;False;False;False;False;2
+1073842633;240;A. Miklyaev;-1;;False;False;False;False;2
+1073842783;236;Amor;-1;;False;False;False;False;2
+1073842784;11;M. Hoseini;-1;;False;False;False;False;2
+1073842785;13;M. Ishii;-1;;False;False;False;False;2
+1073842786;13;T. Oniki;-1;;False;False;False;False;2
+1073842787;16;Do-Hoon Kim;-1;;False;False;False;False;2
+1073842789;162;J. Aloisi;-1;;False;False;False;False;2
+1073842791;16;Sung-Hwan Cho;-1;;False;False;False;False;2
+1073842792;8;Chan Yuen Ting;-1;;False;False;False;False;2
+1073842793;36;T. Sripan;-1;;False;False;False;False;2
+1073842794;11;S. Pourmousavi;-1;;False;False;False;False;2

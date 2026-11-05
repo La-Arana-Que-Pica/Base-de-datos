@@ -1,7 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <base href="/">
+  <script>
+    (function () {
+      var path = location.pathname;
+      var clean = path.replace(/^\/(database|player|team|league)\/v2(?=\/|$)/, '/$1');
+      if (clean !== path) location.replace(clean + location.search + location.hash);
+    })();
+  </script>
   <script src="js/consent-mode.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-M7ZNDRZB27');
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pagina no encontrada | LAqP.website</title>
@@ -24,7 +41,7 @@
       <p>La URL que abriste no existe, fue movida o quedo desactualizada. Podes seguir navegando desde estas secciones principales.</p>
       <div class="seo-link-row">
         <a href="database.html">Base de datos</a>
-        <a href="downloads.html">Option Files</a>
+        <a href="downloads.html">Spider Patch</a>
         <a href="guias.html">Guias</a>
         <a href="tactics.html">Tacticas</a>
         <a href="contact.html">Contacto</a>

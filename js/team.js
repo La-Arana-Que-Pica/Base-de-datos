@@ -437,7 +437,7 @@ function renderFormationPitch(players, formationRow, squadSlots, teamId) {
       tokens.push(`
         <a class="pitch-player" href="${typeof laqpPlayerUrl === 'function' ? laqpPlayerUrl(pid, tid, player.Name) : `player.html?id=${pid}&team=${tid}`}" style="left:${leftPct.toFixed(1)}%;top:${topPct.toFixed(1)}%;z-index:${zIdx}">
           <div class="pitch-player-photo-wrap">
-            <img src="img/players/${pid}.webp"
+            <img src="${LAQPMinifaces.sourceFor(pid)}" data-player-id="${pid}"
               onerror="handleMinifaceError(this,'${pid}')"
               class="pitch-player-photo" alt="${fullName}">
             ${isCapitan ? '<div class="pitch-captain-badge">C</div>' : ''}
@@ -631,11 +631,11 @@ function renderPlayerCard(player, teamId) {
         </div>
       </div>
       <div class="player-card-photo-wrap">
-        <img class="player-card-photo" src="img/players/${pid}.webp"
+        <img class="player-card-photo" src="${LAQPMinifaces.sourceFor(pid)}" data-player-id="${pid}"
           onerror="handleMinifaceError(this,'${pid}')" alt="${safeName}">
       </div>
       <div class="player-card-footer">
-        <div class="player-card-name">${safeName}</div>
+        <div class="player-card-name">${safeName}</div>${window.LAQPEditedFaces.playerBadge(player)}
         <div class="player-card-stats">
           <div class="pcs"><span class="pcs-val" style="color:${atqColor}">${radarAttrs.ATQ}</span><span class="pcs-key">ATQ</span></div>
           <div class="pcs"><span class="pcs-val" style="color:${regColor}">${radarAttrs.REG}</span><span class="pcs-key">REG</span></div>
@@ -812,11 +812,11 @@ function renderPlayerRow(player, teamId) {
     <td class="shirt-number-cell">${shirtNum}</td>
     <td>
       <img class="player-row-photo"
-        src="img/players/${escapeHtml(player.ID)}.webp"
+        src="${LAQPMinifaces.sourceFor(player.ID)}" data-player-id="${escapeHtml(player.ID)}"
         onerror="handleMinifaceError(this,'${escapeHtml(player.ID)}')"
         alt="${safeName}">
     </td>
-    <td><strong>${safeName || '-'}</strong></td>
+    <td><strong>${safeName || '-'}</strong>${window.LAQPEditedFaces.playerBadge(player)}</td>
     <td>
       <img class="player-flag"
         src="${flagSrc(player.Nationality)}"
@@ -884,7 +884,7 @@ function renderTeamPage(team, players, formationRow, squadSlots, coachName, stad
         onerror="this.onerror=null;this.src='img/teams/default.webp'"
         alt="${safeTeamName}">
       <div>
-        <h1 class="view-title">${safeTeamName}</h1>
+        <h1 class="view-title">${safeTeamName}</h1>${window.LAQPEditedFaces.badge(window.LAQPEditedFaces.full(players), true)}
         <div class="view-subtitle">${escapeHtml(typeLabel)} · ${t('db.playerCount', { count: players.length })}</div>
         ${extraInfoHtml ? `<div class="team-extra-info">${extraInfoHtml}</div>` : ''}
       </div>
@@ -1059,6 +1059,8 @@ function goBack() {
 // â”€â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function boot() {
+  await import('/js/edited-faces.js');
+  await window.LAQPEditedFaces.load(parseCSV);
   await window.LAQPEnsurePes2018Overall();
   const params = new URLSearchParams(window.location.search);
   const embeddedTeamId = document.querySelector('meta[name="laqp-team-id"]')?.content || '';

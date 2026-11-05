@@ -1,6 +1,10 @@
 'use strict';
 
 (function () {
+  if (window.LAQPComments) {
+    window.LAQPComments.mount();
+    return;
+  }
   const PAGE_SIZE = 20;
   const MAX_LENGTH = 1000;
   const state = {
@@ -16,6 +20,7 @@
     editId: null,
     hashTargetId: '',
     hashTargetLoaded: false,
+    mountRevision: 0,
   };
 
   const client = () => window.LAQP_SUPABASE || null;
@@ -51,7 +56,7 @@
     if (/^\/assets\/avatars\/avatar-[1-4]\.svg$/.test(raw)) return raw;
     if (/^https:\/\/lh3\.googleusercontent\.com\//i.test(raw)) return raw;
     const projectUrl = window.LAQP_SUPABASE_CONFIG?.url || 'https://npyvbqzgcdoujfxefsdr.supabase.co';
-    if (raw.startsWith(`${projectUrl}/storage/v1/object/public/avatars/`)) return raw;
+    if (raw.startsWith(`${projectUrl}/storage/v1/object/public/avatars/`)) return raw + '?v=' + Date.now();
     return '/assets/avatars/avatar-1.svg';
   }
 
@@ -104,6 +109,7 @@
   }
 
   async function loadHashTarget() {
+    const revision = state.mountRevision;
     const targetId = targetIdFromHash();
     if (!targetId || !client()) return;
     state.hashTargetId = targetId;
@@ -124,6 +130,7 @@
         .eq('status', 'visible')
         .maybeSingle();
       if (targetResult.error) throw targetResult.error;
+      if (revision !== state.mountRevision) return;
       const target = targetResult.data;
       if (!target) return;
       const parentId = target.parent_id || target.id;
@@ -135,6 +142,7 @@
           .eq('id', parentId)
           .maybeSingle();
         if (parentResult.error) throw parentResult.error;
+        if (revision !== state.mountRevision) return;
         parent = parentResult.data;
       }
       if (!parent) return;
@@ -144,6 +152,7 @@
         .eq('parent_id', parentId)
         .order('created_at', { ascending: true });
       if (repliesResult.error) throw repliesResult.error;
+      if (revision !== state.mountRevision) return;
       const thread = { ...parent, replies: repliesResult.data || [] };
       const existing = state.rows.findIndex(row => row.id === parentId);
       if (existing >= 0) state.rows[existing] = thread;
@@ -157,6 +166,7 @@
 
   async function fetchPage(reset = false) {
     if (state.busy || !client()) return;
+    const revision = state.mountRevision;
     state.busy = true;
     if (reset) {
       state.offset = 0;
@@ -184,6 +194,7 @@
       ]);
       if (mainResult.error) throw mainResult.error;
       if (countResult.error) throw countResult.error;
+      if (revision !== state.mountRevision) return;
       const mains = mainResult.data || [];
       const ids = mains.map(item => item.id);
       let replies = [];
@@ -194,6 +205,7 @@
           .in('parent_id', ids)
           .order('created_at', { ascending: true });
         if (replyResult.error) throw replyResult.error;
+        if (revision !== state.mountRevision) return;
         replies = replyResult.data || [];
       }
       const byParent = new Map();
@@ -213,10 +225,12 @@
       state.visibleCount = countResult.count || 0;
       render();
     } catch (error) {
-      renderFailure(errorMessage(error, 'No pudimos cargar los comentarios.'));
+      if (revision === state.mountRevision) renderFailure(errorMessage(error, 'No pudimos cargar los comentarios.'));
     } finally {
-      state.busy = false;
-      if (targetIdFromHash()) void loadHashTarget();
+      if (revision === state.mountRevision) {
+        state.busy = false;
+        if (targetIdFromHash()) void loadHashTarget();
+      }
     }
   }
 
@@ -494,11 +508,29 @@
   function mount() {
     const host = document.querySelector('[data-laqp-comments]');
     if (!host || !client()) return;
+    const pageType = host.dataset.pageType || '';
+    const pageId = host.dataset.pageId || '';
+    if (!['player', 'team', 'tactic', 'download', 'manager'].includes(pageType) || !pageId) return;
+    if (state.host === host && state.pageType === pageType && state.pageId === pageId && host.dataset.laqpCommentsMounted === 'true') {
+      render();
+      if (targetIdFromHash()) void loadHashTarget();
+      return;
+    }
+    state.mountRevision += 1;
     state.host = host;
-    state.pageType = host.dataset.pageType || '';
-    state.pageId = host.dataset.pageId || '';
-    if (!['player', 'team', 'tactic', 'download'].includes(state.pageType) || !state.pageId) return;
+    state.pageType = pageType;
+    state.pageId = pageId;
+    state.rows = [];
+    state.offset = 0;
+    state.hasMore = false;
+    state.visibleCount = 0;
+    state.busy = false;
+    state.replyTo = null;
+    state.editId = null;
+    state.hashTargetId = targetIdFromHash();
+    state.hashTargetLoaded = false;
     host.classList.add('laqp-comments');
+    host.dataset.laqpCommentsMounted = 'true';
     host.innerHTML = `
       <header class="laqp-comments-heading"><div><span>Comunidad LAqP</span><h2 data-comments-title>Comentarios</h2></div><p>Opiniones y aportes de la comunidad.</p></header>
       <div data-comments-composer></div>
@@ -506,16 +538,18 @@
       <button class="laqp-secondary-button laqp-comments-more" type="button" data-comments-more hidden>Cargar más comentarios</button>`;
     host.querySelector('[data-comments-more]').addEventListener('click', () => fetchPage(false));
     render();
-    fetchPage(true);
-    window.addEventListener('hashchange', () => {
-      state.hashTargetId = targetIdFromHash();
-      state.hashTargetLoaded = false;
-      void loadHashTarget();
-    });
+    void fetchPage(true);
   }
 
+  window.LAQPComments = Object.freeze({ mount });
   document.addEventListener('laqp-auth-change', render);
   document.addEventListener('laqp-profile-change', render);
+  document.addEventListener('laqp-social-refresh', mount);
+  window.addEventListener('hashchange', () => {
+    state.hashTargetId = targetIdFromHash();
+    state.hashTargetLoaded = false;
+    void loadHashTarget();
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true });
   else mount();
 })();

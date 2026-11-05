@@ -1,4 +1,61 @@
 /* One visual vocabulary across Database, leagues, clubs, players, DTs and tactics. */
+html[data-face-badges="hidden"] :is(.laqp-face-badge, .player-face-status) { display: none !important; }
+#home-view :is(.laqp-face-badge, .player-face-status) { display: none !important; }
+.face-badge-preference { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; padding: 8px 0; color: #b8c6d2; font-size: 12px; line-height: 1.4; cursor: pointer; }
+.face-badge-preference input { margin: 0; accent-color: var(--db-accent, #21d4c2); cursor: pointer; }
+.player-face-status {
+  display: table;
+  max-width: 100%;
+  margin: 8px 0;
+  padding: 5px 10px;
+  border-inline-start: 3px solid #677783;
+  background: #ffffff08;
+  color: #b8c2cb;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.player-face-status.is-edited {
+  border: 1px solid #b99650;
+  border-inline-start-width: 4px;
+  border-radius: 4px;
+  background: #d7b15c20;
+  color: #f2d797;
+  font-weight: 600;
+}
+.player-face-status.is-edited::before { content: '⚑'; margin-inline-end: 6px; }
+.laqp-face-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin: 3px 0 3px 6px;
+  padding: 2px 6px;
+  border: 1px solid #b9965066;
+  border-radius: 4px;
+  background: #d7b15c14;
+  color: #f2d797;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.laqp-face-badge > span:first-child { font-size: 13px; }
+.laqp-face-badge.is-full { margin-inline-start: 0; }
+.player-face-status.is-scanned,
+.player-face-status[data-i18n="player.faceStatus.scanned"],
+.laqp-face-badge.is-scanned,
+.laqp-face-badge[data-i18n-title="player.faceStatus.scanned"] {
+  border-color: #62b8ee80;
+  background: #45a9ec1c;
+  color: #9bd8ff;
+}
+.club-roster-search select { max-width: 100%; padding: 7px; border: 1px solid var(--db-line); background: var(--db-surface); color: inherit; }
+.club-roster-search label { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.club-roster-search { display: flex; flex-wrap: wrap; gap: 12px; }
+
 body.database-product { --db-accent: var(--laqp-accent, #21d4c2); --db-line: var(--laqp-line, #2b3740); --db-surface: var(--laqp-surface, #141b21); }
 body.database-product .breadcrumbs { margin-bottom: 16px; }
 body.database-product .breadcrumbs a:hover { color: var(--db-accent); }
@@ -392,3 +449,9 @@ body.database-product #dts-page a:hover { color: var(--db-accent-strong); }
   body.database-product #teams-grid-view .grid-card-sub { grid-column: 2 !important; grid-row: 2 !important; }
   body.database-product #teams-grid-view .grid-card-ovr { grid-column: 3 !important; grid-row: 1 / span 2 !important; }
 }
+
+/* Semantic headings retain the original component geometry and typography. */
+body.database-product :is(h2,h3).player-section-title,
+body.database-product h3.face-subsection-title { margin-top: 0; margin-inline: 0; }
+body.database-product h2.player-header-card-title { margin: 0; padding: 17px 18px 10px; font-size: 15px; line-height: inherit; }
+body.database-product h3.similar-player-name { margin: 0; font-size: inherit; line-height: inherit; }

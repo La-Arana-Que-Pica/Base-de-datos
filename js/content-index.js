@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  const LABELS = { player: 'Jugador', team: 'Equipo', tactic: 'Táctica', download: 'Option File' };
+  const LABELS = { player: 'Jugador', team: 'Equipo', tactic: 'Táctica', download: 'Option File', manager: 'DT' };
   let indexPromise = null;
 
   async function load() {
