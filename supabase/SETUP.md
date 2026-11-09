@@ -93,6 +93,8 @@ Para permitir **Vincular Google** desde Mi cuenta, activá **Authentication > Se
 
 Para una base ya creada, ejecutá también `supabase/account-features-production.sql` una sola vez en el SQL Editor. Crea `saved_items`, `saved_lineups` y `ratings` con RLS owner-only; `anon` no recibe permisos.
 
+Si esas tablas ya existen y vas a habilitar favoritos/comentarios en fichas de DT, ejecutá además `supabase/manager-social-production.sql`. La migración solamente amplía los tipos admitidos a `manager`; no cambia datos, RLS ni permisos.
+
 Para habilitar fotos de perfil personalizadas en una base ya creada, ejecutá `supabase/storage-avatars-setup.sql` en el SQL Editor una sola vez. Configura el bucket `avatars` (público, límite 2MB, tipos jpeg/png/webp) y sus policies RLS para que cada usuario sólo suba y borre en `<user_id>/...`.
 
 ## 7. Convertir tu usuario en admin
@@ -164,3 +166,96 @@ Después abrí `http://localhost:8000/`. Las URLs locales indicadas arriba deben
 ## 11. Si Supabase falla o todavía no está configurado
 
 LAqP continúa funcionando sin cuentas ni comentarios. El cargador detecta placeholders, no descarga la librería de Supabase, no hace consultas y deja un único aviso útil en la consola. Si Supabase está temporalmente inaccesible, el error queda aislado y el contenido principal, navegación, SEO y base de datos siguen disponibles.
+
+## 12. Rankings de videojuegos: Supabase exclusivamente, sin CAPTCHA
+
+El backend está instalado en `npyvbqzgcdoujfxefsdr`: migraciones `20261108205806_laqp_football_rankings_schema` y `20261108205907_laqp_football_rankings_catalog`, cinco tablas con RLS, cuatro RPC exclusivos del servidor y 1441 versiones votables de 802 juegos. No repetir las migraciones iniciales ni usar un `db push` general. El catálogo se amplía de forma aditiva mediante `rankings-catalog.sql`.
+
+Estado verificado después de que el propietario configuró `RANKINGS_RATE_SECRET`: el endpoint real devuelve `votingEnabled:true` y `environment:"global"`; GET y CORS funcionan para ambos dominios de LAqP, OPTIONS responde 204 y un Origin ajeno recibe 403. Se verificaron los permisos privados y las validaciones rechazando solicitudes inválidas, sin crear votos. El catálogo mantiene 1441 versiones y el ranking permanece vacío. La configuración **local** `js/football-rankings/config.js` quedó con `enabled:true`, lista para la publicación que decida el propietario; no se publicó la web ni se modificó GitHub.
+
+La función `football-rankings` usa `verify_jwt:false`, valida todos los votos y no consulta cuentas o sesiones Auth. No requiere CAPTCHA, site key ni servicios de verificación externos. La URL es `https://npyvbqzgcdoujfxefsdr.supabase.co/functions/v1/football-rankings`. El frontend permanece en `/tier-list.html`; Scouting conserva `/rankings.html`.
+
+### Único secreto adicional: RANKINGS_RATE_SECRET
+
+Generarlo en una terminal PowerShell local con Node instalado:
+
+```powershell
+node -e "process.stdout.write(require('crypto').randomBytes(32).toString('hex'))" | Set-Clipboard
+```
+
+Este comando copia 64 caracteres hexadecimales al portapapeles sin imprimirlos. En Supabase → proyecto LAqP.website → Edge Functions → Secrets, crear `RANKINGS_RATE_SECRET`, pegar el contenido como valor y guardar. No compartirlo por chat ni guardarlo en Git o archivos públicos. Una vez guardado, se puede vaciar el portapapeles con `Set-Clipboard -Value ''`.
+
+No se necesita configurar ningún otro secreto adicional. `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` son variables privadas que proporciona Supabase al runtime de Edge; nunca deben copiarse al frontend. Los orígenes admitidos ya están definidos en el servidor: `https://laqp.website`, `https://www.laqp.website` y `http://127.0.0.1:5500`. Estos tres se conservan incluso si `RANKINGS_ALLOWED_ORIGINS` contiene la lista pública anterior. La variable es configuración pública, no una credencial, y permite agregar orígenes explícitos administrativamente; no se utiliza un comodín.
+
+Mientras falte el secreto, las lecturas siguen disponibles y todos los POST devuelven 503. El GET público incluye `votingEnabled:false`; al cargar un secreto válido de al menos 32 caracteres devuelve `votingEnabled:true`, sin exponerlo. Permite comprobar la disponibilidad sin registrar votos. No se puede afirmar que la recepción real está habilitada hasta observar ese valor y verificar el endpoint desplegado.
+
+### Verificación antes de publicar
+
+1. GET anónimo con `Origin: https://laqp.website`: 200, `environment:"global"`, puntajes correctos y `votingEnabled:true` después de configurar el secreto. Conservar cero votos y `rows:[]` antes del lanzamiento; no usar votaciones ficticias para probar producción.
+2. OPTIONS con ese Origin: 204, CORS para GET/POST/OPTIONS y cabeceras Content-Type/apikey. Comprobar también `www`; un Origin no permitido recibe 403.
+3. Una solicitud vacía `{}` no puede generar un voto: devuelve 400 cuando la función está habilitada, o 503 si aún falta el secreto. Las pruebas de votos válidos se ejecutan exclusivamente en entornos aislados.
+4. Verificar SQL de solo lectura:
+
+   ```sql
+   select (select count(*) from laqp_rankings_private.versions) as versiones,
+          (select count(*) from laqp_rankings_private.ballots) as votos,
+          (select count(*) from laqp_rankings_private.totals) as totales;
+   select has_schema_privilege('anon','laqp_rankings_private','usage') as anon_schema,
+          has_function_privilege('anon','public.laqp_rankings_vote(text,smallint,text[])','execute') as anon_vote,
+          has_function_privilege('authenticated','public.laqp_rankings_vote(text,smallint,text[])','execute') as account_vote;
+   ```
+
+   Deben seguir presentes 1441 versiones y los tres permisos deben ser false. El esquema privado no debe exponerse a Data API. Las cinco tablas tienen RLS sin políticas públicas, de forma intencional: solo el servidor posee permisos.
+5. Una vez verificado el secreto y el endpoint, poner `enabled:true` en `js/football-rankings/config.js`. La URL y la clave publishable ya están preparadas. No agregar secretos al navegador ni `localTest:true` a la configuración de publicación. La publicación de la web la decide el propietario.
+
+El procedimiento habitual incluye HTML, CSS, JS, catálogo y portadas, y conserva explícitamente SQL/Edge/configuración/documentación de Rankings en Git. `_config.yml` mantiene `supabase/` fuera del sitio generado por Pages. El servidor no depende de esta computadora: corre en Supabase. El actualizador no instala SQL ni despliega funciones.
+
+### Seguridad y límites
+
+- Identificador aleatorio persistente de 256 bits, cuyo hash es la identidad anónima del voto. No se guardan nombres, correos, user_id ni IP; no se usa fingerprinting.
+- Primera contribución entre Top 5 y Top 10, arbitrada por una restricción única en PostgreSQL. Voto y puntos se guardan en la misma transacción y los totales se bloquean en orden estable. Un reintento no vuelve a sumar.
+- Veinte intentos por identificador y ventana de diez minutos, mediante HMAC con el secreto del servidor. Personas de una misma conexión no comparten cuota. Los buckets vencidos se purgan en el siguiente intento; una purga programada opcional debe limitarse a `laqp_rankings_private.throttles`.
+- Formato, tamaño, modo, cantidad, versiones válidas y ausencia de duplicados se validan en servidor. Los puntos enviados desde el navegador no se utilizan. Los RPC no son ejecutables directamente por `anon` ni `authenticated`.
+- Los alias regionales no crean votos adicionales. Las versiones conservan `game_id + plataforma`; no renumerar ni reasignar IDs que tengan votos. Regeneración de semilla local: `node Herramientas/Generadores/rankings-catalog.mjs`.
+- El sistema limita duplicados accidentales y frecuencia por identificador; un atacante puede evadirlo generando identificadores nuevos. Se acepta esta limitación del anonimato para una votación recreativa. Los orígenes CORS no equivalen a una identidad humana.
+- Los puntos se ajustan administrativamente en `laqp_rankings_private.scoring` y los cambios afectan votos futuros. Los ya emitidos conservan su puntuación histórica.
+- Ante caída de Supabase, el Top personal permanece guardado y el servidor no habilita escrituras directas. Para suspender la interfaz, usar `enabled:false`; no borrar votos ni desactivar RLS.
+
+### Conexión desde Live Server: diagnóstico y corrección verificados
+
+Se reprodujo el error desde `http://127.0.0.1:5500/tier-list.html#tier-list`: la función anterior devolvía 403 tanto en GET como en OPTIONS, con `Access-Control-Allow-Origin: null`. Edge registró el rechazo CORS y el frontend solo podía mostrar un error genérico de conexión. El endpoint, los IDs y el formato de las votaciones eran correctos. El fragmento `#tier-list` no participa del Origin.
+
+Se desplegó exclusivamente `football-rankings` versión 4, agregando el origen exacto `http://127.0.0.1:5500` en `service.mjs`, sin cambiar secretos, SQL ni otras funciones. GET devuelve 200 y OPTIONS 204 para los tres orígenes permitidos; `http://localhost:5500`, `http://127.0.0.1:5501` y dominios ajenos continúan rechazados con 403. El cliente añade el origen local al mensaje si la red falla para facilitar el diagnóstico, sin atribuir automáticamente todos los fallos a CORS.
+
+**Live Server usa el backend productivo:** un clic real en Aportar desde esa dirección registra un voto permanente y consume la primera contribución del identificador. El origen local no es un sandbox. Para probar escrituras sin afectar el ranking mundial, usar el servidor aislado indicado abajo.
+
+La prueba `football-rankings-origin.browser.mjs` utiliza el servidor local ya abierto en el puerto 5500. Comprueba lecturas y estado anónimo contra Supabase real, con un bloqueo expreso de cualquier solicitud de voto productivo. Verifica persistencia, recarga y fallo de red. Los votos válidos de Top 5/10 y sus reintentos se interceptan y ejecutan únicamente en PostgreSQL embebido aislado; comprueba 30 + 55 puntos y unicidad entre modos. Conserva el HTML, CSS y módulos del rediseño.
+
+```text
+node Herramientas/Pruebas/football-rankings-origin.browser.mjs
+```
+
+La prueba se ejecutó con el rediseño actual: cero solicitudes de voto a producción y dos votos solo en la base aislada. La consulta posterior mantuvo cero votos y cero totales en el ranking mundial.
+
+### Pruebas locales sin servicios adicionales
+
+Dependencias temporales en `.tmp`, con Node 24+, Edge/Playwright y Deno:
+
+```text
+npm install --prefix .tmp/laqp-rankings @electric-sql/pglite@0.5.15 @embedded-postgres/windows-x64@18.6.0-beta.19 pg@8.16.3 --ignore-scripts --no-audit --no-fund
+deno check supabase/functions/football-rankings/index.ts
+node --test Herramientas/Pruebas/football-rankings.test.mjs Herramientas/Pruebas/football-rankings-release.test.mjs
+node Herramientas/Pruebas/football-rankings.browser.mjs
+node Herramientas/Pruebas/tier-list.browser.cjs
+node Herramientas/Pruebas/football-rankings-concurrency.mjs
+```
+
+La integración `football-rankings-production.mjs` ejecuta el código real en Deno, PostgreSQL nativo y PostgREST 16.5, con Edge. Requiere el [binario oficial de Windows](https://github.com/PostgREST/postgrest/releases/download/v16.5/postgrest-v16.5-windows-x86-64.zip) en `.tmp/laqp-rankings/production/postgrest/postgrest.exe`:
+
+```text
+node Herramientas/Pruebas/football-rankings-production.mjs
+```
+
+Prueba Top 5 y Top 10 sin cuenta ni CAPTCHA, puntajes, duplicados, simultaneidad, RLS/permisos reales por REST, persistencia tras reiniciar PostgreSQL, CORS y caída de red. Intercepta en Edge las URLs reales para servir la copia local; no envía votos a producción. No utiliza respuestas simuladas de ningún proveedor de verificación. Inicia y detiene solo sus procesos temporales.
+
+Vista manual de PostgreSQL en memoria: `node Herramientas/Pruebas/rankings-local.mjs`. Muestra PRUEBAS LOCALES y sus votos desaparecen al cerrar el proceso. No modifica la configuración pública.

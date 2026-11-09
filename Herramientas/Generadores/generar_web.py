@@ -7,8 +7,16 @@ Abrir este archivo con Python muestra la interfaz grafica. Para automatizacion:
 """
 
 from generador_database import main
+import sys
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    if '--spider-patch-only' in sys.argv:
+        from spider_patch import main as spider_main
+        spider_main([arg for arg in sys.argv[1:] if arg != '--spider-patch-only'])
+    elif '--guides-only' in sys.argv:
+        from biblioteca_guias import main as guides_main
+        guides_main([arg for arg in sys.argv[1:] if arg not in ('--guides-only','--cli')])
+    else:
+        raise SystemExit(main())
 

@@ -1988,6 +1988,7 @@ function i18nPairs(group) {
 }
 
 function applyI18nToDocument(root = document) {
+  if (document.documentElement.dataset.spiderLanguage) return;
   document.documentElement.lang = getActiveLanguage();
   document.documentElement.dir = getActiveLanguage() === 'ar' ? 'rtl' : 'ltr';
   root.querySelectorAll('[data-i18n]').forEach(el => {

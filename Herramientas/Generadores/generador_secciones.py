@@ -19,6 +19,8 @@ from typing import Callable, Iterable
 from urllib.parse import quote, unquote, urlsplit
 
 from manager_external import load_manager_cache, transfermarkt_url
+from biblioteca_guias import generate_guides
+from miniface_paths import MinifaceIndex
 
 
 SITE_URL = "https://laqp.website"
@@ -146,6 +148,17 @@ def safe_target(root: Path, relative: Path) -> Path:
     target = (root / relative).resolve()
     target.relative_to(root.resolve())
     return target
+
+
+_MINIFACE_INDEXES: dict[Path, MinifaceIndex] = {}
+
+
+def miniface_src(project_root: Path, player_id) -> str:
+    """Miniface con el nombre del juego (player_<ID>.webp); default.webp si no hay."""
+    key = Path(project_root).resolve()
+    if key not in _MINIFACE_INDEXES:
+        _MINIFACE_INDEXES[key] = MinifaceIndex(key)
+    return _MINIFACE_INDEXES[key].src("players", player_id)
 
 
 @dataclass
@@ -587,6 +600,7 @@ def render_manager_main(
       <section id="peinado" class="dts-profile-panel" data-dts-panel="peinado"><header class="dts-panel-head"><div><h2 data-i18n="dts.hairPes">Peinado PES 2018</h2><p data-i18n="dts.hairIntro">Solo los valores correspondientes al pelo y accesorios.</p></div></header>{render_face_editor(manager.face, 1) if has_hair else '<p class="dts-empty-panel">Este DT no tiene valores de peinado cargados.</p>'}</section>
       <section id="carrera" class="dts-profile-panel" data-dts-panel="carrera"><header class="dts-panel-head"><span>{len(career)}</span><div><h2 data-i18n="dts.career">Carrera</h2><p data-i18n="dts.careerIntro">Etapas como entrenador y otros cargos registrados.</p></div></header><ol class="dts-career-list">{career_html}</ol></section>
     </div>
+    <section data-laqp-comments data-page-type="manager" data-page-id="{esc(cfg.get('id') or manager.directory)}"></section>
   </main>'''
 
 
@@ -713,6 +727,18 @@ def load_managers(project_root: Path, issues) -> list[Manager]:
     return managers
 
 
+def _ga4_tag() -> str:
+    return '''  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-M7ZNDRZB27');
+  </script>'''
+
+
 def database_design(source: str) -> str:
     # El <base> debe aparecer antes de cualquier URL relativa; los navegadores
     # resuelven los elementos anteriores contra la URL profunda del documento.
@@ -731,6 +757,9 @@ def database_design(source: str) -> str:
         count=1,
     )
     """Attach the shared Database design to generated pages without replacing data."""
+    if "googletagmanager.com/gtag/js" not in source:
+        source = source.replace('<script src="js/consent-mode.js"></script>',
+                                '<script src="js/consent-mode.js"></script>' + _ga4_tag(), 1)
     source = source.replace('css/database-system.css?v=20260924d', 'css/database-system.css?v=20260925g')
     source = source.replace('href="css/database-system.css"', 'href="css/database-system.css?v=20260925g"')
     if 'css/database-system.css' not in source:
@@ -939,7 +968,7 @@ def generate_tactics(project_root: Path, output_root: Path, issues, notify, writ
     shell = database_design(shell_path.read_text(encoding="utf-8-sig"))
     index = re.sub(r'<div id="tactics-loading"[^>]*>', '<div id="tactics-loading" class="tactics-loading" style="display:none">', shell, count=1)
     index = replace_between(index, '<div id="tactics-content"', "\n  </main>", f'<div id="tactics-content" class="js-prerender-fallback">{render_tactics_index(tactics)}</div>')
-    index = re.sub(r'js/tactics\.js(?:\?[^"\s]*)?"', 'js/tactics.js?v=20261001dt"', index)
+    index = re.sub(r'js/tactics\.js(?:\?[^"\s]*)?"', 'js/tactics.js?v=20261008a"', index)
     target = safe_target(output_root, Path("tactics.html"))
     if write(target, index.rstrip() + "\n"):
         result.other_html += 1
@@ -957,7 +986,7 @@ def generate_tactics(project_root: Path, output_root: Path, issues, notify, writ
             if tactic.get("_manager_url") else ""
         )
         page = replace_between(page, '<div id="tactics-content"', "\n  </main>", f'<div id="tactics-content" class="js-prerender-fallback" data-laqp-tactic-id="{esc(tactic.get("id"))}"{manager_data}>{render_tactic_detail(tactic, tactics)}</div>')
-        page = re.sub(r'js/tactics\.js(?:\?[^"\s]*)?"', 'js/tactics.js?v=20261001dt"', page)
+        page = re.sub(r'js/tactics\.js(?:\?[^"\s]*)?"', 'js/tactics.js?v=20261008a"', page)
         target = safe_target(output_root, Path("tactics") / tactic["id"] / "index.html")
         if write(target, page.rstrip() + "\n"):
             result.tactics += 1
@@ -979,11 +1008,11 @@ def _hydration_gate() -> str:
 
 def _directory_shell(view: str, title: str, description: str, body: str) -> str:
     active = "teams-grid-view" if view == "teams" else f"{view}-view"
-    canonical = f"database/v2/{view}/"
+    canonical = f"database/{view}/"
     views = []
     for identifier in ("home-view", "league-teams-view", "players-view", "player-view", "search-view", "leagues-view", "teams-grid-view", "favorites-view"):
         views.append(f'<div id="{identifier}"{" class=\"active\"" if identifier == active else ""}>{f"<div class=\"js-prerender-fallback\">{body}</div>" if identifier == active else ""}</div>')
-    return f'''<!DOCTYPE html><html lang="es"><head><base href="/">{_hydration_gate()}<script src="js/consent-mode.js"></script><script src="js/minifaces.js"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="laqp-database-view" content="{esc(view)}"><title>{esc(title)}</title><meta name="description" content="{esc(description)}"><link rel="canonical" href="{SITE_URL}/{canonical}"><link rel="stylesheet" href="css/style.css"><link rel="icon" href="img/logo.webp" type="image/webp"></head><body><header id="header"><a href="/index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a><div class="header-title">PES 2018 Actualizado <span>Base de datos</span></div><nav class="header-nav" aria-label="Menu principal"></nav><div id="search-container"><span class="search-icon" aria-hidden="true">&#128269;</span><input type="text" id="search-input" placeholder="Buscar jugadores..." data-i18n-placeholder="search.players" autocomplete="off"></div></header><div id="layout"><nav id="sidebar"></nav><main id="main"><div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message">Cargando base de datos...</span></div>{''.join(views)}</main></div><script src="js/pes2018-translations.js?v=20261003a"></script><script src="js/i18n.js?v=20261003a"></script><script src="js/site.js"></script><script src="js/favorites.js"></script><script src="js/country-filter.js?v=20260925g"></script><script src="js/pes2018-overall.js?v=20261003a"></script><script src="js/app.js?v=20261003a"></script></body></html>\n'''
+    return f'''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><base href="/">{_hydration_gate()}<script src="js/consent-mode.js"></script>{_ga4_tag()}<script src="js/minifaces.js"></script><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="laqp-database-view" content="{esc(view)}"><title>{esc(title)}</title><meta name="description" content="{esc(description)}"><link rel="canonical" href="{SITE_URL}/{canonical}"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{SITE_URL}/{canonical}"><meta property="og:type" content="website"><meta property="og:image" content="{SITE_URL}/assets/images/home-banner-main-2.png"><link rel="stylesheet" href="css/style.css"><link rel="icon" href="img/logo.webp" type="image/webp"></head><body><header id="header"><a href="/index.html" class="header-logo-link"><img class="logo" width="64" height="64" src="img/logo.webp" alt="Logo LAqP"></a><div class="header-title">PES 2018 Actualizado <span>Base de datos</span></div><nav class="header-nav" aria-label="Menú principal"><a class="header-nav-link" href="/downloads.html">Spider Patch</a><a class="header-nav-link" href="/database.html">Base de datos</a><a class="header-nav-link" href="/alineaciones.html">Creador de alineaciones</a><a class="header-nav-link" href="/miniface-studio.html">Miniface Studio</a><a class="header-nav-link" href="/guias.html">Guías</a></nav></header><div id="layout"><nav id="sidebar"></nav><main id="main"><div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message">Cargando base de datos...</span></div>{''.join(views)}</main></div><script src="js/pes2018-translations.js?v=20261003a"></script><script src="js/i18n.js?v=20261003a"></script><script src="js/site.js"></script><script src="js/favorites.js"></script><script src="js/country-filter.js?v=20260925g"></script><script src="js/pes2018-overall.js?v=20261003a"></script><script src="js/app.js?v=20261003a"></script></body></html>\n'''
 
 
 def generate_directories(project_root: Path, output_root: Path, data, player_paths, team_paths, league_paths, issues, notify, write) -> ExtraResult:
@@ -1004,8 +1033,8 @@ def generate_directories(project_root: Path, output_root: Path, data, player_pat
             seen.add(pid)
             players.append((entry.player, team))
     players.sort(key=lambda item: -int(item[0].get("OverallStats") or 0))
-    player_rows = "".join(f'''<tr><td><img class="player-row-photo" src="img/players/{esc(player.get('Id'))}.webp" alt="{esc(player.get('Name'))}" loading="lazy" onerror="this.onerror=null;this.src='img/players/default.webp'"></td><td><a href="{esc(player_paths.get((team.get('Id',''), player.get('Id','')), '#'))}"><strong>{esc(player.get('Name'))}</strong></a></td><td><a href="{esc(team_paths.get(team.get('Id',''), '#'))}">{esc(team.get('Name'))}</a></td><td><span class="position-badge">{esc(position_label(player.get('POS')))}</span></td><td><span class="overall-badge" style="background:{stat_color(player.get('OverallStats'))}">{esc(player.get('OverallStats') or '-')}</span></td><td>{esc(player.get('Age') or '-')}</td></tr>''' for player, team in players)
-    player_body = f'<div class="breadcrumb-row"><nav class="breadcrumbs"><a href="index.html" data-i18n="common.home">Inicio</a><a href="database.html" data-i18n="common.database">Base de datos</a><span data-i18n="common.players">Jugadores</span></nav></div><div class="view-header"><div><h1 class="view-title" data-i18n="common.players">Jugadores</h1><div class="view-subtitle" data-i18n="db.updatedPlayers" data-i18n-params=\'{{"count":{len(players)}}}\'>{len(players)} jugadores actualizados con stats, medias, equipos y referencias de edición</div></div></div><div class="table-responsive"><table class="players-table players-table--directory"><thead><tr><th></th><th data-i18n="common.player">Jugador</th><th data-i18n="common.team">Equipo</th><th data-i18n="common.positionShort">Pos</th><th data-i18n="common.overall">Media</th><th data-i18n="common.age">Edad</th></tr></thead><tbody>{player_rows}</tbody></table></div>'
+    player_rows = "".join(f'''<tr><td><img class="player-row-photo" src="{esc(miniface_src(project_root, player.get('Id')))}" alt="{esc(player.get('Name'))}" loading="lazy" onerror="this.onerror=null;this.src='img/players/default.webp'"></td><td><a href="{esc(player_paths.get((team.get('Id',''), player.get('Id','')), '#'))}"><strong>{esc(player.get('Name'))}</strong></a></td><td><a href="{esc(team_paths.get(team.get('Id',''), '#'))}">{esc(team.get('Name'))}</a></td><td><span class="position-badge">{esc(position_label(player.get('POS')))}</span></td><td><span class="overall-badge" style="background:{stat_color(player.get('OverallStats'))}">{esc(player.get('OverallStats') or '-')}</span></td><td>{esc(player.get('Age') or '-')}</td></tr>''' for player, team in players)
+    player_body = f'<div class="breadcrumb-row"><nav class="breadcrumbs"><a href="index.html" data-i18n="common.home">Inicio</a><a href="database.html" data-i18n="common.database">Base de datos</a><span data-i18n="common.players">Jugadores</span></nav></div><div class="view-header"><div><h1 class="view-title" data-i18n="common.players">Jugadores</h1><div class="view-subtitle" data-i18n="db.updatedPlayers" data-i18n-params=\'{{"count":{len(players)}}}\'>{len(players)} jugadores actualizados con stats, medias, equipos y referencias de edición</div></div></div><div class="table-responsive"><table class="players-table players-table--directory"><thead><tr><th scope="col" aria-label="Miniface"></th><th scope="col" data-i18n="common.player">Jugador</th><th scope="col" data-i18n="common.team">Equipo</th><th scope="col" data-i18n="common.positionShort">Pos</th><th scope="col" data-i18n="common.overall">Media</th><th scope="col" data-i18n="common.age">Edad</th></tr></thead><tbody>{player_rows}</tbody></table></div>'
     pages = [("players", "Jugadores PES 2018 Actualizado - Stats, Caras y Medias", "Listado de jugadores para PES 2018 actualizado con stats, medias, equipos, posiciones y edad.", player_body)]
     team_cards = "".join(f'''<a class="grid-card db-index-card db-team-card" href="{esc(team_paths.get(team.get('Id',''), '#'))}"><img class="grid-card-img" src="img/teams/{esc(team.get('Id'))}.webp" alt="{esc(team.get('Name'))}" loading="lazy" onerror="this.onerror=null;this.src='img/teams/default.webp'"><span class="grid-card-kicker" data-i18n="db.teamKicker">Equipo</span><span class="grid-card-name">{esc(team.get('Name'))}</span><span class="grid-card-sub" data-i18n="db.playerCount" data-i18n-params='{{"count":{len(data.rosters.get(team.get('Id',''), []))}}}'>{len(data.rosters.get(team.get('Id',''), []))} jugadores</span><span class="grid-card-action" data-i18n="db.viewSquad">Ver plantel</span></a>''' for team in published_teams)
     team_body = f'<div class="breadcrumb-row"><nav class="breadcrumbs"><a href="index.html" data-i18n="common.home">Inicio</a><a href="database.html" data-i18n="common.database">Base de datos</a><span data-i18n="common.teams">Equipos</span></nav></div><div class="view-header"><div><h1 class="view-title" data-i18n="common.teams">Equipos</h1><div class="view-subtitle" data-i18n="db.modernSquads" data-i18n-params=\'{{"count":{len(published_teams)}}}\'>{len(published_teams)} equipos con plantillas modernas</div></div></div><div class="grid-cards" id="teams-grid-cards">{team_cards}</div>'
@@ -1014,7 +1043,7 @@ def generate_directories(project_root: Path, output_root: Path, data, player_pat
     league_body = f'<div class="breadcrumb-row"><nav class="breadcrumbs"><a href="index.html" data-i18n="common.home">Inicio</a><a href="database.html" data-i18n="common.database">Base de datos</a><span data-i18n="common.leagues">Ligas</span></nav></div><div class="view-header"><div><h1 class="view-title" data-i18n="common.leagues">Ligas</h1><div class="view-subtitle" data-i18n="db.leaguesCompetitions" data-i18n-params=\'{{"count":{len(data.leagues)}}}\'>{len(data.leagues)} ligas y competiciones</div></div></div><div class="grid-cards" id="leagues-grid-cards">{league_cards}</div>'
     pages.append(("leagues", "Ligas PES 2018 Actualizado - Equipos y Plantillas", "Ligas y competiciones actualizadas para PES 2018 con equipos y plantillas.", league_body))
     for number, (view, title, description, body) in enumerate(pages, 1):
-        target = safe_target(output_root, Path("database") / "v2" / view / "index.html")
+        target = safe_target(output_root, Path("database") / view / "index.html")
         if write(target, database_design(_directory_shell(view, title, description, body))):
             result.other_html += 1
             result.generated_files.append(target)
@@ -1325,53 +1354,6 @@ def render_legacy_download_redirect(shell: str, item: dict) -> str:
     return replace_marked(source, "DOWNLOADS", content)
 
 
-def tutorial_thumb(item: dict[str, str]) -> str:
-    return item.get("thumbnail") or item.get("image") or (f"https://img.youtube.com/vi/{quote(item.get('video_id',''), safe='')}/hqdefault.jpg" if item.get("video_id") else "img/logo.webp")
-
-
-def render_tutorials_content(tutorials: list[dict[str, str]], guides: list[dict]) -> str:
-    cards = "".join(f'''<article class="tutorial-card"><a class="tutorial-card-thumb-wrap" href="https://www.youtube.com/watch?v={esc(item.get('video_id'))}" target="_blank" rel="noopener noreferrer"><img class="tutorial-card-thumb" src="{esc(tutorial_thumb(item))}" alt="{esc(item.get('titulo'))} - tutorial PES 2018" loading="lazy" width="480" height="270" onerror="this.onerror=null;this.src='img/logo.webp'"><span class="tutorial-play-btn" aria-hidden="true">&#9658;</span></a><div class="tutorial-card-body"><div class="tutorial-card-meta"><span>Video</span>{f'<time datetime="{iso_date(item.get("fecha"))}">{format_date(item.get("fecha"))}</time>' if item.get('fecha') else ''}</div><h3 class="tutorial-card-title">{esc(item.get('titulo'))}</h3><p class="tutorial-card-desc">{esc(item.get('descripcion'))}</p><a class="tutorial-watch-btn" href="https://www.youtube.com/watch?v={esc(item.get('video_id'))}" target="_blank" rel="noopener noreferrer">Ver tutorial</a></div></article>''' for item in tutorials)
-    guide_links = "".join(f'<a href="/guia/{quote(str(guide.get("id") or ""), safe="")}/"><strong>{esc(guide.get("title"))}</strong><span>{esc(guide.get("category") or "Guía")}</span></a>' for guide in guides[:6])
-    return f'''<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Inicio</a><span>Tutoriales</span></nav><section class="content-hub-hero tutorials-hero"><div class="guides-hero-icon" aria-hidden="true">YT</div><div class="guides-hero-copy"><div class="content-hub-kicker">Videos PES 2018</div><h1>Tutoriales</h1><p>Guías en video para instalar, configurar y editar PES 2018 actualizado: Option Files, caras, kits, herramientas y soluciones.</p></div></section><section class="guides-library-panel tutorials-library-panel"><div class="guides-panel-head"><div><span class="guides-panel-kicker">Biblioteca</span><h2>Tutoriales publicados</h2></div><span class="guides-count-pill">{len(tutorials)} tutoriales</span></div><div class="tutorial-cards-grid">{cards}</div></section><section class="guides-quick-strip"><div class="guides-brand-tile"><img src="img/logo.webp" alt="LAqP" loading="lazy"><div><strong>PES 2018 Actualizado</strong><span>Guías, videos, stats y recursos de edición.</span></div></div>{guide_links}</section>'''
-
-
-def article_url(guide: dict) -> str:
-    return f"/guia/{quote(str(guide.get('id') or ''), safe='')}/"
-
-
-def article_image(guide: dict) -> str:
-    return str(guide.get("image") or "img/logo.webp").lstrip("/")
-
-
-def render_guide_card(guide: dict) -> str:
-    category = guide.get("category") or "Guía"
-    return f'''<article class="editorial-card guide-card" data-category="{esc(normalize(category))}"><a class="editorial-card-media" href="{esc(article_url(guide))}"><img src="{esc(article_image(guide))}" alt="{esc(guide.get('title'))}" loading="lazy" width="640" height="360" onerror="this.onerror=null;this.src='img/logo.webp'"></a><div class="editorial-card-body"><div class="editorial-meta guide-card-meta"><span>{esc(guide.get('readTime') or 'Lectura')}</span><span>{esc(category)}</span>{f'<time datetime="{esc(guide.get("date"))}">{format_date(guide.get("date"))}</time>' if guide.get('date') else ''}</div><h2><a href="{esc(article_url(guide))}">{esc(guide.get('title'))}</a></h2><p>{esc(guide.get('description'))}</p><a class="text-link guide-card-link" href="{esc(article_url(guide))}">Ver guía <span aria-hidden="true">&rsaquo;</span></a></div></article>'''
-
-
-def render_article(guide: dict, guides: list[dict]) -> str:
-    title = guide.get("title") or "Guía PES 2018"
-    description = guide.get("description") or "Guía de PES 2018 actualizado."
-    sections = guide.get("sections") if isinstance(guide.get("sections"), list) else []
-    related = [item for item in guides if item.get("id") in (guide.get("related") or [])]
-    body = []
-    for number, section in enumerate(sections, 1):
-        if not isinstance(section, dict):
-            continue
-        paragraphs = "".join(f"<p>{esc(text)}</p>" for text in (section.get("body") or []))
-        list_html = f'<ul>{"".join(f"<li>{esc(item)}</li>" for item in section.get("list", []))}</ul>' if section.get("list") else ""
-        figure = section.get("figure") if isinstance(section.get("figure"), dict) else None
-        figure_html = ""
-        if figure and figure.get("image"):
-            figure_html = f'<figure class="article-figure{" article-figure-small" if figure.get("size") == "small" else ""}"><img src="{esc(str(figure.get("image")).lstrip("/"))}" alt="{esc(figure.get("alt") or section.get("heading"))}" loading="lazy" width="960" height="540" onerror="this.onerror=null;this.src=\'img/logo.webp\'">{f"<figcaption>{esc(figure.get("caption"))}</figcaption>" if figure.get("caption") else ""}</figure>'
-        body.append(f'<section id="section-{number}"><h2>{esc(section.get("heading"))}</h2>{paragraphs}{list_html}{figure_html}</section>')
-    faq = guide.get("faq") if isinstance(guide.get("faq"), list) else []
-    faq_html = f'<section id="faq"><h2>Preguntas frecuentes</h2><div class="article-faq">{"".join(f"<details><summary>{esc(item[0])}</summary><p>{esc(item[1])}</p></details>" for item in faq if isinstance(item, list) and len(item) >= 2)}</div></section>' if faq else ""
-    schema = {"@context": "https://schema.org", "@type": "Article", "headline": title, "description": description, "image": f"{SITE_URL}/{article_image(guide)}", "datePublished": guide.get("date"), "dateModified": guide.get("date"), "inLanguage": "es", "author": {"@type": "Person", "name": "Agustin Segade", "alternateName": "La Araña Que Pica"}, "publisher": {"@type": "Organization", "name": "LAqP", "logo": {"@type": "ImageObject", "url": f"{SITE_URL}/img/logo.webp"}}, "mainEntityOfPage": f"{SITE_URL}{article_url(guide)}"}
-    related_html = "".join(render_guide_card(item) for item in related)
-    toc = "".join(f'<a href="#section-{number}">{esc(section.get("heading"))}</a>' for number, section in enumerate(sections, 1) if isinstance(section, dict))
-    return f'''<!DOCTYPE html><html lang="es"><head><base href="/">{_hydration_gate()}<script src="js/consent-mode.js"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{esc(title)} | PES 2018 Actualizado</title><meta name="description" content="{esc(description)}"><link rel="canonical" href="{SITE_URL}{esc(article_url(guide))}"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:image" content="{SITE_URL}/{esc(article_image(guide))}"><meta property="og:url" content="{SITE_URL}{esc(article_url(guide))}"><meta property="og:type" content="article"><link rel="stylesheet" href="css/style.css"><link rel="icon" href="img/logo.webp" type="image/webp"><script type="application/ld+json">{json.dumps(schema, ensure_ascii=False, separators=(',', ':'))}</script></head><body><header id="header"><a href="/index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a><div class="header-title"><span>Academia PES</span> <span>LAqP.website</span></div><nav class="header-nav" aria-label="Menu principal"></nav></header><main class="article-page"><nav class="breadcrumbs"><a href="index.html">Inicio</a><a href="guias.html">Guías</a><span>{esc(guide.get('category') or 'Guía')}</span></nav><article class="long-article"><header class="long-article-header"><div class="editorial-meta"><span>{esc(guide.get('category') or 'Guía')}</span>{f'<time datetime="{esc(guide.get("date"))}">{format_date(guide.get("date"))}</time>' if guide.get('date') else ''}<span>{esc(guide.get('readTime') or 'Lectura')}</span><span>Por Agustin Segade</span></div><h1>{esc(title)}</h1><p>{esc(description)}</p><img src="{esc(article_image(guide))}" alt="{esc(title)}" loading="eager" width="960" height="540" onerror="this.onerror=null;this.src='img/logo.webp'"></header><div class="article-layout"><aside class="article-toc" aria-label="Índice del artículo"><strong>En esta guía</strong>{toc}{'<a href="#faq">FAQ</a>' if faq else ''}</aside><div class="article-body">{''.join(body)}{faq_html}<section><h2>Seguir explorando</h2><div class="seo-link-row"><a href="tutorials.html">Tutoriales</a><a href="downloads.html">Option Files</a><a href="database.html">Base de datos</a><a href="tactics.html">Tácticas</a></div></section></div></div></article>{f'<section class="landing-section article-related"><div class="landing-section-header"><h2 class="landing-section-title">Guías relacionadas</h2><a class="landing-section-link" href="guias.html">Ver todas</a></div><div class="editorial-grid editorial-grid-compact">{related_html}</div></section>' if related_html else ''}</main><script src="js/i18n.js"></script><script src="js/site.js"></script></body></html>\n'''
-
-
 def render_news_content(downloads: list[dict[str, str]], tutorials: list[dict[str, str]], news: list[dict[str, str]]) -> str:
     items = []
     for row in sorted(news, key=lambda item: item.get("date") or item.get("fecha") or "", reverse=True):
@@ -1407,64 +1389,12 @@ def render_option_file_sitemap(source: str, downloads: list[dict]) -> str:
     return source.replace("</urlset>", f"{entries}\n</urlset>", 1)
 
 
-def generate_content_hubs(project_root: Path, output_root: Path, data, player_paths, team_paths, league_paths, issues, notify, write) -> ExtraResult:
-    """Genera las paginas generales que hoy se hidratan con CSV/JSON."""
-    result = ExtraResult()
-    database_dir = project_root / "database"
-    # ``descargas.csv`` es la fuente que se actualiza al publicar nuevos Option
-    # Files.  Conservamos los metadatos enriquecidos de option-files.json, pero
-    # incorporamos/actualizamos sus filas desde el CSV para no dejar fuera las
-    # entradas nuevas cuando el JSON existente todavía no fue regenerado.
-    json_downloads = read_json(database_dir / "option-files.json", issues)
-    csv_downloads = read_csv(database_dir / "descargas.csv", issues, optional=True)
-    json_by_id = {
-        str(option_value(item, "id", "ID")).strip(): item
-        for item in json_downloads
-        if str(option_value(item, "id", "ID")).strip()
-    }
-    if csv_downloads:
-        # El CSV define también el orden: cada fila se conserva en su posición
-        # y sólo se enriquecen sus datos con metadatos del JSON existente.
-        downloads = []
-        for row in csv_downloads:
-            row_id = str(option_value(row, "id", "ID")).strip()
-            if not row_id:
-                continue
-            merged = dict(json_by_id.get(row_id, {}))
-            merged.update({key: value for key, value in row.items() if value not in (None, "")})
-            if "destacado" in row:
-                merged["featured"] = normalize(row.get("destacado")) in {"1", "true", "si", "sí", "yes"}
-            downloads.append(merged)
-    else:
-        downloads = list(json_downloads)
-    if not json_downloads and not csv_downloads:
-        issues.warning("No se encontraron fuentes de Option Files (option-files.json/descargas.csv).")
-    downloads = [row for row in downloads if normalize(option_value(row, "status", "estado")) != "oculto"]
-    tutorials = read_csv(database_dir / "tutoriales.csv", issues, optional=True)
-    guides = read_json(database_dir / "guias.json", issues)
-    news = read_csv(database_dir / "novedades.csv", issues, optional=True)
-    multipart_count = sum(1 for item in downloads if len(download_parts(item)) > 1)
-    stages = 8 + (len(downloads) * 2) + multipart_count + len(guides)
-    current = 0
-
-    def status(label: str) -> None:
-        nonlocal current
-        current += 1
-        notify("other", current, stages, f"Generando secciones generales... {current} / {stages} ({label})")
-
-    # Portada
-    status("portada")
-    source = (project_root / "index.html").read_text(encoding="utf-8-sig")
-    featured = [item for item in downloads if item.get("featured") is True or str(item.get("destacado") or "").strip() == "1"]
-    _write_other(result, output_root, Path("index.html"), replace_marked(source, "HOME_FEATURED", "".join(render_home_download(item) for item in featured)), write)
-
-    # Portada de base de datos
-    status("base de datos")
+def generate_database_hub(result, project_root: Path, output_root: Path, data, player_paths, team_paths, league_paths, write) -> None:
+    """Portada de la Base de Datos: destacados, textos estaticos y totales de database.html."""
     source = (project_root / "database.html").read_text(encoding="utf-8-sig")
     memberships = [(team_id, entry) for team_id in data.rosters for entry in data.rosters.get(team_id, []) if team_id in team_paths]
-    unique_player_count = len({entry.player.get("Id", "") for _team_id, entry in memberships if entry.player.get("Id", "")})
     top_players = sorted(memberships, key=lambda item: -int(data.corrected_by_player_id.get(item[1].player.get("Id", "")) or item[1].player.get("OverallStats") or 0))[:8]
-    players_html = "".join(f'<a class="db-feature-row" href="{esc(player_paths.get((team_id, entry.player.get("Id","")), "#"))}"><img src="img/players/{esc(entry.player.get("Id"))}.webp" alt="Miniface de {esc(entry.player.get("Name"))}" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src=\'img/players/default.webp\'"><span><strong>{esc(entry.player.get("Name"))}</strong><small>{esc(data.team_by_id[team_id].get("Name"))} · {esc(position_label(entry.player.get("POS")))} · {esc(entry.player.get("Age") or "-")} años</small></span><b>{esc(data.corrected_by_player_id.get(entry.player.get("Id","")) or entry.player.get("OverallStats") or "-")}</b></a>' for team_id, entry in top_players)
+    players_html = "".join(f'<a class="db-feature-row" href="{esc(player_paths.get((team_id, entry.player.get("Id","")), "#"))}"><img src="{esc(miniface_src(project_root, entry.player.get("Id")))}" alt="Miniface de {esc(entry.player.get("Name"))}" loading="lazy" width="42" height="42" onerror="this.onerror=null;this.src=\'img/players/default.webp\'"><span><strong>{esc(entry.player.get("Name"))}</strong><small>{esc(data.team_by_id[team_id].get("Name"))} · {esc(position_label(entry.player.get("POS")))} · {esc(entry.player.get("Age") or "-")} años</small></span><b>{esc(data.corrected_by_player_id.get(entry.player.get("Id","")) or entry.player.get("OverallStats") or "-")}</b></a>' for team_id, entry in top_players)
     teams = [data.team_by_id[team_id] for team_id in data.rosters if team_id in team_paths]
     teams_html = "".join(f'<a class="team-mini-card" href="{esc(team_paths[team.get("Id")])}"><img src="img/teams/{esc(team.get("Id"))}.webp" alt="Escudo de {esc(team.get("Name"))}" loading="lazy" width="44" height="44" onerror="this.onerror=null;this.src=\'img/teams/default.webp\'"><span>{esc(team.get("Name"))}</span></a>' for team in teams[:8])
     leagues_html = "".join(f'<a class="league-mini-row" href="{esc(league_paths[(league.get("league_id",""), league.get("league_name",""))])}"><span>{esc(league.get("league_name"))}</span><small>{len([x for x in league.get("team_ids","").split(",") if x.strip()])} equipos</small></a>' for league in data.leagues[:8])
@@ -1472,41 +1402,44 @@ def generate_content_hubs(project_root: Path, output_root: Path, data, player_pa
     source = replace_marked(source, "TEAMS", teams_html)
     source = replace_marked(source, "LEAGUES", leagues_html)
     source = replace_marked(source, "DATABASE_INTRO", f'<p data-i18n="db.heroDesc">Jugadores, equipos, ligas, stats, medias, plantillas, caras/minifaces y referencias de edición para mantener PES 2018 actualizado con datos modernos.</p><p class="db-static-note" data-i18n="db.staticCount" data-i18n-params=\'{{"memberships":{len(memberships)},"teams":{len(teams)},"leagues":{len(data.leagues)}}}\'>Incluye {len(memberships)} relaciones jugador-equipo, {len(teams)} equipos y {len(data.leagues)} ligas.</p>')
-    source = replace_marked(source, "NOSCRIPT_LINKS", '<noscript><p>JavaScript está desactivado. Podés entrar a los listados:</p><ul><li><a href="database/v2/players/">Jugadores</a></li><li><a href="database/v2/teams/">Equipos</a></li><li><a href="database/v2/leagues/">Ligas</a></li></ul></noscript>')
-    source = set_text_by_id(source, "stat-players", format_count(unique_player_count))
-    source = set_text_by_id(source, "stat-teams", format_count(len(teams)))
-    source = set_text_by_id(source, "stat-leagues", format_count(len(data.leagues)))
+    source = replace_marked(source, "NOSCRIPT_LINKS", '<noscript><p>JavaScript está desactivado. Podés entrar a los listados:</p><ul><li><a href="database/players/">Jugadores</a></li><li><a href="database/teams/">Equipos</a></li><li><a href="database/leagues/">Ligas</a></li></ul></noscript>')
+    from database_statistics import calculate_statistics, render_statistics
+    source = render_statistics(source, calculate_statistics(data))
     source = re.sub(r'<div id="loading-overlay"[^>]*>', '<div id="loading-overlay" style="display:none">', source, count=1)
     _write_other(result, output_root, Path("database.html"), source, write)
 
-    status("tutoriales")
-    source = (project_root / "tutorials.html").read_text(encoding="utf-8-sig")
-    _write_other(result, output_root, Path("tutorials.html"), replace_marked(source, "TUTORIALS", render_tutorials_content(tutorials, guides)), write)
 
-    status("descargas")
-    source = (project_root / "downloads.html").read_text(encoding="utf-8-sig")
-    downloads_page = replace_marked(source, "DOWNLOADS", render_downloads_content(downloads))
-    _write_other(result, output_root, Path("downloads.html"), downloads_page, write)
-    for item in downloads:
-        status(f"artículo {option_slug(item)}")
-        _write_other(result, output_root, Path("option-files") / option_slug(item) / "index.html", render_download_detail(downloads_page, item, downloads), write)
-        if len(download_parts(item)) > 1:
-            status(f"partes {option_slug(item)}")
-            _write_other(result, output_root, Path("option-files") / option_slug(item) / "descargar" / "index.html", render_download_parts_page(downloads_page, item), write)
-        status(f"compatibilidad {option_value(item, 'id', 'ID')}")
-        _write_other(result, output_root, Path("download") / str(option_value(item, "id", "ID", default="sin-id")) / "index.html", render_legacy_download_redirect(downloads_page, item), write)
+def generate_content_hubs(project_root: Path, output_root: Path, data, player_paths, team_paths, league_paths, issues, notify, write) -> ExtraResult:
+    """Genera las paginas generales que hoy se hidratan con CSV/JSON."""
+    result = ExtraResult()
+    database_dir = project_root / "database"
+    # Spider Patch has one published snapshot; CSV/JSON are compatibility exports.
+    from spider_patch import load_published, latest_version, exports, generate as generate_spider_patch
+    spider_model = load_published(project_root)
+    downloads, _compat_csv = exports(spider_model, latest_version(spider_model))
+    tutorials = read_csv(database_dir / "tutoriales.csv", issues, optional=True)
+    guides = read_json(database_dir / "guias.json", issues)
+    news = read_csv(database_dir / "novedades.csv", issues, optional=True)
+    multipart_count = sum(1 for item in downloads if len(download_parts(item)) > 1)
+    stages = 7
+    current = 0
 
-    status("guías")
-    source = (project_root / "guias.html").read_text(encoding="utf-8-sig")
-    cards = "".join(render_guide_card(guide) for guide in guides)
-    source = re.sub(r'(<span class="guides-count-pill" id="guides-count">)[\s\S]*?(</span>)', rf'\g<1>{len(guides)} guías publicadas\g<2>', source, count=1)
-    source = re.sub(r'<section class="editorial-grid guides-grid" id="guides-grid" aria-label="Listado de guias">[\s\S]*?</section>', f'<section class="editorial-grid guides-grid" id="guides-grid" aria-label="Listado de guias">{cards}</section>', source, count=1)
-    _write_other(result, output_root, Path("guias.html"), source, write)
-    for guide in guides:
-        if not guide.get("id"):
-            continue
-        status(f"guía {guide.get('id')}")
-        _write_other(result, output_root, Path("guia") / str(guide["id"]) / "index.html", render_article(guide, guides), write)
+    def status(label: str) -> None:
+        nonlocal current
+        current += 1
+        notify("other", current, stages, f"Generando secciones generales... {current} / {stages} ({label})")
+
+    # The shared renderer also owns the approved Spider Patch homepage entrypoint.
+    status("portada Spider Patch")
+    # Portada de base de datos
+    status("base de datos")
+    generate_database_hub(result, project_root, output_root, data, player_paths, team_paths, league_paths, write)
+
+    status("Spider Patch: renderizador compartido")
+    status("guías y tutoriales")
+    generated_guides = generate_guides(project_root, output_root, write)
+    result.other_html += sum(1 for name in generated_guides if name.endswith('.html'))
+    result.generated_files.extend(output_root / name for name in generated_guides)
 
     status("novedades")
     source = (project_root / "news.html").read_text(encoding="utf-8-sig")
@@ -1533,9 +1466,10 @@ def generate_content_hubs(project_root: Path, output_root: Path, data, player_pa
         source = source.replace('<div id="rankings-content"></div>', fallback, 1)
     _write_other(result, output_root, Path("rankings.html"), source, write)
 
-    status("sitemap de Option Files")
-    sitemap_source = (project_root / "sitemap.xml").read_text(encoding="utf-8-sig")
-    _write_other(result, output_root, Path("sitemap.xml"), render_option_file_sitemap(sitemap_source, downloads), write)
+    status("generación compartida de Spider Patch")
+    spider_files = generate_spider_patch(project_root, output_root, writer=write)
+    result.other_html += sum(name.endswith('.html') for name in spider_files)
+    result.generated_files.extend(output_root / name for name in spider_files)
     return result
 
 

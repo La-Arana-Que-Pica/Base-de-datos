@@ -1,6 +1,6 @@
-"""OVR exacto reconstruido del algoritmo original de PES 2018.
+"""Reconstrucción de OVR contrastada con fichas originales de PES 2018.
 
-No modificar pesos ni redondeos sin validación contra el ejecutable original.
+Aproximación: existen diferencias de un punto en las referencias verificadas.
 Es el equivalente Python de ``js/pes2018-overall.js`` para la generación
 estática. TightPossession se omite deliberadamente: no forma parte de las 20
 filas que usa este algoritmo de PES 2018.
@@ -9,6 +9,7 @@ filas que usa este algoritmo de PES 2018.
 from __future__ import annotations
 
 from typing import Mapping
+from math import isfinite
 
 
 POSITIONS = ("GK", "CB", "LB", "RB", "DMF", "CMF", "LMF", "RMF", "AMF", "LWF", "RWF", "SS", "CF")
@@ -125,6 +126,19 @@ def position_from_pes2018_id(value: object) -> str:
 
 
 def _calculation_rows(stats: Mapping[str, int]) -> list[int]:
+    normalized_stats = {}
+    for key in LAQP_STAT_ALIASES:
+        raw = stats.get(key, 3 if key == "non_dom_leg_precision" else None)
+        if key == "non_dom_leg_precision" and raw is None:
+            raw = 3
+        if raw is None or not str(raw).strip():
+            raise ValueError(f"Invalid PES stat: {key}")
+        value = float(raw)
+        if not isfinite(value):
+            raise ValueError(f"Invalid PES stat: {key}")
+        low, high = (1, 4) if key == "non_dom_leg_precision" else (40, 99)
+        normalized_stats[key] = max(low, min(high, int(value)))
+    stats = normalized_stats
     return [
         int(stats["attacking_prowess"]), int(stats["ball_control"]), int(stats["dribbling"]),
         int(stats["low_pass"]), int(stats["lofted_pass"]), int(stats["finishing"]),

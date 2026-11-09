@@ -4,3 +4,35 @@ __pycache__/
 
 # Runtime log produced by the local site generator
 Herramientas/Salidas/logs/generacion.log
+
+# Draft: configuración local aislada (no publicar)
+/draft/local-test-config.json
+
+# Spider Patch: respaldos, vistas previas y bloqueo local
+/Herramientas/Salidas/Spider-Patch/
+/Herramientas/Recursos/Spider-Patch/operacion.lock
+
+# Vistas y respaldos locales de Guías
+/Herramientas/Salidas/Guias/
+
+/Herramientas/Recursos/Guias/operacion.lock
+
+# Cachés y artefactos locales (los modelos públicos js/vendor y draft/vendor se conservan)
+/.tmp/
+/%SystemDrive%/
+/Herramientas/node_modules/
+/Herramientas/.pnpm-store/
+/Herramientas/Salidas/
+/supabase/.temp/
+/draft/staging/personal-sync/config.js
+*.log
+/Herramientas/Empaquetado/build/
+/Herramientas/Empaquetado/dist/
+/Herramientas/Recursos/Diseno/*.psd
+# Materiales exclusivamente de desarrollo: se conservan localmente y nunca se versionan.
+# Ver Desarrollo/README.md para retirar del seguimiento lo que ya estaba versionado.
+/Desarrollo/
+# Variables de entorno privadas; los ejemplos se pueden versionar deliberadamente.
+.env
+.env.*
+!.env.example

@@ -1,0 +1,26 @@
+/* Scoped to Spider Patch; logical spacing preserves Arabic reading order. */
+.sp-language-bar{display:flex;align-items:center;justify-content:flex-end;gap:.75rem;flex-wrap:wrap;margin:1rem 0;padding:.6rem 0;color:var(--text-secondary,#b6c9ce)}
+.sp-language-bar select{font:inherit;background:#10282e;color:#fff;border:1px solid #43817c;border-radius:8px;padding:.6rem;max-width:100%}
+.sp-password{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;border:2px solid #2cd8be;border-radius:12px;background:#123632;padding:1.1rem;margin-block:1rem;color:#e7fffa}
+.sp-password-value{font-size:1.65rem;font-weight:800;user-select:all;letter-spacing:.08em}
+.sp-password button{background:#2cd8be;color:#06221e;border:0;border-radius:8px;padding:.75rem 1rem;font:inherit;font-weight:700;cursor:pointer}
+.sp-copy-status{flex-basis:100%;font-size:.9rem}.sp-translation-notice{border-inline-start:4px solid #e6c675;padding:1rem;background:#302b18;color:#fff}
+html[data-spider-language] .sp-files strong,html[data-spider-language] .sp-files small{unicode-bidi:plaintext}
+html[data-spider-language=ar] .sp-publication,html[data-spider-language=ar] .sp-parts-page,html[data-spider-language=ar] .sp-featured,html[data-spider-language=ar] .sp-compact-archive{text-align:start}
+html[data-spider-language=ar] .of-number-list,html[data-spider-language=ar] .of-check-list{padding-inline-start:1.6rem;padding-inline-end:0}
+html[data-spider-language=ar] .sp-info-card,html[data-spider-language=ar] .sp-download-panel,html[data-spider-language=ar] .sp-hero-copy{text-align:start}
+html[data-spider-language=ar] input[type=url],html[data-spider-language=ar] code,html[data-spider-language=ar] [data-page-id]{unicode-bidi:isolate}
+@media(max-width:600px){.sp-language-bar{justify-content:flex-start}.sp-password{align-items:flex-start;gap:.6rem}.sp-password strong{flex-basis:100%}.sp-password button{min-height:44px}}
+/* Arabic: mirror the physical left/right rules of option-files.css. */
+html[data-spider-language=ar] .of-check-list li,html[data-spider-language=ar] .of-number-list li{padding-left:0;padding-right:30px}
+html[data-spider-language=ar] .of-number-list li{padding-right:42px}
+html[data-spider-language=ar] .of-check-list li::before,html[data-spider-language=ar] .of-number-list li::before{left:auto;right:0}
+html[data-spider-language=ar] .sp-warning{border-left:0;border-right:3px solid #dfb563}
+html[data-spider-language=ar] .sp-info-card dd,html[data-spider-language=ar] .of-info-card dd{text-align:left}
+html[data-spider-language=ar] .sp-status-dot,html[data-spider-language=ar] .sp-mini-tutorial>span{margin-right:0;margin-left:8px}
+html[data-spider-language=ar] .sp-feature-points>span::before{margin-right:0;margin-left:8px}
+html[data-spider-language=ar] .sp-hero-caption{right:auto;left:35px;text-align:left}
+html[data-spider-language=ar] .sp-skip{left:auto;right:12px}
+@media(max-width:760px){html[data-spider-language=ar] .sp-lean-article .sp-info-card dd{text-align:right}}
+/* Latin brand lines keep their own direction inside Arabic pages. */
+html[data-spider-language=ar] .sp-hero h1,html[data-spider-language=ar] .sp-hero h1 small{direction:ltr;unicode-bidi:isolate;text-align:right}

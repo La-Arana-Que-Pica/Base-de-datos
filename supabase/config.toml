@@ -1,0 +1,4 @@
+# This public endpoint validates anonymous ballots and rate limits in the server.
+# No changes to the existing draft-account function.
+[functions.football-rankings]
+verify_jwt = false

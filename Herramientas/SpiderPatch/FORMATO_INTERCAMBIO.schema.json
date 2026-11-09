@@ -1,0 +1,1029 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:laqp:spider-patch:version:1",
+  "title": "Spider Patch: intercambio editorial de una versión, v1",
+  "$comment": "El validador estándar JSON Schema no sustituye al importador: IDs globales, seguridad HTML/URL, fechas reales, dependencias, límites totales y conflictos se comprueban en Python.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "laqp.spider-patch.version"
+    },
+    "schema_version": {
+      "type": "integer",
+      "enum": [
+        1,
+        2
+      ],
+      "description": "1: solo español. 2: agrega translations, translation_state y password (opcionales). Ambos se importan."
+    },
+    "season": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 300,
+          "pattern": "\\S"
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ]
+    },
+    "version": {
+      "$ref": "#/$defs/version"
+    }
+  },
+  "required": [
+    "format",
+    "schema_version",
+    "season",
+    "version"
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "maxLength": 120,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "image": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "Referencia vacía o imagen local /assets/ o /img/. HTTPS del propio laqp.website se normaliza a ruta local; el importador valida extensión, ruta y existencia."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "hidden"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^(?:|[0-9]{4}-[0-9]{2}-[0-9]{2})$"
+    },
+    "seo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "image": {
+          "$ref": "#/$defs/image"
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      }
+    },
+    "video": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "start_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 604800
+        },
+        "show_in_article": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "url"
+            ],
+            "properties": {
+              "url": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "start_seconds"
+            ],
+            "properties": {
+              "start_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 604800
+              }
+            }
+          }
+        }
+      ]
+    },
+    "galleryImage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "src": {
+          "$ref": "#/$defs/image"
+        },
+        "alt": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "caption": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      }
+    },
+    "mirror": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      }
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "size": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "mirrors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mirror"
+          },
+          "maxItems": 50
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      }
+    },
+    "block_text": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "disclosure"
+          ]
+        },
+        "type": {
+          "const": "text"
+        },
+        "html": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "block_list": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "disclosure"
+          ]
+        },
+        "type": {
+          "const": "list"
+        },
+        "html": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "maxItems": 2000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "block_instructions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "disclosure"
+          ]
+        },
+        "type": {
+          "const": "instructions"
+        },
+        "html": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 100000
+          },
+          "maxItems": 2000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "block_warning": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "disclosure"
+          ]
+        },
+        "type": {
+          "const": "warning"
+        },
+        "html": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "block_html": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "disclosure"
+          ]
+        },
+        "type": {
+          "const": "html"
+        },
+        "html": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "block_image": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "disclosure"
+          ]
+        },
+        "type": {
+          "const": "image"
+        },
+        "src": {
+          "$ref": "#/$defs/image"
+        },
+        "alt": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "caption": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "fit": {
+          "type": "string",
+          "enum": [
+            "contain",
+            "cover"
+          ]
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "block_gallery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "disclosure"
+          ]
+        },
+        "type": {
+          "const": "gallery"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/galleryImage"
+          },
+          "maxItems": 200
+        },
+        "columns": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "block_video": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "disclosure"
+          ]
+        },
+        "type": {
+          "const": "video"
+        },
+        "video": {
+          "$ref": "#/$defs/video"
+        },
+        "caption": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "block": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/block_text"
+        },
+        {
+          "$ref": "#/$defs/block_list"
+        },
+        {
+          "$ref": "#/$defs/block_instructions"
+        },
+        {
+          "$ref": "#/$defs/block_warning"
+        },
+        {
+          "$ref": "#/$defs/block_html"
+        },
+        {
+          "$ref": "#/$defs/block_image"
+        },
+        {
+          "$ref": "#/$defs/block_gallery"
+        },
+        {
+          "$ref": "#/$defs/block_video"
+        }
+      ]
+    },
+    "download": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "install_before": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "maxItems": 200,
+          "uniqueItems": true
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "maxItems": 200,
+          "uniqueItems": true
+        },
+        "image": {
+          "$ref": "#/$defs/image"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "warnings": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/file"
+          },
+          "maxItems": 500
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "update",
+            "addon"
+          ]
+        },
+        "instructions": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "compatibility": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        },
+        "password": {
+          "$ref": "#/$defs/password"
+        },
+        "show_details": {
+          "type": "boolean"
+        }
+      }
+    },
+    "edition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "cover": {
+          "$ref": "#/$defs/image"
+        },
+        "download_intro": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "slug": {
+          "$ref": "#/$defs/id"
+        },
+        "seo": {
+          "$ref": "#/$defs/seo"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "tutorial": {
+          "$ref": "#/$defs/video"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/block"
+          },
+          "maxItems": 1000
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "downloads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/download"
+          },
+          "maxItems": 200
+        },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "pc",
+            "playstation",
+            "all"
+          ]
+        },
+        "comments_id": {
+          "$ref": "#/$defs/id"
+        },
+        "platforms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "PC",
+              "PS4",
+              "PS5"
+            ]
+          },
+          "maxItems": 3,
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "heading": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "cover_alt": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        },
+        "password": {
+          "$ref": "#/$defs/password"
+        }
+      },
+      "required": [
+        "platform"
+      ]
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "cover": {
+          "$ref": "#/$defs/image"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 300,
+          "pattern": "\\S"
+        },
+        "date_line": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "archive_title": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "download_note": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "home_description": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "updated_at": {
+          "$ref": "#/$defs/date"
+        },
+        "editions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/edition"
+          },
+          "maxItems": 20
+        },
+        "version": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "published_at": {
+          "$ref": "#/$defs/date"
+        },
+        "season_id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "release",
+            "addon"
+          ]
+        },
+        "coverage": {
+          "type": "string",
+          "maxLength": 100000
+        },
+        "translations": {
+          "$ref": "#/$defs/translations"
+        },
+        "translation_state": {
+          "$ref": "#/$defs/translation_state"
+        }
+      },
+      "required": [
+        "title",
+        "editions"
+      ]
+    },
+    "translations": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Textos editoriales por idioma (el español es el campo original). Solo campos editoriales presentes en el original; nunca IDs, slugs, URLs, archivos ni estados.",
+      "properties": {
+        "en": {
+          "type": "object",
+          "additionalProperties": false,
+          "propertyNames": {
+            "enum": [
+              "title",
+              "summary",
+              "download_note",
+              "home_description",
+              "heading",
+              "description",
+              "cover_alt",
+              "download_intro",
+              "name",
+              "compatibility",
+              "instructions",
+              "warnings",
+              "alt",
+              "caption",
+              "html",
+              "tagline",
+              "archive_title",
+              "items"
+            ]
+          },
+          "patternProperties": {
+            "^items$": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "^(?!items$).*": {
+              "type": "string"
+            }
+          }
+        },
+        "pt": {
+          "type": "object",
+          "additionalProperties": false,
+          "propertyNames": {
+            "enum": [
+              "title",
+              "summary",
+              "download_note",
+              "home_description",
+              "heading",
+              "description",
+              "cover_alt",
+              "download_intro",
+              "name",
+              "compatibility",
+              "instructions",
+              "warnings",
+              "alt",
+              "caption",
+              "html",
+              "tagline",
+              "archive_title",
+              "items"
+            ]
+          },
+          "patternProperties": {
+            "^items$": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "^(?!items$).*": {
+              "type": "string"
+            }
+          }
+        },
+        "ar": {
+          "type": "object",
+          "additionalProperties": false,
+          "propertyNames": {
+            "enum": [
+              "title",
+              "summary",
+              "download_note",
+              "home_description",
+              "heading",
+              "description",
+              "cover_alt",
+              "download_intro",
+              "name",
+              "compatibility",
+              "instructions",
+              "warnings",
+              "alt",
+              "caption",
+              "html",
+              "tagline",
+              "archive_title",
+              "items"
+            ]
+          },
+          "patternProperties": {
+            "^items$": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "^(?!items$).*": {
+              "type": "string"
+            }
+          }
+        },
+        "it": {
+          "type": "object",
+          "additionalProperties": false,
+          "propertyNames": {
+            "enum": [
+              "title",
+              "summary",
+              "download_note",
+              "home_description",
+              "heading",
+              "description",
+              "cover_alt",
+              "download_intro",
+              "name",
+              "compatibility",
+              "instructions",
+              "warnings",
+              "alt",
+              "caption",
+              "html",
+              "tagline",
+              "archive_title",
+              "items"
+            ]
+          },
+          "patternProperties": {
+            "^items$": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "^(?!items$).*": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "translation_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "en": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "draft",
+                "complete"
+              ]
+            },
+            "source_hash": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "pt": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "draft",
+                "complete"
+              ]
+            },
+            "source_hash": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "ar": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "draft",
+                "complete"
+              ]
+            },
+            "source_hash": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "it": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "draft",
+                "complete"
+              ]
+            },
+            "source_hash": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      }
+    },
+    "password": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Contraseña exacta para descomprimir; se muestra igual en todos los idiomas."
+    }
+  }
+}

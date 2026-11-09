@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#15212b"/><stop offset="1" stop-color="#0a1419"/></linearGradient>
+    <linearGradient id="c1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a6df0"/><stop offset="1" stop-color="#1d3b8a"/></linearGradient>
+    <linearGradient id="c2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f05a3a"/><stop offset="1" stop-color="#8a2a1d"/></linearGradient>
+    <linearGradient id="c3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fbf71"/><stop offset="1" stop-color="#16653b"/></linearGradient>
+    <linearGradient id="c4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b44cf0"/><stop offset="1" stop-color="#5a2280"/></linearGradient>
+    <linearGradient id="c5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4c35a"/><stop offset="1" stop-color="#93701f"/></linearGradient>
+  </defs>
+  <rect width="640" height="400" fill="url(#bg)"/>
+  <g font-family="Arial,Helvetica,sans-serif" font-weight="800">
+    <g transform="translate(40 40)">
+      <rect width="560" height="72" rx="10" fill="#101e24" stroke="#263b42"/>
+      <rect width="72" height="72" rx="10" fill="#ff7d86"/><text x="36" y="49" font-size="36" text-anchor="middle" fill="#2a0a0e">S</text>
+      <rect x="88" y="10" width="40" height="52" rx="5" fill="url(#c1)"/><rect x="136" y="10" width="40" height="52" rx="5" fill="url(#c5)"/><rect x="184" y="10" width="40" height="52" rx="5" fill="url(#c2)"/>
+    </g>
+    <g transform="translate(40 124)">
+      <rect width="560" height="72" rx="10" fill="#101e24" stroke="#263b42"/>
+      <rect width="72" height="72" rx="10" fill="#ffbf7f"/><text x="36" y="49" font-size="36" text-anchor="middle" fill="#2a1700">A</text>
+      <rect x="88" y="10" width="40" height="52" rx="5" fill="url(#c3)"/><rect x="136" y="10" width="40" height="52" rx="5" fill="url(#c4)"/><rect x="184" y="10" width="40" height="52" rx="5" fill="url(#c1)"/><rect x="232" y="10" width="40" height="52" rx="5" fill="url(#c2)"/>
+    </g>
+    <g transform="translate(40 208)">
+      <rect width="560" height="72" rx="10" fill="#101e24" stroke="#263b42"/>
+      <rect width="72" height="72" rx="10" fill="#ffdf7f"/><text x="36" y="49" font-size="36" text-anchor="middle" fill="#2a2100">B</text>
+      <rect x="88" y="10" width="40" height="52" rx="5" fill="url(#c5)"/><rect x="136" y="10" width="40" height="52" rx="5" fill="url(#c3)"/>
+      <rect x="184" y="10" width="40" height="52" rx="5" fill="none" stroke="#22cdbb" stroke-width="2" stroke-dasharray="5 4"/><text x="204" y="44" font-size="24" text-anchor="middle" fill="#22cdbb">+</text>
+    </g>
+    <g transform="translate(40 292)">
+      <rect width="560" height="72" rx="10" fill="#101e24" stroke="#263b42"/>
+      <rect width="72" height="72" rx="10" fill="#bfff7f"/><text x="36" y="49" font-size="36" text-anchor="middle" fill="#142a00">C</text>
+      <rect x="88" y="10" width="40" height="52" rx="5" fill="url(#c4)"/>
+    </g>
+    <g transform="translate(420 170) rotate(-6)">
+      <rect width="170" height="110" rx="14" fill="#0b1a1f" stroke="#22cdbb" stroke-width="2"/>
+      <text x="85" y="44" font-size="20" text-anchor="middle" fill="#66d9ca" letter-spacing="3">TOP 10</text>
+      <text x="85" y="84" font-size="34" text-anchor="middle" fill="#ecf3f3">#1</text>
+    </g>
+  </g>
+</svg>

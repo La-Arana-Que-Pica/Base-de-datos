@@ -1,733 +1,869 @@
 [
   {
-    "id": "importar-kits-pes-2018",
+    "description": "Aprendé a crear minifaces para PES 2018 con imágenes propias, quitarles el fondo automáticamente y exportarlas listas para instalar en el juego.",
     "category": "Edición",
-    "title": "Cómo importar y configurar kits en PES 2018 correctamente",
-    "description": "Guía para configurar colores, cuello, dorsales, nombre del jugador, resolución y detalles visuales al importar kits en PES 2018.",
-    "date": "2026-05-16",
-    "readTime": "12 min",
-    "image": "assets/images/guias/configurar-kits.png",
+    "author": "LAqP",
+    "date": "2026-11-08",
+    "updatedAt": "",
+    "readTime": "6 min",
+    "locale": "es",
+    "visibility": "catalog",
+    "indexable": true,
+    "image": "/assets/images/guias/instalar-minifaces/portada-guia-hacer-minifaces.png",
+    "thumbnail": "/assets/images/guias/instalar-minifaces/portada-guia-hacer-minifaces.png",
+    "thumbnailPosition": "50% 40%",
+    "thumbnailFit": "cover",
+    "seo": {
+      "title": "Cómo crear minifaces para PES 2018 sin Photoshop | LAqP",
+      "description": "Creá minifaces para PES 2018 gratis con LAqP Miniface Studio. Importá tu EDIT, quitá el fondo, ajustá las fotos y exportá un CPK para PC.",
+      "image": "/assets/images/guias/instalar-minifaces/portada-guia-hacer-minifaces.png"
+    },
     "related": [
-      "consejos-crear-caras-pes-2018-editor-interno",
+      "sider-y-cpk-pes-2018",
       "diferencia-option-file-parche-pes"
+    ],
+    "tutorialIds": [],
+    "faq": [
+      [
+        "¿Es necesario tener Photoshop?",
+        "No. Miniface Studio permite preparar, recortar, encuadrar y exportar las imágenes directamente desde el navegador."
+      ],
+      [
+        "¿Puedo crear minifaces sin tener el archivo EDIT?",
+        "Sí. Podés agregar imágenes manualmente e introducir el ID de cada jugador."
+      ],
+      [
+        "¿Tengo que completar un equipo entero para exportarlo?",
+        "No. Podés exportar las minifaces que ya estén terminadas y continuar con las demás después."
+      ],
+      [
+        "¿Se modifican mis archivos de PES 2018 al importar el EDIT?",
+        "No. La herramienta solamente lee el EDIT para obtener los datos de los jugadores. El archivo original no se modifica ni se sube a un servidor."
+      ],
+      [
+        "¿Puedo instalar estas minifaces en PS4 o PS5?",
+        "Este procedimiento está pensado para PES 2018 en PC, porque la instalación de minifaces mediante CPK requiere modificar archivos del juego."
+      ]
+    ],
+    "showFaq": true,
+    "id": "como-crear-minifaces-pes-2018-sin-photoshop",
+    "title": "Cómo crear minifaces para PES 2018 fácilmente y sin Photoshop",
+    "status": "published",
+    "platforms": [
+      "PC"
     ],
     "sections": [
       {
-        "heading": "Introducción",
+        "heading": "1. ¿Qué necesitás para empezar?",
         "body": [
-          "Importar un kit en PES 2018 no es solamente pegar la imagen de la camiseta y listo. Si querés que el equipo se vea como si viniera licenciado de forma oficial dentro del juego, hay varios detalles que conviene configurar bien antes de aplicar la imagen del uniforme.",
-          "En esta guía voy a explicar cómo configurar correctamente los colores del uniforme, el tipo de cuello, los dorsales, el nombre del jugador y algunos detalles visuales para que los kits queden mucho más prolijos dentro del juego.",
-          "Esta guía parte desde el momento en el que ya sabés importar una imagen de kit en PES 2018, así que me voy a enfocar más en la configuración correcta del uniforme."
+          "Solamente necesitás PES 2018 para PC, las imágenes de los jugadores que quieras utilizar y acceso a LAqP Miniface Studio.",
+          "La herramienta funciona desde el navegador y es gratuita. No hace falta instalar Photoshop ni programas para convertir imágenes.",
+          "También vamos a utilizar el archivo EDIT de PES 2018 para cargar automáticamente los jugadores de los equipos con sus nombres e IDs."
         ],
         "list": [],
         "figure": {
-          "image": "assets/images/guias/configurar-kits/muestra-kit-final.png",
-          "alt": "Captura del editor de uniformes de PES 2018, mostrando camiseta, pantalón, medias y cuello.",
-          "caption": "Muestra de resultado final del kit, con sus números y colores bien configurados."
+          "image": "/assets/images/guias/instalar-minifaces/vista-minifaces-studio.png",
+          "alt": "Pantalla principal de LAqP Miniface Studio con colección de jugadores a la izquierda, editor central y opciones a la derecha.",
+          "caption": "Vista general de Miniface Studio y sus tres áreas principales."
         }
       },
       {
-        "heading": "Configurar los colores del uniforme",
+        "heading": "2. Importar los jugadores de PES 2018",
         "body": [
-          "Si ya tenés algo de experiencia descargando kits para PES, seguramente viste que muchas imágenes de camisetas traen, en la parte inferior izquierda, unos colores acompañados por números.",
-          "Esos números indican la configuración de colores que tenés que poner dentro del juego para que el uniforme quede correctamente armado. Normalmente aparecen los colores de la camiseta, el pantalón, las medias y también el tipo de cuello.",
-          "Esto es muy importante porque esos colores no son solo decorativos. PES los usa para varios elementos del uniforme dentro del partido, como mangas largas, calzas, vendas en las medias y otros detalles que dependen del color base del kit."
+          "Lo primero que recomendamos es cargar el archivo EDIT del juego. Así no vas a tener que buscar ni escribir manualmente el ID de cada jugador.",
+          "El archivo normalmente se encuentra en Documentos\\KONAMI\\Pro Evolution Soccer 2018\\save.",
+          "Una vez agregado el equipo, sus jugadores aparecerán en la colección, organizados por liga y club. Los IDs ya estarán asignados automáticamente."
+        ],
+        "list": [
+          "Abrí Miniface Studio y asegurate de estar en el modo PES 2018.",
+          "Entrá en la pestaña EDIT del panel derecho.",
+          "Presioná Importar EDIT00000000 y seleccioná el archivo de tu PES 2018.",
+          "Elegí la liga y el equipo que quieras editar.",
+          "Agregá toda la plantilla con el botón + del club, o seleccioná solamente los jugadores que necesites."
+        ],
+        "figure": {
+          "image": "/assets/images/guias/instalar-minifaces/vista-minifaces-studio-edit-con-equipo.png",
+          "alt": "Pestaña EDIT de Miniface Studio con una liga abierta, sus equipos y el botón más para agregar la plantilla.",
+          "caption": "Elegí una liga y utilizá el botón + para agregar todos los jugadores de un equipo."
+        }
+      },
+      {
+        "heading": "3. Conseguir las imágenes de los jugadores",
+        "body": [
+          "Ahora necesitamos las fotos que vamos a convertir en minifaces. Podés conseguirlas en páginas como SoFIFA o PES Master, o utilizar tus propias imágenes.",
+          "Lo ideal es elegir fotos donde se vea claramente la cabeza del jugador, preferentemente de frente y con buena resolución.",
+          "También podés utilizar Desde archivo para cargar una imagen guardada en tu computadora."
+        ],
+        "list": [
+          "Buscá la foto del jugador.",
+          "Hacé clic derecho sobre la imagen y seleccioná Copiar imagen.",
+          "Volvé a Miniface Studio y seleccioná al jugador correcto en tu colección.",
+          "Presioná Ctrl + V para pegarla."
+        ],
+        "figure": {
+          "image": "/assets/images/guias/instalar-minifaces/vista-minifaces-studio-jugador-recien-pegado.png",
+          "alt": "Fotografía de un futbolista recién pegada en Miniface Studio, antes de quitar el fondo.",
+          "caption": "Imagen original cargada en el editor, antes de recortarla."
+        }
+      },
+      {
+        "heading": "4. Quitar el fondo y ajustar la miniface",
+        "body": [
+          "Una vez cargada la imagen, podemos prepararla para que se vea correctamente dentro del juego.",
+          "Si la imagen tiene fondo, presioná Quitar fondo. La herramienta utiliza inteligencia artificial para separar al jugador del fondo.",
+          "Cuando termine, revisá que el pelo, la cara y los hombros hayan quedado correctamente recortados. Si el resultado no te convence, podés restaurar la imagen original y probar con otra foto.",
+          "Después de quitar el fondo, presioná Encuadrar. Miniface Studio intentará ajustar el tamaño y la posición del rostro para que tenga un aspecto similar al de las minifaces originales de PES.",
+          "Si necesitás corregir algo, arrastrá la imagen para moverla y utilizá los controles de escala para acercarla o alejarla. Revisá la vista final de 128 × 128 píxeles en el panel derecho.",
+          "Si vas a crear muchas minifaces, activá Quitar el fondo y Encuadrar automáticamente en el apartado Al importar.",
+          "Así, cada vez que pegues una imagen nueva, la herramienta intentará recortarla y encuadrarla automáticamente."
+        ],
+        "list": [],
+        "figure": {
+          "image": "/assets/images/guias/instalar-minifaces/vista-minifaces-studio-jugador-recortado-y-encuadrado.png",
+          "alt": "Comparación de una foto original, el recorte del jugador sin fondo y la miniface terminada y encuadrada.",
+          "caption": "Compará la imagen original con el recorte y el resultado final."
+        }
+      },
+      {
+        "heading": "5. Crear las minifaces de un equipo completo",
+        "body": [
+          "Una de las mayores ventajas de Miniface Studio es que podés trabajar con toda una plantilla sin repetir el proceso desde cero.",
+          "Si ya importaste el equipo desde el EDIT y activaste las opciones automáticas, el procedimiento es muy sencillo:",
+          "No necesitás escribir sus IDs porque ya fueron cargados desde el EDIT. Podés cambiar entre equipos utilizando las carpetas de la colección y buscar jugadores por su nombre."
+        ],
+        "list": [
+          "Seleccioná el primer jugador pendiente.",
+          "Copiá su fotografía y pegala con Ctrl + V.",
+          "Revisá que el resultado sea correcto.",
+          "Pasá al siguiente jugador con Siguiente › o la tecla Av Pág.",
+          "Repetí el procedimiento hasta completar los jugadores que quieras."
+        ],
+        "figure": {
+          "image": "/assets/images/guias/instalar-minifaces/vista-minifaces-studio-equipo-a-la-mitad.png",
+          "alt": "Plantilla de PES 2018 cargada en Miniface Studio con varias minifaces terminadas y otras pendientes.",
+          "caption": "Podés avanzar jugador por jugador y ver cuáles faltan en la colección."
+        }
+      },
+      {
+        "heading": "6. Guardar el proyecto para continuar después",
+        "body": [
+          "Miniface Studio guarda automáticamente tu progreso en el navegador. Si cerrás la página y volvés a entrar desde el mismo navegador, normalmente podrás continuar donde lo dejaste.",
+          "Sin embargo, también recomendamos guardar una copia de seguridad.",
+          "Cuando quieras recuperar o combinar ese trabajo, utilizá Importar y combinar desde la misma pestaña."
+        ],
+        "list": [
+          "Entrá en la pestaña Proyecto.",
+          "Presioná Exportar proyecto.",
+          "Guardá el archivo .laqpmf en tu computadora."
+        ],
+        "figure": {
+          "image": "/assets/images/guias/instalar-minifaces/vista-minifaces-studio-proyectos.png",
+          "alt": "Pestaña Proyecto de Miniface Studio con los botones Exportar proyecto e Importar y combinar.",
+          "caption": "Guardá una copia de tu proyecto para retomarlo otro día o en otra computadora."
+        }
+      },
+      {
+        "heading": "7. Exportar las minifaces para PES 2018",
+        "body": [
+          "Una vez que tengas las minifaces preparadas, llega el momento de exportarlas.",
+          "En la pestaña Miniface, buscá el apartado Exportar toda la colección. Escribí el nombre que quieras darle a tu archivo y presioná Exportar todas (CPK).",
+          "Miniface Studio generará automáticamente un archivo CPK con las minifaces terminadas, preparado para instalar en PES 2018.",
+          "Si solamente querés exportar una miniface, también podés utilizar los botones individuales DDS, CPK o ZIP."
+        ],
+        "list": [],
+        "figure": {
+          "image": "/assets/images/guias/instalar-minifaces/vista-minifaces-studio-exportar-cpk.png",
+          "alt": "Panel Miniface de Miniface Studio mostrando el nombre del CPK y el botón Exportar todas CPK.",
+          "caption": "Desde Exportar toda la colección podés generar un único CPK para tu juego."
+        }
+      },
+      {
+        "heading": "8. Instalar las minifaces en PES 2018",
+        "body": [
+          "Con el CPK descargado, solamente falta instalarlo en PES 2018 para PC.",
+          "Si la miniface no aparece, revisá que el CPK esté activado, que el ID del jugador sea correcto y que otro parche no esté reemplazando la misma imagen."
+        ],
+        "list": [
+          "Copiá el archivo .cpk dentro de la carpeta download de PES 2018.",
+          "Abrí DpFileList Generator.",
+          "Agregá el nuevo CPK a la lista y conservá los demás archivos que utilizás.",
+          "Generá el archivo DpFileList.bin.",
+          "Abrí PES 2018 y comprobá las nuevas minifaces."
+        ],
+        "figure": {
+          "image": "/assets/images/guias/instalar-minifaces/insertar-cpk-de-minifaces.png",
+          "alt": "Ventana de DpFileList Generator con un archivo CPK de minifaces agregado junto a los demás CPK del juego.",
+          "caption": "El CPK debe estar incluido en DpFileList Generator para que PES 2018 lo cargue."
+        }
+      },
+      {
+        "heading": "9. ¿Puedo crear minifaces sin utilizar el EDIT?",
+        "body": [
+          "¡Sí! El EDIT es el método recomendado para trabajar con equipos completos, pero no es obligatorio.",
+          "Si solamente querés crear una miniface, podés pegar la fotografía directamente en Miniface Studio, escribir manualmente el ID del jugador y exportarla.",
+          "También podés cargar varias fotografías desde Archivos, en la colección, y asignar sus IDs posteriormente. En ambos casos, el procedimiento para quitar el fondo, encuadrar y exportar es el mismo."
+        ],
+        "list": []
+      },
+      {
+        "heading": "10. ¡Listo! Ya podés crear tus propias minifaces",
+        "body": [
+          "Con LAqP Miniface Studio podés crear y actualizar las imágenes de tus jugadores sin utilizar Photoshop ni convertir archivos manualmente.",
+          "La herramienta es gratuita y permite trabajar con plantillas completas, organizar jugadores por equipos y guardar proyectos para continuar más adelante.",
+          "Volvé a LAqP Miniface Studio para crear tu próximo equipo."
+        ],
+        "list": []
+      }
+    ]
+  },
+  {
+    "description": "Configurá los colores, el cuello, los dorsales y los nombres de tus kits en PES 2018. Aprendé a usar Kit Color Studio y evitá errores al importar uniformes.",
+    "category": "Edición",
+    "author": "Agustín Segade",
+    "date": "2026-05-16",
+    "updatedAt": "",
+    "readTime": "4 min",
+    "locale": "es",
+    "visibility": "catalog",
+    "indexable": true,
+    "image": "/assets/images/guias/configurar-kits.png",
+    "thumbnail": "/assets/images/guias/configurar-kits.png",
+    "thumbnailPosition": "50% 27%",
+    "thumbnailFit": "cover",
+    "seo": {
+      "title": "Cómo configurar kits en PES 2018: colores y dorsales | LAqP",
+      "description": "Aprendé a configurar kits en PES 2018: colores de camiseta, pantalón y medias, cuello, dorsales y Kit Color Studio, paso a paso.",
+      "image": ""
+    },
+    "related": [
+      "diferencia-option-file-parche-pes",
+      "sider-y-cpk-pes-2018"
+    ],
+    "tutorialIds": [],
+    "faq": [
+      [
+        "¿Por qué conviene elegir los colores antes de importar un kit?",
+        "Porque algunos ajustes del uniforme pueden quedar bloqueados al aplicar la imagen. Configurar camiseta, pantalón, medias y cuello primero evita tener que empezar de nuevo."
+      ],
+      [
+        "¿Qué hago si mi kit no trae los números de color?",
+        "Cargá la imagen en LAqP Kit Color Studio. La herramienta te ayuda a obtener los valores para camiseta, pantalón y medias y copiarlos en PES 2018."
+      ],
+      [
+        "¿Qué resolución conviene para los kits de PES 2018?",
+        "Si querés importar muchas equipaciones, 1024 × 1024 es una buena opción para ahorrar espacio. Los kits de 2048 × 2048 pueden dar más detalle, pero consumen más capacidad."
+      ],
+      [
+        "¿Cómo configuro bien el nombre y los dorsales?",
+        "Compará el color, la posición y el tamaño de los números con fotos reales del uniforme, especialmente de la espalda."
+      ]
+    ],
+    "showFaq": true,
+    "id": "importar-kits-pes-2018",
+    "title": "Cómo importar y configurar kits en PES 2018",
+    "platforms": [
+      "PC",
+      "PS4",
+      "PS5"
+    ],
+    "status": "published",
+    "toc": "auto",
+    "sections": [
+      {
+        "heading": "Prepará los colores y el cuello antes de importar el kit",
+        "body": [
+          "En el editor de PES 2018, algunos ajustes pueden dejar de estar disponibles después de aplicar una imagen de uniforme. Por eso, hacé primero estas configuraciones:"
+        ],
+        "list": [
+          "Elegí el color de la camiseta.",
+          "Configurá el color del pantalón.",
+          "Configurá el color de las medias.",
+          "Seleccioná el tipo de cuello.",
+          "Recién entonces importá la imagen del kit."
+        ],
+        "figure": {
+          "image": "assets/images/guias/configurar-kits/muestra-kit-antes-de-ser-pegado.png",
+          "alt": "Captura del editor antes de aplicar el kit, mostrando colores de camiseta, pantalón y medias todavía editables.",
+          "caption": "Configurá el uniforme base antes de aplicar la imagen del kit."
+        }
+      },
+      {
+        "heading": "Qué significan los números de color que trae un kit",
+        "body": [
+          "Muchos creadores incluyen números de color junto a la imagen del uniforme. Esos valores sirven para ajustar los colores del juego: camiseta, pantalón y medias. A veces también indican el tipo de cuello.",
+          "No son solo un detalle estético: el juego utiliza esos colores en elementos como mangas largas, calzas y vendas. Si no coinciden con la camiseta, el uniforme puede verse raro durante el partido."
         ],
         "list": [],
         "figure": {
           "image": "assets/images/guias/configurar-kits/muestra-colores-en-kit.png",
           "alt": "Imagen de un kit PNG donde se vean claramente los valores de color en la esquina inferior izquierda.",
-          "caption": "Captura de como figuran los colores en la mayoría de kits de la comunidad."
+          "caption": "Ejemplo de los valores de color que suelen acompañar a los kits."
         }
       },
       {
-        "heading": "Por qué hay que configurar los colores antes de pegar el kit",
+        "heading": "Cómo obtener los colores con LAqP Kit Color Studio",
         "body": [
-          "Antes de aplicar la imagen del kit al equipo, primero tenés que configurar correctamente los colores del uniforme dentro del editor.",
-          "Esto es importante porque, una vez que pegás la imagen del kit, el juego ya no te permite modificar algunos colores, como el del pantalón y las medias. Por eso, si te olvidás de configurarlos antes, puede que después el uniforme quede mal en ciertos detalles.",
-          "Respetar este orden evita problemas visuales y hace que el uniforme quede más parecido a uno licenciado oficialmente."
+          "Si tu kit no trae los valores de color, no hace falta abrir Paint ni convertir números a mano. En LAqP Kit Color Studio podés cargar la imagen y obtener los colores que necesitás para el editor de PES 2018."
         ],
         "list": [
-          "Configurar el color de la camiseta.",
-          "Configurar el color del pantalón.",
-          "Configurar el color de las medias.",
-          "Configurar el tipo de cuello.",
-          "Recién después aplicar la imagen del kit."
+          "Abrí Kit Color Studio desde LAqP.",
+          "Cargá la imagen del kit.",
+          "Revisá los colores de la camiseta, el pantalón y las medias.",
+          "Copiá los valores que te devuelve y aplicalos en el editor del juego."
         ],
         "figure": {
-          "image": "assets/images/guias/configurar-kits/muestra-kit-antes-de-ser-pegado.png",
-          "alt": "Captura del editor antes de aplicar el kit, mostrando colores de camiseta, pantalón y medias todavía editables.",
-          "caption": "Captura de cómo se debe de ver el kit antes de pegar la imagen del kit."
+          "image": "/assets/images/guias/configurar-kits/kit-color-studio-en-uso.png",
+          "alt": "Kit Color Studio de LAqP con la imagen de un kit cargada y los valores de camiseta, pantalón y medias identificados.",
+          "caption": "Captura pendiente: mostrar Kit Color Studio con los colores listos para copiar."
         }
       },
       {
-        "heading": "Cómo poner los colores que aparecen en el kit",
+        "heading": "Elegir el tipo de cuello",
         "body": [
-          "Si el kit incluye los valores de color, simplemente tenés que copiarlos dentro del editor de PES 2018.",
-          "Primero configurá el color de la camiseta tal como aparece en la imagen del kit. Después hacé lo mismo con el pantalón y las medias.",
-          "Esto sirve para que todos los elementos del uniforme respeten los colores reales del club. Por ejemplo, si un jugador usa mangas largas, la manga se va a ver del color correcto. Lo mismo pasa con las calzas o las vendas en las medias.",
-          "Puede parecer un detalle menor, pero dentro del partido ayuda mucho a que el uniforme se vea más natural y mejor terminado."
-        ],
-        "list": [],
-        "figure": {
-          "image": "assets/images/guias/configurar-kits/comparacion-kits-configurado-y-no-conigurado.png",
-          "alt": "Comparación entre un jugador con mangas largas mal configuradas y otro con el color correcto.",
-          "caption": "Comparación entre un jugador con mangas largas mal configuradas y otro con el color correcto."
-        }
-      },
-      {
-        "heading": "Qué hacer si el kit no incluye los valores de color",
-        "body": [
-          "A veces el kit no trae los numeritos de color en la parte inferior. En ese caso, podés sacar los colores manualmente usando Paint y un convertidor de colores para PES.",
-          "Una página útil para hacer esta conversión es: https://editemospes.com/editor/convertidor-de-colores/index.html.",
-          "Con esto podés obtener una configuración bastante precisa para aplicarla en PES 2018, incluso cuando el kit no trae los valores ya preparados."
-        ],
-        "list": [
-          "Abrí la imagen del kit en Paint.",
-          "Usá el cuentagotas para seleccionar el color que querés copiar.",
-          "Entrá en Editar color.",
-          "Anotá los valores de Rojo, Verde y Azul.",
-          "Pegá esos valores en un convertidor de colores para PES.",
-          "Usá la configuración que te devuelve el convertidor dentro del juego."
-        ],
-        "figure": {
-          "image": "assets/images/guias/configurar-kits/cuentagotas-paint.png",
-          "alt": "Capturas de Paint usando el cuentagotas y del convertidor de colores de EditemosPES con valores RGB cargados.",
-          "caption": "Muestra de los colores dentro del paint, que luego deben de ser convertidos con la herramienta de EditemosPES."
-        }
-      },
-      {
-        "heading": "Configurar el tipo de cuello",
-        "body": [
-          "Además de los colores, también es importante configurar el tipo de cuello de la camiseta.",
-          "Muchos kits ya incluyen el número de cuello recomendado junto con los colores. Si el kit lo trae, simplemente copiá ese valor dentro del editor antes de pegar la imagen.",
-          "Si el kit no incluye el valor del cuello, lo mejor es buscar una imagen real de la camiseta en Google o en redes sociales y elegir el tipo de cuello más parecido dentro del juego.",
-          "No hace falta que sea perfecto, porque el editor de PES tiene límites, pero elegir un cuello similar ayuda bastante a que el uniforme se vea más fiel a la camiseta real."
+          "Si el kit indica un número de cuello, seleccionalo en PES 2018 antes de aplicar la imagen. Si no lo indica, buscá una foto de la camiseta real y elegí el cuello más parecido entre las opciones del juego."
         ],
         "list": [],
         "figure": {
           "image": "assets/images/guias/configurar-kits/muestra-cuello-correcto.png",
           "alt": "Comparación entre la camiseta real del club y la pantalla del editor donde se elige el tipo de cuello.",
-          "caption": "Comparación entre la camiseta del club y los cuellos disponibles en el juego."
+          "caption": "Compará el cuello de la camiseta real con las opciones disponibles en PES 2018."
         }
       },
       {
-        "heading": "Aplicar la imagen del kit",
+        "heading": "Aplicar la imagen del kit y comprobar el resultado",
         "body": [
-          "Una vez que ya configuraste los colores de camiseta, pantalón, medias y el tipo de cuello, recién ahí conviene aplicar la imagen del kit.",
-          "Este orden es importante porque te asegura que todos los elementos editables queden bien antes de que el juego bloquee ciertas opciones del uniforme.",
-          "Después de aplicar el kit, revisá cómo se ve desde el editor y, si podés, también dentro de un partido. A veces un uniforme parece correcto en el menú, pero dentro del juego se nota si las mangas, medias o dorsales no combinan bien."
+          "Cuando ya estén configurados los colores y el cuello, importá la imagen del uniforme. Comprobá cómo se ve en el editor y, si podés, probalo dentro de un partido.",
+          "Prestá atención a las mangas largas, las medias y las calzas: son los detalles que más suelen delatar un color mal configurado."
         ],
         "list": [],
         "figure": {
           "image": "assets/images/guias/configurar-kits/muestra-kit-final.png",
           "alt": "Captura del kit ya aplicado en el editor de PES 2018, mostrando el uniforme completo.",
-          "caption": "Captura del kit ya aplicado en el editor de PES 2018, mostrando el uniforme completo."
+          "caption": "Kit aplicado en el editor, con camiseta, pantalón y medias configurados."
         }
       },
       {
-        "heading": "Qué resolución conviene usar para los kits",
+        "heading": "Qué resolución conviene: 1024 o 2048 píxeles",
         "body": [
-          "Siempre recomiendo importar los kits en resolución 1024x1024.",
-          "PES 2018 tiene un límite de imágenes importadas, y si usás kits en una resolución más alta, vas a llenar ese límite mucho más rápido. En cambio, usando kits de 1024x1024, el juego te permite importar una mayor cantidad de uniformes.",
-          "Esto es especialmente importante si querés actualizar muchas ligas o instalar un Option File con varios equipos. La diferencia de calidad puede no justificar el espacio extra que ocupan los kits en mayor resolución.",
-          "En resumen, si querés priorizar cantidad y estabilidad, lo mejor es usar kits de 1024x1024."
+          "Si vas a importar muchos uniformes en un Option File, los kits de 1024 × 1024 píxeles suelen ser la opción más práctica: ocupan menos espacio dentro del límite de imágenes del juego.",
+          "Los kits de 2048 × 2048 pueden ofrecer más detalle, pero consumen más capacidad. Elegí la resolución según cuántas equipaciones necesites instalar y la calidad que busques."
         ],
         "list": [],
         "figure": {
           "image": "assets/images/guias/configurar-kits/muestra-importar-kits.png",
           "alt": "Captura del menú de importación de imágenes en distintas resoluciones.",
-          "caption": "Captura del menú de importación de imágenes en distintas resoluciones."
+          "caption": "Opciones de resolución al importar kits en PES 2018."
         }
       },
       {
-        "heading": "Configurar dorsales y nombre del jugador",
+        "heading": "Configurar dorsales y nombres de los jugadores",
         "body": [
-          "Después de aplicar el kit, también conviene configurar los dorsales y el nombre del jugador.",
-          "Para hacerlo de forma más realista, una buena recomendación es buscar en Instagram o Google una foto de la camiseta del equipo vista desde atrás. Así podés ver mejor el color, tamaño y ubicación del dorsal, el número del pantalón y el nombre del jugador.",
-          "Esto ayuda mucho a que el kit no solo se vea bien de frente, sino también durante el partido, especialmente en repeticiones, festejos o jugadas donde se ve la espalda del jugador."
+          "Después de aplicar el kit, revisá el número de la espalda, el nombre del jugador y el número del pantalón. Una foto real de la camiseta vista desde atrás te puede servir para elegir colores, tamaños y posiciones.",
+          "Si configurás camiseta local, visitante y arquero, intentá mantener una línea visual consistente. Usar kits del mismo creador y revisar los dorsales de cada equipación ayuda mucho."
         ],
         "list": [
-          "Número de la espalda.",
-          "Nombre del jugador.",
+          "Color de los números y nombres.",
+          "Tamaño y ubicación del dorsal.",
           "Número del pantalón.",
-          "Color de los dorsales.",
-          "Ubicación y tamaño de cada elemento."
+          "Estilo de letra, cuando el editor permita cambiarlo."
         ],
         "figure": {
           "image": "assets/images/guias/configurar-kits/comparacion-numeros.png",
           "alt": "Comparación entre camiseta real y dorsales configurados en el editor de PES 2018.",
-          "caption": "Comparación entre camiseta real y dorsales configurados en el editor de PES 2018."
-        }
-      },
-      {
-        "heading": "Mantener coherencia entre kits de un mismo equipo",
-        "body": [
-          "Si vas a importar varias equipaciones para un mismo equipo, lo ideal es descargar los kits del mismo creador.",
-          "Esto ayuda a mantener una misma línea visual entre la camiseta local, visitante, arquero y posibles terceros kits. Además, suele facilitar que los colores, cuellos y proporciones estén preparados con un criterio similar.",
-          "También recomiendo usar una configuración de dorsales parecida entre todas las equipaciones del mismo equipo, salvo que en la vida real usen estilos claramente distintos.",
-          "La idea es que todos los uniformes del equipo se sientan parte del mismo pack y no como camisetas mezcladas de distintos lugares."
-        ],
-        "list": [],
-        "figure": {
-          "image": "assets/images/guias/configurar-kits/comparacion-dorsales-mismo-club.png",
-          "alt": "Comparación de dorsales en equipaciones de un mismo club.",
-          "caption": "Comparación de dorsales en equipaciones de un mismo club."
+          "caption": "Comparación entre la camiseta real y los dorsales configurados en el juego."
         }
       },
       {
         "heading": "Mostrar dos colores en el marcador",
         "body": [
-          "Hay equipos que tienen una camiseta con más de un color importante. En esos casos, puede pasar que dentro del partido el marcador muestre solo un color del equipo, cuando en realidad quedaría mejor que aparezcan dos.",
-          "Para configurar esto, tenés que ir a la edición de la camiseta y entrar en Diseño 1. Ahí elegís el diseño número 71 y le ponés el color secundario de la equipación.",
-          "De esta forma, durante el partido el marcador puede mostrar los dos colores del equipo, haciendo que se vea más parecido a una licencia oficial.",
-          "Este detalle no siempre es necesario, pero queda muy bien en equipos con camisetas a rayas, mitades de distinto color o diseños donde el color secundario sea muy importante."
+          "En equipos con camisetas de dos colores importantes, podés probar el Diseño 1, número 71, dentro del editor de la camiseta y elegir allí el color secundario. Esto puede ayudar a que el marcador muestre ambos colores.",
+          "Es un detalle opcional: comprobá el efecto en un partido, porque no todos los uniformes necesitan esta configuración."
         ],
         "list": [],
         "figure": {
           "image": "assets/images/guias/configurar-kits/muestra-tipo-71.png",
           "alt": "Captura con el estilo 71 seleccionado y el color secundario aplicado.",
-          "caption": "Captura con el estilo 71 seleccionado y el color secundario aplicado."
+          "caption": "Diseño 71 seleccionado para utilizar un segundo color en el marcador."
         }
+      },
+      {
+        "heading": "Revisión final antes de guardar",
+        "body": [],
+        "list": [
+          "Comprobá que camiseta, pantalón y medias tengan los colores correctos.",
+          "Revisá el cuello, los nombres y los dorsales.",
+          "Probá el kit en un partido para detectar diferencias que no se notan en el editor.",
+          "Guardá los cambios de edición cuando estés conforme."
+        ]
       }
+    ]
+  },
+  {
+    "description": "Consejos para crear caras parecidas en PES 2018 con el editor del juego: imágenes de referencia, piel, pelo, boca y detalles que mejoran el resultado.",
+    "category": "Edición",
+    "author": "Agustín Segade",
+    "date": "2026-05-23",
+    "updatedAt": "",
+    "readTime": "3 min",
+    "locale": "es",
+    "visibility": "catalog",
+    "indexable": true,
+    "image": "assets/images/guias/consejos-caras.png",
+    "thumbnail": "/assets/images/guias/consejos-caras.png",
+    "thumbnailPosition": "50% 40%",
+    "thumbnailFit": "cover",
+    "seo": {
+      "title": "Cómo crear caras en PES 2018 con el editor interno | LAqP",
+      "description": "Mejorá tus caras en PES 2018 con consejos de edición: fotos de referencia, formas del rostro, tonos de piel, pelo, labios y orejas.",
+      "image": ""
+    },
+    "related": [
+      "importar-kits-pes-2018",
+      "sistema-medias-pes-2018"
     ],
+    "tutorialIds": [],
     "faq": [
       [
-        "Conviene configurar colores antes de aplicar el kit?",
-        "Sí. Después de pegar la imagen del kit, PES puede bloquear algunos colores como pantalón y medias."
+        "¿Cuál es la mejor foto para crear una cara en PES 2018?",
+        "Una foto frontal, con buena iluminación y expresión neutra. Si podés, buscá otra foto de perfil para comprobar la forma de la cabeza."
       ],
       [
-        "Qué resolución conviene usar?",
-        "Para la mayoría de Option Files conviene usar kits 1024x1024, porque ocupan menos espacio y permiten importar más uniformes."
+        "¿Tengo que cambiar todas las opciones del editor?",
+        "No. Es mejor concentrarse en los rasgos más reconocibles y evitar ajustes exagerados que hagan que la cara se vea artificial."
       ],
       [
-        "Qué hago si el kit no trae valores de color?",
-        "Podés tomar el color con Paint, anotar los valores RGB y convertirlos con una herramienta de colores para PES."
+        "¿Una cara creada en el editor es lo mismo que una miniface?",
+        "No. La cara es el rostro del modelo del jugador en el partido. La miniface es la imagen pequeña que aparece en menús y plantillas."
       ]
     ],
+    "showFaq": true,
+    "id": "consejos-crear-caras-pes-2018-editor-interno",
+    "title": "Cómo crear caras en PES 2018 con el editor interno: consejos",
     "platforms": [
       "PC",
       "PS4",
       "PS5"
     ],
     "status": "published",
-    "visibility": "catalog",
-    "indexable": true,
-    "locale": "es",
-    "author": "Agustín Segade",
-    "seo": {},
     "toc": "auto",
-    "thumbnail": "assets/images/guias/configurar-kits/muestra-kit-final.png",
-    "thumbnailPosition": "50% 27%",
-    "thumbnailFit": "cover"
-  },
-  {
-    "id": "consejos-crear-caras-pes-2018-editor-interno",
-    "category": "Edición",
-    "title": "Consejos para crear caras en PES 2018 con el editor interno",
-    "description": "Consejos prácticos para crear caras más parecidas en PES 2018 usando el editor interno del juego.",
-    "date": "2026-05-23",
-    "readTime": "7 min",
-    "image": "assets/images/guias/consejos-caras.png",
-    "related": [
-      "importar-kits-pes-2018",
-      "sistema-medias-pes-2018"
-    ],
     "sections": [
       {
-        "heading": "Crear caras lleva practica",
+        "heading": "Elegí una buena foto de referencia",
         "body": [
-          "Crear caras en PES 2018 no es solo elegir un peinado parecido y mover un par de valores. La clave está en aprender a mirar los rasgos importantes del jugador y entender hasta donde permite llegar el editor interno.",
-          "Estos consejos son personales, pero sirven como base para conseguir caras más naturales y reconocibles."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Elegir una buena imagen de referencia",
-        "body": [
-          "Antes de tocar el editor, elegí una foto frontal, con buena luz y expresión neutra. Las sonrisas y gestos cambian ojos, boca, nariz y cachetes, y después la cara puede verse rara dentro del juego.",
-          "Siempre que puedas, evita fotos de costado, con sombras fuertes o con expresiones demasiado marcadas."
+          "Buscá una imagen frontal, bien iluminada y con la cara relajada. Las sonrisas exageradas, las sombras fuertes o las fotos de costado pueden confundir al copiar ojos, boca y forma de la cabeza."
         ],
         "list": [
-          "De frente.",
-          "Sin sonrisa marcada.",
-          "Sin gestos raros.",
-          "Con buena luz.",
-          "Con el rostro natural."
+          "Rostro de frente y sin gestos exagerados.",
+          "Buena luz y detalles visibles.",
+          "Pelo y barba parecidos a los que usa el jugador.",
+          "Si es posible, otra imagen de perfil para revisar la mandíbula y la nariz."
         ],
         "figure": {
           "image": "assets/images/guias/consejos-caras/imagen-referencia.webp",
           "alt": "Referencia correcta e incorrecta para crear caras en PES 2018",
-          "caption": "Lo ideal es usar una imagen frontal y con expresión neutra. Las sonrisas y gestos pueden deformar ojos, nariz, boca y cachetes."
+          "caption": "Una referencia frontal y con expresión neutra facilita la edición."
         }
       },
       {
-        "heading": "Elegir bien el color y la textura de piel",
+        "heading": "Empezá por la forma de la cara",
         "body": [
-          "En PES no importa solo si la piel es más clara u oscura: también cambia mucho la textura. Algunos tonos pueden verse artificiales, brillantes o demasiado amarillentos dentro del juego.",
-          "Para jugadores de piel clara, muchas veces conviene priorizar una textura natural antes que copiar el color exacto. El tercer tono claro suele funcionar mejor que los primeros dos en varios casos. El segundo tono lo usaría con cuidado, porque puede quedar raro salvo en jugadores muy concretos."
+          "Antes de ajustar detalles pequeños, mirá la forma general de la cabeza. Compará el ancho de la cara, la mandíbula, las mejillas y la posición de ojos, nariz y boca.",
+          "Si esa base se parece al jugador, después va a ser mucho más fácil mejorar el resultado con el peinado, la barba y otros detalles."
+        ],
+        "list": []
+      },
+      {
+        "heading": "Elegí bien el tono de piel y el pelo",
+        "body": [
+          "No todos los tonos de piel del editor tienen la misma textura o brillo. Elegí el que se vea más natural dentro del juego, aunque en el menú parezca un poco distinto a la fotografía.",
+          "Con el pelo pasa algo parecido: los colores predeterminados pueden verse planos. Podés ajustarlos manualmente hasta encontrar un tono que combine con las referencias."
         ],
         "list": [],
         "figure": {
           "image": "assets/images/guias/consejos-caras/color-piel.webp",
           "alt": "Editor interno de PES 2018 para ajustar color y textura de piel",
-          "caption": "El editor interno de PES tiene limitaciones. Por eso conviene aprender a usar bien cada parámetro en lugar de intentar copiar todo exactamente."
+          "caption": "Compará el tono de piel dentro del juego, no solo con la foto de referencia."
         }
       },
       {
-        "heading": "No abusar de los colores de pelo por defecto",
+        "heading": "Cuidá los labios, la boca y las orejas",
         "body": [
-          "Los colores de pelo por defecto suelen quedar planos, especialmente en negros y marrones. Conviene ajustarlos manualmente y usarlos solo como punto de partida."
+          "Algunos tipos de labios, como el 5, pueden dejar una expresión de sonrisa permanente si los usás para compensar una foto en la que el jugador está sonriendo. Reservalos para caras donde realmente encajen.",
+          "Las orejas también ayudan al parecido. Fijate si son grandes o pequeñas, si están pegadas a la cabeza o sobresalen, y a qué altura quedan."
+        ],
+        "list": []
+      },
+      {
+        "heading": "No exageres los cambios en el físico",
+        "body": [
+          "No hace falta modificar demasiado el cuerpo para que una cara sea reconocible. Si el jugador no tiene un rasgo físico muy particular, conviene mantener proporciones naturales y concentrarse en el rostro."
+        ],
+        "list": []
+      },
+      {
+        "heading": "Probá la cara dentro del partido",
+        "body": [
+          "El editor y el partido no siempre muestran al jugador de la misma manera. Cuando termines una primera versión, miralo dentro de un partido para comprobar el parecido con otra iluminación y desde distintas cámaras."
         ],
         "list": [
-          "Pelo negro: R1 / V1 / A0.",
-          "Pelo marron: R4 / V2 / A1.",
-          "Ajustar siempre según jugador, iluminacion y peinado."
+          "Compará la cara con tus fotos de referencia.",
+          "Corregí primero la forma general y el peinado.",
+          "Después ajustá piel, ojos, nariz, boca y orejas.",
+          "Volvé a probar sin exagerar los valores."
         ]
       },
       {
-        "heading": "No complicarse demasiado con el físico",
+        "heading": "Caras y minifaces: no son lo mismo",
         "body": [
-          "No hace falta tocar demasiado el cuerpo salvo que el jugador tenga un rasgo muy marcado. Si se exageran los valores, el modelo puede quedar deformado o artificial.",
-          "Para la mayoría de jugadores, lo más importante está en la cara. El físico puede acompañar, pero no debería robarse todo el laburo."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Cuidado con los labios tipo 5",
-        "body": [
-          "El labio superior o inferior tipo 5 puede servir en casos muy especificos, pero no conviene usarlo para copiar sonrisas. Sí se aplica mal, el jugador queda con una mueca permanente.",
-          "Puede funcionar en jugadores con una boca muy característica, como Ronaldinho, pero en la mayoría de casos es mejor usarlo con cuidado."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Darle más importancia a las orejas",
-        "body": [
-          "Las orejas parecen menores, pero ayudan bastante al parecido. Cómo el editor tiene pocas opciones, no hace falta copiarlas exactas: alcanza con cuidar tamaño, separacion y altura.",
-          "Si el jugador tiene orejas grandes, pegadas o muy salidas, ajustarlas puede mejorar mucho la sensacion general."
-        ],
-        "list": [
-          "Tamaño.",
-          "Separacion respecto de la cabeza.",
-          "Altura o posición general."
-        ]
-      },
-      {
-        "heading": "No intentar copiar absolutamente todo",
-        "body": [
-          "El editor interno tiene límites. A veces no existe el peinado perfecto, la nariz exacta o los ojos ideales, y forzar demasiado puede empeorar el resultado.",
-          "En esos casos, conviene capturar lo más reconocible: forma de la cabeza, peinado, barba, ojos, nariz, mandibula, color de piel y expresión general."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Conclusion",
-        "body": [
-          "Para mejorar creando caras en PES 2018, lo más importante es elegir buenas referencias, usar bien los tonos de piel, no abusar de rasgos raros y probar siempre el resultado dentro del partido.",
-          "No hay una fórmula mágica: mientras más caras hagas, mejor vas a entender qué valores funcionan para cada jugador."
+          "La cara es el modelo del jugador que ves durante el partido. La miniface es la foto pequeña que aparece en menús y alineaciones. Si querés crear esas imágenes para PES 2018 en PC, podés usar LAqP Miniface Studio."
         ],
         "list": []
       }
-    ],
-    "faq": [
-      [
-        "Cuál es la mejor foto para crear una cara en PES 2018?",
-        "Una foto frontal, con buena luz y expresión neutra. Las sonrisas o gestos raros pueden confundir al copiar ojos, boca, nariz y cachetes."
-      ],
-      [
-        "Conviene modificar mucho el físico del jugador?",
-        "No siempre. Salvo que tenga un rasgo físico muy marcado, suele ser mejor ajustar poco el cuerpo para evitar deformaciones raras."
-      ]
-    ],
-    "platforms": [
-      "PC",
-      "PS4",
-      "PS5"
-    ],
-    "status": "published",
-    "visibility": "catalog",
-    "indexable": true,
-    "locale": "es",
-    "author": "Agustín Segade",
-    "seo": {},
-    "toc": "auto",
-    "thumbnail": "assets/images/guias/consejos-caras/imagen-referencia.webp",
-    "thumbnailPosition": "50% 40%",
-    "thumbnailFit": "cover"
+    ]
   },
   {
-    "id": "sistema-medias-pes-2018",
+    "description": "Entendé de forma sencilla cómo PES 2018 calcula la media de los jugadores, por qué cambia según la posición y cómo probarlo en la calculadora de LAqP.",
     "category": "Base de datos",
-    "title": "Cómo funciona el sistema de medias en PES 2018",
-    "description": "Cómo calcula PES 2018 la media general: estadísticas, posición, familiaridad y redondeos de la fórmula reconstruida del juego.",
+    "author": "Agustín Segade",
     "date": "2026-05-18",
-    "readTime": "6 min",
-    "image": "assets/images/guias/sistema-medias.png",
-    "related": [
-      "diferencia-option-file-parche-pes",
-      "consejos-crear-caras-pes-2018-editor-interno"
-    ],
-    "sections": [
-      {
-        "heading": "La media no es un promedio común",
-        "body": [
-          "La media general resume atributos de un jugador para una posición. Dos jugadores con el mismo promedio de estadísticas pueden tener una media distinta: el juego no valora todas las habilidades de la misma manera.",
-          "LAqP utiliza una fórmula reconstruida del algoritmo original de PES 2018. La explicación anterior basada en una aproximación ya no representa el cálculo actual de la web."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Cada posición valora estadísticas distintas",
-        "body": [
-          "El cálculo prepara los atributos y aplica una matriz de pesos específica para cada posición. Por eso cambiar la posición de evaluación puede modificar el resultado aunque las estadísticas sigan siendo las mismas."
-        ],
-        "list": [
-          "Se normalizan los atributos antes de aplicar sus pesos.",
-          "Algunas filas combinan más de una estadística, con los redondeos del algoritmo.",
-          "La posición se identifica por su código; no se deben intercambiar directamente los distintos órdenes numéricos de PES y de las exportaciones."
-        ]
-      },
-      {
-        "heading": "Posición natural y familiaridad",
-        "body": [
-          "Después del cálculo posicional se aplica la bonificación correspondiente: posición natural, dominio completo de una posición secundaria o dominio parcial. Las bonificaciones dependen de la posición.",
-          "Comparar una media en la posición natural con otra en una posición secundaria exige tener en cuenta esa familiaridad, además de los pesos de los atributos."
-        ],
-        "list": []
-      },
-      {
-        "heading": "El ajuste global y los porteros",
-        "body": [
-          "Para un jugador evaluado en su posición natural, siempre que no sea portero, el algoritmo combina un 60 % de la puntuación posicional con un 40 % de una puntuación global obtenida mediante una tabla.",
-          "Ese ajuste no se aplica del mismo modo a los porteros ni a las evaluaciones en posiciones secundarias. No conviene reducir toda la fórmula a una única media ponderada."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Redondeos, límites y datos de entrada",
-        "body": [
-          "El orden de las operaciones importa. La fórmula utiliza redondeos enteros en pasos concretos; redondear sólo al final puede producir diferencias. El resultado se limita al intervalo de 40 a 109 previsto por la implementación reconstruida."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Cómo se utiliza en LAqP",
-        "body": [
-          "La calculadora y las vistas de LAqP utilizan la implementación de esta fórmula. La generación estática dispone de su equivalente en Python, para que las páginas generadas y los cálculos del navegador mantengan el mismo criterio.",
-          "Podés cambiar estadísticas y posiciones para observar el resultado en la calculadora de medias."
-        ],
-        "list": []
-      }
-    ],
-    "faq": [
-      [
-        "La media es un promedio de todas las stats?",
-        "No. PES 2018 le da distinto peso a cada estadística según la posición del jugador."
-      ],
-      [
-        "Existe una fórmula oficial de Konami?",
-        "No hay una fórmula pública exacta. Lo que usamos es una aproximación basada en comparar stats y medias reales del juego."
-      ],
-      [
-        "Qué tan precisa es la fórmula aproximada?",
-        "En las pruebas queda muy cerca de la media real, con errores no mayores a 1 punto."
-      ],
-      [
-        "La media alcanza para saber si un jugador rinde?",
-        "No del todo. Ayuda como referencia, pero también conviene mirar stats concretas, posición, estilo y encaje en el equipo."
-      ]
-    ],
-    "platforms": [
-      "PC",
-      "PS4",
-      "PS5"
-    ],
-    "status": "published",
+    "updatedAt": "2026-10-29",
+    "readTime": "3 min",
+    "locale": "es",
     "visibility": "catalog",
     "indexable": true,
-    "locale": "es",
-    "author": "Agustín Segade",
-    "seo": {},
-    "toc": "auto",
+    "image": "/assets/images/guias/sistema-medias.png",
     "thumbnail": "assets/images/guias/sistema-medias.png",
     "thumbnailPosition": "center",
-    "updatedAt": "2026-10-29",
-    "thumbnailFit": "contain"
+    "thumbnailFit": "contain",
+    "seo": {
+      "title": "Cómo se calcula la media en PES 2018: explicación | LAqP",
+      "description": "Descubrí cómo se calcula la media de un jugador en PES 2018 con ejemplos simples: estadísticas, posiciones, familiaridad y calculadora de LAqP.",
+      "image": ""
+    },
+    "related": [
+      "consejos-crear-caras-pes-2018-editor-interno"
+    ],
+    "tutorialIds": [],
+    "faq": [
+      [
+        "¿La media es el promedio de todas las estadísticas?",
+        "No. Cada posición le da más importancia a unas habilidades que a otras."
+      ],
+      [
+        "¿Por qué la media cambia cuando muevo al jugador de posición?",
+        "Porque el juego valora otras habilidades y tiene en cuenta cuánto domina el jugador esa posición."
+      ],
+      [
+        "¿La fórmula de LAqP es un promedio inventado?",
+        "No. LAqP utiliza una reconstrucción del cálculo de PES 2018, con pesos por posición, ajustes y redondeos. No es una fórmula oficial publicada por Konami."
+      ],
+      [
+        "¿Por qué un jugador con menos media puede rendir mejor?",
+        "Porque la media es un resumen. Su velocidad, sus pases, su estilo y el puesto en el que lo uses también influyen en el partido."
+      ]
+    ],
+    "showFaq": true,
+    "id": "sistema-medias-pes-2018",
+    "title": "Cómo se calcula la media de un jugador en PES 2018",
+    "platforms": [
+      "PC",
+      "PS4",
+      "PS5"
+    ],
+    "status": "published",
+    "toc": "auto",
+    "sections": [
+      {
+        "heading": "Qué significa la media de un jugador",
+        "body": [
+          "La media es un número que intenta resumir qué tan bueno es un futbolista para jugar en una posición. No significa que todas sus habilidades valgan lo mismo.",
+          "Pensalo así: si un delantero tiene buena definición, eso ayuda mucho más a su media de delantero que si tiene una gran capacidad para defender."
+        ],
+        "list": []
+      },
+      {
+        "heading": "Cada posición se fija en habilidades diferentes",
+        "body": [
+          "El juego analiza las estadísticas de cada jugador y les da distinta importancia según el puesto. Por eso, con exactamente las mismas estadísticas, un jugador puede tener una media diferente como delantero, mediocampista o defensor."
+        ],
+        "list": [
+          "Delantero: importa mucho cómo ataca y define.",
+          "Mediocampista: importan habilidades como el pase y el control del balón.",
+          "Defensor: importan más las capacidades defensivas y físicas.",
+          "Arquero: se evalúan especialmente sus estadísticas de portería."
+        ]
+      },
+      {
+        "heading": "Cómo calcula la media LAqP",
+        "body": [
+          "En LAqP usamos una fórmula reconstruida a partir del funcionamiento de PES 2018. No hacemos un promedio común ni inventamos una media según el nombre del jugador."
+        ],
+        "list": [
+          "La fórmula toma las estadísticas del jugador.",
+          "Les asigna la importancia que corresponde a la posición elegida.",
+          "Tiene en cuenta si el jugador conoce bien esa posición.",
+          "Aplica los ajustes y redondeos necesarios para obtener la media final."
+        ]
+      },
+      {
+        "heading": "Un ejemplo de la parte 60 % y 40 %",
+        "body": [
+          "En un jugador de campo evaluado en su posición natural, una parte del cálculo combina dos puntuaciones: un 60 % de la nota para su puesto y un 40 % de una nota general obtenida por el algoritmo.",
+          "Imaginemos, solo para entender esa mezcla, que la nota de su puesto fuera 80 y la general 75. El cálculo simplificado sería: 80 × 0,60 + 75 × 0,40 = 78."
+        ],
+        "list": []
+      },
+      {
+        "heading": "Qué pasa cuando cambiás al jugador de posición",
+        "body": [
+          "El juego también tiene en cuenta si esa es su posición habitual o una posición secundaria que conoce mejor o peor.",
+          "Por eso no basta con mirar las estadísticas: un jugador puede rendir bien en más de un lugar, pero la media cambia según el puesto y su familiaridad con él."
+        ],
+        "list": []
+      },
+      {
+        "heading": "Los arqueros y los redondeos son diferentes",
+        "body": [
+          "Los arqueros no siguen exactamente la misma combinación que los jugadores de campo. Además, la fórmula redondea números en varios momentos, no solamente al final. Esos detalles ayudan a que el resultado coincida con el comportamiento de PES 2018."
+        ],
+        "list": []
+      },
+      {
+        "heading": "Probá la calculadora de medias de LAqP",
+        "body": [
+          "Podés elegir una posición, cambiar las estadísticas y ver cómo se mueve la media en nuestra calculadora. Es la forma más fácil de entender qué características pesan más en cada puesto."
+        ],
+        "list": []
+      }
+    ]
   },
   {
-    "id": "sider-y-cpk-pes-2018",
+    "description": "Entendé qué son CPK, Sider y LiveCPK en PES 2018 para PC, cómo se cargan los mods y cuál método conviene para instalar o probar cambios.",
     "category": "PC",
-    "title": "CPK vs Sider en PES 2018: diferencias y cuándo usar cada uno",
-    "description": "Guía para entender las diferencias entre CPK, Sider, LiveCPK y módulos en PES 2018 para PC, y saber cuándo conviene usar cada método.",
+    "author": "Agustín Segade",
     "date": "2026-05-20",
-    "readTime": "9 min",
-    "image": "assets/images/guias/cpk-vs-sider.png",
+    "updatedAt": "",
+    "readTime": "3 min",
+    "locale": "es",
+    "visibility": "catalog",
+    "indexable": true,
+    "image": "/assets/images/guias/cpk-vs-sider.png",
+    "thumbnail": "assets/images/guias/cpk-vs-sider.png",
+    "thumbnailPosition": "center",
+    "thumbnailFit": "contain",
+    "seo": {
+      "title": "CPK vs Sider en PES 2018: diferencias y usos | LAqP",
+      "description": "CPK, Sider y LiveCPK en PES 2018 para PC: qué hace cada uno, cómo cargar mods y cuál te conviene para editar, probar o instalar contenido.",
+      "image": ""
+    },
     "related": [
       "diferencia-option-file-parche-pes"
     ],
+    "tutorialIds": [],
+    "faq": [
+      [
+        "¿CPK y Sider hacen lo mismo?",
+        "Ambos pueden servir para cargar mods, pero CPK es un archivo empaquetado y Sider es un programa que se ejecuta con el juego."
+      ],
+      [
+        "¿Qué es LiveCPK?",
+        "Es una función de Sider que permite cargar archivos desde carpetas sin tener que crear un CPK nuevo para cada cambio."
+      ],
+      [
+        "¿Qué conviene para probar minifaces o gráficos?",
+        "Si tenés Sider y LiveCPK correctamente configurados, es práctico para probar modificaciones sin volver a empaquetarlas."
+      ],
+      [
+        "¿Qué pasa si dos mods cambian el mismo archivo?",
+        "Puede prevalecer uno según el método y el orden de carga. Conviene revisar las prioridades y evitar duplicaciones."
+      ]
+    ],
+    "showFaq": true,
+    "id": "sider-y-cpk-pes-2018",
+    "title": "CPK vs Sider en PES 2018: diferencias y cuándo usar cada uno",
+    "platforms": [
+      "PC"
+    ],
+    "status": "published",
+    "toc": "auto",
     "sections": [
       {
-        "heading": "Introducción",
+        "heading": "Qué es un archivo CPK",
         "body": [
-          "En PES 2018 para PC existen distintas formas de modificar archivos del juego. Dos de las más conocidas son los CPK y Sider. A simple vista pueden parecer métodos parecidos, porque ambos permiten agregar contenido personalizado, pero en realidad funcionan de manera bastante distinta.",
-          "En esta guía voy a explicar la diferencia entre CPK y Sider de forma simple, para entender cuándo conviene usar cada uno."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Qué es un CPK",
-        "body": [
-          "Un CPK es básicamente un conjunto de archivos empaquetados.",
-          "Cuando descargás o creás un mod en formato CPK, ese archivo se coloca dentro de la carpeta del juego, normalmente en la carpeta download, y después se activa usando herramientas como DpFileList Generator.",
-          "Una vez aplicado, el juego detecta ese CPK como si fuera parte de sus propios archivos. Es decir, antes de iniciar, PES ya carga ese contenido como si viniera integrado dentro del juego.",
-          "La ventaja principal del CPK es que, una vez instalado correctamente, no tenés que abrir ningún programa extra antes de jugar. Simplemente iniciás PES 2018 y los cambios ya aparecen aplicados."
+          "Un CPK es un archivo que reúne recursos del juego, como minifaces, caras, kits o menús. Se utiliza para instalar mods empaquetados."
         ],
         "list": [
-          "Minifaces.",
-          "Caras.",
-          "Kits.",
-          "Menús.",
-          "Música.",
-          "Imágenes.",
-          "Gráficos.",
-          "Otros archivos internos del juego."
+          "Colocá el CPK en la carpeta download de PES 2018.",
+          "Abrí una herramienta compatible, como DpFileList Generator.",
+          "Incluí el nuevo CPK junto con los que ya utilizás y generá DpFileList.bin.",
+          "Iniciá el juego y comprobá que se cargó correctamente."
         ]
       },
       {
         "heading": "Qué es Sider",
         "body": [
-          "Sider, en cambio, no es solo un archivo empaquetado. Es un programa externo que se ejecuta junto con el juego.",
-          "Para que funcione, normalmente tenés que abrir Sider como administrador antes de entrar a PES 2018. Una vez ejecutado, Sider puede cargar contenido externo y aplicar modificaciones mientras el juego está funcionando.",
-          "A diferencia del CPK, Sider no depende únicamente de empaquetar archivos. Su utilidad principal está en dos partes: LiveCPK y los módulos o servidores."
+          "Sider es un programa externo que funciona junto con PES 2018 en PC. Permite cargar archivos y módulos adicionales sin depender exclusivamente de los CPK.",
+          "Para utilizarlo, tenés que tener una versión compatible y seguir su configuración. No todos los mods de Sider funcionan de la misma forma ni requieren los mismos pasos."
         ],
         "list": []
       },
       {
-        "heading": "Qué es LiveCPK",
+        "heading": "Qué es LiveCPK y por qué sirve para editar",
         "body": [
-          "LiveCPK es una función de Sider que permite cargar archivos modificados sin tener que empaquetarlos en un CPK cada vez.",
-          "Con LiveCPK podés trabajar de forma más rápida. Modificás los archivos en una carpeta, los cargás con Sider y podés ver los cambios en el juego con mucha menos vuelta.",
-          "Por eso LiveCPK es muy útil para editar y probar cambios. Si estás haciendo menús, imágenes, minifaces u otros archivos internos, te permite revisar más rápido cómo queda todo dentro del juego."
+          "LiveCPK es una función de Sider que permite cargar archivos modificados desde carpetas. Es útil cuando estás probando algo y todavía no querés empaquetarlo en un CPK.",
+          "Por ejemplo, si corregís una miniface, podés cambiar el archivo de trabajo y volver a probarlo sin crear un CPK nuevo cada vez. Así ahorrás tiempo durante la edición."
         ],
-        "list": [
-          "Desempaquetar archivos.",
-          "Modificarlos.",
-          "Volver a empaquetarlos en CPK.",
-          "Copiarlos a la carpeta download.",
-          "Activarlos con DpFileList Generator.",
-          "Abrir el juego para probar."
-        ]
+        "list": []
       },
       {
         "heading": "Qué son los módulos o servidores de Sider",
         "body": [
-          "Además de LiveCPK, Sider también permite usar módulos o servidores.",
-          "Estos sirven para hacer modificaciones más complejas que no se podrían lograr simplemente reemplazando archivos mediante un CPK.",
-          "Un ejemplo conocido en PES 2018 es el servidor de scoreboards o marcadores. Este tipo de módulo permite cambiar el marcador según la liga o competición que estés jugando.",
-          "Eso es algo que con un CPK común sería mucho más limitado, porque el CPK modifica archivos base del juego, pero no tiene la misma capacidad para aplicar cambios dinámicos según el contexto del partido.",
-          "Por eso Sider puede ser más potente en ciertos casos, especialmente cuando se busca que el juego cambie contenido automáticamente dependiendo de la competición, estadio, equipo u otra condición."
+          "Sider también puede utilizar módulos para funciones más avanzadas. Algunos permiten cambiar recursos según el contexto del partido, como un marcador diferente para cada competición.",
+          "Esto es distinto de reemplazar un archivo fijo con un CPK: el módulo puede elegir qué recurso mostrar mientras se juega."
         ],
         "list": []
       },
       {
-        "heading": "Diferencia principal entre CPK y Sider",
+        "heading": "CPK o Sider: cuál conviene elegir",
         "body": [
-          "La diferencia más importante es la forma en la que cargan los archivos.",
-          "Un CPK se instala dentro de la carpeta del juego y PES lo detecta al iniciar, como si fuera parte de sus archivos originales.",
-          "Sider, en cambio, es un programa externo que se ejecuta junto al juego y permite cargar archivos o módulos de forma más flexible."
+          "No hace falta elegir un único método para todo. Podés editar y probar con LiveCPK y, cuando termines, preparar un CPK si te resulta más cómodo."
         ],
         "list": [
-          "CPK: archivo empaquetado que el juego carga al iniciar.",
-          "Sider: programa externo que carga contenido mientras el juego funciona.",
-          "LiveCPK: función de Sider para probar archivos sin empaquetar.",
-          "Módulos/servidores: funciones más avanzadas para cambios dinámicos."
+          "CPK: para dejar un mod empaquetado e instalado de forma estable.",
+          "Sider con LiveCPK: para probar cambios y trabajar sobre archivos sueltos.",
+          "Módulos de Sider: para funciones dinámicas que requieren algo más que reemplazar un archivo."
         ]
       },
       {
-        "heading": "Cuándo conviene usar CPK",
-        "body": [
-          "Personalmente, considero que el CPK es la mejor opción si solamente querés modificar archivos internos del juego y dejarlos instalados de forma fija.",
-          "Por ejemplo, si ya terminaste un pack de minifaces, una modificación del menú o un conjunto de imágenes, lo más práctico es pasarlo a CPK, activarlo con DpFileList Generator y olvidarte.",
-          "La ventaja es que después no tenés que abrir Sider cada vez que quieras jugar. Simplemente abrís PES 2018 y los cambios ya están aplicados."
-        ],
+        "heading": "Qué revisar si un mod no aparece",
+        "body": [],
         "list": [
-          "Querés una instalación más fija.",
-          "No necesitás probar cambios constantemente.",
-          "Querés evitar abrir programas externos antes de jugar.",
-          "El mod solo reemplaza archivos internos del juego.",
-          "Ya terminaste de editar y querés dejar todo aplicado."
+          "Comprobá que el mod sea compatible con tu PES 2018 y con la versión de Sider que uses, si corresponde.",
+          "Si es un CPK, verificá que esté en download y figure en el DpFileList.bin generado.",
+          "Si usás LiveCPK, revisá las carpetas y la configuración de Sider.",
+          "Si varios mods reemplazan el mismo archivo, comprobá cuál tiene prioridad en la carga."
         ]
       },
       {
-        "heading": "Cuándo conviene usar Sider",
+        "heading": "La recomendación de LAqP",
         "body": [
-          "Sider es más recomendable si estás editando y necesitás probar cambios de forma rápida.",
-          "Por ejemplo, si estás modificando imágenes, minifaces, menús o archivos internos, LiveCPK te permite ver los resultados sin tener que crear un CPK nuevo cada vez. Esto ahorra bastante tiempo durante el proceso de edición.",
-          "También conviene usar Sider si necesitás módulos o servidores que hagan cosas más complejas, como cambiar marcadores dependiendo de la competición."
+          "Para aprender y probar cambios rápidamente, LiveCPK puede ser muy útil. Para un pack terminado que quieras tener instalado sin ejecutar otro programa, el CPK suele ser la opción más sencilla.",
+          "Si todavía no sabés qué modifica cada archivo, consultá primero las diferencias entre Option File y parche."
         ],
-        "list": [
-          "Estás editando y querés probar cambios rápido.",
-          "Necesitás usar LiveCPK.",
-          "Querés evitar empaquetar un CPK cada vez que hacés una prueba.",
-          "El mod necesita módulos o servidores.",
-          "Querés aplicar cambios dinámicos que un CPK común no puede hacer."
-        ]
-      },
-      {
-        "heading": "Mi recomendación",
-        "body": [
-          "Mi recomendación es usar Sider y LiveCPK mientras estás editando, porque permite trabajar más rápido y ver los cambios dentro del juego sin tener que repetir todo el proceso de empaquetado.",
-          "Pero una vez que los cambios ya están terminados, lo mejor es pasarlos a CPK. De esta forma, el contenido queda instalado de manera más cómoda y no necesitás abrir Sider cada vez que quieras jugar."
-        ],
-        "list": [
-          "Para editar y probar: Sider con LiveCPK.",
-          "Para dejar el mod instalado definitivamente: CPK.",
-          "Para cambios avanzados o dinámicos: Sider con módulos o servidores."
-        ]
+        "list": []
       }
-    ],
-    "faq": [
-      [
-        "CPK y Sider hacen lo mismo?",
-        "No exactamente. Ambos pueden cargar contenido personalizado, pero el CPK se carga al iniciar el juego y Sider funciona como programa externo junto a PES 2018."
-      ],
-      [
-        "Qué conviene para probar cambios rápido?",
-        "Sider con LiveCPK, porque evita empaquetar un CPK nuevo cada vez que querés probar un archivo."
-      ],
-      [
-        "Qué conviene para dejar un mod instalado fijo?",
-        "CPK suele ser más cómodo cuando el mod ya está terminado y no necesitás seguir probando cambios."
-      ]
-    ],
-    "platforms": [
-      "PC"
-    ],
-    "status": "published",
-    "visibility": "catalog",
-    "indexable": true,
-    "locale": "es",
-    "author": "Agustín Segade",
-    "seo": {},
-    "toc": "auto",
-    "thumbnail": "assets/images/guias/cpk-vs-sider.png",
-    "thumbnailPosition": "center",
-    "thumbnailFit": "contain"
+    ]
   },
   {
-    "id": "diferencia-option-file-parche-pes",
+    "description": "Conocé las diferencias entre un Option File y un parche de PES 2018, qué modifica cada uno y cuál conviene instalar en PC, PS4 o PS5.",
     "category": "Option Files",
-    "title": "Diferencia entre Option File y Parche en PES: cuál conviene usar?",
-    "description": "Diferencias entre Option File y parche en PES: qué modifica cada uno, en qué plataformas conviene usarlos y cuál elegir según tu caso.",
+    "author": "Agustín Segade",
     "date": "2026-05-23",
-    "readTime": "5 min",
-    "image": "assets/images/guias/parches-vs-option-files.png",
+    "updatedAt": "",
+    "readTime": "2 min",
+    "locale": "es",
+    "visibility": "catalog",
+    "indexable": true,
+    "image": "/assets/images/guias/parches-vs-option-files.png",
+    "thumbnail": "/assets/images/guias/parches-vs-option-files.png",
+    "thumbnailPosition": "center",
+    "thumbnailFit": "contain",
+    "seo": {
+      "title": "Option File vs parche en PES 2018: ¿cuál conviene? | LAqP",
+      "description": "Descubrí qué cambia un Option File y qué modifica un parche en PES 2018. Compará sus ventajas y elegí la opción adecuada para PC, PS4 o PS5.",
+      "image": ""
+    },
     "related": [
       "sider-y-cpk-pes-2018"
     ],
-    "sections": [
-      {
-        "heading": "La diferencia principal",
-        "body": [
-          "Un Option File usa las herramientas del editor interno de PES. Un parche, en cambio, modifica archivos internos del juego.",
-          "Los dos pueden actualizar equipos, kits y plantillas, pero no funcionan igual ni sirven para las mismas plataformas."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Qué es un Option File",
-        "body": [
-          "Un Option File es contenido creado desde el editor del juego. Permite editar equipos, competiciones, jugadores, escudos, kits, planteles y ligas genéricas sin tocar archivos internos.",
-          "Por eso es la opción más comoda para PS4 y PS5: se instala desde el menú de edicion de PES 2018 y no requiere consola liberada."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Qué se puede modificar con un Option File",
-        "body": [],
-        "list": [
-          "Nombres de equipos y competiciones.",
-          "Escudos y kits importados.",
-          "Planteles, jugadores, stats y formaciones.",
-          "Equipos creados en ligas genéricas.",
-          "Entrenadores, estadios e imágenes cuando el juego lo permite."
-        ]
-      },
-      {
-        "heading": "Qué es un parche",
-        "body": [
-          "Un parche va más alla del editor interno y puede reemplazar o agregar archivos del juego. Por eso permite cambios más profundos, sobre todo en PC.",
-          "La contra es que requiere más cuidado: normalmente hay que usar CPK, Sider, carpetas del juego u otras herramientas de modding."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Qué puede modificar un parche que un Option File no puede",
-        "body": [],
-        "list": [
-          "Caras escaneadas o faces reales.",
-          "Minifaces de jugadores.",
-          "Uniformes de equipos licenciados.",
-          "Dorsales, fonts y números personalizados.",
-          "Menú y soundtrack del juego.",
-          "Estadios, scoreboards, cánticos, balones, botines y guantes.",
-          "Graficos de competiciones o cambios de gameplay más avanzados."
-        ]
-      },
-      {
-        "heading": "Por qué no usar siempre un parche",
-        "body": [
-          "Porque en consolas normales no se pueden modificar archivos internos del juego. En PS4 y PS5, lo más seguro y compatible es usar Option Files.",
-          "En PC si hay más libertad, pero también más riesgo de errores si se mezclan versiones, CPK, Sider o mods incompatibles."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Cuál conviene usar",
-        "body": [
-          "Si jugás en PS4 o PS5, usa un Option File. Es más simple, seguro y compatible.",
-          "Si jugás en PC, podés combinar un Option File para equipos y plantillas con parches o mods para faces, minifaces, estadios, menús, cánticos y otros cambios visuales."
-        ],
-        "list": []
-      },
-      {
-        "heading": "Conclusion",
-        "body": [
-          "El Option File es la opción practica para actualizar PES desde el editor del juego. El parche es la opción más completa para PC, pero también exige más conocimiento técnico.",
-          "La mejor eleccion depende de tu plataforma y de cuanto quieras modificar el juego."
-        ],
-        "list": []
-      }
-    ],
+    "tutorialIds": [],
     "faq": [
       [
-        "Un Option File y un parche son lo mismo?",
-        "No. Un Option File usa el editor interno de PES, mientras que un parche modifica archivos internos del juego."
+        "¿Option File y parche son lo mismo?",
+        "No. Un Option File guarda cambios del editor del juego; un parche puede reemplazar o agregar archivos internos, especialmente en PC."
       ],
       [
-        "Qué conviene usar en PS4 o PS5?",
-        "En consolas lo más recomendable es usar Option Files, porque se instalan desde el juego y no requieren modificar archivos internos."
+        "¿Se pueden instalar parches CPK en PS4 o PS5 normales?",
+        "Este tipo de parche está pensado para PC. En PS4 y PS5 sin modificaciones del sistema lo habitual es instalar Option Files desde el editor de PES."
       ],
       [
-        "En PC conviene Option File o parche?",
-        "Depende del objetivo. El Option File es más simple para equipos y planteles; el parche permite cambios más profundos como faces, estadios, menús, marcadores y cánticos."
+        "¿Se pueden combinar un Option File y un parche en PC?",
+        "Sí, siempre que sean compatibles. El Option File puede aportar equipos y plantillas, mientras que el parche puede añadir caras, minifaces, menús y otros recursos."
+      ],
+      [
+        "¿Qué opción conviene para actualizar equipos y kits?",
+        "En consola, normalmente un Option File. En PC, depende de si buscás únicamente datos editables o también modificaciones de archivos internos."
       ]
     ],
+    "showFaq": true,
+    "id": "diferencia-option-file-parche-pes",
+    "title": "Option File vs parche en PES 2018: diferencias y cuál conviene",
     "platforms": [
       "PC",
       "PS4",
       "PS5"
     ],
     "status": "published",
-    "visibility": "catalog",
-    "indexable": true,
-    "locale": "es",
-    "author": "Agustín Segade",
-    "seo": {},
     "toc": "auto",
-    "thumbnail": "assets/images/guias/parches-vs-option-files.png",
-    "thumbnailPosition": "center",
-    "thumbnailFit": "contain"
+    "sections": [
+      {
+        "heading": "Qué es un Option File de PES 2018",
+        "body": [
+          "Un Option File es un conjunto de datos creados o modificados con el editor del juego. Permite actualizar equipos, plantillas y otros elementos que PES deja editar sin reemplazar sus archivos internos."
+        ],
+        "list": [
+          "Nombres de equipos y competiciones.",
+          "Escudos y kits importados.",
+          "Jugadores, plantillas, estadísticas y formaciones.",
+          "Equipos y ligas editables del juego."
+        ]
+      },
+      {
+        "heading": "Qué es un parche para PES 2018",
+        "body": [
+          "Un parche puede cambiar archivos internos del juego. En PC se utilizan métodos como CPK o Sider para instalar contenido que el editor de PES no permite modificar."
+        ],
+        "list": [
+          "Caras y minifaces personalizadas.",
+          "Menús, imágenes y música del juego.",
+          "Kits de equipos licenciados y elementos gráficos.",
+          "Estadios, marcadores, cánticos y otros mods, según su compatibilidad."
+        ]
+      },
+      {
+        "heading": "Diferencia principal entre Option File y parche",
+        "body": [
+          "El Option File aprovecha las opciones del editor interno. El parche puede ir más allá y reemplazar recursos que el juego no deja editar desde sus menús."
+        ],
+        "list": [
+          "Option File: modifica datos y recursos admitidos por el editor de PES.",
+          "Parche: puede modificar archivos del juego, principalmente en PC.",
+          "Ambos pueden actualizar equipos y uniformes, pero mediante métodos diferentes."
+        ]
+      },
+      {
+        "heading": "Cuál conviene instalar según tu plataforma",
+        "body": [
+          "Si jugás en una consola normal, elegí un Option File compatible con tu versión de PES 2018. Es el método habitual para importar equipaciones, escudos y cambios de equipos desde el propio juego.",
+          "Podés usar Option Files para editar equipos y plantillas, parches para modificar archivos internos o una combinación de ambos. Lo importante es comprobar que las versiones sean compatibles."
+        ],
+        "list": []
+      },
+      {
+        "heading": "¿Puedo combinar un Option File con un parche?",
+        "body": [
+          "Sí, en PC pueden complementarse. Por ejemplo, un Option File puede actualizar las plantillas y un parche puede aportar minifaces y menús nuevos."
+        ],
+        "list": []
+      },
+      {
+        "heading": "Por dónde empezar",
+        "body": [
+          "Si querés actualizar PES 2018 desde el editor, empezá por la guía para instalar un Option File.",
+          "Si jugás en PC y querés agregar minifaces, menús o gráficos, también te conviene conocer la diferencia entre CPK y Sider."
+        ],
+        "list": []
+      }
+    ]
   }
 ]

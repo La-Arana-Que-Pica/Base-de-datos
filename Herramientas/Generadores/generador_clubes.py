@@ -16,9 +16,39 @@ import unicodedata
 from pathlib import Path
 from urllib.parse import quote
 
+from miniface_paths import MinifaceIndex
+
 POSITIONS = ('POR', 'CT', 'LI', 'LD', 'MCD', 'MC', 'MI', 'MD', 'MP', 'EI', 'ED', 'SD', 'DC')
 PES_POSITION_KEYS = ('GK', 'CB', 'LB', 'RB', 'DMF', 'CMF', 'LMF', 'RMF', 'AMF', 'LWF', 'RWF', 'SS', 'CF')
 GROUPS = ('POR', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'MED', 'DEL', 'DEL', 'DEL', 'DEL')
+KIT_ORDER = ('1st', '2nd', '3rd', '4th')
+KIT_PREVIEW_NAME = re.compile(r'(?P<team>\d+)_DEF_(?P<gk>GK)?(?P<order>1st|2nd|3rd|4th)\.webp')
+# Same role tones and classic field surface as js/builder-views.js (Creador de alineaciones, vista Clásica).
+ROLE_TONES = {'POR': '#ffe600', 'DEF': '#36c9f5', 'MED': '#79e329', 'DEL': '#ff378e'}
+
+
+def _pitch_surface():
+    # Static copy for a .84 aspect pitch, so the centre circle stays round without JS.
+    rx, half = 9.333, 7.467
+    path = lambda points: ' '.join(('L' if i else 'M') + f'{x} {y}' for i, (x, y) in enumerate(points))
+    lines = ' '.join(path(p) for p in (
+        [(6, 4), (94, 4), (94, 94), (6, 94), (6, 4)], [(6, 49), (94, 49)],
+        [(21.53, 4), (21.53, 18.14), (78.47, 18.14), (78.47, 4)], [(38.12, 4), (38.12, 8.71), (61.88, 8.71), (61.88, 4)],
+        [(21.53, 94), (21.53, 79.86), (78.47, 79.86), (78.47, 94)], [(38.12, 94), (38.12, 89.29), (61.88, 89.29), (61.88, 94)]))
+    bands = ''.join(f'<rect x="6" y="{4 + i * 9}" width="88" height="9" fill="{"#286125" if i % 2 else "#225721"}"/>' for i in range(10))
+    corners = ''.join(f'<path transform="translate({x} {y}) rotate({a})" d="M1.3 0 A1.3 .86 0 0 1 0 .86"/>'
+                      for x, y, a in ((6, 4, 0), (94, 4, 90), (94, 94, 180), (6, 94, 270)))
+    spots = ''.join(f'<ellipse cx="50" cy="{y}" rx=".3" ry=".2"/>' for y in (49, 13.43, 84.57))
+    return ('<svg xmlns="http://www.w3.org/2000/svg" class="club-pitch-surface" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'
+            f'<rect width="100" height="100" rx="1" fill="#19481f"/>{bands}'
+            '<defs><filter id="club-grass"><feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" stitchTiles="stitch"/></filter></defs>'
+            '<rect x="6" y="4" width="88" height="90" filter="url(#club-grass)" opacity=".055"/>'
+            f'<g fill="none" stroke="#c2db9b" stroke-width=".32" opacity=".72"><path d="{lines}"/><ellipse cx="50" cy="49" rx="{rx}" ry="7.84"/>'
+            f'<path d="M{50 - half} 18.14 A{rx} 7.84 0 0 0 {50 + half} 18.14 M{50 - half} 79.86 A{rx} 7.84 0 0 1 {50 + half} 79.86"/>{corners}</g>'
+            f'<g fill="#c2db9b">{spots}</g></svg>')
+
+
+PITCH_SURFACE = _pitch_surface()
 POSITION_ORDER = {position: order for order, position in enumerate(('POR', 'LD', 'CT', 'LI', 'MCD', 'MC', 'MD', 'MI', 'MP', 'ED', 'EI', 'SD', 'DC'))}
 ADVANCED = {
     0: 'Desactivada', 1: 'Pegados a la banda', 2: 'Falso nueve',
@@ -91,6 +121,19 @@ def context_style(team):
     return f'--db-context-primary:{rgb(primary)};--db-context-secondary:{rgb(secondary)};--db-accent:{rgb(accent)}'
 
 
+def face_badge(show, full=False, scanned=False):
+    if not show:
+        return ''
+    key, text = ('faces.full', 'Full caras LAqP') if full else ('player.faceStatus.scanned', 'Escaneado en PES 2018') if scanned else ('faces.edited', 'Cara LAqP')
+    help_key, help_text = ('faces.fullHelp', 'Todas las caras editadas por LAqP o escaneadas en PES 2018') if full else ('player.faceStatus.scanned', 'Escaneado en PES 2018') if scanned else ('player.faceStatus.edited', 'Cara editada por LAqP')
+    return f'<span class="laqp-face-badge{" is-full" if full else " is-scanned" if scanned else ""}" title="{help_text}" data-i18n-title="{help_key}"><span aria-hidden="true">⚑</span> <span data-i18n="{key}">{text}</span></span>'
+
+
+def full_faces(data, team_id):
+    roster = data.rosters.get(team_id, [])
+    return bool(roster) and all((entry.player.get('Id') in data.edited_face_ids or entry.player.get('Id') in data.scanned_face_ids) for entry in roster)
+
+
 def rating_class(value):
     # Shared thresholds and classes from the player profile (overallColor).
     number = integer(value)
@@ -105,15 +148,24 @@ def stadium_name(team):
     return name if name not in ('', '-', '0') and not name.isdigit() else ''
 
 
+def load_kit_previews(root):
+    """Render del kit dentro del juego: {team_id: {(arquero, numero): ruta}}, escaneado al generar."""
+    previews = {}
+    for path in (root / 'img' / 'kits_preview').glob('*/*.webp'):
+        match = KIT_PREVIEW_NAME.fullmatch(path.name)
+        if match and match['team'] == path.parent.name:
+            key = (bool(match['gk']), KIT_ORDER.index(match['order']))
+            previews.setdefault(match['team'], {})[key] = f'img/kits_preview/{path.parent.name}/{path.name}'
+    return previews
+
+
 class ClubRenderer:
     def __init__(self, root, data, team_paths, player_paths, country_names, corrected_overall, managers=()):
         self.root, self.data = root, data
         self.team_paths, self.player_paths = team_paths, player_paths
         self.countries, self.overall = country_names, corrected_overall
         self.formations = {r['Id']: r for r in data.formations}
-        self.uniforms = {}
-        for row in data.uniforms:
-            self.uniforms.setdefault(row.get('Id_Team'), []).append(row)
+        self.kit_previews = load_kit_previews(root)
         self.managers = list(managers)
         self.tactics = []
         tactic_file = root / 'database' / 'tacticas.csv'
@@ -121,10 +173,9 @@ class ClubRenderer:
             with tactic_file.open(encoding='utf-8-sig', newline='') as stream:
                 self.tactics = list(csv.DictReader(stream, delimiter=';'))
         # Scan once at build time, never from the browser.
-        self.assets = {
-            folder: {p.name for p in (root / 'img' / folder).glob('*.webp')}
-            for folder in ('players', 'pes_original_minifaces', 'teams')
-        }
+        self.assets = {'teams': {p.name for p in (root / 'img' / 'teams').glob('*.webp')}}
+        # Minifaces con el nombre del juego: player_<ID>.webp (IDs inflados sin el 0x40000000).
+        self.minifaces = MinifaceIndex(root)
 
     def asset(self, folder, identifier):
         name = f'{identifier}.webp'
@@ -132,14 +183,17 @@ class ClubRenderer:
 
     def miniface(self, player, css='club-face'):
         pid = player.get('Id', '')
-        current = self.asset('players', pid)
-        original = f'img/pes_original_minifaces/{pid}.webp' if f'{pid}.webp' in self.assets['pes_original_minifaces'] else ''
+        current = self.minifaces.src('players', pid)
+        original = self.minifaces.src('pes_original_minifaces', pid, default=None)
         attrs = f'class="{css}" alt="{esc(player.get("Name"))}" width="48" height="48" loading="lazy"'
         # No src until the shared resolver knows the saved mode. A missing PES
         # original goes directly to default, never to the modern miniface.
         return (f'<img {attrs} data-player-id="{esc(pid)}" data-miniface-current-src="{esc(current)}" '
                 f'data-miniface-pes-src="{esc(original)}">'
                 f'<noscript><img {attrs} src="{esc(current)}"></noscript>')
+
+    def edited(self, player):
+        return player.get('Id') in self.data.edited_face_ids and player.get('Id') not in self.data.scanned_face_ids
 
     def player_link(self, team_id, player, text=None):
         name = text or player.get('Name') or 'Jugador'
@@ -165,7 +219,10 @@ class ClubRenderer:
         if not (0 <= x <= 52 and 0 <= y <= 104) or pos not in range(13):
             return None
         # Vertical depth X grows towards the opponent; Y grows left -> right.
-        return {'left': round(10 + y / 104 * 80, 3), 'top': round(8 + (1 - x / 52) * 84, 3), 'position': POSITIONS[pos], 'positionKey': PES_POSITION_KEYS[pos]}
+        # Projected into the playing area of the Squad Builder classic surface (x 6-94, y 4-94).
+        left, top = 10 + y / 104 * 80, 8 + (1 - x / 52) * 84
+        return {'left': round(6 + left * .88, 3), 'top': round(4 + top * .9, 3), 'position': POSITIONS[pos],
+                'positionKey': PES_POSITION_KEYS[pos], 'tone': ROLE_TONES[GROUPS[pos]]}
 
     def formation(self, team_id, row):
         starters = []
@@ -189,17 +246,16 @@ class ClubRenderer:
         for number, player, normal in starters:
             states = {key: self.coordinates(row, number, suffix) for key, _, suffix, _ in variants}
             url = self.player_paths.get((team_id, player['Id']), '')
+            overall = self.overall(self.data, player) or '—'
             tokens.append(f'<a class="club-pitch-player" href="{esc(url)}" data-formation-player="{number}" '
                           f'data-positions="{esc(json.dumps(states, separators=(",", ":")))}" '
-                          f'style="left:{normal["left"]}%;top:{normal["top"]}%" title="{esc(player.get("Name"))}">'
-                          f'{self.miniface(player)}<span class="club-pitch-name">{esc(player.get("Name"))}</span>'
-                          f'<span class="club-pitch-position" data-i18n-map="positions" data-i18n-key="{normal["positionKey"]}">{normal["position"]}</span></a>')
+                          f'style="left:{normal["left"]}%;top:{normal["top"]}%;--role-tone:{normal["tone"]}" title="{esc(player.get("Name"))}">'
+                          f'<span class="club-pitch-face">{self.miniface(player)}</span>'
+                          f'<span class="club-pitch-stats"><span class="club-pitch-position" data-i18n-map="positions" data-i18n-key="{normal["positionKey"]}">{normal["position"]}</span><b>{esc(overall)}</b></span>'
+                          f'<span class="club-pitch-name">{esc(player.get("Name"))}</span></a>')
         return f'''<section class="club-section club-formation" id="formacion" aria-labelledby="club-formation-heading">
           <div class="club-section-heading"><h2 id="club-formation-heading" data-i18n="team.formation">Formación</h2>{controls}</div>
-          <div class="club-pitch" aria-label="Once inicial; ataque hacia arriba" data-i18n-aria-label="team.pitchAria">
-            <span class="club-pitch-half" aria-hidden="true"></span><span class="club-pitch-circle" aria-hidden="true"></span>
-            <span class="club-pitch-area club-pitch-area-top" aria-hidden="true"></span>
-            <span class="club-pitch-area club-pitch-area-bottom" aria-hidden="true"></span>{''.join(tokens)}
+          <div class="club-pitch" aria-label="Once inicial; ataque hacia arriba" data-i18n-aria-label="team.pitchAria">{PITCH_SURFACE}{''.join(tokens)}
           </div><p class="club-caption" data-i18n="team.startingEleven">Once inicial · Ataque hacia arriba</p></section>'''
 
     def tactics_html(self, team_id, row):
@@ -286,29 +342,16 @@ class ClubRenderer:
         return f'<section class="club-section club-coach" data-coach-id="{esc(coach.get("Id"))}"><h2 data-i18n="team.coachTitle">Director Técnico</h2><div class="club-coach-profile">{photo}<div><strong>{esc(name)}</strong><p data-i18n-map="countries" data-i18n-key="{esc(coach.get("Country"))}">{esc(country)}</p>{link}</div></div></section>'
 
     def kits(self, team_id):
-        result, seen = [], set()
-        for kit in sorted(self.uniforms.get(team_id, []), key=lambda k: (k.get('Competition',''), k.get('Goalkeeper') == 'True', integer(k.get('Num_Kit')) or 0)):
-            num = integer(kit.get('Num_Kit'))
-            if num is None or not 0 <= num < 10:
-                continue
-            goalkeeper = kit.get('Goalkeeper') == 'True'
-            key = (goalkeeper, num, kit.get('Competition'))
-            if key in seen:
-                continue
-            seen.add(key)
+        result = []
+        team_name = self.data.team_by_id.get(team_id, {}).get('Name', '')
+        for (goalkeeper, num), source in sorted(self.kit_previews.get(team_id, {}).items()):
             if goalkeeper:
                 label = '<span data-i18n="team.goalkeeperKit">Arquero</span>' + (f' · <span data-i18n="team.kit">Kit</span> {num+1}' if num else '')
+                plain = 'Arquero' + (f' kit {num+1}' if num else '')
             else:
-                labels = {0:('team.homeKit','Local'),1:('team.awayKit','Visitante'),2:('team.thirdKit','Tercer kit'),3:('team.fourthKit','Cuarto kit')}
-                label_key, label_text = labels.get(num, ('team.kit', 'Kit'))
-                label = f'<span data-i18n="{label_key}">{label_text}</span>' + (f' {num+1}' if num not in labels else '')
-            samples = []
-            for prefix, part, part_key in [('Shirt_Base', 'Camiseta', 'team.shirt'), ('Pant', 'Pantalón', 'team.shorts'), ('Socks', 'Medias', 'team.socks')]:
-                color = pes_rgb(kit, prefix, '_')
-                if color:
-                    samples.append(f'<span class="club-kit-part"><i style="background:{rgb(color)}" aria-label="{part}: {rgb(color)}" role="img"></i><small data-i18n="{part_key}">{part}</small></span>')
-            if samples:
-                result.append(f'<div class="club-kit" data-kit-id="{esc(kit.get("Id"))}"><h3>{label}</h3><div class="club-kit-colors">{"".join(samples)}</div></div>')
+                label_key, plain = {0:('team.homeKit','Local'),1:('team.awayKit','Visitante'),2:('team.thirdKit','Tercer kit'),3:('team.fourthKit','Cuarto kit')}[num]
+                label = f'<span data-i18n="{label_key}">{plain}</span>'
+            result.append(f'<figure class="club-kit" data-kit="{"gk" if goalkeeper else "field"}{num+1}"><img src="{esc(source)}" alt="{esc(team_name)}: {plain}" width="256" height="256" loading="lazy"><figcaption>{label}</figcaption></figure>')
         return f'<section class="club-section club-uniforms"><h2 data-i18n="team.uniforms">Uniformes</h2><div class="club-kits">{"".join(result)}</div></section>' if result else ''
 
     def rivals(self, team):
@@ -347,9 +390,9 @@ class ClubRenderer:
             overall = self.overall(self.data, player)
             shirt = integer(entry.shirt_number)
             shirt = shirt if shirt is not None and shirt > 0 else ''
-            rows.append(f'<tr data-group="{group}" data-name="{esc(player.get("Name"))}" data-number="{shirt}" data-position="{POSITION_ORDER.get(position, "")}" data-overall="{esc(overall)}" data-age="{esc(player.get("Age"))}" data-roster-player-id="{esc(player["Id"])}">'
+            rows.append(f'<tr data-group="{group}" data-name="{esc(player.get("Name"))}" data-number="{shirt}" data-position="{POSITION_ORDER.get(position, "")}" data-overall="{esc(overall)}" data-age="{esc(player.get("Age"))}" data-roster-player-id="{esc(player["Id"])}" data-face-edited="{int(self.edited(player))}">'
                         f'<td class="club-roster-face">{self.miniface(player)}</td><td class="club-number">{shirt or "—"}</td>'
-                        f'<td>{self.player_link(team_id, player)}</td><td><span class="club-position" data-i18n-map="positions" data-i18n-key="{position_key}">{position}</span></td><td class="club-overall"><span class="club-rating {rating_class(overall)}">{esc(overall)}</span></td><td>{esc(player.get("Age") or "—")}</td></tr>')
+                        f'<td>{self.player_link(team_id, player)}{face_badge(self.edited(player) or player['Id'] in self.data.scanned_face_ids, scanned=player['Id'] in self.data.scanned_face_ids)}</td><td><span class="club-position" data-i18n-map="positions" data-i18n-key="{position_key}">{position}</span></td><td class="club-overall"><span class="club-rating {rating_class(overall)}">{esc(overall)}</span></td><td>{esc(player.get("Age") or "—")}</td></tr>')
         filters = ''.join(f'<button type="button" data-club-filter="{value}" aria-pressed="{str(value == "").lower()}" data-i18n="{label_key}">{label}</button>' for value,label,label_key in [('', 'Todos','common.allMasc'),('POR','POR','filters.goalkeeper'),('DEF','DEF','filters.defender'),('MED','MED','filters.midfielder'),('DEL','DEL','filters.forward')])
         formation = self.formations.get(team_id, {})
         stadium = stadium_name(team)
@@ -357,13 +400,14 @@ class ClubRenderer:
         team_i18n_params = esc(json.dumps({"team": team["Name"]}, ensure_ascii=False))
         return style, f'''<article class="club-detail" data-club-id="{esc(team_id)}" style="{style}">
           <header class="club-hero db-hero"><div class="club-crest"><img src="{self.asset('teams', team_id)}" alt="Escudo de {esc(team['Name'])}" data-i18n-alt="team.crestAlt" data-i18n-params="{team_i18n_params}" width="112" height="112"></div>
-            <div class="club-identity"><p class="club-eyebrow" data-i18n="team.optionFile">PES 2018 · Option File</p><h1>{esc(team['Name'])}</h1>
+            <div class="club-identity"><p class="club-eyebrow" data-i18n="team.optionFile">PES 2018 · Option File</p><h1>{esc(team['Name'])}</h1>{face_badge(full_faces(self.data, team_id), True)}
               <div class="club-meta">{league_html if league_html != '-' else ''}<span data-i18n-map="countries" data-i18n-key="{esc(team.get('Country'))}">{esc(self.countries.get(team.get('Country'), ''))}</span><span><span data-i18n="team.pesId">PES ID</span> {esc(team_id)}</span></div>{stadium_html}
               <div class="club-summary">{summary}</div><a class="club-builder-cta club-text-link" href="/alineaciones.html?team={esc(team_id)}" data-i18n="team.buildLineup">Crear alineación con este equipo</a></div></header>
           {self.coach(team)}<div class="club-layout db-module-grid">{self.tactics_html(team_id, formation)}{self.formation(team_id, formation)}<aside class="club-right-rail" aria-label="Roles, uniformes y rivales" data-i18n-aria-label="team.rightRailAria">{self.roles(team_id, formation)}{self.kits(team_id)}{self.rivals(team)}</aside></div>
           <section class="club-section club-roster" id="plantilla" aria-labelledby="club-roster-heading"><div class="club-section-heading"><h2 id="club-roster-heading" data-i18n="team.squad">Plantilla</h2><span data-roster-count aria-live="polite" data-i18n="team.players" data-i18n-params='{{"count":{len(roster)}}}'>{len(roster)} jugadores</span></div>
             <div class="club-roster-tools"><div class="club-filters club-js-control" role="group" aria-label="Filtrar por posición" data-i18n-aria-label="team.filterPosition">{filters}</div><div data-miniface-control-host></div></div>
             <div class="club-roster-search club-js-control"><label><span data-i18n="team.searchSquad">Buscar en la plantilla</span> <input type="search" data-club-search placeholder="Nombre del jugador" data-i18n-placeholder="team.playerName" autocomplete="off"></label></div>
+            <div class="club-roster-search club-js-control"><label><span data-i18n="filters.faceEdited">Caras editadas por LAqP</span><select data-club-face-filter><option value="" data-i18n="common.allMasc">Todos</option><option value="yes" data-i18n="common.yes">Sí</option><option value="no" data-i18n="common.no">No</option></select></label></div>
             <table class="club-roster-table"><caption class="club-sr-only" data-i18n="team.squadCaption" data-i18n-params="{team_i18n_params}">Plantilla de {esc(team['Name'])}</caption><thead><tr><th><span class="club-sr-only">Miniface</span></th><th scope="col" aria-sort="none"><button type="button" data-club-sort="number"># <span class="club-sort-indicator" aria-hidden="true"></span></button></th><th scope="col" aria-sort="none"><button type="button" data-club-sort="name"><span data-i18n="common.player">Jugador</span> <span class="club-sort-indicator" aria-hidden="true"></span></button></th><th scope="col" aria-sort="none"><button type="button" data-club-sort="position"><span data-i18n="common.positionShort">Pos.</span> <span class="club-sort-indicator" aria-hidden="true"></span></button></th><th scope="col" aria-sort="none"><button type="button" data-club-sort="overall"><span data-i18n="common.overall">Media</span> <span class="club-sort-indicator" aria-hidden="true"></span></button></th><th scope="col" aria-sort="none"><button type="button" data-club-sort="age"><span data-i18n="common.age">Edad</span> <span class="club-sort-indicator" aria-hidden="true"></span></button></th></tr></thead><tbody>{''.join(rows)}</tbody></table>
             <p data-roster-empty data-i18n="{'team.noCsvPlayers' if not roster else 'team.noMatches'}"{'' if not roster else ' hidden'}>{'No hay jugadores disponibles en los CSV para esta plantilla.' if not roster else 'No hay jugadores que coincidan con los filtros.'}</p></section>
         </article>'''

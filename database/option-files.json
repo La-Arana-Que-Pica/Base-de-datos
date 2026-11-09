@@ -1,5 +1,66 @@
 [
   {
+    "id": "laqp-sp-2026-v4-pc",
+    "slug": "spider-patch-2026-v4-pc",
+    "title": "Spider Patch 2026 V4 — PES 2018",
+    "description": "Actualizá PES 2018 en PC con Spider Patch 2026 V4: Premier League, LaLiga, Serie A, Ligue 1, Bundesliga, Liga Argentina, Brasileirão, 17 clubes chilenos, Libertadores 2026, selecciones y muchos clubes internacionales. Plantillas, fichajes, tácticas y kits actualizados, con Face Pack adicional opcional.",
+    "version": "V4",
+    "game": "PES 2018",
+    "season": "2026",
+    "date": "2026-11-08",
+    "platforms": [
+      "PC"
+    ],
+    "cover": "/assets/images/spider-patch/OF-2026-V4-615801b82f4a.png",
+    "featured": true,
+    "status": "Disponible",
+    "category": "Option File",
+    "download_parts": [
+      {
+        "name": "Parte 1 — LAqP_Patch_V4_PC.part1.rar",
+        "url": "https://sharemods.com/hmjjrtzn7qk2/LAqP_Patch_V4_PC.part1.rar.html",
+        "size": ""
+      },
+      {
+        "name": "Parte 2 — LAqP_Patch_V4_PC.part2.rar",
+        "url": "https://sharemods.com/ngmsgfp05eps/LAqP_Patch_V4_PC.part2.rar.html",
+        "size": ""
+      },
+      {
+        "name": "Parte 3 — LAqP_Patch_V4_PC.part3.rar",
+        "url": "https://sharemods.com/gzo6ejjf3dkd/LAqP_Patch_V4_PC.part3.rar.html",
+        "size": ""
+      }
+    ],
+    "tutorial": "https://www.youtube.com/watch?v=1ioQsBhgsBY&t=362s"
+  },
+  {
+    "id": "laqp-sp-2026-v4-ps",
+    "slug": "spider-patch-2026-v4-ps4-ps5",
+    "title": "Spider Patch 2026 V4 — PES 2018",
+    "description": "Option File V4 de LAqP para actualizar PES 2018 en PlayStation 4 y PlayStation 5: principales ligas europeas, Argentina, Brasil, 17 clubes chilenos, Libertadores 2026, selecciones, equipos internacionales, fichajes, formaciones y uniformes.",
+    "version": "V4",
+    "game": "PES 2018",
+    "season": "2026",
+    "date": "2026-11-08",
+    "platforms": [
+      "PS4",
+      "PS5"
+    ],
+    "cover": "/assets/images/spider-patch/OF-2026-V4-615801b82f4a.png",
+    "featured": true,
+    "status": "Disponible",
+    "category": "Option File",
+    "download_parts": [
+      {
+        "name": "LAqP_Patch_V4_PS4-PS5.rar — Archivo único",
+        "url": "https://sharemods.com/xjtnatpx0rrr/LAqP_Patch_V4_PS4-PS5.rar.html",
+        "size": ""
+      }
+    ],
+    "tutorial": "https://www.youtube.com/watch?v=1ioQsBhgsBY&t=697s"
+  },
+  {
     "id": "of_pes2018_2026_v3_pc",
     "slug": "pes-2018-option-file-2026-v3-pc",
     "title": "Spider Patch 2026 V3",
@@ -12,7 +73,7 @@
       "PC"
     ],
     "cover": "/assets/images/option-files/OF PES 2018 al 2026 V3.webp",
-    "featured": true,
+    "featured": false,
     "status": "Disponible",
     "category": "Option File",
     "download_parts": [
@@ -53,7 +114,7 @@
       "PS5"
     ],
     "cover": "/assets/images/option-files/OF PES 2018 al 2026 V3.webp",
-    "featured": true,
+    "featured": false,
     "status": "Disponible",
     "category": "Option File",
     "download_parts": [

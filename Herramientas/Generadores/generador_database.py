@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Callable, Iterable
 from urllib.parse import quote
 
+from miniface_paths import FOLDERS as MINIFACE_FOLDERS, MinifaceIndex, miniface_name
 from pes2018_overall import assign_overall
 
 
@@ -227,6 +228,11 @@ class TemplateEngine:
             if not template_path.is_file():
                 raise GenerationFatalError(f"No se encontro la plantilla: {template_path}")
             self.templates[name] = template_path.read_text(encoding="utf-8-sig")
+            source = self.templates[name]
+            consent = source.find('src="js/consent-mode.js"')
+            analytics = source.find("https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27")
+            if consent < 0 or analytics < consent or source.count("gtag('config', 'G-M7ZNDRZB27')") != 1:
+                raise GenerationFatalError(f"Integracion GA4/consentimiento invalida en {name}.html")
 
     def render(self, name: str, values: dict[str, object]) -> str:
         template = self.templates[name]
@@ -268,6 +274,8 @@ class GeneratorData:
     corrected_by_player_id: dict[str, str] = field(default_factory=dict)
     rosters: dict[str, list[RosterEntry]] = field(default_factory=dict)
     team_leagues: dict[str, list[dict[str, str]]] = field(default_factory=dict)
+    edited_face_ids: set[str] = field(default_factory=set)
+    scanned_face_ids: set[str] = field(default_factory=set)
 
 
 def escape(value: object) -> str:
@@ -423,6 +431,26 @@ def unique_index(
     return result
 
 
+def remove_unpublished_player_pages(output_root: Path, player_paths: dict[tuple[str, str], str]) -> list[Path]:
+    """Retira fichas generadas de membresias que ya no se publican; conserva aliases de las vigentes."""
+    removed: list[Path] = []
+    # Sin planteles no hay con que comparar: nunca vaciar la carpeta por datos rotos.
+    if not player_paths:
+        return removed
+    for page in (output_root / 'player').glob('*/*/index.html'):
+        match = re.search(r'<meta name="laqp-player-id" content="([^"]+)">', page.read_text(encoding='utf-8', errors='replace')[:4000])
+        if not match or (page.parent.parent.name, match.group(1)) in player_paths:
+            continue
+        page.unlink()
+        removed.append(page)
+        for directory in (page.parent, page.parent.parent):
+            try:
+                directory.rmdir()
+            except OSError:
+                break  # Keep any unrelated files that happen to share this folder.
+    return removed
+
+
 def load_data(database_dir: Path, issues: IssueLogger) -> GeneratorData:
     rows: dict[str, list[dict[str, str]]] = {}
     optional_names = {"appearances", "formations", "coaches", "uniforms"}
@@ -444,6 +472,11 @@ def load_data(database_dir: Path, issues: IssueLogger) -> GeneratorData:
         )
 
     data = GeneratorData(**rows)
+    scanned_rows = read_csv_file(database_dir / 'scanned_players.csv', {'Id'}, issues, optional=True)
+    data.scanned_face_ids = {row['Id'] for row in scanned_rows if row.get('Id')}
+    face_rows = read_csv_file(database_dir / 'caras_editadas.csv', {'Id', 'Edited'}, issues, optional=True)
+    data.edited_face_ids = {row['Id'] for row in face_rows
+                            if row.get('Edited', '').lower() in {'1', 'true'} and row['Id'] not in data.scanned_face_ids}
     for player in data.players:
         try:
             overall = assign_overall(player)
@@ -670,12 +703,8 @@ def build_builder_index(project_root: Path, data: GeneratorData) -> dict[str, ob
             "overall": int(corrected_overall(data, player)) if corrected_overall(data, player).isdigit() else None,
             "age": int(player["Age"]) if player.get("Age", "").isdigit() else None,
             "countryId": player.get("Country", "").strip(),
-            "miniface": f"img/players/{player_id}.webp" if asset_exists(project_root, "players", player_id) else "img/players/default.webp",
-            "pes2018Miniface": (
-                f"img/pes_original_minifaces/{player_id}.webp"
-                if (project_root / "img" / "pes_original_minifaces" / f"{player_id}.webp").is_file()
-                else ""
-            ),
+            "miniface": minifaces(project_root).src("players", player_id),
+            "pes2018Miniface": minifaces(project_root).src("pes_original_minifaces", player_id, default=None),
         })
     players.sort(key=lambda item: (str(item["name"]).casefold(), str(item["id"])))
 
@@ -696,7 +725,8 @@ def build_builder_index(project_root: Path, data: GeneratorData) -> dict[str, ob
     }
 
 
-def build_content_index(project_root: Path, data: GeneratorData, version: str = DEFAULT_VERSION) -> dict[str, object]:
+def build_content_index(project_root: Path, data: GeneratorData, version: str = DEFAULT_VERSION,
+                        output_root: Path | None = None) -> dict[str, object]:
     """Relaciona IDs usados por comentarios/guardados con títulos y URLs reales."""
     # Reutilizar exactamente la misma resolución que genera las páginas de
     # Option Files evita que el índice y la URL publicada puedan divergir.
@@ -705,7 +735,7 @@ def build_content_index(project_root: Path, data: GeneratorData, version: str = 
     items: dict[str, dict[str, str]] = {}
     public_team_ids = set(data.team_leagues)
     team_paths = {
-        team_id: f"/team/{version}/{slugify(team.get('Name'), 'equipo')}-{quote(team_id)}/"
+        team_id: f"/team/{slugify(team.get('Name'), 'equipo')}-{quote(team_id)}/"
         for team_id, team in data.team_by_id.items()
         if team_id in public_team_ids and team.get("Name", "").strip() not in {"", "-"}
     }
@@ -726,7 +756,7 @@ def build_content_index(project_root: Path, data: GeneratorData, version: str = 
             if not player_id:
                 continue
             name = entry.player.get("Name", "").strip() or f"Jugador {player_id}"
-            url = f"/player/{version}/{quote(team_id)}/{slugify(name, 'jugador')}-{quote(player_id)}/"
+            url = f"/player/{quote(team_id)}/{slugify(name, 'jugador')}-{quote(player_id)}/"
             player_candidates.setdefault(player_id, []).append((priority, team_id, url))
     for player_id, candidates in player_candidates.items():
         _priority, _team_id, url = sorted(candidates, key=lambda row: (row[0], row[1]))[0]
@@ -748,21 +778,9 @@ def build_content_index(project_root: Path, data: GeneratorData, version: str = 
             "url": f"/tactics/{quote(tactic_id, safe='')}/",
         }
 
-    json_path = project_root / "database" / "option-files.json"
-    json_downloads = json.loads(json_path.read_text(encoding="utf-8-sig")) if json_path.is_file() else []
-    json_by_id = {str(row.get("id", "")).strip(): row for row in json_downloads if str(row.get("id", "")).strip()}
-    csv_downloads = read_csv_file(project_root / "database" / "descargas.csv", set(), issues, optional=True)
-    downloads: list[dict[str, object]] = []
-    if csv_downloads:
-        for row in csv_downloads:
-            row_id = str(row.get("id") or row.get("ID") or "").strip()
-            if not row_id:
-                continue
-            merged = dict(json_by_id.get(row_id, {}))
-            merged.update({key: value for key, value in row.items() if value not in (None, "")})
-            downloads.append(merged)
-    else:
-        downloads = list(json_downloads)
+    from spider_patch import load_published, latest_version, exports
+    spider_model = load_published(project_root)
+    downloads, _compat_csv = exports(spider_model, latest_version(spider_model))
     for download in downloads:
         status = str(download.get("status") or download.get("estado") or "").strip().casefold()
         if status == "oculto":
@@ -770,6 +788,30 @@ def build_content_index(project_root: Path, data: GeneratorData, version: str = 
         slug = option_slug(download)
         title = option_title(download).strip()
         items[f"download:{slug}"] = {"title": title, "url": f"/option-files/{quote(slug, safe='')}/"}
+
+    # Los DT usan el ID estable ya publicado en data-laqp-manager-id. Leer las
+    # fichas generadas mantiene el índice disponible incluso cuando la fuente
+    # externa de entrenadores no está presente en una regeneración parcial.
+    manager_pages: dict[str, Path] = {}
+    for root in dict.fromkeys((output_root or project_root, project_root)):
+        managers_root = root / "database" / "DTs"
+        if not managers_root.is_dir():
+            continue
+        for page in managers_root.glob("*/index.html"):
+            manager_pages.setdefault(page.parent.name, page)
+    for page in sorted(manager_pages.values()):
+        source = page.read_text(encoding="utf-8-sig")
+        id_match = re.search(r'data-laqp-manager-id="([^"]+)"', source)
+        title_match = re.search(r'<div class="dts-manager-copy">.*?<h1>(.*?)</h1>', source, re.DOTALL)
+        if not id_match or not title_match:
+            continue
+        manager_id = html.unescape(id_match.group(1)).strip()
+        title = html.unescape(re.sub(r"<[^>]+>", "", title_match.group(1))).strip()
+        if manager_id and title:
+            items[f"manager:{manager_id}"] = {
+                "title": title,
+                "url": f"/database/DTs/{quote(page.parent.name, safe='')}/",
+            }
 
     return {"schemaVersion": 1, "items": dict(sorted(items.items()))}
 
@@ -827,7 +869,20 @@ def team_average(data: GeneratorData, team_id: str) -> str:
     return str(round(sum(top) / len(top))) if top else "-"
 
 
+_MINIFACE_INDEXES: dict[Path, MinifaceIndex] = {}
+
+
+def minifaces(project_root: Path) -> MinifaceIndex:
+    """Minifaces con el nombre del juego (player_<ID>.webp), escaneadas una vez por ejecución."""
+    key = Path(project_root).resolve()
+    if key not in _MINIFACE_INDEXES:
+        _MINIFACE_INDEXES[key] = MinifaceIndex(key)
+    return _MINIFACE_INDEXES[key]
+
+
 def asset_exists(project_root: Path, kind: str, item_id: str) -> bool:
+    if kind in MINIFACE_FOLDERS:
+        return minifaces(project_root).exists(kind, item_id)
     return (project_root / "img" / kind / f"{item_id}.webp").is_file()
 
 
@@ -839,21 +894,21 @@ def scan_existing_aliases(project_root: Path, version: str) -> tuple[
     player_aliases: dict[tuple[str, str], set[str]] = {}
     suffix_re = re.compile(r"-(\d+)$")
 
-    league_root = project_root / "league" / version
+    league_root = project_root / "league"
     if league_root.is_dir():
         for directory in league_root.iterdir():
             match = suffix_re.search(directory.name) if directory.is_dir() else None
             if match:
                 league_aliases.setdefault(match.group(1), set()).add(directory.name)
 
-    team_root = project_root / "team" / version
+    team_root = project_root / "team"
     if team_root.is_dir():
         for directory in team_root.iterdir():
             match = suffix_re.search(directory.name) if directory.is_dir() else None
             if match:
                 team_aliases.setdefault(match.group(1), set()).add(directory.name)
 
-    player_root = project_root / "player" / version
+    player_root = project_root / "player"
     if player_root.is_dir():
         for team_dir in player_root.iterdir():
             if not team_dir.is_dir():
@@ -923,6 +978,7 @@ class DatabaseGenerator:
         self.project_root = project_root.resolve()
         self.output_root = (output_root or project_root).resolve()
         self.version = validate_version(version)
+        self.missing_only = False
         self.progress = progress or (lambda _stage, _current, _total, _message: None)
         self.issues = IssueLogger(
             self.project_root / "Herramientas" / "Salidas" / "logs" / "generacion.log"
@@ -938,7 +994,11 @@ class DatabaseGenerator:
 
     def _record_write(self, file_path: Path, content: str, *, alias: bool = False) -> bool:
         try:
-            changed = write_html(file_path, content)
+            if self.missing_only and file_path.is_file():
+                content = file_path.read_text(encoding="utf-8-sig")
+                changed = False
+            else:
+                changed = write_html(file_path, content)
             if changed:
                 self.result.files_written += 1
             else:
@@ -971,7 +1031,7 @@ class DatabaseGenerator:
                 self.issues.warning(f"Imagen inexistente: img/teams/{team_id}.webp (se usara default.webp).")
         for player_id in sorted(referenced_player_ids, key=lambda value: (len(value), value)):
             if player_id and not asset_exists(self.project_root, "players", player_id):
-                self.issues.warning(f"Imagen inexistente: img/players/{player_id}.webp (se usara default.webp).")
+                self.issues.warning(f"Imagen inexistente: img/players/{miniface_name(player_id)} (se usara default.webp).")
         seen_league_images: set[str] = set()
         for league in data.leagues:
             league_id = league.get("league_id", "")
@@ -997,7 +1057,7 @@ class DatabaseGenerator:
     def _generate_content_index(self, data: GeneratorData) -> None:
         target = self.output_root / "database" / "content-index.json"
         content = json.dumps(
-            build_content_index(self.project_root, data, self.version),
+            build_content_index(self.project_root, data, self.version, self.output_root),
             ensure_ascii=False,
             separators=(",", ":"),
         ) + "\n"
@@ -1011,8 +1071,13 @@ class DatabaseGenerator:
     def run(self, *, teams_only: bool = False, missing_only: bool = False,
             builder_index_only: bool = False, managers_only: bool = False,
             tactics_only: bool = False, content_index_only: bool = False,
+            database_only: bool = False, players_only: bool = False, only: str | None = None,
             refresh_coaches: bool = False, refresh_coach_ids: tuple[str, ...] = ()) -> GenerationResult:
         started = time.perf_counter()
+        self.missing_only = missing_only
+        selected_pages = {kind.strip() for kind in (only or "leagues,teams,players").split(",") if kind.strip()}
+        if not selected_pages or selected_pages - {"leagues", "teams", "players"}:
+            raise GenerationFatalError("--only admite leagues,teams,players separados por comas.")
         try:
             self.issues.info(f"Inicio de generacion. Proyecto={self.project_root}; salida={self.output_root}; version={self.version}.")
             try:
@@ -1028,6 +1093,14 @@ class DatabaseGenerator:
                 self.project_root / "database",
                 SilentIssues() if (managers_only or tactics_only) else self.issues,
             )
+            # Shared totals must refresh even for partial and missing-only builds.
+            from database_statistics import synchronize_statistics
+            preserve_existing = self.missing_only
+            self.missing_only = False
+            try:
+                synchronize_statistics(self.project_root, self.output_root, data, self._record_write)
+            finally:
+                self.missing_only = preserve_existing
             if not managers_only:
                 self._generate_content_index(data)
             if content_index_only:
@@ -1050,7 +1123,9 @@ class DatabaseGenerator:
             # resuelto por team.Coach -> coaches.Id como enlace de respaldo.
             from generador_secciones import (
                 generate_directories,
+                ExtraResult,
                 generate_content_hubs,
+                generate_database_hub,
                 generate_managers,
                 generate_tactics,
                 load_managers,
@@ -1091,17 +1166,17 @@ class DatabaseGenerator:
                 league_id_counts[league.get("league_id", "")] = league_id_counts.get(league.get("league_id", ""), 0) + 1
 
             league_paths = {
-                league_key(league): f"/league/{self.version}/{slugify(league['league_name'], 'liga')}-{quote(league['league_id'])}/"
+                league_key(league): f"/league/{slugify(league['league_name'], 'liga')}-{quote(league['league_id'])}/"
                 for league in data.leagues
             }
             team_paths = {
-                team_id: f"/team/{self.version}/{slugify(team['Name'], 'equipo')}-{quote(team_id)}/"
+                team_id: f"/team/{slugify(team['Name'], 'equipo')}-{quote(team_id)}/"
                 for team_id, team in data.team_by_id.items()
                 if team_id in data.team_leagues and team.get("Name", "").strip() not in {"", "-"}
             }
             player_paths = {
                 (team_id, entry.player.get("Id", "")):
-                    f"/player/{self.version}/{quote(team_id)}/{slugify(entry.player.get('Name') or f'Jugador {entry.player.get("Id", "")}', 'jugador')}-{quote(entry.player.get('Id', ''))}/"
+                    f"/player/{quote(team_id)}/{slugify(entry.player.get('Name') or f'Jugador {entry.player.get("Id", "")}', 'jugador')}-{quote(entry.player.get('Id', ''))}/"
                 for team_id in data.rosters if team_id in team_paths
                 for entry in data.rosters.get(team_id, [])
                 if entry.player.get("Id", "")
@@ -1155,6 +1230,7 @@ class DatabaseGenerator:
                 )
                 self.result.managers += manager_result.managers
                 self.result.other_html += manager_result.other_html
+                self._generate_content_index(data)
                 self.result.warnings = self.issues.warnings
                 self.result.errors = self.issues.errors
                 self.result.elapsed_seconds = time.perf_counter() - started
@@ -1167,18 +1243,21 @@ class DatabaseGenerator:
                 )
                 self.result.tactics += tactic_result.tactics
                 self.result.other_html += tactic_result.other_html
+                self._generate_content_index(data)
                 self.result.warnings = self.issues.warnings
                 self.result.errors = self.issues.errors
                 self.result.elapsed_seconds = time.perf_counter() - started
                 return self.result
 
-            if not teams_only:
+            if not teams_only and not players_only and "leagues" in selected_pages:
                 self._generate_leagues(data, league_paths, team_paths, league_aliases, league_id_counts)
-            self._generate_teams(
-                data, league_paths, team_paths, player_paths, team_aliases,
-                managers=managers, missing_only=missing_only,
-            )
-            self._remove_unpublished_club_pages(team_paths)
+            if not players_only and "teams" in selected_pages:
+                self._generate_teams(
+                    data, league_paths, team_paths, player_paths, team_aliases,
+                    managers=managers, missing_only=missing_only,
+                )
+            if (not database_only or only is None) and not players_only:
+                self._remove_unpublished_club_pages(team_paths)
             if teams_only:
                 self._validate_output()
                 validate_internal_links(self.project_root, self.output_root, self.generated_html_files,
@@ -1187,7 +1266,42 @@ class DatabaseGenerator:
                 self.result.errors = self.issues.errors
                 self.result.elapsed_seconds = time.perf_counter() - started
                 return self.result
-            self._generate_players(data, league_paths, team_paths, player_paths, player_aliases)
+            if "players" in selected_pages:
+                self._generate_players(data, league_paths, team_paths, player_paths, player_aliases)
+                if only is None:
+                    for page in remove_unpublished_player_pages(self.output_root, player_paths):
+                        self.issues.info(f'Ficha retirada, jugador fuera de los planteles publicados: {page}.')
+            self._generate_database_sitemaps(league_paths, team_paths, player_paths)
+            if database_only or players_only:
+                if database_only and only is None:
+                    directory_result = generate_directories(self.project_root, self.output_root, data, player_paths, team_paths,
+                                         league_paths, self.issues, self._notify, self._record_write)
+                    self.result.other_html += directory_result.other_html
+                    manager_result = generate_managers(
+                        self.project_root, self.output_root, COUNTRY_NAMES, self.issues,
+                        self._notify, self._record_write, managers, manager_team_paths,
+                        manager_tactics, manager_team_catalog,
+                    )
+                    self.result.managers += manager_result.managers
+                    self.result.other_html += manager_result.other_html
+                    tactic_result, _tactics = generate_tactics(
+                        self.project_root, self.output_root, self.issues,
+                        self._notify, self._record_write, managers,
+                    )
+                    self.result.tactics += tactic_result.tactics
+                    self.result.other_html += tactic_result.other_html
+                    hub_result = ExtraResult()
+                    generate_database_hub(hub_result, self.project_root, self.output_root, data, player_paths,
+                                          team_paths, league_paths, self._record_write)
+                    self.result.other_html += hub_result.other_html
+                    self._generate_content_index(data)
+                self._validate_output()
+                validate_internal_links(self.project_root, self.output_root, self.generated_html_files,
+                                        self.issues, self._notify, self.generated_links)
+                self.result.warnings = self.issues.warnings
+                self.result.errors = self.issues.errors
+                self.result.elapsed_seconds = time.perf_counter() - started
+                return self.result
 
             manager_result = generate_managers(
                 self.project_root, self.output_root, COUNTRY_NAMES, self.issues,
@@ -1215,6 +1329,16 @@ class DatabaseGenerator:
                 league_paths, self.issues, self._notify, self._record_write,
             )
             self.result.other_html += content_result.other_html
+            # Content renderers may rebuild index.html from the source root.
+            preserve_existing = self.missing_only
+            self.missing_only = False
+            try:
+                synchronize_statistics(self.project_root, self.output_root, data, self._record_write)
+                from database_statistics import validate_statistics
+                validate_statistics(self.output_root, data)
+            finally:
+                self.missing_only = preserve_existing
+            self._generate_content_index(data)
             self._validate_output()
             validate_internal_links(
                 self.project_root, self.output_root, self.generated_html_files,
@@ -1235,6 +1359,32 @@ class DatabaseGenerator:
         finally:
             self.issues.close()
 
+    def _generate_database_sitemaps(self, league_paths, team_paths, player_paths):
+        for name, paths in [('database', ['/database/players/', '/database/teams/', '/database/leagues/', *league_paths.values(), *team_paths.values()]), ('players', list(player_paths.values()))]:
+            urls = ''.join(f'<url><loc>{SITE_URL}{escape(path)}</loc></url>\n' for path in sorted(set(paths)))
+            content = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls + '</urlset>\n'
+            write_html(self.output_root / f'sitemap-{name}.xml', content)
+        # Keep other sections in the main sitemap while replacing database URLs.
+        import xml.etree.ElementTree as ET
+        from urllib.parse import urlsplit
+        source = self.output_root / 'sitemap.xml'
+        if not source.is_file():
+            source = self.project_root / 'sitemap.xml'
+        if source.is_file():
+            ns = 'http://www.sitemaps.org/schemas/sitemap/0.9'
+            ET.register_namespace('', ns)
+            tree = ET.fromstring(source.read_text(encoding='utf-8-sig'))
+            if tree.tag == f'{{{ns}}}urlset':
+                for item in list(tree):
+                    loc = item.find(f'{{{ns}}}loc')
+                    path = urlsplit(loc.text or '').path if loc is not None else ''
+                    if re.match(r'^/(?:player|team|league)/|^/database/(?:v2/)?(?:players|teams|leagues)/', path):
+                        tree.remove(item)
+                for path in sorted(set(['/database/players/', '/database/teams/', '/database/leagues/', *league_paths.values(), *team_paths.values(), *player_paths.values()])):
+                    item = ET.SubElement(tree, f'{{{ns}}}url')
+                    ET.SubElement(item, f'{{{ns}}}loc').text = SITE_URL + path
+                write_html(self.output_root / 'sitemap.xml', ET.tostring(tree, encoding='unicode', xml_declaration=True) + '\n')
+
     def _generate_leagues(
         self,
         data: GeneratorData,
@@ -1243,7 +1393,7 @@ class DatabaseGenerator:
         aliases: dict[str, set[str]],
         id_counts: dict[str, int],
     ) -> None:
-        from generador_clubes import rating_class
+        from generador_clubes import rating_class, face_badge, full_faces
         total = len(data.leagues)
         for index, league in enumerate(data.leagues, start=1):
             league_id = league.get("league_id", "").strip()
@@ -1278,7 +1428,7 @@ class DatabaseGenerator:
                     f'<a class="db-club-row" href="{escape(team_paths[team_id])}">'
                     f'<img src="img/teams/{escape(team_id)}.webp" alt="" width="46" height="46" loading="lazy" '
                     f'onerror="this.onerror=null;this.src=\'img/teams/default.webp\'">'
-                    f'<span class="db-club-row-copy"><strong>{escape(team.get("Name") or team_id)}</strong>'
+                    f'<span class="db-club-row-copy"><strong>{escape(team.get("Name") or team_id)}</strong>{face_badge(full_faces(data, team_id), True)}'
                     f'<small>{len(roster)} jugadores</small></span>{badge}</a>'
                 )
 
@@ -1303,6 +1453,7 @@ class DatabaseGenerator:
                 "LEAGUE_IMAGE_PATH": escape(f"img/leagues/{league_id}.webp"),
                 "TEAM_COUNT": len(teams),
                 "LEAGUE_SUMMARY": league_summary,
+                "FULL_FACES_BADGE": face_badge(bool(teams) and len(teams) == len([tid for tid in league.get("team_ids", "").split(",") if tid.strip()]) and all(full_faces(data, team["Id"]) for team in teams), True),
                 "TEAM_CARDS": "\n".join(cards),
             })
 
@@ -1312,7 +1463,7 @@ class DatabaseGenerator:
                 target_segments.update(aliases.get(league_id, set()))
             canonical_ok = False
             for segment in sorted(target_segments):
-                file_path = safe_output_file(self.output_root, Path("league") / self.version / segment)
+                file_path = safe_output_file(self.output_root, Path("league") / segment)
                 ok = self._record_write(file_path, content, alias=segment != canonical_segment)
                 if segment == canonical_segment:
                     canonical_ok = ok
@@ -1369,7 +1520,7 @@ class DatabaseGenerator:
             target_segments = {canonical_segment, *aliases.get(team_id, set())}
             canonical_ok = False
             for segment in sorted(target_segments):
-                file_path = safe_output_file(self.output_root, Path("team") / self.version / segment)
+                file_path = safe_output_file(self.output_root, Path("team") / segment)
                 if missing_only and file_path.is_file():
                     continue
                 ok = self._record_write(file_path, content, alias=segment != canonical_segment)
@@ -1381,7 +1532,7 @@ class DatabaseGenerator:
 
     def _remove_unpublished_club_pages(self, team_paths: dict[str, str]) -> None:
         """Retire only pages made by this renderer for teams absent from leagues."""
-        version_root = (self.output_root / 'team' / self.version).resolve()
+        version_root = (self.output_root / 'team').resolve()
         if not version_root.is_dir() or not version_root.is_relative_to(self.output_root):
             return
         for directory in version_root.iterdir():
@@ -1457,7 +1608,7 @@ class DatabaseGenerator:
             for column, label in PLAYER_STATS:
                 value = player.get(column, "").strip()
                 if value:
-                    stat_rows.append(f"<tr><th>{escape(label)}</th><td>{escape(value)}</td></tr>")
+                    stat_rows.append(f"<tr><th scope='row'>{escape(label)}</th><td>{escape(value)}</td></tr>")
 
             country_id = player.get("Country", "").strip()
             country_name = COUNTRY_NAMES.get(country_id, country_id or "-")
@@ -1465,9 +1616,12 @@ class DatabaseGenerator:
                 f"{player_name} para PES 2018 actualizado: stats, media {overall}, equipo {team_name}, "
                 "posicion, dorsal, datos de apariencia y referencias para editar su cara/miniface."
             )
-            image_exists = asset_exists(self.project_root, "players", player_id)
             content = self.templates.render("player", {
                 "PLAYER_ID": escape(player_id),
+                "FACE_EDITED": '1' if player_id in data.edited_face_ids and player_id not in data.scanned_face_ids else '0',
+                "FACE_STATUS_CLASS": ' is-scanned' if player_id in data.scanned_face_ids else ' is-edited' if player_id in data.edited_face_ids and player_id not in data.scanned_face_ids else '',
+                "FACE_STATUS_KEY": 'player.faceStatus.scanned' if player_id in data.scanned_face_ids else 'player.faceStatus.edited' if player_id in data.edited_face_ids else 'player.faceStatus.unmarked',
+                "FACE_STATUS_TEXT": 'Escaneado en PES 2018' if player_id in data.scanned_face_ids else 'Cara editada por LAqP' if player_id in data.edited_face_ids else 'Cara no marcada como editada',
                 "TEAM_ID": escape(team_id),
                 "PLAYER_NAME": escape(player_name),
                 "TEAM_NAME": escape(team_name),
@@ -1483,8 +1637,8 @@ class DatabaseGenerator:
                 "DESCRIPTION": escape(description),
                 "CANONICAL_URL": escape(f"{SITE_URL}{canonical_path}"),
                 "OG_TITLE": escape(f"{player_name} #{player_id} - {team_name} | PES 2018"),
-                "OG_IMAGE_URL": escape(f"{SITE_URL}/img/players/{quote(player_id)}.webp" if image_exists else f"{SITE_URL}/img/players/default.webp"),
-                "PLAYER_IMAGE_PATH": escape(f"img/players/{player_id}.webp"),
+                "OG_IMAGE_URL": escape(f"{SITE_URL}/{minifaces(self.project_root).src('players', player_id)}"),
+                "PLAYER_IMAGE_PATH": escape(minifaces(self.project_root).src("players", player_id)),
                 "OVERALL": escape(overall),
                 "POSITION": escape(pos),
                 "AGE": escape(player.get("Age") or "-"),
@@ -1502,7 +1656,7 @@ class DatabaseGenerator:
             target_segments = {canonical_segment, *aliases.get((team_id, player_id), set())}
             canonical_ok = False
             for segment in sorted(target_segments):
-                file_path = safe_output_file(self.output_root, Path("player") / self.version / team_id / segment)
+                file_path = safe_output_file(self.output_root, Path("player") / team_id / segment)
                 ok = self._record_write(file_path, content, alias=segment != canonical_segment)
                 if segment == canonical_segment:
                     canonical_ok = ok
@@ -1563,6 +1717,9 @@ def run_cli(args: argparse.Namespace) -> int:
         )
         result = generator.run(
             teams_only=args.teams_only,
+            database_only=args.database_only,
+            players_only=args.players_only,
+            only=args.only,
             missing_only=args.missing_only,
             builder_index_only=args.builder_index_only,
             content_index_only=args.content_index_only,
@@ -1586,7 +1743,7 @@ def run_cli(args: argparse.Namespace) -> int:
 
 
 class GeneratorGUI:
-    def __init__(self, project_root: Path) -> None:
+    def __init__(self, project_root: Path, database_only: bool = False) -> None:
         import tkinter as tk
         from tkinter import ttk
 
@@ -1616,19 +1773,19 @@ class GeneratorGUI:
             font=("Segoe UI", 19, "bold"),
         ).pack(pady=(4, 4))
         tk.Label(
-            frame, text="Genera toda la web pre-renderizada desde database.",
+            frame, text="Regenera solo la Base de Datos; no toca el resto de la web." if database_only else "Genera toda la web pre-renderizada desde database.",
             bg="#111319", fg="#aeb4c0", font=("Segoe UI", 9),
         ).pack(pady=(0, 20))
 
         actions = tk.Frame(frame, bg="#111319")
         actions.pack(fill="x")
         self.buttons = []
-        for label, mode in (
+        for label, mode in ((("GENERAR BASE DE DATOS", "database"),) if database_only else (
             ("GENERAR TODA LA WEB", "all"),
             ("ACTUALIZAR DATOS EXTERNOS Y GENERAR", "all-refresh"),
             ("GENERAR SOLO ENTRENADORES", "managers"),
             ("ACTUALIZAR Y GENERAR ENTRENADORES", "managers-refresh"),
-        ):
+        )):
             button = ttk.Button(actions, text=label, style="Generate.TButton", command=lambda value=mode: self.start(value))
             button.pack(fill="x", pady=4)
             self.buttons.append(button)
@@ -1662,6 +1819,7 @@ class GeneratorGUI:
     def worker(self, mode: str) -> None:
         try:
             result = DatabaseGenerator(self.project_root, progress=self.progress_callback).run(
+                database_only=mode == "database",
                 managers_only=mode.startswith("managers"),
                 refresh_coaches=mode.endswith("refresh"),
             )
@@ -1706,8 +1864,11 @@ class GeneratorGUI:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Genera los HTML estaticos de LAqP.website.")
     parser.add_argument("--cli", action="store_true", help="Ejecuta sin interfaz grafica.")
+    parser.add_argument("--only", help="Familias de fichas para el generador auxiliar: leagues,teams,players.")
+    parser.add_argument("--database-only", action="store_true", help="Regenera solo la Base de Datos: portada, jugadores, equipos, ligas, directorios, DTs, tacticas, indices y sitemaps.")
+    parser.add_argument("--players-only", action="store_true", help="Regenera solo fichas de jugadores con la plantilla compartida.")
     parser.add_argument("--teams-only", action="store_true", help="Regenera solamente las fichas de equipos y sus aliases.")
-    parser.add_argument("--missing-only", action="store_true", help="Con --teams-only, conserva los HTML existentes.")
+    parser.add_argument("--missing-only", action="store_true", help="Conserva los HTML existentes al generar fichas o directorios.")
     parser.add_argument("--builder-index-only", action="store_true", help="Regenera solo el indice liviano del Creador de alineaciones.")
     parser.add_argument("--content-index-only", action="store_true", help="Regenera solo el indice de nombres y URLs para cuentas/comentarios.")
     parser.add_argument("--managers-only", action="store_true", help="Regenera solamente las paginas y el indice de DTs.")
@@ -1716,7 +1877,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--refresh-coach", action="append", metavar="ID", help="Fuerza la actualizacion de un ID LAQP o Transfermarkt; se puede repetir.")
     parser.add_argument("--project-root", help="Raiz del repositorio LAqP.website.")
     parser.add_argument("--output-root", help="Raiz de salida alternativa, util para pruebas.")
-    parser.add_argument("--version", default=DEFAULT_VERSION, help="Version de URL (por defecto: v2).")
+    parser.add_argument("--version", default=DEFAULT_VERSION, help="Version de datos (no forma parte de las URLs publicas).")
     return parser
 
 

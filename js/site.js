@@ -25,7 +25,6 @@ const SITE_NAV_ITEMS = [
     { href: '/database/DTs/', fallback: 'Directores técnicos', key: 'dts' },
     { href: '/tactics.html', fallback: 'Tácticas históricas', key: 'tactics' },
   ] },
-  { href: '/draft/', fallback: 'LAqP Draft · Próximamente', key: 'draft' },
   // Análisis: trabajan con datos de fútbol (consultar, calcular, planificar).
   { fallback: 'Análisis', key: 'tools', children: [
     { href: '/rankings.html', fallback: 'Scouting', key: 'rankings' },
@@ -38,6 +37,8 @@ const SITE_NAV_ITEMS = [
     { href: '/kit-color-studio.html', fallback: 'Kit Color Studio', key: 'kit-color-studio' },
     { href: '/soundtrack-maker.html', fallback: 'Soundtrack Maker', key: 'soundtrack-maker' },
   ] },
+  // Entretenimiento: sección propia (portal de minijuegos, rankings y Draft), sin desplegable.
+  { href: '/entretenimiento.html', fallback: 'Entretenimiento', key: 'entertainment' },
   { href: '/guias.html', fallback: 'Guías', key: 'guides' },
 ];
 const SITE_NAV_DESKTOP_QUERY = '(min-width: 1151px)';
@@ -55,6 +56,9 @@ const LAQP_PRETTY_PATHS = {
   'miniface-studio.html': 'miniface-studio.html',
   'kit-color-studio.html': 'kit-color-studio.html',
   'soundtrack-maker.html': 'soundtrack-maker.html',
+  'entretenimiento.html': 'entretenimiento.html',
+  'ahorcado-futbolero.html': 'ahorcado-futbolero.html',
+  'tier-list.html': 'tier-list.html',
   'contact.html': 'contact.html',
   'about.html': 'about.html',
   'acerca-de.html': 'acerca-de.html',
@@ -140,6 +144,7 @@ function currentPageKey() {
   const parts = window.location.pathname.split('/').filter(Boolean);
   const first = (parts[0] || 'index.html').toLowerCase();
   const file = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  if (['tier-list.html', 'entretenimiento.html', 'ahorcado-futbolero.html'].includes(file) || first === 'entretenimiento' || first === 'draft') return 'entertainment';
   if (first === 'index.html' || first === '') return 'index';
   if (first === 'downloads' || first === 'download' || first === 'option-files' || file === 'downloads.html') return 'downloads';
   if (first === 'guides' || first === 'guia' || first === 'article' || file === 'guias.html' || file === 'articulo.html') return 'guides';

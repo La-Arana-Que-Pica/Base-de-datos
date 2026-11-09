@@ -1,0 +1,119 @@
+{
+  "format": "laqp.spider-patch.version",
+  "schema_version": 1,
+  "season": {
+    "id": "2027",
+    "title": "Temporada 2027"
+  },
+  "version": {
+    "id": "ejemplo-sp-2027-v4",
+    "season_id": "2027",
+    "version": "V4",
+    "kind": "release",
+    "title": "Ejemplo editorial de Spider Patch V4",
+    "summary": "Plantilla de intercambio: completar únicamente con información verificada.",
+    "cover": "",
+    "status": "draft",
+    "published_at": "",
+    "updated_at": "",
+    "download_note": "Los enlaces y requisitos reales están pendientes de completar.",
+    "editions": [
+      {
+        "id": "ejemplo-edicion-pc",
+        "slug": "ejemplo-sp-2027-v4-pc",
+        "comments_id": "ejemplo-sp-2027-v4-pc",
+        "platform": "pc",
+        "platforms": [
+          "PC"
+        ],
+        "status": "draft",
+        "heading": "Ejemplo V4 para PC",
+        "description": "Borrador de ejemplo; no es una publicación terminada.",
+        "cover": "",
+        "cover_alt": "Portada que se incorporará desde la biblioteca.",
+        "seo": {
+          "title": "Ejemplo editorial V4 PC",
+          "description": "Completar con la descripción comprobada del contenido.",
+          "image": ""
+        },
+        "tutorial": {
+          "url": "",
+          "start_seconds": null,
+          "show_in_article": true
+        },
+        "blocks": [
+          {
+            "id": "ejemplo-contenido",
+            "type": "list",
+            "title": "Contenido confirmado",
+            "variant": "normal",
+            "items": [
+              "Reemplazar por características verificadas de esta edición."
+            ]
+          },
+          {
+            "id": "ejemplo-instalacion",
+            "type": "instructions",
+            "title": "Instalación",
+            "items": [
+              "Completar con pasos de instalación realmente probados."
+            ]
+          },
+          {
+            "id": "ejemplo-imagen",
+            "type": "image",
+            "title": "Captura de ejemplo pendiente",
+            "src": "",
+            "alt": "Describir la captura real que se agregará después.",
+            "caption": "No se incluye ni inventa una imagen.",
+            "fit": "contain"
+          }
+        ],
+        "download_intro": "Archivo de ejemplo: no hay enlaces reales.",
+        "downloads": [
+          {
+            "id": "ejemplo-paquete-pc",
+            "name": "Paquete principal (pendiente)",
+            "kind": "complete",
+            "status": "draft",
+            "compatibility": "Completar con la versión base y requisitos reales.",
+            "requires": [],
+            "install_before": [],
+            "instructions": "<p>Completá las instrucciones verificadas antes de publicar.</p>",
+            "warnings": "Este JSON es una plantilla; no incluye archivos del parche.",
+            "image": "",
+            "files": [
+              {
+                "id": "ejemplo-parte-1",
+                "name": "Parte 1 pendiente",
+                "url": "",
+                "size": "",
+                "mirrors": [
+                  {
+                    "name": "Mirror pendiente",
+                    "url": ""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ejemplo-complemento-pc",
+            "name": "Complemento opcional de ejemplo",
+            "kind": "addon",
+            "status": "draft",
+            "compatibility": "Completar compatibilidad real antes de publicar.",
+            "requires": [
+              "ejemplo-paquete-pc"
+            ],
+            "install_before": [],
+            "instructions": "",
+            "warnings": "No representa un complemento existente.",
+            "image": "",
+            "files": []
+          }
+        ]
+      }
+    ]
+  }
+}

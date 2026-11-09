@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
   <base href="/">
   <script>document.documentElement.classList.add('laqp-js');window.setTimeout(function(){document.documentElement.classList.add('laqp-js-timeout');},6000);</script>
   <script src="js/consent-mode.js"></script>
   <script src="js/minifaces.js"></script>
   <script src="js/database-rating.js?v=20260924d"></script>
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="laqp-player-id" content="{{PLAYER_ID}}">
   <meta name="laqp-team-id" content="{{TEAM_ID}}">
@@ -23,7 +23,7 @@
   <meta name="twitter:description" content="{{DESCRIPTION}}">
   <meta name="twitter:image" content="{{OG_IMAGE_URL}}">
   <link rel="stylesheet" href="css/style.css?v=20261002e">
-  <link rel="stylesheet" href="css/database-system.css?v=20260925f">
+  <link rel="stylesheet" href="css/database-system.css?v=20261015faces">
   <link rel="icon" href="img/logo.webp" type="image/webp">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
   <script>
@@ -33,13 +33,13 @@
     gtag('config', 'G-M7ZNDRZB27');
   </script>
 </head>
-<body class="database-product player-context" style="{{CONTEXT_STYLE}}" data-player-context="{{PLAYER_CONTEXT}}">
+<body class="database-product player-context" style="{{CONTEXT_STYLE}}" data-player-context="{{PLAYER_CONTEXT}}" data-face-edited="{{FACE_EDITED}}">
   <header id="header">
-    <a href="/index.html" class="header-logo-link"><img class="logo" src="img/logo.webp" alt="Logo LAqP"></a>
+    <a href="/index.html" class="header-logo-link"><img class="logo" width="64" height="64" src="img/logo.webp" alt="Logo LAqP"></a>
     <div class="header-title">PES 2018 Actualizado <span>Stats y caras</span></div>
-    <nav class="header-nav" aria-label="Menu principal"></nav>
+    <nav class="header-nav" aria-label="Menú principal"><a class="header-nav-link" href="/downloads.html">Spider Patch</a><a class="header-nav-link" href="/database.html">Base de datos</a><a class="header-nav-link" href="/alineaciones.html">Creador de alineaciones</a><a class="header-nav-link" href="/miniface-studio.html">Miniface Studio</a><a class="header-nav-link" href="/guias.html">Guías</a></nav>
   </header>
-  <div id="player-page">
+  <main id="player-page">
     <div id="loading-overlay" class="js-hydration-loader" style="display:none">
       <div class="spinner"></div>
       <span class="loading-message" data-i18n="loading.player">Cargando jugador...</span>
@@ -58,6 +58,7 @@
             <noscript><img src="{{PLAYER_IMAGE_PATH}}" alt="Miniface de {{PLAYER_NAME}}" width="120" height="120"></noscript>
             <div>
               <h1>{{PLAYER_NAME}}</h1>
+              <p class="player-face-status{{FACE_STATUS_CLASS}}" data-i18n="{{FACE_STATUS_KEY}}" data-i18n-title="player.faceStatusHelp">{{FACE_STATUS_TEXT}}</p>
               <p><a href="{{TEAM_URL}}">{{TEAM_NAME}}</a> · {{NATIONALITY}}</p>
               <div class="download-card-header">
                 <span class="download-platform-badge"><span data-i18n="common.overall">Media</span> {{OVERALL}}</span>
@@ -95,12 +96,12 @@
       </div>
     </div>
     <section data-laqp-comments data-page-type="player" data-page-id="{{PLAYER_ID}}"></section>
-  </div>
+  </main>
   <script src="js/pes2018-translations.js?v=20261003a"></script>
-  <script src="js/i18n.js?v=20261003a"></script>
+  <script src="js/i18n.js?v=20261015faces"></script>
   <script src="js/site.js"></script>
   <script src="js/favorites.js"></script>
   <script src="js/pes2018-overall.js?v=20261003a"></script>
-  <script src="js/player.js?v=20261003a"></script>
+  <script src="js/player.js?v=20261015faces"></script>
 </body>
 </html>

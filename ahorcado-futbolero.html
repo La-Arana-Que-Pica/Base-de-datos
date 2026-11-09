@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><base href="/"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ahorcado Futbolero — Adiviná apellidos de futbolistas reales | LAqP</title>
+<meta name="description" content="Juego de ahorcado de fútbol: adiviná el apellido de futbolistas reales de la base de datos de LAqP. Filtrá por liga, país o club, elegí entre cuatro dificultades y sumá puntos en partidas de 10 rondas.">
+<link rel="canonical" href="https://laqp.website/ahorcado-futbolero.html">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#091217">
+<meta property="og:title" content="Ahorcado Futbolero — LAqP"><meta property="og:description" content="Adiviná el apellido de futbolistas reales. Cuatro dificultades, pistas automáticas, modo Hardcore y partidas de 10 rondas."><meta property="og:url" content="https://laqp.website/ahorcado-futbolero.html"><meta property="og:type" content="website"><meta property="og:image" content="https://laqp.website/img/entretenimiento/ahorcado-futbolero-og.png"><meta property="og:locale" content="es_AR"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Ahorcado Futbolero — LAqP"><meta name="twitter:description" content="Adiviná el apellido de futbolistas reales."><meta name="twitter:image" content="https://laqp.website/img/entretenimiento/ahorcado-futbolero-og.png">
+<link rel="icon" href="/img/logo.webp"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/site-navigation.css" data-site-navigation><link rel="stylesheet" href="/css/ahorcado.css?v=20261108b">
+<link rel="preload" href="/database/builder-player-index.json" as="fetch" crossorigin>
+<script src="/js/consent-mode.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-M7ZNDRZB27');</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Ahorcado Futbolero","url":"https://laqp.website/ahorcado-futbolero.html","applicationCategory":"GameApplication","genre":"Trivia de fútbol","operatingSystem":"Web","inLanguage":"es","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Adiviná el apellido de futbolistas reales de la base de datos de LAqP.","isPartOf":{"@type":"CollectionPage","name":"Entretenimiento LAqP","url":"https://laqp.website/entretenimiento.html"}}</script>
+<noscript><style>@media(max-width:1180px){html body #header.site-header-v2 .header-nav{display:flex!important}}</style></noscript></head>
+<body class="hg-body"><a class="hg-skip" href="#contenido">Saltar al juego</a><header id="header" class="site-header-v2"><a href="/index.html" class="header-logo-link" aria-label="Inicio LAqP"><img class="logo" src="/img/logo.webp" alt="LAqP" width="38" height="38"></a><div class="header-title">LAqP<span>PES 2018</span></div><nav class="header-nav" aria-label="Menú principal"><a href="/downloads.html" class="header-nav-link">Spider Patch</a><details class="site-nav-group"><summary>Base de datos</summary><div class="site-nav-panel"><a class="header-nav-link" href="/database.html">Base de datos de jugadores y equipos</a><a class="header-nav-link" href="/database/DTs/">Directores técnicos</a><a class="header-nav-link" href="/tactics.html">Tácticas históricas</a></div></details><details class="site-nav-group"><summary>Análisis</summary><div class="site-nav-panel"><a class="header-nav-link" href="/rankings.html">Scouting</a><a class="header-nav-link" href="/calculadora-medias.html">Calculadora de medias</a><a class="header-nav-link" href="/alineaciones.html">Creador de alineaciones</a></div></details><details class="site-nav-group"><summary>Editores</summary><div class="site-nav-panel"><a class="header-nav-link" href="/miniface-studio.html">Miniface Studio</a><a class="header-nav-link" href="/kit-color-studio.html">Kit Color Studio</a><a class="header-nav-link" href="/soundtrack-maker.html">Soundtrack Maker</a></div></details><a href="/entretenimiento.html" class="header-nav-link active" aria-current="page">Entretenimiento</a><a href="/guias.html" class="header-nav-link">Guías</a><a class="header-nav-link site-account-fallback" href="/mi-cuenta.html">Cuenta</a></nav></header>
+
+<main id="contenido" class="hg-main" tabindex="-1">
+  <nav class="hg-breadcrumbs" aria-label="Ruta de navegación"><a href="/index.html">Inicio</a><span aria-hidden="true">/</span><a href="/entretenimiento.html">Entretenimiento</a><span aria-hidden="true">/</span><span aria-current="page">Ahorcado Futbolero</span></nav>
+
+  <!-- Configuración -->
+  <section id="hg-setup" class="hg-setup" aria-labelledby="hg-title">
+    <div class="hg-setup-grid">
+      <header class="hg-hero">
+        <div class="hg-hero-art" aria-hidden="true"><img src="/img/entretenimiento/ahorcado-personaje.svg" alt="" width="206" height="232"></div>
+        <div class="hg-hero-copy">
+          <span class="hg-eyebrow">Minijuego · Conocimiento futbolero</span>
+          <h1 id="hg-title">Ahorcado <em>Futbolero</em></h1>
+          <p class="hg-lead">Adiviná el apellido de futbolistas reales, letra por letra, antes de que se complete el dibujo.</p>
+          <ul class="hg-rules">
+            <li><strong>7</strong><span>errores permitidos</span></li>
+            <li><strong>2</strong><span>pistas automáticas</span></li>
+            <li><strong>10</strong><span>rondas por partida</span></li>
+          </ul>
+        </div>
+      </header>
+
+      <div class="hg-setup-main">
+        <div id="hg-resume" class="hg-resume" hidden>
+          <div class="hg-resume-copy">
+            <span class="hg-resume-tag"><i aria-hidden="true"></i>Partida en curso</span>
+            <span id="hg-resume-label" class="hg-resume-label"></span>
+            <span class="hg-resume-bar" aria-hidden="true"><span id="hg-resume-progress"></span></span>
+          </div>
+          <button type="button" id="hg-resume-btn" class="hg-btn is-primary">Continuar <span aria-hidden="true">→</span></button>
+        </div>
+
+        <div id="hg-loading" class="hg-loading" role="status"><span class="hg-spinner" aria-hidden="true"></span>Cargando futbolistas…</div>
+        <div id="hg-load-error" class="hg-alert is-error" role="alert" hidden><p>No pudimos cargar la base de futbolistas.</p><button type="button" class="hg-btn is-ghost" id="hg-retry">Reintentar</button></div>
+
+        <form id="hg-config" class="hg-config" hidden>
+          <div class="hg-config-body">
+            <fieldset class="hg-field">
+              <legend><span class="hg-step">1</span>Jugadores</legend>
+              <div class="hg-segment" role="radiogroup" aria-label="Universo de jugadores">
+                <label><input type="radio" name="scope" value="global" checked><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>Todos</span></label>
+                <label><input type="radio" name="scope" value="league"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M10 17h4"/></svg>Liga</span></label>
+                <label><input type="radio" name="scope" value="country"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>País</span></label>
+                <label><input type="radio" name="scope" value="club"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/></svg>Club</span></label>
+              </div>
+              <label class="hg-select" id="hg-scope-select-wrap" hidden>
+                <span class="hg-visually-hidden" id="hg-scope-select-label">Elegí</span>
+                <select id="hg-scope-select" aria-labelledby="hg-scope-select-label"></select>
+              </label>
+            </fieldset>
+
+            <fieldset class="hg-field">
+              <legend><span class="hg-step">2</span>Dificultad</legend>
+              <div class="hg-difficulty" id="hg-difficulty">
+                <label data-level="1"><input type="radio" name="difficulty" value="easy" checked><span><span class="hg-level" aria-hidden="true"><i></i><i></i><i></i><i></i></span><strong>Fácil</strong><small data-count="easy">—</small></span></label>
+                <label data-level="2"><input type="radio" name="difficulty" value="medium"><span><span class="hg-level" aria-hidden="true"><i></i><i></i><i></i><i></i></span><strong>Medio</strong><small data-count="medium">—</small></span></label>
+                <label data-level="3"><input type="radio" name="difficulty" value="hard"><span><span class="hg-level" aria-hidden="true"><i></i><i></i><i></i><i></i></span><strong>Difícil</strong><small data-count="hard">—</small></span></label>
+                <label data-level="4"><input type="radio" name="difficulty" value="impossible"><span><span class="hg-level" aria-hidden="true"><i></i><i></i><i></i><i></i></span><strong>Imposible</strong><small data-count="impossible">—</small></span></label>
+              </div>
+            </fieldset>
+
+            <fieldset class="hg-field">
+              <legend><span class="hg-step">3</span>Modo</legend>
+              <label class="hg-toggle">
+                <input type="checkbox" id="hg-hardcore">
+                <span class="hg-toggle-copy"><strong>Hardcore</strong><small>Sin pistas · +35 % de puntos al ganar</small></span>
+                <span class="hg-toggle-track" aria-hidden="true"></span>
+              </label>
+            </fieldset>
+          </div>
+
+          <div class="hg-launch">
+            <p id="hg-summary" class="hg-summary" role="status" aria-live="polite"></p>
+            <div id="hg-warning" class="hg-alert" hidden>
+              <p id="hg-warning-text"></p>
+              <div class="hg-alert-actions" id="hg-warning-actions"></div>
+            </div>
+            <button type="submit" id="hg-start" class="hg-btn is-primary is-block is-cta"><span>Empezar partida</span><span class="hg-cta-arrow" aria-hidden="true">→</span></button>
+          </div>
+        </form>
+
+        <section id="hg-stats" class="hg-stats" aria-labelledby="hg-stats-title" hidden>
+          <h2 id="hg-stats-title">Tus estadísticas</h2>
+          <dl class="hg-stats-grid">
+            <div><dt>Partidas</dt><dd data-stat="matches">0</dd></div>
+            <div><dt>Rondas ganadas</dt><dd data-stat="roundsWon">0</dd></div>
+            <div><dt>Rondas perdidas</dt><dd data-stat="roundsLost">0</dd></div>
+            <div><dt>Mejor puntaje</dt><dd data-stat="bestScore">0</dd></div>
+            <div><dt>Mayor racha</dt><dd data-stat="bestStreak">0</dd></div>
+            <div><dt>Dificultad preferida</dt><dd data-stat="preferred">—</dd></div>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- Partida -->
+  <section id="hg-play" class="hg-play" aria-label="Partida de Ahorcado Futbolero" hidden>
+    <div class="hg-topbar">
+      <div class="hg-scoreboard" role="group" aria-label="Marcador">
+        <div><span>Ronda</span><strong id="hg-round">1/10</strong></div>
+        <div><span>Puntos</span><strong id="hg-score">0</strong></div>
+        <div><span>Aciertos</span><strong id="hg-wins">0</strong></div>
+        <div><span>Racha</span><strong id="hg-streak">0</strong></div>
+      </div>
+      <button type="button" id="hg-quit" class="hg-quit" aria-label="Salir de la partida" title="Salir">✕</button>
+    </div>
+    <p id="hg-config-label" class="hg-config-label"></p>
+
+    <div class="hg-board">
+      <div class="hg-stage" id="hg-stage">
+        <svg viewBox="4 4 206 232" role="img" aria-labelledby="hg-figure-title" class="hg-figure">
+          <title id="hg-figure-title">Futbolista: 0 de 6 partes</title>
+          <g class="hg-gallows">
+            <rect x="12" y="222" width="124" height="10" rx="5" fill="#1f7a47"/>
+            <path d="M22 227H126" stroke="#fff" stroke-opacity=".35" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="36" y="16" width="9" height="210" rx="4.5" fill="#41606a"/>
+            <rect x="36" y="12" width="114" height="9" rx="4.5" fill="#41606a"/>
+            <path d="M45 54L80 21" stroke="#41606a" stroke-width="7" stroke-linecap="round"/>
+            <path d="M140 21V38" stroke="#c9b48a" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="140" cy="42" r="4.5" fill="none" stroke="#c9b48a" stroke-width="2.5"/>
+          </g>
+          <g class="hg-part" data-part="1">
+            <rect x="135" y="80" width="10" height="11" rx="3" fill="#e3a97f"/>
+            <circle cx="122" cy="67" r="4" fill="#e3a97f"/><circle cx="158" cy="67" r="4" fill="#e3a97f"/>
+            <circle cx="140" cy="66" r="18" fill="#f6cba4"/>
+            <path d="M122 63c-1-13 8-20 18-20 11 0 19 7 18 19-3-4-7-6-12-6-5 2-12 3-17 2-3 1-6 3-7 5Z" fill="#3a2a22"/>
+            <circle cx="129" cy="73" r="3.2" fill="#f2917f" opacity=".45"/><circle cx="151" cy="73" r="3.2" fill="#f2917f" opacity=".45"/>
+            <g class="hg-face-ok"><ellipse cx="133.5" cy="67" rx="2.2" ry="2.8" fill="#1d1d1d"/><ellipse cx="146.5" cy="67" rx="2.2" ry="2.8" fill="#1d1d1d"/><path d="M134 75q6 5 12 0" fill="none" stroke="#8a4b3a" stroke-width="2" stroke-linecap="round"/></g>
+<g class="hg-face-sad"><path d="M130.5 68q3-2.5 6 0M143.5 68q3-2.5 6 0" fill="none" stroke="#1d1d1d" stroke-width="2" stroke-linecap="round"/><path d="M134 78q6-4.5 12 0" fill="none" stroke="#8a4b3a" stroke-width="2" stroke-linecap="round"/><path d="M160 58c0 3-2 5-3.5 5s-3.5-2-3.5-5 3.5-7 3.5-7 3.5 4 3.5 7Z" fill="#8fd3ff"/></g>
+          </g>
+          <g class="hg-part" data-part="2">
+            <path d="M121 91 140 87l19 4 3 47h-44Z" fill="#22cdbb"/>
+            <path d="M121 91l-1 18M159 91l1 18" stroke="#0e6e63" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+            <path d="M133 89l7 7 7-7" fill="none" stroke="#0e6e63" stroke-width="3" stroke-linejoin="round"/>
+            <text x="140" y="125" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="19" font-weight="800" fill="#06433c">9</text>
+            <path d="M118 136h44l-2 22h-17l-3-6-3 6h-17Z" fill="#10232a"/>
+            <path d="M121 140v15M159 140v15" stroke="#22cdbb" stroke-width="2" opacity=".7"/>
+          </g>
+          <g class="hg-part" data-part="3">
+            <path d="M116 105l-10 26" stroke="#f6cba4" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="105" cy="134" r="5" fill="#f6cba4"/>
+            <path d="M123 93l-8 15" stroke="#22cdbb" stroke-width="12" stroke-linecap="round"/>
+          </g>
+          <g class="hg-part" data-part="4">
+            <path d="M164 105l10 26" stroke="#f6cba4" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="175" cy="134" r="5" fill="#f6cba4"/>
+            <path d="M157 93l8 15" stroke="#22cdbb" stroke-width="12" stroke-linecap="round"/>
+          </g>
+          <g class="hg-part" data-part="5">
+            <path d="M131 158v16" stroke="#f6cba4" stroke-width="9" stroke-linecap="round"/>
+            <path d="M131 176v20" stroke="#eef3f3" stroke-width="10" stroke-linecap="round"/>
+            <rect x="126" y="179" width="10" height="3.5" fill="#22cdbb"/>
+            <path d="M118 208q0-11 13-11h5v11Z" fill="#f4c35a"/>
+            <path d="M120 208h15" stroke="#7a5a12" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <g class="hg-part" data-part="6">
+            <path d="M149 158v16" stroke="#f6cba4" stroke-width="9" stroke-linecap="round"/>
+            <path d="M149 176v20" stroke="#eef3f3" stroke-width="10" stroke-linecap="round"/>
+            <rect x="144" y="179" width="10" height="3.5" fill="#22cdbb"/>
+            <path d="M162 208q0-11-13-11h-5v11Z" fill="#f4c35a"/>
+            <path d="M145 208h15" stroke="#7a5a12" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <g class="hg-part hg-final" data-part="7">
+            <g transform="rotate(14 192 68)"><rect x="181" y="50" width="22" height="31" rx="3.5" fill="#ef4c5a"/><rect x="181" y="50" width="22" height="31" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".35"/></g>
+          </g>
+          <g class="hg-ball"><circle cx="182" cy="205" r="8" fill="#fff" stroke="#1b1b1b" stroke-width="1.4"/><path d="M182 200l3.8 2.8-1.4 4.4h-4.8l-1.4-4.4Z" fill="#1b1b1b"/></g>
+        </svg>
+        <div class="hg-errorbar">
+          <div class="hg-lives" id="hg-lives" aria-hidden="true"></div>
+          <p class="hg-errors" id="hg-errors">Errores 0/7 · Te quedan 7</p>
+        </div>
+      </div>
+
+      <div class="hg-side">
+        <div class="hg-puzzle">
+          <p class="hg-answer-kind" id="hg-answer-kind">Apellido</p>
+          <div class="hg-word" id="hg-word" role="img" aria-label=""></div>
+          <p class="hg-tip">Tildes y Ñ se adivinan con su letra base.</p>
+        </div>
+        <div class="hg-hints" id="hg-hints"></div>
+        <div class="hg-keyboard" id="hg-keyboard" role="group" aria-label="Teclado"></div>
+      </div>
+    </div>
+    <p id="hg-live" class="hg-visually-hidden" role="status" aria-live="polite"></p>
+
+    <!-- Resultado de la ronda -->
+    <div id="hg-result" class="hg-result" role="dialog" aria-modal="false" aria-labelledby="hg-result-title" hidden>
+      <div class="hg-result-card">
+        <div class="hg-result-head">
+          <img id="hg-result-face" src="/img/players/default.webp" alt="" width="72" height="72">
+          <div>
+            <p class="hg-result-kicker" id="hg-result-kicker"></p>
+            <h2 id="hg-result-title"></h2>
+            <p class="hg-result-meta" id="hg-result-meta"></p>
+          </div>
+        </div>
+        <ul class="hg-breakdown" id="hg-breakdown"></ul>
+        <div class="hg-result-total"><span>Puntos de la ronda</span><strong id="hg-result-points">0</strong></div>
+        <button type="button" id="hg-next" class="hg-btn is-primary is-block">Siguiente ronda <span aria-hidden="true">→</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resumen final -->
+  <section id="hg-final" class="hg-final" aria-labelledby="hg-final-title" hidden>
+    <span class="hg-eyebrow">Final del partido</span>
+    <h2 id="hg-final-title" tabindex="-1">Partida terminada</h2>
+    <p class="hg-final-score"><strong id="hg-final-points">0</strong><span>puntos</span></p>
+    <p id="hg-final-record" class="hg-record" hidden>¡Nuevo récord personal!</p>
+    <p id="hg-final-config" class="hg-config-label"></p>
+    <dl class="hg-stats-grid">
+      <div><dt>Aciertos</dt><dd id="hg-final-won">0</dd></div>
+      <div><dt>Rondas perdidas</dt><dd id="hg-final-lost">0</dd></div>
+      <div><dt>Mejor racha</dt><dd id="hg-final-streak">0</dd></div>
+      <div><dt>Errores totales</dt><dd id="hg-final-errors">0</dd></div>
+    </dl>
+    <ol class="hg-final-rounds" id="hg-final-rounds"></ol>
+    <div class="hg-final-actions">
+      <button type="button" id="hg-again" class="hg-btn is-primary">Jugar otra vez</button>
+      <button type="button" id="hg-change-difficulty" class="hg-btn is-ghost">Cambiar dificultad</button>
+      <button type="button" id="hg-change-filters" class="hg-btn is-ghost">Cambiar filtros</button>
+    </div>
+  </section>
+
+  <noscript><p class="hg-alert">Ahorcado Futbolero necesita JavaScript para funcionar.</p></noscript>
+</main>
+<script src="/js/i18n.js"></script><script src="/js/site.js"></script>
+<script src="/js/ahorcado-core.js?v=20261108a" defer></script><script src="/js/entertainment-store.js?v=20261108a" defer></script><script src="/js/ahorcado.js?v=20261108b" defer></script>
+</body></html>
