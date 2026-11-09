@@ -1,4 +1,4 @@
-import {TOP_KEY,RECEIPT_KEY,POINTS,versions,initial,validateTop,reorder,voterId,cover,slots,compact} from './model.mjs';
+import {TOP_KEY,RECEIPT_KEY,POINTS,versions,initial,validateTop,reorder,voterId,cover,slots,compact,dedupeGames} from './model.mjs';
 import config from './config.js';
 import {createApi} from './api.mjs';
 import {loadCatalog,year} from './catalog.mjs';
@@ -34,15 +34,22 @@ function selectView(){
 window.addEventListener('hashchange',selectView);
 
 /* ---------- Top 5 / Top 10 ---------- */
+// Un juego canónico ocupa un solo puesto, sea cual sea su plataforma.
+const gameAt=(gameId,except)=>slots(top).findIndex((id,i)=>i!==except&&id&&known.get(id)?.gameId===gameId);
 function chooseFor(index,startGame){
  const current=slots(top)[index];
  openPicker({
   title:(current?'Cambiar el puesto ':'Puesto ')+(index+1),
   subtitle:'Top '+top.mode+' · '+points(index)+' puntos',
   current,startGame,takenWhere:'en tu Top',takenLabel:'Ya en tu Top',
-  taken:id=>{const at=slots(top).indexOf(id);return at>=0&&at!==index?'Puesto '+(at+1):null;},
+  taken:id=>{const at=gameAt(known.get(id)?.gameId,index);return at>=0?'Ya está en el puesto '+(at+1):null;},
+  explainTaken:game=>{
+   const at=gameAt(game.id,index);if(at<0)return null;const cur=known.get(slots(top)[at]);
+   return {message:game.title+' ya está en el puesto '+(at+1)+' ('+cur.platform+'). Cada juego puede aparecer una sola vez en tu Top, en una plataforma.',
+    action:versions(game).length>1?{label:'Cambiar su plataforma en el puesto '+(at+1),run:()=>chooseFor(at,game)}:null};
+  },
   onPick:v=>{
-   const s=slots(top),dup=s.indexOf(v.id);if(dup>=0&&dup!==index)return {close:true};
+   const s=slots(top),dup=gameAt(v.gameId,index);if(dup>=0){notify(v.game.title+' ya está en el puesto '+(dup+1)+'.');return {close:true};}
    s[index]=v.id;top.choices=s;store();render();
    const next=slots(top).indexOf(null);
    notify(next<0?'¡Top '+top.mode+' completo! '+(api&&!receipt?'Ya podés votar o descargar la imagen.':'Ya podés guardarlo o descargar la imagen.'):v.game.title+' quedó en el puesto '+(index+1)+'.');
@@ -138,7 +145,7 @@ function setMode(mode){
  if(mode===top.mode)return;
  const s=slots(top);
  if(mode===5){reserve=s.slice(5);top.choices=s.slice(0,5);top.mode=5;const n=reserve.filter(Boolean).length;if(n)notify('Guardamos '+(n===1?'el juego':'los '+n+' juegos')+' de los puestos 6 a 10 por si volvés a Top 10.');}
- else{const next=[...s,null,null,null,null,null];reserve.forEach((id,i)=>{if(id&&!s.includes(id))next[5+i]=id;});top.choices=next;top.mode=10;reserve=[];}
+ else{const next=[...s,null,null,null,null,null];reserve.forEach((id,i)=>{if(id&&known.has(id)&&!next.some(x=>x&&known.get(x).gameId===known.get(id).gameId))next[5+i]=id;});top.choices=next;top.mode=10;reserve=[];}
  store();render();
 }
 
@@ -152,7 +159,7 @@ async function loadResults(){
  if(!api){$('#community-status').textContent='El ranking global todavía no está habilitado. Acá no se muestran votos simulados.';$('#community-podium').replaceChildren();$('#community-list').replaceChildren(emptyState('Cuando se habilite la votación, acá vas a ver los juegos más votados.'));$('#community-more').hidden=true;return;}
  $('#community-status').textContent='Consultando el ranking…';skeleton();$('#refresh-ranking').disabled=true;
  try{
-  const data=await api('results');rows=data.rows;scoring=data.scoring||POINTS;
+  const data=await api('results');rows=gameRows(data);scoring=data.scoring||POINTS;
   $('#community-status').textContent=(data.environment==='local'?'PRUEBA LOCAL AISLADA · ':'Ranking histórico mundial · ')+(data.ballots===1?'1 votación válida':data.ballots+' votaciones válidas');
   $('#points-info').textContent='Top 5: '+scoring[5].join(', ')+' puntos · Top 10: '+scoring[10].join(', ')+' puntos.';
   communityLimit=PAGE;renderResults();render();
@@ -160,25 +167,52 @@ async function loadResults(){
  finally{$('#refresh-ranking').disabled=false;}
 }
 function emptyState(text,cta){const li=node('li','fr-empty lr-empty',text);if(cta){const a=node('a','lr-cta','Crear mi Top');a.href='#top';li.append(a);}return li;}
-function rowMeta(r){return r.platform+' · '+r.series;}
+const PLATFORM_NAMES={PS1:'PlayStation',PS2:'PlayStation 2',PS3:'PlayStation 3',PS4:'PlayStation 4',PS5:'PlayStation 5'};
+const platformName=p=>PLATFORM_NAMES[p]||p;
+const plural=(n,w)=>n.toLocaleString('es')+' '+w+(n===1?'':'s');
+// Una fila por juego canónico (game_id). Si el backend todavía responde por versión (antes de la
+// migración rankings-games.sql), se agrupa acá; los votantes únicos no se pueden deducir: «aprox.».
+function gameRows(data){
+ if(data.aggregation==='game'||data.rows.every(r=>Array.isArray(r.platforms)))return data.rows.map(r=>({...r,game_id:r.game_id||r.id,platforms:r.platforms||[]}));
+ const by=new Map();
+ for(const r of data.rows){const gid=r.game_id||known.get(r.id)?.gameId||r.id;const g=by.get(gid)||{id:gid,game_id:gid,title:r.title,series:r.series,points:0,voters:0,platforms:[],approximate:true};g.points+=r.points;g.voters+=r.voters;g.platforms.push({id:r.id,platform:r.platform,points:r.points,voters:r.voters});by.set(gid,g);}
+ return [...by.values()].sort((a,b)=>b.points-a.points||b.voters-a.voters||String(a.game_id).localeCompare(b.game_id)).map((g,i)=>({...g,position:i+1}));
+}
+function breakdown(r){
+ const box=node('div','lr-breakdown');
+ box.append(node('p','lr-breakdown-total',r.title+' — '+plural(r.points,'punto')+' · '+plural(r.voters,'votante')+(r.voters===1?' único':' únicos')+(r.approximate?' (aprox.)':'')));
+ const ul=node('ul');
+ for(const p of r.platforms){const li=node('li');li.dataset.version=p.id;li.append(node('span',null,platformName(p.platform)),node('strong',null,plural(p.points,'punto')),node('small',null,plural(p.voters,'votante')));ul.append(li);}
+ box.append(ul);return box;
+}
 function renderResults(){
  const q=$('#community-search').value.trim(),platform=$('#community-platform').value,series=$('#community-series').value;
  // Ranking filter favours precision: keep games close to the best match.
  let ids=null;if(q&&catalog){const found=catalog.index.search(q,{limit:Infinity,min:.5}),best=found[0]?.score||0;ids=new Set(found.filter(r=>r.score>=best*.8).map(r=>r.game.id));}
- const filtered=rows.filter(r=>(!platform||r.platform===platform)&&(!series||r.series===series)&&(!ids||ids.has(known.get(r.id)?.gameId)));
+ let filtered=rows.filter(r=>(!platform||r.platforms.some(p=>p.platform===platform))&&(!series||r.series===series)&&(!ids||ids.has(r.game_id)));
+ // Con filtro de plataforma se ordena por los puntos de esa plataforma; el total del juego queda en el desglose.
+ const shown=r=>{const p=platform&&r.platforms.find(x=>x.platform===platform);return p?{points:p.points,voters:p.voters,label:' en '+platformName(platform)}:{points:r.points,voters:r.voters,label:''};};
+ if(platform)filtered=[...filtered].sort((a,b)=>shown(b).points-shown(a).points||shown(b).voters-shown(a).voters||a.position-b.position);
  const podium=!q&&!platform&&!series?filtered.filter(r=>r.position<=3).slice(0,3):[];
  const rest=filtered.filter(r=>!podium.includes(r));
+ const summary=r=>r.platforms.map(p=>p.platform).join(' · ');
  $('#community-podium').replaceChildren(...podium.map(r=>{
-  const li=node('li','lr-podium-item lr-p'+r.position),game=known.get(r.id)?.game;
+  const li=node('li','lr-podium-item lr-p'+r.position),game=catalog?.gameById.get(r.game_id);li.dataset.game=r.game_id;
   li.append(node('b','lr-medal',r.position));if(game)li.append(image(game,140));
-  const info=node('div','lr-podium-info');info.append(node('h3',null,r.title),node('p',null,r.platform),node('strong','fr-score',r.points.toLocaleString('es')+' pts'),node('span','fr-voters',r.voters+' votante'+(r.voters===1?'':'s')));
-  li.append(info);return li;
+  const info=node('div','lr-podium-info');info.append(node('h3',null,r.title),node('p',null,summary(r)),node('strong','fr-score',r.points.toLocaleString('es')+' pts'),node('span','fr-voters',plural(r.voters,'votante')));
+  const more=node('details','lr-podium-more');more.append(node('summary',null,'Por plataforma'),breakdown(r));
+  li.append(info,more);return li;
  }));
- $('#community-list').replaceChildren(...rest.slice(0,communityLimit).map(r=>{
-  const row=node('li','fr-standing');row.append(node('b','fr-position-number',r.position));const game=known.get(r.id)?.game;row.append(game?image(game,48):node('span','lr-noimg'));
-  const info=node('div','fr-standing-info');info.append(node('h3',null,r.title),node('p',null,rowMeta(r)));
-  const score=node('div','lr-score');score.append(node('strong','fr-score',r.points.toLocaleString('es')+' pts'),node('span','fr-voters',r.voters+' votante'+(r.voters===1?'':'s')));
-  row.append(info,score);return row;
+ $('#community-list').replaceChildren(...rest.slice(0,communityLimit).map((r,i)=>{
+  const row=node('li','fr-standing'),game=catalog?.gameById.get(r.game_id),v=shown(r);row.dataset.game=r.game_id;
+  const head=button('',null,null,'lr-standing-head');head.setAttribute('aria-expanded','false');
+  head.append(node('b','fr-position-number',platform?i+1:r.position),game?image(game,48):node('span','lr-noimg'));
+  const info=node('div','fr-standing-info');info.append(node('h3',null,r.title),node('p',null,summary(r)+(r.series&&r.series!=='Independientes'?' · '+r.series:'')));
+  const score=node('div','lr-score');score.append(node('strong','fr-score',v.points.toLocaleString('es')+' pts'+v.label),node('span','fr-voters',plural(v.voters,'votante')));
+  head.append(info,score,node('span','lr-chevron','▾'));
+  const box=breakdown(r);box.hidden=true;
+  head.onclick=()=>{const open=head.getAttribute('aria-expanded')!=='true';head.setAttribute('aria-expanded',String(open));box.hidden=!open;};
+  row.append(head,box);return row;
  }));
  $('#community-more').hidden=rest.length<=communityLimit;
  if(!filtered.length)$('#community-list').append(rows.length?emptyState('No hay juegos votados con estos filtros.'):emptyState('Todavía no hay votos. ¡El primer Top válido inaugura el ranking!',true));
@@ -239,9 +273,12 @@ async function poster(){
 try{
  catalog=await loadCatalog();known=catalog.versionById;
  try{
-  const raw=localStorage.getItem(TOP_KEY);if(raw)top=validateTop(JSON.parse(raw),known);
+  // Guardados anteriores a la regla «un juego por Top»: se conserva el puesto más alto de cada juego.
+  const clean=t=>{if(t&&Array.isArray(t.choices)){const d=dedupeGames(t.choices.map(x=>x??null),known);return {top:{...t,choices:d.choices},removed:d.removed};}return {top:t,removed:[]};};
+  const raw=localStorage.getItem(TOP_KEY);
+  if(raw){const c=clean(JSON.parse(raw));top=validateTop(c.top,known);if(c.removed.length){notify('Tu Top tenía '+c.removed.map(id=>known.get(id).game.title).join(', ')+' repetido en otra plataforma: quedó solo en su puesto más alto.');store();}}
   receipt=localStorage.getItem(RECEIPT_KEY)==='counted';
-  const h=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');if(!Array.isArray(h))throw Error();history=h.map(t=>validateTop(t,known));
+  const h=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');if(!Array.isArray(h))throw Error();history=h.map(t=>validateTop(clean(t).top,known));
  }catch{blocked=true;notify('El guardado anterior no se pudo leer y se conserva sin sobrescribir. Podés abrir una copia o empezar otro Top.');}
  try{const r=JSON.parse(localStorage.getItem(RESERVE_KEY)||'[]');reserve=Array.isArray(r)&&r.length<=5&&r.every(id=>id===null||known.has(id))?r:[];}catch{reserve=[];}
  options($('#community-series'),[...new Set(catalog.games.map(g=>g.series))].sort((a,b)=>a.localeCompare(b,'es')),'Todas las sagas');

@@ -43,10 +43,20 @@ function resultButton(g){
  const {list,free}=availability(g),b=el('button','lr-result');b.type='button';b.dataset.game=g.id;b.setAttribute('role','option');
  const info=el('span','lr-result-info');info.append(el('strong',null,g.title),el('small',null,[year(g),g.series!=='Independientes'?g.series:'',list.length>1?list.length+' versiones':list[0].platform].filter(Boolean).join(' · ')));
  b.append(image(g,48),info);
- if(!free){b.setAttribute('aria-disabled','true');b.append(el('span','lr-badge',options.takenLabel||'Ya elegido'));}
+ if(!free){b.setAttribute('aria-disabled','true');b.append(el('span','lr-badge',(options.explainTaken&&options.taken?.(list[0].id))||options.takenLabel||'Ya elegido'));}
  else b.append(el('span','lr-result-go',list.length>1?'Elegir versión ›':'Elegir ›'));
- b.onclick=()=>{if(!free){toast('Todas las versiones de '+g.title+' ya están '+(options.takenWhere||'en tu Top')+'.');return;}choose(g);};
+ b.onclick=()=>{
+  if(!free){const info=options.explainTaken?.(g);if(info)notice(info);else toast('Todas las versiones de '+g.title+' ya están '+(options.takenWhere||'en tu Top')+'.');return;}
+  choose(g);
+ };
  return b;
+}
+// Aviso con acción (p. ej. «este juego ya está en el puesto 3 · Cambiar su plataforma»).
+function notice({message,action}){
+ const box=el('span','lr-notice');box.append(el('span',null,message));
+ // El evento «close» es asíncrono: se reabre recién cuando terminó de cerrarse.
+ if(action){const b=el('button','lr-notice-action',action.label);b.type='button';b.onclick=()=>{ui.dialog.addEventListener('close',()=>action.run(),{once:true});ui.dialog.close();};box.append(b);}
+ ui.hint.replaceChildren(box);ui.hint.scrollIntoView({block:'nearest'});box.querySelector('button')?.focus();
 }
 function section(title,games){const head=el('li','lr-results-head',title);head.setAttribute('role','presentation');return [head,...games.map(g=>{const li=el('li');li.setAttribute('role','presentation');li.append(resultButton(g));return li;})];}
 function renderResults(){
@@ -103,7 +113,7 @@ function toast(text){ui.toast.textContent=text;ui.toast.classList.remove('lr-sho
 // options: {title, subtitle, onPick(version)→{close?,message?}, taken(versionId)→label|null, current, keepOpen, takenWhere, startGame, onClose}
 export async function openPicker(next){
  catalog=await loadCatalog();if(!ui)bind();
- if(ui.dialog.open)ui.dialog.close();
+ if(ui.dialog.open)await new Promise(done=>{ui.dialog.addEventListener('close',done,{once:true});ui.dialog.close();});
  opener=document.activeElement;options=next;query='';limit=PAGE;
  ui.input.value='';ui.clear.hidden=true;ui.title.textContent=next.title;ui.subtitle.textContent=next.subtitle||'';ui.toast.textContent='';ui.toast.classList.remove('lr-show');
  ui.dialog.showModal();

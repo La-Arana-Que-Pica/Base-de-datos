@@ -10,9 +10,20 @@ export function initial(){return {version:1,mode:5,title:'Mi Top de fútbol',cho
 export function validateTop(top,known,complete=false){
  const filled=Array.isArray(top?.choices)?top.choices.filter(id=>id!==null):[];
  if(!top||top.version!==1||![5,10].includes(top.mode)||typeof top.title!=='string'||top.title.length>100||!Array.isArray(top.choices)||top.choices.length>top.mode||filled.some(id=>typeof id!=='string'||!known.has(id))||new Set(filled).size!==filled.length)throw Error('Top inválido: revisá el modo, las versiones y los duplicados.');
+ // Un juego canónico (game_id) aparece una sola vez por Top, aunque tenga varias plataformas.
+ const gameIds=filled.map(id=>known.get(id).gameId);
+ if(new Set(gameIds).size!==gameIds.length)throw Error('Top inválido: un mismo juego aparece en dos puestos (aunque sea en otra plataforma).');
  if(complete&&(top.choices.length!==top.mode||filled.length!==top.mode))throw Error('Elegí exactamente '+top.mode+' versiones antes de votar.');
  return structuredClone(top);
 }
+// Copias guardadas antes de esta regla: conserva la aparición con más puntos (el puesto más alto)
+// y deja vacío el puesto repetido. Devuelve los juegos quitados para avisar al usuario.
+export function dedupeGames(choices,known){
+ const seen=new Set(),removed=[];
+ const out=choices.map(id=>{if(id===null||!known.has(id))return id;const g=known.get(id).gameId;if(seen.has(g)){removed.push(id);return null;}seen.add(g);return id;});
+ return {choices:out,removed};
+}
+export function gameOf(id,known){return known.get(id)?.gameId??null;}
 export function slots(top){return Array.from({length:top.mode},(_,i)=>top.choices[i]??null);}
 export function compact(choices){const out=[...choices];while(out.length&&out[out.length-1]===null)out.pop();return out;}
 export function reorder(choices,from,to){if(from<0||to<0||from>=choices.length||to>=choices.length)return;choices.splice(to,0,choices.splice(from,1)[0]);}

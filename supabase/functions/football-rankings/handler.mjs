@@ -37,7 +37,7 @@ export function createHandler({rpc,origins,rateSecret,clock=Date.now,localTest=f
    return reply(200,await rpc('laqp_rankings_vote',{p_hash:hash,p_mode:body.mode,p_choices:body.choices}));
   }catch(error){
    // Do not return database details or log request bodies, headers, voter IDs or network identifiers.
-   if(error.code==='22023')return reply(400,{message:'El Top incluye una versión inexistente, repetida o no votable.'});
+   if(error.code==='22023')return reply(400,{message:'El Top incluye un juego repetido (también en otra plataforma) o una versión inexistente o no votable.'});
    return reply(503,{message:'El ranking no está disponible. Tu Top sigue guardado; podés reintentar.'});
   }
  };

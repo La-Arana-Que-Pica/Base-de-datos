@@ -259,3 +259,21 @@ node Herramientas/Pruebas/football-rankings-production.mjs
 Prueba Top 5 y Top 10 sin cuenta ni CAPTCHA, puntajes, duplicados, simultaneidad, RLS/permisos reales por REST, persistencia tras reiniciar PostgreSQL, CORS y caída de red. Intercepta en Edge las URLs reales para servir la copia local; no envía votos a producción. No utiliza respuestas simuladas de ningún proveedor de verificación. Inicia y detiene solo sus procesos temporales.
 
 Vista manual de PostgreSQL en memoria: `node Herramientas/Pruebas/rankings-local.mjs`. Muestra PRUEBAS LOCALES y sus votos desaparecen al cerrar el proceso. No modifica la configuración pública.
+
+### Ranking por juego canónico (`rankings-games.sql`) — pendiente de aplicar en producción
+
+Regla: **un videojuego = una entrada en el ranking = una sola aparición por Top**. El ranking suma los puntos de todas las versiones de un mismo `game_id` y conserva el desglose por plataforma. Un Top que repite el juego en otra plataforma se rechaza en la base de datos (`DUPLICATE_GAME`, HTTP 400).
+
+- Migración aditiva: reemplaza solo `laqp_rankings_vote` y `laqp_rankings_results` (mismas firmas y permisos). No borra, mueve ni reescribe filas de `ballots` ni de `totals`.
+- El ranking se calcula desde `ballots`. Si un voto histórico tuviera el mismo juego dos veces, solo cuenta la aparición con más puntos, con su puesto y su plataforma originales.
+- `totals` se sigue actualizando por versión, así que la reversión no necesita recalcular nada.
+- Auditoría de solo lectura del 8/11/2026, hecha con el GET público: 3 votaciones, 140 puntos, y ninguna votación con un juego repetido. Las dos versiones de PES 2013 y PES 2012 vienen de votantes distintos. El ranking nuevo usa todos los puntos existentes sin descartar nada.
+
+Pasos (SQL Editor, rol propietario):
+1. `rankings-games-audit.sql`: consultas de solo lectura. La consulta 2 tiene que devolver 0 filas o listar los votos repetidos que el cálculo va a ignorar. La consulta 3 tiene que devolver 0 filas.
+2. `rankings-games.sql`.
+3. Verificar que `select public.laqp_rankings_results()` devuelve `aggregation:"game"` y que la suma de los puntos de las filas coincide con `ballot_points` de la auditoría.
+4. Opcional: volver a desplegar `football-rankings`. Solo cambia el texto del error 400.
+5. Reversión: `rankings-games-rollback.sql`.
+
+El frontend funciona con las dos versiones del backend. Si la migración todavía no está aplicada, agrupa por juego en el navegador y marca los votantes como «aprox.», porque no se puede saber cuántos son únicos.
