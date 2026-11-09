@@ -56,7 +56,7 @@ function chooseFor(index,startGame){
    pendingFocus=next<0?'#vote-top':'[data-index="'+next+'"] .lr-slot-add';
    return {close:true};
   },
-  onClose:()=>{const target=pendingFocus&&$(pendingFocus);pendingFocus=null;if(target&&!target.disabled)setTimeout(()=>target.focus({preventScroll:false}));}
+  onClose:()=>{const target=pendingFocus&&$(pendingFocus);pendingFocus=null;if(filledCount()===top.mode&&maybePromptVote())return;if(target&&!target.disabled)setTimeout(()=>target.focus({preventScroll:false}));}
  });
 }
 let pendingFocus=null;
@@ -219,16 +219,34 @@ function renderResults(){
 }
 
 /* ---------- Events ---------- */
-$('#vote-top').onclick=async()=>{
+$('#vote-top').onclick=()=>submitVote(false);
+async function submitVote(fromPrompt){
  if(busy||receipt||!api||!identity)return;
  try{
   const submitted=validateTop(top,known,true);
+  // Desde la ventana de invitación, el botón «Sí, sumarlo» ya muestra y acepta la regla del primer voto.
+  if(fromPrompt)$('#vote-rule').checked=true;
   if(!$('#vote-rule').checked){notify('Antes de votar, confirmá que entendés la regla del primer voto.');$('#vote-rule').focus();$('#vote-card').classList.remove('lr-shake');void $('#vote-card').offsetWidth;$('#vote-card').classList.add('lr-shake');return;}
   busy=true;render();
   const result=await api('vote',{voterId:identity,mode:submitted.mode,choices:submitted.choices});
   if(result.accepted||result.alreadyVoted){markReceipt();await loadResults();notify(result.accepted?'Tu primer Top ya aportó puntos. Podés seguir creando Tops personales.':'Este navegador ya votó. Este Top queda como una creación personal.');}
  }catch(e){notify(e.message);}finally{busy=false;render();}
-};
+}
+
+/* ---------- Invitación a votar al completar el Top ---------- */
+const PROMPT_KEY='laqp-football-vote-prompt-dismissed';
+const promptDismissed=()=>{try{return sessionStorage.getItem(PROMPT_KEY)==='1';}catch{return false;}};
+function maybePromptVote(){
+ if(!api||!identity||receipt||busy||promptDismissed()||filledCount()!==top.mode)return false;
+ const s=slots(top),d=$('#vote-prompt');
+ $('#vote-prompt-eyebrow').textContent='¡Tu Top '+top.mode+' está completo!';
+ $('#vote-prompt-text').textContent='Sumalo al ranking histórico de la comunidad: '+known.get(s[0]).game.title+' recibe '+points(0)+' puntos y el resto según su puesto. Es anónimo y no necesitás cuenta.';
+ $('#vote-prompt-list').replaceChildren(...s.map((id,i)=>{const v=known.get(id),li=node('li');li.append(node('b',null,i+1),image(v.game,54));li.title=v.game.title+' · '+v.platform;return li;}));
+ d.showModal();$('#vote-prompt-yes').focus();return true;
+}
+$('#vote-prompt-yes').onclick=async()=>{$('#vote-prompt').close();await submitVote(true);};
+$('#vote-prompt-no').onclick=()=>{$('#vote-prompt').close();try{sessionStorage.setItem(PROMPT_KEY,'1');}catch{}notify('Cuando quieras, lo sumás desde «Sumá tu Top al ranking».');};
+$('#vote-prompt').addEventListener('cancel',()=>{try{sessionStorage.setItem(PROMPT_KEY,'1');}catch{}});
 $('#vote-rule').onchange=()=>render();
 for(const b of document.querySelectorAll('.lr-mode button'))b.onclick=()=>setMode(Number(b.dataset.mode));
 $('.lr-mode').onkeydown=e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();setMode(top.mode===5?10:5);$('.lr-mode [aria-checked="true"]').focus();}};

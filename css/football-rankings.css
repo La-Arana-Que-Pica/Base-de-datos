@@ -306,3 +306,23 @@
  .lr .lr-standing-head{grid-template-columns:36px 40px minmax(0,1fr) auto 16px;gap:10px;padding:8px 8px 8px 4px}
  .lr-breakdown{padding:4px 10px 12px}
 }
+/* Invitación a votar al completar el Top */
+.lr-vote-prompt{--lr-accent:#21d4c2;--lr-accent-ink:#04201c;width:min(460px,calc(100vw - 24px));padding:24px;border-radius:20px;border:1px solid #2a5a55;background:radial-gradient(circle at 50% 0,rgba(33,212,194,.18),transparent 60%),#0c161b;color:#eef5f7;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.65)}
+.lr-vote-prompt::backdrop{background:rgba(2,6,8,.78);backdrop-filter:blur(3px)}
+.lr-vote-prompt .lr-eyebrow{margin:0;font:700 .75rem/1.2 Bahnschrift,'Segoe UI',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#21d4c2}
+.lr-vote-prompt h2{margin:8px 0 14px;font:800 1.6rem/1.15 Bahnschrift,'Segoe UI',sans-serif;color:#fff}
+.lr-vote-prompt p{margin:10px 0;line-height:1.5;font-size:.92rem;color:#cfe0e4}
+.lr-vote-prompt .lr-small{font-size:.8rem;color:#93a9b1}
+.lr-prompt-covers{list-style:none;display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:0 0 6px;padding:0}
+.lr-prompt-covers li{position:relative}
+.lr-prompt-covers img{display:block;width:54px;height:72px;object-fit:cover;border-radius:6px;box-shadow:0 6px 14px rgba(0,0,0,.5)}
+.lr-prompt-covers b{position:absolute;left:-4px;top:-6px;min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:#21d4c2;color:#04201c;font:800 .75rem/20px Bahnschrift,'Segoe UI',sans-serif}
+.lr-prompt-covers li:first-child b{background:#f5c451}
+.lr-prompt-actions{display:grid;gap:8px;margin-top:16px}
+.lr-vote-prompt button{min-height:48px;padding:10px 16px;border-radius:12px;border:1px solid #22363f;background:#14232a;color:#eef5f7;font:inherit;cursor:pointer}
+.lr-vote-prompt .lr-cta{background:#21d4c2;border-color:#21d4c2;color:#04201c;font-weight:800;font-size:1rem}
+.lr-vote-prompt .lr-cta:hover{background:#5ff0dc}
+.lr-vote-prompt button:focus-visible{outline:3px solid #21d4c2;outline-offset:2px}
+/* Centrado de las ventanas: el sitio quita el margen automático de <dialog>. */
+dialog.lr-picker,dialog.lr-vote-prompt,dialog#game-dialog,dialog#tier-dialog{position:fixed;inset:0;margin:auto}
+@media (max-width:700px){dialog.lr-picker{margin:0}}
