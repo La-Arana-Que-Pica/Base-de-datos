@@ -39,3 +39,12 @@ export function cover(game){
  const lines=(text.match(/.{1,15}(?:\s|$)|.{1,15}/g)||[]).slice(0,4);
  return 'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="320"><rect width="240" height="320" fill="#142a32"/><circle cx="225" cy="270" r="140" fill="#21d4c2" opacity=".15"/><text x="18" y="38" fill="#21d4c2" font-family="sans-serif" font-size="18">LAqP / FÚTBOL</text>${lines.map((line,i)=>`<text x="18" y="${110+i*28}" fill="white" font-family="sans-serif" font-size="22">${line}</text>`).join('')}</svg>`);
 }
+// Una fila por juego canónico (game_id). Si el backend todavía responde por versión (antes de la
+// migración rankings-games.sql), se agrupa acá; los votantes únicos no se pueden deducir: «aprox.».
+// Compartido con la portada (js/home-promo-ranking.mjs): un único criterio de agrupación y orden.
+export function gameRows(data,known=new Map()){
+ if(data.aggregation==='game'||data.rows.every(r=>Array.isArray(r.platforms)))return data.rows.map(r=>({...r,game_id:r.game_id||r.id,platforms:r.platforms||[]}));
+ const by=new Map();
+ for(const r of data.rows){const gid=r.game_id||known.get(r.id)?.gameId||r.id;const g=by.get(gid)||{id:gid,game_id:gid,title:r.title,series:r.series,points:0,voters:0,platforms:[],approximate:true};g.points+=r.points;g.voters+=r.voters;g.platforms.push({id:r.id,platform:r.platform,points:r.points,voters:r.voters});by.set(gid,g);}
+ return [...by.values()].sort((a,b)=>b.points-a.points||b.voters-a.voters||String(a.game_id).localeCompare(b.game_id)).map((g,i)=>({...g,position:i+1}));
+}

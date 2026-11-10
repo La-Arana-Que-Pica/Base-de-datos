@@ -2,5 +2,11 @@
   "discord": {
     "inviteUrl": null,
     "description": null
+  },
+  "support": {
+    "_info": "Enlaces oficiales de apoyo voluntario. Un valor null oculta esa opción (nunca se muestra un botón sin destino). Hosts admitidos: Mercado Pago (link.mercadopago.com.ar, mpago.la, mpago.li, mercadopago.com.ar), PayPal (paypal.com, paypal.me) y YouTube (youtube.com/.../join). La membresía de YouTube queda en null hasta que el canal muestre el botón «Unirme» (verificado 2026-11-10: no aparece).",
+    "mercadoPagoUrl": "https://link.mercadopago.com.ar/laqp",
+    "paypalUrl": "https://paypal.me/LAqP2018",
+    "youtubeMembershipUrl": null
   }
 }

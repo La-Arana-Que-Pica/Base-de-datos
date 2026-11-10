@@ -1,4 +1,4 @@
-import {TOP_KEY,RECEIPT_KEY,POINTS,versions,initial,validateTop,reorder,voterId,cover,slots,compact,dedupeGames} from './model.mjs';
+import {TOP_KEY,RECEIPT_KEY,POINTS,versions,initial,validateTop,reorder,voterId,cover,slots,compact,dedupeGames,gameRows} from './model.mjs';
 import config from './config.js';
 import {createApi} from './api.mjs';
 import {loadCatalog,year} from './catalog.mjs';
@@ -159,7 +159,7 @@ async function loadResults(){
  if(!api){$('#community-status').textContent='El ranking global todavía no está habilitado. Acá no se muestran votos simulados.';$('#community-podium').replaceChildren();$('#community-list').replaceChildren(emptyState('Cuando se habilite la votación, acá vas a ver los juegos más votados.'));$('#community-more').hidden=true;return;}
  $('#community-status').textContent='Consultando el ranking…';skeleton();$('#refresh-ranking').disabled=true;
  try{
-  const data=await api('results');rows=gameRows(data);scoring=data.scoring||POINTS;
+  const data=await api('results');rows=gameRows(data,known);scoring=data.scoring||POINTS;
   $('#community-status').textContent=(data.environment==='local'?'PRUEBA LOCAL AISLADA · ':'Ranking histórico mundial · ')+(data.ballots===1?'1 votación válida':data.ballots+' votaciones válidas');
   $('#points-info').textContent='Top 5: '+scoring[5].join(', ')+' puntos · Top 10: '+scoring[10].join(', ')+' puntos.';
   communityLimit=PAGE;renderResults();render();
@@ -170,14 +170,6 @@ function emptyState(text,cta){const li=node('li','fr-empty lr-empty',text);if(ct
 const PLATFORM_NAMES={PS1:'PlayStation',PS2:'PlayStation 2',PS3:'PlayStation 3',PS4:'PlayStation 4',PS5:'PlayStation 5'};
 const platformName=p=>PLATFORM_NAMES[p]||p;
 const plural=(n,w)=>n.toLocaleString('es')+' '+w+(n===1?'':'s');
-// Una fila por juego canónico (game_id). Si el backend todavía responde por versión (antes de la
-// migración rankings-games.sql), se agrupa acá; los votantes únicos no se pueden deducir: «aprox.».
-function gameRows(data){
- if(data.aggregation==='game'||data.rows.every(r=>Array.isArray(r.platforms)))return data.rows.map(r=>({...r,game_id:r.game_id||r.id,platforms:r.platforms||[]}));
- const by=new Map();
- for(const r of data.rows){const gid=r.game_id||known.get(r.id)?.gameId||r.id;const g=by.get(gid)||{id:gid,game_id:gid,title:r.title,series:r.series,points:0,voters:0,platforms:[],approximate:true};g.points+=r.points;g.voters+=r.voters;g.platforms.push({id:r.id,platform:r.platform,points:r.points,voters:r.voters});by.set(gid,g);}
- return [...by.values()].sort((a,b)=>b.points-a.points||b.voters-a.voters||String(a.game_id).localeCompare(b.game_id)).map((g,i)=>({...g,position:i+1}));
-}
 function breakdown(r){
  const box=node('div','lr-breakdown');
  box.append(node('p','lr-breakdown-total',r.title+' — '+plural(r.points,'punto')+' · '+plural(r.voters,'votante')+(r.voters===1?' único':' únicos')+(r.approximate?' (aprox.)':'')));

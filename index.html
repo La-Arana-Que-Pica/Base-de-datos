@@ -26,7 +26,7 @@
   <meta name="twitter:description" content="Stats, caras, plantillas, scouting, guias y descargas para PES 2018 actualizado.">
   <meta name="twitter:image" content="https://laqp.website/assets/images/home-banner.png">
   <link rel="stylesheet" href="css/style.css?v=20261002e">
-  <link rel="stylesheet" href="/css/home-draft.css?v=20261029">
+  <link rel="stylesheet" href="/css/home-draft.css?v=20261110">
   <link rel="icon" href="img/logo.webp" type="image/webp">
   <script type="application/ld+json">
   {
@@ -94,21 +94,99 @@
       </div>
     </section>
 
-    <section class="home-draft-feature" aria-labelledby="home-draft-title">
-      <div class="home-draft-copy">
-        <span class="home-eyebrow">El fútbol también se juega acá</span>
-        <h2 id="home-draft-title">LAqP <span>Draft</span></h2>
-        <p>Estamos preparando LAqP Draft. Su apertura se anunciará cuando el juego esté listo para recibirte.</p>
-        <a class="home-draft-play" href="/draft/">Próximamente <span aria-hidden="true">→</span></a>
-        <span class="home-draft-modes">Clásico · Carrera · Supervivencia</span>
+    <!-- Carrusel de Entretenimiento. Para sumar una experiencia: agregá otro <article class="home-promo-slide">
+         con data-promo y data-label; los indicadores, el orden aleatorio y el autoavance se generan solos. -->
+    <section id="home-promo" class="home-promo" aria-roledescription="carrusel" aria-label="Entretenimiento LAqP">
+      <div class="home-promo-track" id="home-promo-track" aria-live="off">
+
+        <article class="home-promo-slide home-promo-draft is-active" data-promo="laqp-draft" data-label="Draft" role="group" aria-roledescription="diapositiva" aria-labelledby="home-draft-title">
+          <div class="home-promo-copy">
+            <span class="home-eyebrow">El fútbol también se juega acá</span>
+            <h2 id="home-draft-title">LAqP <span>Draft</span></h2>
+            <p data-draft-text>Estamos preparando LAqP Draft. Su apertura se anunciará cuando el juego esté listo para recibirte.</p>
+            <a class="home-promo-cta" href="/draft/" data-draft-cta>Próximamente <span aria-hidden="true">→</span></a>
+            <span class="home-promo-meta">Clásico · Carrera · Supervivencia</span>
+          </div>
+          <div class="home-promo-art home-draft-art" aria-hidden="true">
+            <img src="/assets/images/draft-coming-soon-960.webp" srcset="/assets/images/draft-coming-soon-640.webp 640w, /assets/images/draft-coming-soon-960.webp 960w" sizes="(max-width: 650px) 100vw, 46vw" alt="" width="960" height="720" loading="lazy" decoding="async">
+            <span>Tu equipo. Tu historia.</span>
+          </div>
+        </article>
+
+        <article class="home-promo-slide home-promo-arcade" data-promo="arcade" data-label="Arcade" role="group" aria-roledescription="diapositiva" aria-labelledby="home-arcade-title">
+          <div class="home-promo-copy">
+            <span class="home-eyebrow">Minijuegos de fútbol</span>
+            <h2 id="home-arcade-title">LAqP <span>Arcade</span></h2>
+            <p>Juegos rápidos y gratuitos para poner a prueba cuánto sabés de futbolistas, ligas y clubes. Directo en el navegador.</p>
+            <ul class="home-arcade-games" data-arcade-games aria-label="Juegos disponibles">
+              <li><a href="/ahorcado-futbolero.html"><strong>Ahorcado Futbolero</strong><small>Adiviná los apellidos de futbolistas reales.</small></a></li>
+            </ul>
+            <a class="home-promo-cta" href="/entretenimiento.html">Jugar ahora <span aria-hidden="true">→</span></a>
+            <span class="home-promo-meta">Gratis · Sin registro</span>
+          </div>
+          <div class="home-promo-art home-arcade-art" aria-hidden="true">
+            <div class="home-arcade-screen">
+              <img class="home-arcade-cover" src="/img/entretenimiento/ahorcado-futbolero.webp" alt="" width="1280" height="800" loading="lazy" decoding="async">
+              <span class="home-arcade-start">Press start</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="home-promo-slide home-promo-ranking" data-promo="ranking" data-label="Ranking" role="group" aria-roledescription="diapositiva" aria-labelledby="home-ranking-title">
+          <div class="home-promo-copy">
+            <span class="home-eyebrow">Ranking de la comunidad</span>
+            <h2 id="home-ranking-title">Los mejores juegos de <span>fútbol</span></h2>
+            <p>El Top histórico que arma la comunidad de LAqP con sus votos. ¿Estás de acuerdo con el podio?</p>
+            <p class="home-ranking-status" data-ranking-status>Consultando el ranking…</p>
+            <a class="home-promo-cta" href="/tier-list.html#top">¡Armá tu Top 10 y sumá tu voto! <span aria-hidden="true">→</span></a>
+            <a class="home-promo-link" href="/tier-list.html#community">Ver el ranking completo</a>
+          </div>
+          <div class="home-promo-art home-ranking-art">
+            <ol class="home-ranking-podium" data-ranking-podium aria-label="Top 3 del ranking histórico">
+              <li class="home-podium-item is-p1" data-position="1"><span class="home-podium-cover"></span><b class="home-podium-medal" aria-hidden="true">1</b><span class="home-podium-title"></span><small class="home-podium-points"></small></li>
+              <li class="home-podium-item is-p2" data-position="2"><span class="home-podium-cover"></span><b class="home-podium-medal" aria-hidden="true">2</b><span class="home-podium-title"></span><small class="home-podium-points"></small></li>
+              <li class="home-podium-item is-p3" data-position="3"><span class="home-podium-cover"></span><b class="home-podium-medal" aria-hidden="true">3</b><span class="home-podium-title"></span><small class="home-podium-points"></small></li>
+            </ol>
+          </div>
+        </article>
+
       </div>
-      <div class="home-draft-art" aria-hidden="true">
-        <img src="/assets/images/draft-coming-soon.webp" alt="" width="960" height="700" loading="lazy">
-        <span>Tu equipo. Tu historia.</span>
+      <div class="home-promo-controls">
+        <div class="home-promo-dots" role="group" aria-label="Elegir diapositiva" data-promo-dots></div>
+        <div class="home-promo-buttons">
+          <button type="button" class="home-promo-btn" data-promo-prev aria-label="Diapositiva anterior"><span aria-hidden="true">‹</span></button>
+          <button type="button" class="home-promo-btn" data-promo-next aria-label="Diapositiva siguiente"><span aria-hidden="true">›</span></button>
+        </div>
       </div>
     </section>
+    <script>
+      // Primera diapositiva al azar (probabilidad uniforme), antes del primer pintado: sin parpadeo ni salto.
+      (function () {
+        var root = document.getElementById('home-promo');
+        var slides = root ? root.querySelectorAll('.home-promo-slide') : [];
+        var n = slides.length, start = 0, i;
+        if (!n) return;
+        try { var r = new Uint32Array(1); crypto.getRandomValues(r); start = r[0] % n; }
+        catch (e) { start = Math.floor(Math.random() * n); }
+        var dots = root.querySelector('[data-promo-dots]');
+        for (i = 0; i < n; i++) {
+          var on = i === start, s = slides[i], label = s.getAttribute('data-label') || String(i + 1);
+          s.classList.toggle('is-active', on);
+          s.setAttribute('aria-label', (i + 1) + ' de ' + n);
+          if (!on) { s.setAttribute('aria-hidden', 'true'); s.inert = true; }
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'home-promo-dot' + (on ? ' is-active' : '');
+          b.setAttribute('aria-label', 'Mostrar ' + label + ' (' + (i + 1) + ' de ' + n + ')');
+          if (on) b.setAttribute('aria-current', 'true');
+          var t = document.createElement('span'); t.textContent = label;
+          b.appendChild(t); b.appendChild(document.createElement('i'));
+          dots.appendChild(b);
+        }
+        root.setAttribute('data-start', String(start));
+      })();
+    </script>
 
-    <section id="featured-of-section" data-spider-patch="static" class="spider-patch-site sp-home-promo" aria-labelledby="sp-home-title"><div class="sp-home-promo-copy"><span class="sp-eyebrow">EL PROYECTO DE LAqP / PES 2018</span><h2 id="sp-home-title">SPIDER <span>PATCH.</span></h2><p>El mismo PES. Una nueva temporada.</p><p class="sp-home-description">Descubrí Spider Patch 2026 V4 — PES 2018: ligas europeas, fútbol sudamericano, 17 equipos chilenos, Copa Libertadores 2026, clubes internacionales, plantillas y uniformes actualizados para PES 2018 en PC, PS4 y PS5.</p><div class="sp-actions"><a class="sp-button" href="/downloads.html">Explorar Spider Patch ↗</a><a class="sp-text-link" href="/downloads.html#como-instalar">Cómo instalar →</a></div></div><a class="sp-home-promo-image" href="/downloads.html#version-2026-v4" aria-label="Ver la última versión de Spider Patch"><img src="/assets/images/spider-patch/OF-2026-V4-615801b82f4a.png" width="1280" height="720" loading="lazy" alt="Portada de Spider Patch 2026 V4 — PES 2018"><span class="sp-latest">ÚLTIMA VERSIÓN DISPONIBLE · V4</span></a></section>
+    <section id="featured-of-section" data-spider-patch="static" class="spider-patch-site sp-home-promo" aria-labelledby="sp-home-title"><div class="sp-home-promo-copy"><span class="sp-eyebrow">EL PROYECTO DE LAqP / PES 2018</span><h2 id="sp-home-title">SPIDER <span>PATCH.</span></h2><p>El mismo PES. Una nueva temporada.</p><p class="sp-home-description">Descubrí Spider Patch 2026 V4 — PES 2018: ligas europeas, fútbol sudamericano, 17 equipos chilenos, Copa Libertadores 2026, clubes internacionales, plantillas y uniformes actualizados para PES 2018 en PC, PS4 y PS5.</p><div class="sp-actions"><a class="sp-button" href="/downloads.html">Explorar Spider Patch ↗</a><a class="sp-text-link sp-install-link" data-platform="pc" href="/option-files/spider-patch-2026-v4-pc/#pc-instalacion">Cómo instalar en PC →</a><a class="sp-text-link sp-install-link" data-platform="playstation" href="/option-files/spider-patch-2026-v4-ps4-ps5/#ps-instalacion">Cómo instalar en PS4/PS5 →</a></div></div><a class="sp-home-promo-image" href="/downloads.html#version-2026-v4" aria-label="Ver la última versión de Spider Patch"><img src="/assets/images/spider-patch/OF-2026-V4-615801b82f4a.png" width="1280" height="720" loading="lazy" alt="Portada de Spider Patch 2026 V4 — PES 2018"><span class="sp-latest">ÚLTIMA VERSIÓN DISPONIBLE · V4</span></a></section>
 
     <section class="home-feature home-feature-database" aria-labelledby="database-feature-title">
       <div class="home-feature-copy">
@@ -324,5 +402,7 @@
   <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/home.js"></script>
+  <script src="/js/entertainment-catalog.js?v=20261110" defer></script>
+  <script src="/js/home-promo.js?v=20261110" defer></script>
 </body>
 </html>

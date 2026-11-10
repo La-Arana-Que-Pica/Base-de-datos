@@ -170,6 +170,18 @@ function currentPageKey() {
   return '';
 }
 
+// Configuración pública de comunidad (Discord y enlaces de apoyo): un único pedido por página.
+let laqpCommunityConfigPromise = null;
+function laqpCommunityConfig() {
+  if (!laqpCommunityConfigPromise) {
+    laqpCommunityConfigPromise = fetch('/database/community.json')
+      .then(response => (response.ok ? response.json() : {}))
+      .catch(() => ({}));
+  }
+  return laqpCommunityConfigPromise;
+}
+window.laqpCommunityConfig = laqpCommunityConfig;
+
 async function renderMainNav() {
   const nav = document.querySelector('.header-nav');
   if (!nav) return;
@@ -184,9 +196,7 @@ async function renderMainNav() {
   ensureMobileNavToggle(nav);
   // Community is a Discord invitation, never an avatar/account control.
   try {
-    const response = await fetch('/database/community.json');
-    if (!response.ok) return;
-    const invite = (await response.json()).discord?.inviteUrl;
+    const invite = (await laqpCommunityConfig()).discord?.inviteUrl;
     if (!invite) return;
     const parsed = new URL(invite);
     if (parsed.protocol !== 'https:' || !['discord.gg', 'discord.com'].includes(parsed.hostname) || !parsed.pathname.slice(1) || (parsed.hostname === 'discord.com' && !parsed.pathname.startsWith('/invite/'))) return;
@@ -438,6 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderLanguageSelector();
   renderSiteFooter();
   renderCookieConsent();
+  // Apoyo voluntario: footer, acceso secundario en el menú e invitación tras las descargas.
+  laqpLoadScript('/js/laqp-support.js?v=20261110').catch(() => {});
   if (typeof applyI18nToDocument === 'function') applyI18nToDocument();
   if (typeof renderLanguagePrompt === 'function') {
     renderLanguagePrompt();
