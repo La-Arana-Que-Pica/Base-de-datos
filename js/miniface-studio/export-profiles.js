@@ -53,9 +53,13 @@ export const PES2018_PROFILE = Object.freeze({
   cpk(files) { return createCpk(files.map(({ id, dds }) => ({ path: this.internalPath(id), data: dds }))); },
 });
 
+// DpFileList.bin reserva 36 bytes por nombre de CPK; si el nombre es más largo, pisa el orden de la lista y PES 2018
+// no arranca (confirmado en el juego con Soundtrack Maker, 2026-11-09). Máximo seguro: 35 caracteres contando «.cpk».
+export const CPK_NAME_MAX = 35;
+
 /** Nombre de archivo CPK seguro (PES y DpFileList usan nombres simples sin espacios). */
 export function sanitizeCpkName(raw) {
-  const base = String(raw ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().replace(/\.cpk$/i, '').replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60);
+  const base = String(raw ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().replace(/\.cpk$/i, '').replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, CPK_NAME_MAX - 4).replace(/_+$/, '');
   return (base || 'LAqP_Minifaces') + '.cpk';
 }
 

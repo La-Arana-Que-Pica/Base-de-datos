@@ -8,6 +8,7 @@ import { ACB_TEMPLATE } from './acb-template.js';
 
 export const MIN_SONGS = 12; // decisión de producto: las del soundtrack original (el EXE no exige mínimo)
 export const MAX_SONGS = 32;
+// El EXE copia título y artista con un límite de 64 bytes (63 + fin de cadena). Un título de 41 bytes anduvo en el juego (SND08F).
 export const TEXT_MAX_BYTES = 63;
 export const SAMPLE_RATE = 48000;
 const AWB_ALIGN = 32;
@@ -164,6 +165,38 @@ export function truncateUtf8(text, maxBytes = TEXT_MAX_BYTES) {
   return out;
 }
 
+// Textos que el juego no admite (SND-08, 2026-11-09): con «Á» en Playlist.xml PES 2018 no arranca [CONFIRMADO EN JUEGO];
+// las minúsculas con tilde (á é í ó ú ñ) andan. La diferencia está en UTF-8: las mayúsculas acentuadas (Á É Í Ó Ú Ñ Ü)
+// llevan un byte entre 0x80 y 0x9F, y las minúsculas, entre 0xA0 y 0xBF. Por precaución se rechaza todo carácter cuyo
+// UTF-8 tenga un byte en ese rango (también ’ “ ” … – — € y emojis) y los caracteres de control.
+const isRiskyChar = ch => {
+  const code = ch.codePointAt(0);
+  if (code < 0x20 || code === 0x7f) return true;
+  return [...utf8.encode(ch)].some(b => b >= 0x80 && b <= 0x9f);
+};
+
+/** Caracteres de `text` que pueden impedir que PES 2018 arranque, sin repetir. */
+export function riskyGameChars(text) {
+  return [...new Set([...String(text)].filter(isRiskyChar))];
+}
+
+const SAFE_REPLACEMENTS = {
+  '\u2018': "'", '\u2019': "'", '\u201a': "'", '\u201b': "'", '\u2032': "'", '\u201c': '"', '\u201d': '"', '\u201e': '"',
+  '\u2026': '...', '\u2013': '-', '\u2014': '-', '\u2015': '-', '\u2212': '-', '\u2022': '-', '\u20ac': 'EUR', 'ß': 'ss',
+  'Æ': 'AE', 'Œ': 'OE', 'Ø': 'O', 'Ð': 'D', 'Þ': 'Th', '\u00a0': ' ',
+};
+
+/** Versión segura para el juego: «Árbol» → «Arbol», «’» → «'»; lo que no tenga equivalente se quita. */
+export function safeGameText(text) {
+  let out = '';
+  for (const ch of String(text)) {
+    if (!isRiskyChar(ch)) { out += ch; continue; }
+    const replacement = SAFE_REPLACEMENTS[ch] ?? ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    out += [...replacement].filter(c => !isRiskyChar(c)).join('');
+  }
+  return out.replace(/\s+/g, ' ').trim();
+}
+
 const xmlAttr = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /**
@@ -173,6 +206,10 @@ const xmlAttr = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g
  * Las canciones de un CPK cargado conservan su Id, Offset y fundidos (playlistId, offset, remainTime, fadeoutTime, fadeoutWaitTime).
  */
 export function buildPlaylistXml(songs, { created = new Date() } = {}) {
+  for (const s of songs) {
+    const bad = riskyGameChars(`${s.title}${s.artist}`);
+    if (bad.length) throw new Error(`«${s.title}» tiene caracteres que el juego no admite (${bad.join(' ')}).`);
+  }
   const pad = v => String(v).padStart(2, '0');
   const stamp = `${created.getFullYear()}/${pad(created.getMonth() + 1)}/${pad(created.getDate())} ${pad(created.getHours())}:${pad(created.getMinutes())}:${pad(created.getSeconds())}`;
   const taken = new Set();

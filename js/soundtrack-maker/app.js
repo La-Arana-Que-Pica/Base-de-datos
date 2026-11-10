@@ -1,10 +1,11 @@
 // LAqP Soundtrack Maker: interfaz. Todo se procesa en el navegador; ningún archivo se sube.
 
-import { MIN_SONGS, MAX_SONGS, TEXT_MAX_BYTES } from './bank.js';
+import { MIN_SONGS, MAX_SONGS, TEXT_MAX_BYTES, riskyGameChars, safeGameText, truncateUtf8 } from './bank.js';
 import { buildSoundtrack, sanitizeCpkName, estimateCpkBytes } from './build.js';
 import { readSongMeta } from './id3.js';
 import { decodeToPcm, createEncoder, createPreviewer, probeDuration, fileHash } from './audio.js';
 import { loadSoundtrack, SoundtrackLoadError } from './soundtrack-reader.js';
+import { saveProject, openProject, sortSongs, ProjectError, PROJECT_EXTENSION } from './project.js';
 
 // Textos: claves soundtrack.* del sistema de idiomas del sitio (js/i18n.js); si no hay traducción, español.
 const msg = (key, fallback, params = {}) => {
@@ -23,6 +24,7 @@ const fmtTime = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStar
 const fmtMB = b => (b < 104858 ? '<0,1 MB' : `${(b / 1048576).toLocaleString('es-AR', { maximumFractionDigits: b < 10485760 ? 1 : 0 })} MB`);
 const isMp3 = file => /\.mp3$/i.test(file.name) || file.type === 'audio/mpeg' || file.type === 'audio/mp3';
 const isCpk = file => /\.cpk$/i.test(file.name);
+const isProject = file => file.name.toLowerCase().endsWith(PROJECT_EXTENSION);
 const MAX_PREVIEWS = 2; // WAV de escucha que se conservan (unos 40 MB cada uno)
 
 const state = {
@@ -34,8 +36,10 @@ const els = {
   count: $('#sm-count'), meter: $('#sm-meter-fill'), meterWrap: $('#sm-meter'), summary: $('#sm-summary'), total: $('#sm-total'),
   generate: $('#sm-generate'), cancel: $('#sm-cancel'), progress: $('#sm-progress'), progressBar: $('#sm-progress-bar'),
   progressText: $('#sm-progress-text'), status: $('#sm-status'), cpkName: $('#sm-cpk-name'), audio: $('#sm-audio'),
+  sortButton: $('#sm-sort'), sortMenu: $('#sm-sort-menu'), sortUndo: $('#sm-sort-undo'),
+  projectSave: $('#sm-project-save'), projectOpen: $('#sm-project-open'), projectFile: $('#sm-project-file'),
   cpkFile: $('#sm-cpk-file'), replaceFile: $('#sm-replace-file'), source: $('#sm-source'), sourceText: $('#sm-source-text'),
-  sourceList: $('#sm-source-list'), listHead: $('#sm-list-head'), result: $('#sm-result'), resultText: $('#sm-result-text'), redownload: $('#sm-redownload'), checks: $('#sm-checks'),
+  sourceList: $('#sm-source-list'), fixAll: $('#sm-fix-all'), listHead: $('#sm-list-head'), result: $('#sm-result'), resultText: $('#sm-result-text'), redownload: $('#sm-redownload'), checks: $('#sm-checks'),
 };
 
 function setStatus(text, kind = '') {
@@ -48,6 +52,10 @@ function songIssues(song) {
   const issues = [];
   if (song.error) issues.push({ level: 'error', text: song.error });
   if (!song.title.trim()) issues.push({ level: 'error', text: msg('issue.noTitle', 'Falta el título.') });
+  const bad = riskyGameChars(song.title + song.artist);
+  if (bad.length) {
+    issues.push({ level: 'error', fix: true, text: msg('issue.badChars', 'Tiene caracteres que hacen que PES 2018 no arranque: {chars}. El juego no admite mayúsculas con tilde (Á, É, Í, Ó, Ú, Ñ) ni algunos símbolos (’ “ ” … –).', { chars: bad.map(c => `«${c}»`).join(' ') }) });
+  }
   if (byteLength(song.title.trim()) > TEXT_MAX_BYTES) issues.push({ level: 'warn', text: msg('issue.longTitle', 'El título supera el máximo del juego: se recortará.') });
   if (byteLength(song.artist.trim()) > TEXT_MAX_BYTES) issues.push({ level: 'warn', text: msg('issue.longArtist', 'El artista supera el máximo del juego: se recortará.') });
   const key = (song.title.trim() + '\u0000' + song.artist.trim()).toLocaleLowerCase('es');
@@ -80,6 +88,8 @@ function render() {
   els.meterWrap.setAttribute('aria-valuenow', String(n));
   els.summary.textContent = text;
   els.summary.dataset.kind = ready ? 'ok' : errors || (n && n < MIN_SONGS) ? 'warn' : '';
+  els.fixAll.hidden = !state.songs.some(s => riskyGameChars(s.title + s.artist).length);
+  els.fixAll.disabled = Boolean(state.generating);
   const seconds = state.songs.reduce((s, x) => s + (x.duration || 0), 0);
   // Las canciones de un CPK cargado se copian tal cual: se conoce su tamaño exacto.
   const bytes = state.songs.reduce((sum, x) => sum + (x.hca ? x.file?.size || 0 : estimateCpkBytes(x.duration || 0)), 0);
@@ -91,6 +101,10 @@ function render() {
   els.generate.disabled = !ready || busy;
   document.querySelectorAll('[data-action=add]').forEach(b => { b.disabled = busy || n >= MAX_SONGS; });
   document.querySelectorAll('[data-action=load-cpk]').forEach(b => { b.disabled = busy || state.loadingCpk; });
+  els.sortButton.disabled = busy || n < 2;
+  els.projectSave.disabled = busy || n === 0;
+  els.projectOpen.disabled = busy;
+  els.sortUndo.hidden = !state.sortUndo;
   document.body.classList.toggle('sm-busy', busy);
   renderChecks(n, errors);
   renderList();
@@ -122,7 +136,14 @@ function renderList() {
     let li = existing.get(String(song.id));
     if (!li) li = createRow(song);
     existing.delete(String(song.id));
-    li.querySelector('.sm-song-num').textContent = String(index + 1).padStart(2, '0');
+    const position = li.querySelector('.sm-song-num');
+    if (document.activeElement !== position) position.value = String(index + 1);
+    position.disabled = busy;
+    li.classList.toggle('is-swap-source', state.swapId === song.id);
+    li.classList.toggle('is-swap-target', Boolean(state.swapId) && state.swapId !== song.id);
+    const swap = li.querySelector('[data-action=swap]');
+    swap.setAttribute('aria-pressed', String(state.swapId === song.id));
+    swap.title = state.swapId && state.swapId !== song.id ? msg('swapHere', 'Intercambiar con la elegida') : msg('swap', 'Intercambiar con otra canción');
     li.querySelector('.sm-song-meta').textContent = [song.duration ? fmtTime(song.duration) : '', song.file ? fmtMB(song.file.size) : ''].filter(Boolean).join(' · ');
     li.querySelector('[data-action=undo-replace]').hidden = !song.undo;
     const issues = songIssues(song);
@@ -130,6 +151,14 @@ function renderList() {
     li.classList.toggle('has-warn', issues.some(i => i.level === 'warn') && !issues.some(i => i.level === 'error'));
     const box = li.querySelector('.sm-song-issues');
     box.textContent = issues.map(i => i.text).join(' ');
+    if (issues.some(i => i.fix)) {
+      const fix = document.createElement('button');
+      fix.type = 'button';
+      fix.className = 'sm-link';
+      fix.dataset.action = 'fix-text';
+      fix.textContent = msg('fixText', 'Corregir');
+      box.append(' ', fix);
+    }
     box.hidden = !issues.length;
     li.querySelector('[data-action=up]').disabled = busy || index === 0;
     li.querySelector('[data-action=down]').disabled = busy || index === state.songs.length - 1;
@@ -157,7 +186,7 @@ function createRow(song) {
   li.dataset.id = String(song.id);
   li.innerHTML = `
     <button type="button" class="sm-handle" data-action="handle" draggable="true" aria-label="${msg('reorder', 'Mover (arrastrá o usá las flechas)')}" title="${msg('reorder', 'Mover (arrastrá o usá las flechas)')}"><span aria-hidden="true">⋮⋮</span></button>
-    <span class="sm-song-num" aria-hidden="true"></span>
+    <input type="text" class="sm-song-num" data-action="position" inputmode="numeric" maxlength="2" autocomplete="off" aria-label="${msg('position', 'Posición: escribí un número y Enter')}" title="${msg('position', 'Posición: escribí un número y Enter')}">
     <button type="button" class="sm-play" data-action="play"><span aria-hidden="true">▶</span></button>
     <div class="sm-song-fields">
       <label class="sm-song-field"><span>${msg('title', 'Título')}</span><input type="text" data-field="title" maxlength="120" autocomplete="off" spellcheck="false" placeholder="${msg('title', 'Título')}"></label>
@@ -166,6 +195,7 @@ function createRow(song) {
       <p class="sm-song-issues" hidden></p>
     </div>
     <div class="sm-song-actions">
+      <button type="button" class="sm-icon" data-action="swap" aria-pressed="false" aria-label="${msg('swap', 'Intercambiar con otra canción')}" title="${msg('swap', 'Intercambiar con otra canción')}">⇅</button>
       <button type="button" class="sm-icon" data-action="replace" aria-label="${msg('replace', 'Reemplazar por otro MP3')}" title="${msg('replace', 'Reemplazar por otro MP3')}">⇄</button>
       <button type="button" class="sm-icon" data-action="up" aria-label="${msg('up', 'Subir')}" title="${msg('up', 'Subir')}">↑</button>
       <button type="button" class="sm-icon" data-action="down" aria-label="${msg('down', 'Bajar')}" title="${msg('down', 'Bajar')}">↓</button>
@@ -186,6 +216,8 @@ function createRow(song) {
 async function addFiles(fileList) {
   if (state.generating) return;
   const all = [...fileList];
+  const projects = all.filter(isProject);
+  if (projects.length) { await openProjectFile(projects[0]); return; }
   const cpks = all.filter(isCpk);
   if (cpks.length) { await loadCpk(cpks[0]); if (state.loadingCpk) return; }
   const files = all.filter(f => !isCpk(f));
@@ -229,6 +261,8 @@ function forgetAudio(song) {
 
 function clearCollection() {
   els.audio.pause();
+  state.swapId = null;
+  state.sortUndo = null;
   state.songs.forEach(forgetAudio);
   state.songs = [];
   els.list.replaceChildren();
@@ -320,6 +354,25 @@ function undoReplace(song) {
   render();
 }
 
+// ---------- textos que el juego no admite ----------
+function fixTexts(songs) {
+  let changed = 0;
+  for (const song of songs) {
+    const row = els.list.querySelector(`.sm-song[data-id="${song.id}"]`);
+    for (const field of ['title', 'artist']) {
+      const fixed = truncateUtf8(safeGameText(song[field])).trim();
+      if (fixed === song[field]) continue;
+      song[field] = fixed;
+      const input = row?.querySelector(`[data-field="${field}"]`);
+      if (input) input.value = fixed;
+      changed++;
+    }
+  }
+  setStatus(changed ? msg('fixed', 'Se corrigieron {n} texto(s): por ejemplo «Á» pasó a «A».', { n: changed }) : '', changed ? 'ok' : '');
+  render();
+}
+els.fixAll.addEventListener('click', () => fixTexts(state.songs));
+
 // ---------- reproducción ----------
 async function urlFor(song) {
   if (state.urls.has(song.id)) return state.urls.get(song.id);
@@ -372,6 +425,7 @@ els.audio.addEventListener('ended', () => { state.playingId = null; render(); })
 
 function removeSong(song) {
   forgetAudio(song);
+  if (state.swapId === song.id) state.swapId = null;
   state.songs.splice(state.songs.indexOf(song), 1);
   setStatus(msg('removed', 'Se quitó «{title}».', { title: song.title || song.name }));
   render();
@@ -387,10 +441,45 @@ function move(song, delta) {
   render();
 }
 
+function moveTo(song, position) {
+  const i = state.songs.indexOf(song);
+  const j = Math.min(Math.max(position, 1), state.songs.length) - 1;
+  if (i < 0 || i === j) { render(); return; }
+  state.songs.splice(i, 1);
+  state.songs.splice(j, 0, song);
+  setStatus(msg('moved', '«{title}» ahora es la número {n}.', { title: song.title || song.name, n: j + 1 }));
+  render();
+}
+
+// Intercambiar: se elige una canción y después la otra.
+function swapWith(song) {
+  if (!state.swapId) {
+    state.swapId = song.id;
+    setStatus(msg('swapPick', 'Elegí con qué canción intercambiar «{title}»: tocá ⇅ en la otra, o Esc para cancelar.', { title: song.title || song.name }));
+  } else if (state.swapId === song.id) {
+    state.swapId = null;
+    setStatus('');
+  } else {
+    const first = state.songs.find(s => s.id === state.swapId);
+    const i = state.songs.indexOf(first), j = state.songs.indexOf(song);
+    state.swapId = null;
+    if (i >= 0 && j >= 0) {
+      [state.songs[i], state.songs[j]] = [state.songs[j], state.songs[i]];
+      setStatus(msg('swapped', 'Se intercambiaron «{a}» (ahora la {i}) y «{b}» (ahora la {j}).', { a: first.title || first.name, i: j + 1, b: song.title || song.name, j: i + 1 }), 'ok');
+    }
+  }
+  render();
+}
+
 const songOf = el => state.songs.find(s => String(s.id) === el.closest('.sm-song')?.dataset.id);
 
 els.list.addEventListener('click', event => {
   const button = event.target.closest('button[data-action]');
+  if (!button && state.swapId && !state.generating && !event.target.closest('input')) {
+    const target = songOf(event.target);
+    if (target) swapWith(target);
+    return;
+  }
   const song = button && songOf(button);
   if (!song || state.generating) return;
   const action = button.dataset.action;
@@ -400,6 +489,16 @@ els.list.addEventListener('click', event => {
   else if (action === 'remove') removeSong(song);
   else if (action === 'replace') { state.replaceTarget = song; els.replaceFile.click(); }
   else if (action === 'undo-replace') undoReplace(song);
+  else if (action === 'fix-text') fixTexts([song]);
+  else if (action === 'swap') swapWith(song);
+});
+els.list.addEventListener('change', event => {
+  const position = event.target.closest('.sm-song-num');
+  const song = position && songOf(position);
+  if (!song || state.generating) return;
+  const n = Number.parseInt(position.value, 10);
+  if (Number.isInteger(n)) moveTo(song, n);
+  else render();
 });
 els.list.addEventListener('input', event => {
   const input = event.target.closest('input[data-field]');
@@ -409,6 +508,16 @@ els.list.addEventListener('input', event => {
   render();
 });
 els.list.addEventListener('keydown', event => {
+  const position = event.target.closest('.sm-song-num');
+  if (position && (event.key === 'Enter' || event.key === 'Escape')) {
+    event.preventDefault();
+    const song = songOf(position);
+    if (event.key === 'Escape' || !song) { position.value = String(state.songs.indexOf(song) + 1); position.blur(); return; }
+    const n = Number.parseInt(position.value, 10);
+    position.blur();
+    if (Number.isInteger(n)) moveTo(song, n);
+    return;
+  }
   const handle = event.target.closest('.sm-handle');
   const song = handle && songOf(handle);
   if (!song || state.generating) return;
@@ -430,6 +539,13 @@ els.list.addEventListener('dragstart', event => {
   event.dataTransfer.effectAllowed = 'move';
   event.dataTransfer.setData('text/plain', dragId);
   event.dataTransfer.setDragImage(row, 24, 24);
+});
+// Al arrastrar cerca del borde de la ventana, la página se desplaza sola.
+document.addEventListener('dragover', event => {
+  if (!dragId) return;
+  const edge = 90;
+  if (event.clientY < edge) window.scrollBy(0, -Math.ceil((edge - event.clientY) / 4));
+  else if (event.clientY > window.innerHeight - edge) window.scrollBy(0, Math.ceil((event.clientY - window.innerHeight + edge) / 4));
 });
 els.list.addEventListener('dragover', event => {
   if (!dragId) return;
@@ -491,6 +607,84 @@ document.addEventListener('click', event => {
   }
 });
 els.file.addEventListener('change', () => { addFiles(els.file.files); els.file.value = ''; });
+
+// ---------- ordenar alfabéticamente ----------
+function closeSortMenu() {
+  els.sortMenu.hidden = true;
+  els.sortButton.setAttribute('aria-expanded', 'false');
+}
+els.sortButton.addEventListener('click', () => {
+  const open = els.sortMenu.hidden;
+  els.sortMenu.hidden = !open;
+  els.sortButton.setAttribute('aria-expanded', String(open));
+  if (open) els.sortMenu.querySelector('button')?.focus();
+});
+els.sortMenu.addEventListener('click', event => {
+  const option = event.target.closest('[data-sort]');
+  if (!option || state.generating) return;
+  closeSortMenu();
+  state.sortUndo = state.songs.slice();
+  state.songs = sortSongs(state.songs, option.dataset.sort);
+  state.swapId = null;
+  els.sortUndo.hidden = false;
+  setStatus(option.dataset.sort === 'title'
+    ? msg('sortedTitle', 'Lista ordenada alfabéticamente por título.')
+    : msg('sortedArtist', 'Lista ordenada alfabéticamente por artista o banda.'), 'ok');
+  render();
+});
+els.sortUndo.addEventListener('click', () => {
+  if (!state.sortUndo) return;
+  const current = new Set(state.songs);
+  const restored = state.sortUndo.filter(s => current.has(s));
+  state.songs = [...restored, ...state.songs.filter(s => !restored.includes(s))];
+  state.sortUndo = null;
+  els.sortUndo.hidden = true;
+  setStatus(msg('sortUndone', 'Se recuperó el orden anterior.'));
+  render();
+});
+document.addEventListener('click', event => { if (!event.target.closest('.sm-sort')) closeSortMenu(); });
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  if (!els.sortMenu.hidden) { closeSortMenu(); els.sortButton.focus(); }
+  if (state.swapId) { state.swapId = null; setStatus(''); render(); }
+});
+
+// ---------- proyecto: guardar y seguir otro día ----------
+els.projectSave.addEventListener('click', () => {
+  if (!state.songs.length || state.generating) return;
+  const blob = saveProject({ songs: state.songs, cpkName: els.cpkName.value });
+  const day = new Date().toISOString().slice(0, 10);
+  download(blob, `${sanitizeCpkName(els.cpkName.value).replace(/\.cpk$/, '')}_proyecto_${day}${PROJECT_EXTENSION}`);
+  setStatus(msg('projectSaved', 'Proyecto guardado ({n} canciones, {size}). Para seguir, tocá «Abrir proyecto» y elegí ese archivo.', { n: state.songs.length, size: fmtMB(blob.size) }), 'ok');
+});
+els.projectOpen.addEventListener('click', () => els.projectFile.click());
+els.projectFile.addEventListener('change', () => { if (els.projectFile.files[0]) openProjectFile(els.projectFile.files[0]); els.projectFile.value = ''; });
+
+async function openProjectFile(file) {
+  if (state.generating) return;
+  if (state.songs.length && !window.confirm(msg('confirmProject', 'Abrir este proyecto reemplaza la lista actual. ¿Continuar?'))) return;
+  try {
+    const project = await openProject(file);
+    clearCollection();
+    state.songs = project.songs.map(s => ({ ...s, id: state.nextId++ }));
+    if (project.cpkName) els.cpkName.value = sanitizeCpkName(project.cpkName).replace(/\.cpk$/, '');
+    els.sourceText.textContent = msg('projectTitle', '{file}: {n} canción(es) recuperada(s).', { file: file.name, n: state.songs.length });
+    const lines = [['ok', msg('projectOk', 'Se recuperaron las canciones, sus nombres y el orden. Seguí editando o generá el CPK cuando esté listo.')]];
+    if (state.songs.length < MIN_SONGS) lines.push(['warn', msg('projectMissing', 'Faltan {n} canción(es) para el mínimo de {min}.', { n: MIN_SONGS - state.songs.length, min: MIN_SONGS })]);
+    els.sourceList.replaceChildren(...lines.map(([kind, text]) => {
+      const li = document.createElement('li');
+      li.dataset.kind = kind;
+      li.textContent = text;
+      return li;
+    }));
+    els.source.hidden = false;
+    els.result.hidden = true;
+    setStatus(msg('projectOpened', 'Proyecto abierto.'), 'ok');
+  } catch (error) {
+    setStatus(error instanceof ProjectError ? error.message : msg('projectFailed', 'No se pudo abrir el proyecto: {error}', { error: error.message }), 'error');
+  }
+  render();
+}
 els.cpkFile.addEventListener('change', () => { if (els.cpkFile.files[0]) loadCpk(els.cpkFile.files[0]); els.cpkFile.value = ''; });
 els.replaceFile.addEventListener('change', () => {
   const file = els.replaceFile.files[0];

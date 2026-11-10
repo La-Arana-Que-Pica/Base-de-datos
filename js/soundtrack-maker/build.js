@@ -75,10 +75,16 @@ export async function buildSoundtrack(songs, { decode, encode, onProgress = () =
   return { parts, cpkSize: parts.reduce((s, p) => s + size(p), 0), acb, xml, songs: info, awbSize: afs2.totalSize, afs2Header: afs2.header };
 }
 
+// DpFileList.bin guarda cada CPK en una entrada de 48 bytes: el nombre ocupa 36 bytes (+0x08) y en +0x2c va el orden.
+// Un nombre de 36 caracteres pisa el orden con su fin de cadena, y uno más largo con letras: con
+// «Rock_Nacional_Spider_Patch_Soundtrack.cpk» (41) el juego no arrancó (SND-08, 2026-11-09). EXE: tabla en 0x142efb318,
+// paso 0x30, máximo 0x40 CPK, nombre devuelto por 0x14125e520. Máximo seguro: 35 caracteres contando «.cpk».
+export const CPK_NAME_MAX = 35;
+
 /** Nombre de archivo CPK seguro (DpFileList y PES usan nombres simples). */
 export function sanitizeCpkName(raw) {
   const base = String(raw ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().replace(/\.cpk$/i, '')
-    .replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60);
+    .replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, CPK_NAME_MAX - 4).replace(/_+$/, '');
   return (base || 'LAqP_Soundtrack') + '.cpk';
 }
 

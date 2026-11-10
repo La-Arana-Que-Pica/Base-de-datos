@@ -21,7 +21,7 @@
   <link rel="icon" href="/img/logo.webp" type="image/webp">
   <link rel="stylesheet" href="/css/style.css?v=20261004c">
   <link rel="stylesheet" href="/css/site-navigation.css" data-site-navigation>
-  <link rel="stylesheet" href="/css/soundtrack-maker.css?v=20261104a">
+  <link rel="stylesheet" href="/css/soundtrack-maker.css?v=20261109d">
   <script src="/js/consent-mode.js"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-M7ZNDRZB27');</script>
@@ -32,7 +32,7 @@
   {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Mis canciones se suben a algún servidor?", "acceptedAnswer": {"@type": "Answer", "text": "No. La lectura, la conversión y el empaquetado se hacen en tu navegador. Ningún archivo se envía a LAqP ni a servicios externos."}}, {"@type": "Question", "name": "¿Cuántas canciones puedo poner en el soundtrack de PES 2018?", "acceptedAnswer": {"@type": "Answer", "text": "Hasta 32: es el límite del juego. Soundtrack Maker pide un mínimo de 12, la misma cantidad que el soundtrack original."}}, {"@type": "Question", "name": "¿En qué orden aparecen las canciones en el juego?", "acceptedAnswer": {"@type": "Answer", "text": "En el mismo orden de tu lista. Reordenalas antes de generar el CPK."}}, {"@type": "Question", "name": "¿Por qué sigo escuchando la música anterior?", "acceptedAnswer": {"@type": "Answer", "text": "Otro CPK con música tiene más prioridad, por ejemplo el de un parche u Option File. En DpFileList Generator, ubicá tu CPK de soundtrack con más prioridad que ese. Si usás Sider con música en LiveCPK, esa música reemplaza a cualquier CPK."}}, {"@type": "Question", "name": "¿Puedo editar un soundtrack que ya armé?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Con «Cargar CPK» se leen las canciones, los títulos, los artistas y el orden. Podés escucharlas, reemplazar algunas, agregar o quitar. Las que no cambies se copian sin perder calidad y tu CPK original no se modifica. Si el CPK no trae Playlist.xml, te avisa y crea uno nuevo."}}, {"@type": "Question", "name": "¿Funciona para PS4?", "acceptedAnswer": {"@type": "Answer", "text": "Por ahora está pensado y probado solo para PES 2018 en PC."}}]}
   </script>
   <script defer src="/js/site.js"></script>
-  <script type="module" src="/js/soundtrack-maker/app.js?v=20261104a"></script>
+  <script type="module" src="/js/soundtrack-maker/app.js?v=20261109d"></script>
 </head>
 <body class="soundtrack-maker-body">
   <a class="sm-skip" href="#soundtrack-maker">Saltar al editor</a>
@@ -60,12 +60,21 @@
         <div class="sm-toolbar">
           <button type="button" class="sm-button sm-button-primary" data-action="add"><span aria-hidden="true">＋</span>Agregar MP3</button>
           <button type="button" class="sm-button" data-action="load-cpk"><span aria-hidden="true">⇪</span>Cargar CPK</button>
+          <div class="sm-sort">
+            <button type="button" class="sm-button" id="sm-sort" aria-haspopup="true" aria-expanded="false" aria-controls="sm-sort-menu" disabled><span aria-hidden="true">A–Z</span>Ordenar</button>
+            <div class="sm-sort-menu" id="sm-sort-menu" role="group" aria-label="Ordenar alfabéticamente" hidden>
+              <button type="button" data-sort="title">Por título</button>
+              <button type="button" data-sort="artist">Por artista o banda</button>
+            </div>
+            <button type="button" class="sm-link" id="sm-sort-undo" hidden>Deshacer orden</button>
+          </div>
           <div class="sm-counter">
             <div class="sm-counter-head"><strong id="sm-count">0/32</strong><span id="sm-total" class="sm-total"></span></div>
             <div class="sm-meter" id="sm-meter" role="meter" aria-label="Canciones en el soundtrack" aria-valuemin="0" aria-valuemax="32" aria-valuenow="0"><span id="sm-meter-fill"></span><i aria-hidden="true" title="Mínimo: 12"></i></div>
           </div>
         </div>
         <p class="sm-summary" id="sm-summary" aria-live="polite"></p>
+        <p class="sm-fix-all-row"><button type="button" class="sm-button" id="sm-fix-all" hidden>Corregir caracteres no admitidos en toda la lista</button></p>
         <div class="sm-source" id="sm-source" hidden>
           <div class="sm-source-head"><strong id="sm-source-text"></strong><button type="button" class="sm-link" data-action="clear-source">Vaciar lista</button></div>
           <ul id="sm-source-list"></ul>
@@ -97,8 +106,9 @@
           <ul class="sm-checks" id="sm-checks" aria-label="Requisitos"></ul>
           <div class="sm-field">
             <label for="sm-cpk-name">Nombre del CPK</label>
-            <div class="sm-input-suffix"><input type="text" id="sm-cpk-name" autocomplete="off" spellcheck="false" maxlength="60" value="LAqP_Soundtrack"><span>.cpk</span></div>
+            <div class="sm-input-suffix"><input type="text" id="sm-cpk-name" autocomplete="off" spellcheck="false" maxlength="31" value="LAqP_Soundtrack" aria-describedby="sm-cpk-name-hint"><span>.cpk</span></div>
           </div>
+          <p class="sm-hint" id="sm-cpk-name-hint">Hasta 31 caracteres (35 con «.cpk»). No le pongas un nombre más largo al renombrarlo: DpFileList Generator lo guarda mal y el juego no arranca.</p>
           <button type="button" class="sm-button sm-button-primary sm-button-block" id="sm-generate" disabled>Generar soundtrack</button>
           <div class="sm-progress" id="sm-progress" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
             <div class="sm-progress-track"><span id="sm-progress-bar"></span></div>
@@ -112,15 +122,25 @@
           </div>
           <p class="sm-hint">La conversión ocurre en tu navegador: ninguna canción se sube a internet. Tarda unos segundos por canción; no cierres la pestaña mientras tanto.</p>
         </section>
-        <section class="sm-panel" aria-labelledby="sm-limits-title">
-          <h3 id="sm-limits-title">Límites del juego</h3>
+        <section class="sm-panel" aria-labelledby="sm-project-title">
+          <h3 id="sm-project-title">Proyecto <small>para seguir otro día</small></h3>
+          <div class="sm-row">
+            <button type="button" class="sm-button" id="sm-project-save" disabled>Guardar proyecto</button>
+            <button type="button" class="sm-button" id="sm-project-open">Abrir proyecto</button>
+          </div>
+          <input type="file" id="sm-project-file" class="sm-sr-only" tabindex="-1" accept=".laqpst" aria-label="Elegir un proyecto de Soundtrack Maker">
+          <p class="sm-hint">Guarda las canciones (con su audio), los nombres y el orden en un archivo <code>.laqpst</code>. Abrilo cuando quieras para seguir, aunque todavía no tengas las 12 canciones. También podés arrastrarlo a la lista.</p>
+        </section>
+        <details class="sm-panel sm-limits-panel">
+          <summary><h3 id="sm-limits-title">Límites del juego</h3></summary>
           <dl class="sm-limits">
             <div><dt>Canciones</dt><dd>12 a 32 (el juego no admite más de 32)</dd></div>
             <div><dt>Orden</dt><dd>El juego las muestra en el orden de tu lista</dd></div>
-            <div><dt>Título y artista</dt><dd>Hasta 63 bytes cada uno (unas 60 letras)</dd></div>
+            <div><dt>Título y artista</dt><dd>Hasta 63 bytes cada uno (unas 60 letras). Sin mayúsculas con tilde (Á, É, Í, Ó, Ú, Ñ) ni símbolos como ’ “ ” …: hacen que el juego no arranque</dd></div>
             <div><dt>Formato</dt><dd>MP3 de entrada; se convierte a HCA estéreo 48 kHz</dd></div>
+            <div><dt>Nombre del CPK</dt><dd>Hasta 35 caracteres contando «.cpk»</dd></div>
           </dl>
-        </section>
+        </details>
         <p class="sm-status" id="sm-status" role="status" aria-live="polite"></p>
       </aside>
     </section>
@@ -132,7 +152,7 @@
         <ol class="sm-steps">
           <li><strong>Cargá tus canciones.</strong> Arrastrá los MP3 a la lista o tocá «Agregar MP3». La colección empieza vacía: el soundtrack es solo tuyo.</li>
           <li><strong>Revisá título y artista.</strong> Se completan con las etiquetas del MP3 o con el nombre del archivo; podés corregirlos. Así aparecen en el menú de música del juego.</li>
-          <li><strong>Ordenalas.</strong> Arrastrá la manija <span aria-hidden="true">⋮⋮</span> o usá las flechas. El juego respeta ese orden.</li>
+          <li><strong>Ordenalas.</strong> El juego respeta ese orden. Podés ordenar todo alfabéticamente por título o por artista con «Ordenar», escribir el número de posición de una canción, intercambiar dos canciones con <span aria-hidden="true">⇅</span>, usar las flechas o arrastrar la manija <span aria-hidden="true">⋮⋮</span>.</li>
           <li><strong>Escuchalas.</strong> Con <span aria-hidden="true">▶</span> comprobás que cada archivo sea el correcto.</li>
           <li><strong>Generá el soundtrack.</strong> Con 12 a 32 canciones, «Generar soundtrack» convierte todo y descarga el CPK.</li>
         </ol>
@@ -153,6 +173,7 @@
         <h2 id="instalar">Cómo instalar el soundtrack</h2>
         <ol class="sm-steps">
           <li>Copiá el <code>.cpk</code> en la carpeta <code>download</code> del juego, por ejemplo <code>Pro Evolution Soccer 2018\download</code>.</li>
+          <li><strong>No lo renombres con un nombre largo:</strong> el nombre del archivo puede tener como máximo 35 caracteres contando «.cpk». Con un nombre más largo, DpFileList Generator lo guarda mal y PES 2018 no arranca.</li>
           <li>Abrí DpFileList Generator, agregá el CPK y ubicalo con <strong>más prioridad que cualquier otro CPK que traiga música</strong> (por ejemplo, el del Option File o parche que uses). Guardá <code>DpFileList.bin</code>.</li>
           <li>Iniciá PES 2018: en el <em>Menú de música de fondo</em> vas a ver tus canciones, en tu orden.</li>
         </ol>
@@ -194,8 +215,16 @@
           <p>Sí. Con «Cargar CPK» se leen las canciones, los títulos, los artistas y el orden. Podés escucharlas, reemplazar algunas, agregar o quitar. Las que no cambies se copian sin perder calidad y tu CPK original no se modifica. Si el CPK no trae Playlist.xml, te avisa y crea uno nuevo.</p>
         </details>
         <details>
-          <summary>¿Se guarda mi colección si cierro la página?</summary>
-          <p>No, en esta versión la colección vive en la pestaña abierta. Generá el CPK antes de cerrarla.</p>
+          <summary>¿Por qué no puedo usar «Á» o «Ñ» mayúsculas en los nombres?</summary>
+          <p>PES 2018 no arranca si un título o artista del soundtrack tiene una mayúscula con tilde, como «Árbol». Las minúsculas con tilde (á, é, í, ó, ú, ñ) sí funcionan. Soundtrack Maker te avisa y con «Corregir» las cambia por la letra sin tilde. Por precaución hace lo mismo con símbolos que se codifican parecido, como el apóstrofo curvo ’, las comillas “ ” y los puntos suspensivos ….</p>
+        </details>
+        <details>
+          <summary>Instalé el soundtrack y el juego no arranca</summary>
+          <p>Revisá el nombre del archivo CPK: tiene que tener como máximo 35 caracteres contando «.cpk». DpFileList Generator reserva 36 bytes por nombre y, si el nombre es más largo, pisa otros datos de la lista y PES 2018 no arranca. Renombralo con algo corto, por ejemplo «Rock_Nacional.cpk», y volvé a guardar DpFileList.</p>
+        </details>
+        <details>
+          <summary>¿Puedo dejar el soundtrack a medias y seguir otro día?</summary>
+          <p>Sí. Tocá «Guardar proyecto»: se descarga un archivo <code>.laqpst</code> con las canciones, los nombres y el orden. Para seguir, abrí la página, tocá «Abrir proyecto» y elegí ese archivo. No hace falta tener las 12 canciones para guardarlo. La página no guarda nada sola: si la cerrás sin guardar el proyecto, la lista se pierde.</p>
         </details>
         <details>
           <summary>¿Funciona para PS4?</summary>

@@ -60,7 +60,7 @@
 .sm-library.is-full .sm-drop span::after{content:" (la lista está completa)"}
 
 .sm-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px}
-.sm-list-head{display:grid;grid-template-columns:28px 30px 40px minmax(0,1fr) minmax(0,1fr) 148px;gap:10px;padding:0 13px 6px;
+.sm-list-head{display:grid;grid-template-columns:28px 30px 40px minmax(0,1fr) minmax(0,1fr) 184px;gap:10px;padding:0 13px 6px;
   font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sm-faint)}
 .sm-list-head span:nth-child(2){grid-column:4}
 .sm-song{position:relative;display:grid;grid-template-columns:28px 30px 40px minmax(0,1fr) auto;align-items:center;gap:10px;padding:7px 12px;
@@ -162,3 +162,26 @@
   .sm-library{min-height:420px}
   .sm-empty{min-height:320px}
 }
+
+.sm-fix-all-row{margin:0;padding:0 16px}.sm-fix-all-row:has(#sm-fix-all[hidden]){display:none}
+.sm-fix-all-row .sm-button{margin:8px 0;border-color:var(--sm-danger-line);color:#ffd2c6}
+.sm-song-issues .sm-link{display:inline;align-self:auto;font-size:11.5px}
+
+/* Ordenar, posición editable, intercambiar y proyecto */
+.sm-sort{position:relative;display:flex;align-items:center;gap:8px}
+.sm-sort-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:20;display:flex;flex-direction:column;min-width:190px;padding:6px;border:1px solid var(--sm-line-strong);border-radius:10px;background:#0f1e23;box-shadow:0 14px 30px #0009}
+.sm-sort-menu button{border:0;border-radius:7px;background:transparent;color:#d6ecea;text-align:left;padding:9px 12px;font:inherit;font-size:13px;cursor:pointer}
+.sm-sort-menu button:hover,.sm-sort-menu button:focus-visible{background:#1d363c;color:#fff}
+.sm-sort .sm-link{align-self:center;white-space:nowrap}
+.soundtrack-maker-body .sm-song input.sm-song-num{width:30px;height:30px;min-height:0;padding:0;margin:0;border:1px solid transparent;border-radius:7px;background:transparent;box-shadow:none;color:#7fdccf;font:inherit;font-size:13px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums}
+.soundtrack-maker-body .sm-song input.sm-song-num:hover{border-color:var(--sm-line-strong);background:#081115}
+.soundtrack-maker-body .sm-song input.sm-song-num:focus{outline:none;border-color:var(--sm-accent);background:#081115;box-shadow:0 0 0 3px #21d4c22b}
+.sm-song.is-swap-source{border-color:var(--sm-accent);box-shadow:0 0 0 3px #21d4c233;background:#123230}
+.sm-song.is-swap-target{cursor:pointer}.sm-song.is-swap-target:hover{border-color:#4f8780;background:#152a2e}
+.sm-icon[aria-pressed=true]{background:var(--sm-accent);color:var(--sm-accent-ink);border-color:transparent}
+.sm-row{display:flex;flex-wrap:wrap;gap:8px}.sm-row .sm-button{flex:1 1 0}
+.sm-limits-panel summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}
+.sm-limits-panel summary::-webkit-details-marker{display:none}
+.sm-limits-panel summary::after{content:"⌄";color:var(--sm-faint);font-size:14px}
+.sm-limits-panel[open] summary::after{content:"⌃"}
+.sm-limits-panel[open] summary{margin-bottom:8px}
