@@ -1,0 +1,85 @@
+.sp-soundtrack-feature.sp-home-promo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(20px, 4vw, 48px);
+  margin: 34px 0;
+  padding: clamp(20px, 4vw, 42px);
+  border: 1px solid #2f514c;
+  border-top: 3px solid #21d4c2;
+  border-radius: 6px;
+  background: linear-gradient(120deg, #152b29, #10191e);
+  scroll-margin-top: 90px;
+}
+
+.sp-soundtrack-feature .sp-home-promo-image img,
+.sp-soundtrack-article .sp-lean-header-cover img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.sp-soundtrack-intro h1 {
+  margin: 18px 0 10px;
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  line-height: 1.06;
+  letter-spacing: -.045em;
+}
+
+.sp-soundtrack-article.sp-lean-article .sp-publication-header {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+}
+
+.sp-soundtrack-article .sp-publication-header .sp-actions {
+  margin-top: 18px;
+}
+
+.sp-soundtrack-article .sp-track-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 32px;
+  margin: 18px 0 0;
+  padding-inline-start: 28px;
+  list-style: decimal;
+}
+
+.sp-track-list li {
+  padding: 8px 10px;
+  border-bottom: 1px solid #284047;
+  overflow-wrap: anywhere;
+}
+
+.sp-track-list li::marker {
+  color: #63d9c9;
+  font-variant-numeric: tabular-nums;
+}
+
+.sp-track-list strong,
+.sp-track-list span {
+  display: block;
+}
+
+.sp-track-list span {
+  color: #a8bfc4;
+  font-size: .85em;
+}
+
+.sp-soundtrack-player iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.sp-soundtrack-article :is(#descarga, #instalacion, #canciones, #spotify) {
+  scroll-margin-top: 90px;
+}
+
+@media (max-width: 760px) {
+  .sp-soundtrack-feature.sp-home-promo,
+  .sp-soundtrack-article.sp-lean-article .sp-publication-header,
+  .sp-soundtrack-article .sp-track-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
