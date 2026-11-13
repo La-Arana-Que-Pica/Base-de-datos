@@ -22,9 +22,7 @@
   <link rel="stylesheet" href="/css/style.css?v=20261004c">
   <link rel="stylesheet" href="/css/site-navigation.css" data-site-navigation>
   <link rel="stylesheet" href="/css/soundtrack-maker.css?v=20261109d">
-  <script src="/js/consent-mode.js"></script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-M7ZNDRZB27');</script>
+  <script defer src="/js/consent-mode.js?v=20261113-ga4"></script>
   <script type="application/ld+json">
   {"@context": "https://schema.org", "@type": "WebApplication", "name": "LAqP Soundtrack Maker", "softwareVersion": "1.0 beta", "alternateName": "PES 2018 soundtrack maker", "url": "https://laqp.website/soundtrack-maker.html", "description": "Editor online del soundtrack del menú de PES 2018: importa MP3, permite ordenar y editar títulos y artistas, convierte a HCA y genera un CPK con BGM_P2P.acb, BGM_P2P.awb y Playlist.xml.", "applicationCategory": "MultimediaApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "inLanguage": "es", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "featureList": ["Importación de varios MP3 a la vez y arrastrar y soltar", "Títulos y artistas leídos de las etiquetas ID3", "Orden personalizado: el juego muestra las canciones en ese orden", "Vista previa de cada canción", "Carga y edición de un CPK de soundtrack ya armado: escuchar, reemplazar y reordenar sin recodificar", "Conversión a HCA 48 kHz en el navegador", "CPK listo para la carpeta download", "De 12 a 32 canciones"], "publisher": {"@type": "Organization", "name": "LAqP", "url": "https://laqp.website/"}}
   </script>
@@ -32,7 +30,8 @@
   {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Mis canciones se suben a algún servidor?", "acceptedAnswer": {"@type": "Answer", "text": "No. La lectura, la conversión y el empaquetado se hacen en tu navegador. Ningún archivo se envía a LAqP ni a servicios externos."}}, {"@type": "Question", "name": "¿Cuántas canciones puedo poner en el soundtrack de PES 2018?", "acceptedAnswer": {"@type": "Answer", "text": "Hasta 32: es el límite del juego. Soundtrack Maker pide un mínimo de 12, la misma cantidad que el soundtrack original."}}, {"@type": "Question", "name": "¿En qué orden aparecen las canciones en el juego?", "acceptedAnswer": {"@type": "Answer", "text": "En el mismo orden de tu lista. Reordenalas antes de generar el CPK."}}, {"@type": "Question", "name": "¿Por qué sigo escuchando la música anterior?", "acceptedAnswer": {"@type": "Answer", "text": "Otro CPK con música tiene más prioridad, por ejemplo el de un parche u Option File. En DpFileList Generator, ubicá tu CPK de soundtrack con más prioridad que ese. Si usás Sider con música en LiveCPK, esa música reemplaza a cualquier CPK."}}, {"@type": "Question", "name": "¿Puedo editar un soundtrack que ya armé?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Con «Cargar CPK» se leen las canciones, los títulos, los artistas y el orden. Podés escucharlas, reemplazar algunas, agregar o quitar. Las que no cambies se copian sin perder calidad y tu CPK original no se modifica. Si el CPK no trae Playlist.xml, te avisa y crea uno nuevo."}}, {"@type": "Question", "name": "¿Funciona para PS4?", "acceptedAnswer": {"@type": "Answer", "text": "Por ahora está pensado y probado solo para PES 2018 en PC."}}]}
   </script>
   <script defer src="/js/site.js"></script>
-  <script type="module" src="/js/soundtrack-maker/app.js?v=20261109d"></script>
+  <script type="module" src="/js/soundtrack-maker/app.js?v=20261113-ga4"></script>
+  <link rel="stylesheet" href="/css/download-donation.css?v=20261113-ga4">
 </head>
 <body class="soundtrack-maker-body">
   <a class="sm-skip" href="#soundtrack-maker">Saltar al editor</a>

@@ -591,7 +591,7 @@ function renderDatabaseListPagesLegacy(data) {
 <head>
   <base href="/">
   ${hydrationGateScript()}
-  <script src="js/consent-mode.js"></script>
+  <script defer src="/js/consent-mode.js?v=20261113-ga4"></script>
   <script src="js/minifaces.js"></script>
   <script src="js/database-rating.js?v=20260924d"></script>
   <meta charset="UTF-8">
@@ -702,7 +702,7 @@ function renderDatabaseListPages(data) {
 <head>
   <base href="/">
   ${hydrationGateScript()}
-  <script src="js/consent-mode.js"></script>
+  <script defer src="/js/consent-mode.js?v=20261113-ga4"></script>
   <script src="js/minifaces.js"></script>
   <script src="js/database-rating.js?v=20260924d"></script>
   <meta charset="UTF-8">

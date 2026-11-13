@@ -320,67 +320,6 @@ function renderSiteFooter() {
   document.body.appendChild(footer);
 }
 
-const LAQP_CONSENT_KEY = 'laqp_cookie_consent_v1';
-
-function getStoredConsent() {
-  try {
-    return JSON.parse(localStorage.getItem(LAQP_CONSENT_KEY) || 'null');
-  } catch {
-    return null;
-  }
-}
-
-function saveConsent(choice) {
-  const payload = {
-    choice,
-    analytics: choice === 'accept',
-    updatedAt: new Date().toISOString(),
-  };
-  try {
-    localStorage.setItem(LAQP_CONSENT_KEY, JSON.stringify(payload));
-  } catch {}
-
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
-  window.gtag('consent', 'update', {
-    analytics_storage: payload.analytics ? 'granted' : 'denied',
-  });
-  document.querySelector('.cookie-consent')?.remove();
-}
-
-function applyConsentDefaults() {
-  if (window.__laqpConsentDefaultsApplied) return;
-  const consent = getStoredConsent();
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
-  window.gtag('consent', 'default', {
-    analytics_storage: consent?.analytics ? 'granted' : 'denied',
-    wait_for_update: 500,
-  });
-  window.__laqpConsentDefaultsApplied = true;
-}
-
-function renderCookieConsent() {
-  if (getStoredConsent() || document.querySelector('.cookie-consent')) return;
-  const banner = document.createElement('section');
-  banner.className = 'cookie-consent';
-  banner.setAttribute('aria-label', 'Aviso de cookies');
-  banner.innerHTML = `
-    <div class="cookie-consent-copy">
-      <strong>Cookies y analítica</strong>
-      <p>LAqP usa almacenamiento técnico para recordar preferencias y puede usar Google Analytics para medir el uso agregado del sitio. Podés aceptar o rechazar la medición no esencial.</p>
-    </div>
-    <div class="cookie-consent-actions">
-      <a href="cookies.html">Ver detalles</a>
-      <button type="button" class="secondary" data-cookie-choice="reject">Rechazar</button>
-      <button type="button" data-cookie-choice="accept">Aceptar</button>
-    </div>`;
-  banner.querySelectorAll('[data-cookie-choice]').forEach(button => {
-    button.addEventListener('click', () => saveConsent(button.dataset.cookieChoice));
-  });
-  document.body.appendChild(banner);
-}
-
 function getDatabaseDirectoryView() {
   const metaView = document.querySelector('meta[name="laqp-database-view"]')?.content;
   if (metaView) return metaView;
@@ -440,16 +379,17 @@ function rescueDatabaseDirectoryPage() {
   }, delay);
 }
 
-applyConsentDefaults();
-
 document.addEventListener('DOMContentLoaded', () => {
   renderHeaderBrand();
   renderMainNav();
   renderLanguageSelector();
   renderSiteFooter();
-  renderCookieConsent();
   // Apoyo voluntario: footer, acceso secundario en el menú e invitación tras las descargas.
   laqpLoadScript('/js/laqp-support.js?v=20261110').catch(() => {});
+  if (['database', 'dts'].includes(currentPageKey())) {
+    import('/js/database-donation.js?v=20261113-ga4')
+      .then(({ startDatabaseDonation }) => startDatabaseDonation()).catch(() => {});
+  }
   if (typeof applyI18nToDocument === 'function') applyI18nToDocument();
   if (typeof renderLanguagePrompt === 'function') {
     renderLanguagePrompt();

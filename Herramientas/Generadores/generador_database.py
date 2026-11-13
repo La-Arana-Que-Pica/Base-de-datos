@@ -229,9 +229,8 @@ class TemplateEngine:
                 raise GenerationFatalError(f"No se encontro la plantilla: {template_path}")
             self.templates[name] = template_path.read_text(encoding="utf-8-sig")
             source = self.templates[name]
-            consent = source.find('src="js/consent-mode.js"')
-            analytics = source.find("https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27")
-            if consent < 0 or analytics < consent or source.count("gtag('config', 'G-M7ZNDRZB27')") != 1:
+            tag = '<script defer src="/js/consent-mode.js?v=20261113-ga4"></script>'
+            if source.count(tag) != 1 or 'googletagmanager.com/gtag/js' in source:
                 raise GenerationFatalError(f"Integracion GA4/consentimiento invalida en {name}.html")
 
     def render(self, name: str, values: dict[str, object]) -> str:

@@ -636,6 +636,7 @@ function saveNavState(state) {
   } else {
     history.replaceState(state, '', url);
   }
+  window.LAQPAnalytics?.pageView();
 }
 
 function loadNavState() {

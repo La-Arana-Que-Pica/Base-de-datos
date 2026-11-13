@@ -1,3 +1,4 @@
+import { clickDownload } from '../download-donation.js?v=20261113-ga4';
 // Miniface Studio · interfaz. La lógica de imagen, estado, colección, render, exportación, proyectos
 // y lectura del EDIT vive en módulos separados para poder sumar funciones sin rehacer la herramienta.
 
@@ -746,7 +747,7 @@ function downloadBlob(blob, fileName) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url; link.download = fileName; link.hidden = true;
-  document.body.appendChild(link); link.click(); link.remove();
+  document.body.appendChild(link); clickDownload(link, 'miniface_studio'); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 

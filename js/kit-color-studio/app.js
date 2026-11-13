@@ -1,3 +1,4 @@
+import { clickDownload } from '../download-donation.js?v=20261113-ga4';
 // Kit Color Studio: interfaz. Todo se procesa y se guarda en el dispositivo (IndexedDB); nada se envía a servidores.
 import { Viewer } from './viewer.js';
 import { ROLES, editorValues, gameHex, parseHex, hex as toHex, from63 } from './colors.js';
@@ -95,7 +96,7 @@ async function copyText(text, label = text) {
 }
 function download(blob, name) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
-  document.body.append(a); a.click(); a.remove();
+  document.body.append(a); clickDownload(a, 'kit_color_studio'); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 60000);
 }
 const fileSafe = s => (s || 'proyecto').replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'proyecto';

@@ -23,10 +23,8 @@
   <link rel="stylesheet" href="/css/style.css?v=20261004c">
   <link rel="stylesheet" href="/css/site-navigation.css" data-site-navigation>
   <link rel="stylesheet" href="/css/kit-color-studio.css?v=20261103a">
-  <link rel="modulepreload" href="/js/kit-color-studio/app.js?v=20261102a">
-  <script src="/js/consent-mode.js"></script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-M7ZNDRZB27');</script>
+  <link rel="modulepreload" href="/js/kit-color-studio/app.js?v=20261113-ga4">
+  <script defer src="/js/consent-mode.js?v=20261113-ga4"></script>
   <script type="application/ld+json">
   {"@context": "https://schema.org", "@type": "WebApplication", "name": "Kit Color Studio", "softwareVersion": "1.0 beta", "alternateName": "Colores de uniformes para PES 2018", "url": "https://laqp.website/kit-color-studio.html", "description": "Herramienta online que detecta los colores de los kits de PES 2018 y PES 2021 (camiseta principal, secundario, pantalón y medias) y los convierte a los valores R, G y B de 0 a 63 del editor de PES 2018.", "applicationCategory": "MultimediaApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "inLanguage": "es", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "featureList": ["Detección automática de los colores de camiseta, pantalón y medias con las siluetas UV del juego", "Valores R, G y B de 0 a 63 para el editor de PES 2018", "Importación de PNG, JPG, WebP, DDS, FTEX, ZIP y RAR", "Cuentagotas de precisión con zoom por píxel y lupa táctil", "Color de los dorsales desde la textura _back", "Proyectos con guardado automático y archivo .laqpkits", "Ficha de colores en PDF", "Modo consola para PS4 y PS5"], "publisher": {"@type": "Organization", "name": "LAqP", "url": "https://laqp.website/"}}
   </script>
@@ -34,7 +32,8 @@
   {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Qué valores de color usa el editor de PES 2018?", "acceptedAnswer": {"@type": "Answer", "text": "El editor de uniformes de PES 2018 usa R, G y B de 0 a 63. El juego guarda 6 bits por canal y los multiplica por 4, así que Kit Color Studio convierte cada color al valor más cercano de esa escala."}}, {"@type": "Question", "name": "¿Mis kits se suben a algún servidor?", "acceptedAnswer": {"@type": "Answer", "text": "No. Las imágenes, los ZIP y los RAR se procesan en tu navegador y el proyecto se guarda en tu dispositivo. Nada se envía a LAqP ni a servicios externos."}}, {"@type": "Question", "name": "¿Sirve para kits de PES 2021?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Las texturas de kits de PES 2021 y PES 2018 tienen la misma distribución. Podés importar el kitpack en RAR o ZIP con sus archivos FTEX o DDS sin extraerlo."}}, {"@type": "Question", "name": "¿Puedo usarlo desde el celular mientras edito en la PlayStation?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. La herramienta está pensada para el celular: importás el kit, ampliás la textura con los dedos y el modo consola muestra los valores en grande mientras configurás el uniforme en PS4 o PS5."}}, {"@type": "Question", "name": "¿Cómo sigo mi proyecto otro día o en otro dispositivo?", "acceptedAnswer": {"@type": "Answer", "text": "El proyecto se guarda automáticamente en el navegador. Para pasarlo a otro dispositivo o tener un respaldo, usá «Guardar proyecto»: descarga un archivo .laqpkits con las imágenes, carpetas y colores, que se abre con «Abrir proyecto»."}}]}
   </script>
   <script defer src="/js/site.js"></script>
-  <script type="module" src="/js/kit-color-studio/app.js?v=20261102a"></script>
+  <script type="module" src="/js/kit-color-studio/app.js?v=20261113-ga4"></script>
+  <link rel="stylesheet" href="/css/download-donation.css?v=20261113-ga4">
 </head>
 <body class="kcs-body">
   <a class="kcs-skip" href="#kcs-app">Saltar a la herramienta</a>

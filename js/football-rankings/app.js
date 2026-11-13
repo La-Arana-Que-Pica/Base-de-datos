@@ -16,7 +16,7 @@ function store(){
  try{localStorage.setItem(TOP_KEY,JSON.stringify(top));localStorage.setItem(RESERVE_KEY,JSON.stringify(reserve));}
  catch{notify('No se pudo guardar en este navegador. Descargá una copia JSON para conservar tu Top.');}
 }
-function download(blob,name){const url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);}
+function download(blob,name){const url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download=name;a.click();window.LAQPAnalytics?.download("football_rankings",name);setTimeout(()=>URL.revokeObjectURL(url),5000);}
 function image(game,size=60){const img=node('img');img.src=cover(game);img.alt='';img.width=size;img.height=Math.round(size*4/3);img.loading='lazy';img.decoding='async';img.draggable=false;img.onerror=()=>{img.onerror=null;img.style.visibility='hidden';};return img;}
 function options(select,values,empty){select.replaceChildren();if(empty){const o=node('option',null,empty);o.value='';select.append(o);}for(const v of values){const o=node('option',null,v);o.value=v;select.append(o);}}
 const filledCount=()=>slots(top).filter(Boolean).length;

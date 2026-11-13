@@ -45,4 +45,4 @@ function standardPositions(formation) {
   standardCache.set(formation,positions);return positions;
 }
 window.LAQPBuilderDraftView={projectField,unprojectField,pitchSurface,compactName,tier,fieldPath,standardPositions,separateGoalkeeperSlots};
-await import('./squad-builder.js?v=20261031e');
+await import('./squad-builder.js?v=20261113-ga4');

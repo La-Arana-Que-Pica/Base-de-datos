@@ -1,3 +1,4 @@
+import { clickDownload } from '../download-donation.js?v=20261113-ga4';
 // LAqP Soundtrack Maker: interfaz. Todo se procesa en el navegador; ningún archivo se sube.
 
 import { MIN_SONGS, MAX_SONGS, TEXT_MAX_BYTES, riskyGameChars, safeGameText, truncateUtf8 } from './bank.js';
@@ -699,7 +700,7 @@ function download(blob, name) {
   const a = document.createElement('a');
   a.href = url; a.download = name; a.hidden = true;
   document.body.append(a);
-  a.click();
+  clickDownload(a, 'soundtrack_maker');
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }

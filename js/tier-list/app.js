@@ -97,7 +97,7 @@ const closeMenu=()=>document.querySelector('.lr-menu')?.removeAttribute('open');
 $('#list-title').oninput=e=>{state.title=e.target.value;save();};
 $('#tl-add-games').onclick=()=>addGames('pool');
 $('#add-tier').onclick=()=>{if(state.tiers.length>=20)return status('Máximo: 20 niveles.');const t=newTier();state.tiers.push(t);save();render();editTier(t.id);$('#tier-name').select();};
-function download(blob,name){const u=URL.createObjectURL(blob),a=el('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),10000);}
+function download(blob,name){const u=URL.createObjectURL(blob),a=el('a');a.href=u;a.download=name;a.click();window.LAQPAnalytics?.download("tier_list",name);setTimeout(()=>URL.revokeObjectURL(u),10000);}
 $('#backup').onclick=()=>{closeMenu();download(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),'laqp-tier-list.json');};
 $('#restore').onchange=async e=>{closeMenu();try{const file=e.target.files[0];if(!file)return;if(file.size>8*1024**2)throw Error('Copia demasiado grande (máximo 8 MB).');const value=validate(JSON.parse(await file.text()));if(confirm('¿Reemplazar tu clasificación con esta copia?')){state=value;blocked=false;save();render();}}catch(error){status(error.message);}finally{e.target.value='';}};
 $('#reset').onclick=()=>{closeMenu();if(confirm('¿Reiniciar la clasificación? Se vacían todas las categorías.')){state=initial();blocked=false;save();render();}};

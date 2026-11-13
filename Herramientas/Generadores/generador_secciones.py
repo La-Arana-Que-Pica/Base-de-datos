@@ -727,39 +727,13 @@ def load_managers(project_root: Path, issues) -> list[Manager]:
     return managers
 
 
-def _ga4_tag() -> str:
-    return '''  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7ZNDRZB27"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-M7ZNDRZB27');
-  </script>'''
+ANALYTICS_TAG = '<script defer src="/js/consent-mode.js?v=20261113-ga4"></script>'
 
 
 def database_design(source: str) -> str:
-    # El <base> debe aparecer antes de cualquier URL relativa; los navegadores
-    # resuelven los elementos anteriores contra la URL profunda del documento.
-    source = re.sub(
-        r'(<head>\s*)(<script\s+src="js/consent-mode\.js"></script>\s*)(<base\s+href="/")',
-        r'\1\3>\n  \2',
-        source,
-        count=1,
-    )
-    # El <base> debe aparecer antes de cualquier URL relativa; los navegadores
-    # resuelven los elementos anteriores contra la URL profunda del documento.
-    source = re.sub(
-        r'(<head>\s*)(<script\s+src="js/consent-mode\.js"></script>\s*)(<base\s+href="/")',
-        r'\1\3>\n  \2',
-        source,
-        count=1,
-    )
     """Attach the shared Database design to generated pages without replacing data."""
-    if "googletagmanager.com/gtag/js" not in source:
-        source = source.replace('<script src="js/consent-mode.js"></script>',
-                                '<script src="js/consent-mode.js"></script>' + _ga4_tag(), 1)
+    if ANALYTICS_TAG not in source:
+        source = source.replace('</head>', ANALYTICS_TAG + '\n</head>', 1)
     source = source.replace('css/database-system.css?v=20260924d', 'css/database-system.css?v=20260925g')
     source = source.replace('href="css/database-system.css"', 'href="css/database-system.css?v=20260925g"')
     if 'css/database-system.css' not in source:
@@ -1012,7 +986,7 @@ def _directory_shell(view: str, title: str, description: str, body: str) -> str:
     views = []
     for identifier in ("home-view", "league-teams-view", "players-view", "player-view", "search-view", "leagues-view", "teams-grid-view", "favorites-view"):
         views.append(f'<div id="{identifier}"{" class=\"active\"" if identifier == active else ""}>{f"<div class=\"js-prerender-fallback\">{body}</div>" if identifier == active else ""}</div>')
-    return f'''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><base href="/">{_hydration_gate()}<script src="js/consent-mode.js"></script>{_ga4_tag()}<script src="js/minifaces.js"></script><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="laqp-database-view" content="{esc(view)}"><title>{esc(title)}</title><meta name="description" content="{esc(description)}"><link rel="canonical" href="{SITE_URL}/{canonical}"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{SITE_URL}/{canonical}"><meta property="og:type" content="website"><meta property="og:image" content="{SITE_URL}/assets/images/home-banner-main-2.png"><link rel="stylesheet" href="css/style.css"><link rel="icon" href="img/logo.webp" type="image/webp"></head><body><header id="header"><a href="/index.html" class="header-logo-link"><img class="logo" width="64" height="64" src="img/logo.webp" alt="Logo LAqP"></a><div class="header-title">PES 2018 Actualizado <span>Base de datos</span></div><nav class="header-nav" aria-label="Menú principal"><a class="header-nav-link" href="/downloads.html">Spider Patch</a><a class="header-nav-link" href="/database.html">Base de datos</a><a class="header-nav-link" href="/alineaciones.html">Creador de alineaciones</a><a class="header-nav-link" href="/miniface-studio.html">Miniface Studio</a><a class="header-nav-link" href="/guias.html">Guías</a></nav></header><div id="layout"><nav id="sidebar"></nav><main id="main"><div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message">Cargando base de datos...</span></div>{''.join(views)}</main></div><script src="js/pes2018-translations.js?v=20261003a"></script><script src="js/i18n.js?v=20261003a"></script><script src="js/site.js"></script><script src="js/favorites.js"></script><script src="js/country-filter.js?v=20260925g"></script><script src="js/pes2018-overall.js?v=20261003a"></script><script src="js/app.js?v=20261003a"></script></body></html>\n'''
+    return f'''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><base href="/">{_hydration_gate()}{ANALYTICS_TAG}<script src="js/minifaces.js"></script><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="laqp-database-view" content="{esc(view)}"><title>{esc(title)}</title><meta name="description" content="{esc(description)}"><link rel="canonical" href="{SITE_URL}/{canonical}"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{SITE_URL}/{canonical}"><meta property="og:type" content="website"><meta property="og:image" content="{SITE_URL}/assets/images/home-banner-main-2.png"><link rel="stylesheet" href="css/style.css"><link rel="icon" href="img/logo.webp" type="image/webp"></head><body><header id="header"><a href="/index.html" class="header-logo-link"><img class="logo" width="64" height="64" src="img/logo.webp" alt="Logo LAqP"></a><div class="header-title">PES 2018 Actualizado <span>Base de datos</span></div><nav class="header-nav" aria-label="Menú principal"><a class="header-nav-link" href="/downloads.html">Spider Patch</a><a class="header-nav-link" href="/database.html">Base de datos</a><a class="header-nav-link" href="/alineaciones.html">Creador de alineaciones</a><a class="header-nav-link" href="/miniface-studio.html">Miniface Studio</a><a class="header-nav-link" href="/guias.html">Guías</a></nav></header><div id="layout"><nav id="sidebar"></nav><main id="main"><div id="loading-overlay" class="js-hydration-loader" style="display:none"><div class="spinner"></div><span class="loading-message">Cargando base de datos...</span></div>{''.join(views)}</main></div><script src="js/pes2018-translations.js?v=20261003a"></script><script src="js/i18n.js?v=20261003a"></script><script src="js/site.js"></script><script src="js/favorites.js"></script><script src="js/country-filter.js?v=20260925g"></script><script src="js/pes2018-overall.js?v=20261003a"></script><script src="js/app.js?v=20261113-ga4"></script></body></html>\n'''
 
 
 def generate_directories(project_root: Path, output_root: Path, data, player_paths, team_paths, league_paths, issues, notify, write) -> ExtraResult:

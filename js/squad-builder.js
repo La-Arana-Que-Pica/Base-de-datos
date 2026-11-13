@@ -1609,6 +1609,7 @@
       link.download = `${normalize(state.name || 'alineacion').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'alineacion'}-laqp.png`;
       link.href = outputUrl;
       link.click();
+      window.LAQPAnalytics?.download("squad_builder", link.download);
       showToast('PNG exportado correctamente.');
     } catch (error) {
       console.error(error);
